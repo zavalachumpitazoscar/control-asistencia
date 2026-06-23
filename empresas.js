@@ -96,7 +96,15 @@ async function cargarEmpresas() {
         <td>${empresa.ruc || ""}</td>
         <td>${empresa.razonSocial || ""}</td>
         <td>${empresa.correo || ""}</td>
-        <td>${empresa.estado ? "Activo" : "Inactivo"}</td>
+        <td>
+    ${
+        empresa.estado === "pendiente"
+        ? "🟡 Pendiente"
+        : empresa.estado === true
+        ? "🟢 Activo"
+        : "🔴 Inactivo"
+    }
+</td>
         <td>
             <button onclick="abrirEmpresa('${doc.id}')">
                 Administrar
