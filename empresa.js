@@ -157,7 +157,6 @@ await addDoc(collection(db, "usuarios"), {
 
     }
 
-}
 
 async function cargarUsuarios(){
 
