@@ -1,26 +1,101 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrar Empresa</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administrar Empresa</title>
+
+<style>
+
+body{
+    font-family: Arial;
+    margin:20px;
+}
+
+input,select{
+    display:block;
+    margin:10px 0;
+    padding:10px;
+    width:300px;
+}
+
+button{
+    padding:10px;
+    cursor:pointer;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+    margin-top:20px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+}
+
+</style>
+
 </head>
 <body>
 
-<h1>Administrar Empresa</h1>
+<h1 id="nombreEmpresa">
+Cargando...
+</h1>
 
-<div id="empresaId"></div>
+<p><b>RUC:</b> <span id="ruc"></span></p>
+<p><b>Correo:</b> <span id="correoEmpresa"></span></p>
+<p><b>Teléfono:</b> <span id="telefonoEmpresa"></span></p>
 
-<script>
+<hr>
 
-const params = new URLSearchParams(window.location.search);
+<h2>Usuarios de Acceso</h2>
 
-const empresaId = params.get("id");
+<input
+type="text"
+id="nombreUsuario"
+placeholder="Nombre">
 
-document.getElementById("empresaId").innerHTML =
-"ID Empresa: " + empresaId;
+<input
+type="email"
+id="correoUsuario"
+placeholder="Correo">
 
-</script>
+<input
+type="password"
+id="passwordUsuario"
+placeholder="Contraseña">
+
+<select id="rolUsuario">
+<option value="ADMIN">ADMIN</option>
+<option value="CONSULTA">CONSULTA</option>
+</select>
+
+<button id="btnCrearUsuario">
+Crear Usuario
+</button>
+
+<hr>
+
+<h2>Usuarios Registrados</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Correo</th>
+<th>Rol</th>
+</tr>
+</thead>
+
+<tbody id="tablaUsuarios">
+</tbody>
+
+</table>
+
+<script type="module" src="empresa.js"></script>
 
 </body>
 </html>
