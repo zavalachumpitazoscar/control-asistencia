@@ -1,74 +1,128 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
 <title>Administrar Empresa</title>
 
 <link rel="stylesheet" href="empresa.css">
 
 </head>
+
 <body>
 
-<h1 id="nombreEmpresa">
-Cargando...
-</h1>
+<div class="container">
 
-<p><b>RUC:</b> <span id="ruc"></span></p>
-<p><b>Correo:</b> <span id="correoEmpresa"></span></p>
-<p><b>Teléfono:</b> <span id="telefonoEmpresa"></span></p>
+    <div class="card">
 
-<hr>
+        <h1 id="nombreEmpresa">
+            Cargando...
+        </h1>
 
-<h2>Usuarios de Acceso</h2>
+        <div class="empresa-info">
 
-<input
-type="text"
-id="nombreUsuario"
-placeholder="Nombre">
+            <p>
+                <strong>RUC:</strong>
+                <span id="ruc"></span>
+            </p>
 
-<input
-type="email"
-id="correoUsuario"
-placeholder="Correo">
+            <p>
+                <strong>Correo:</strong>
+                <span id="correoEmpresa"></span>
+            </p>
 
-<input
-type="password"
-id="passwordUsuario"
-placeholder="Contraseña">
+            <p>
+                <strong>Teléfono:</strong>
+                <span id="telefonoEmpresa"></span>
+            </p>
 
-<select id="rolUsuario">
-<option value="ADMIN">ADMIN</option>
-<option value="RRHH">RRHH</option>
-<option value="SUPERVISOR">SUPERVISOR</option>
-<option value="CONSULTA">CONSULTA</option>
-</select>
+        </div>
 
-<button id="btnCrearUsuario">
-Crear Usuario
-</button>
+    </div>
 
-<hr>
+    <div class="card">
 
-<h2>Usuarios Registrados</h2>
+        <h2>Usuarios de Acceso</h2>
 
-<table>
+        <div class="form-grid">
 
-<thead>
-<tr>
-<th>Nombre</th>
-<th>Correo</th>
-<th>Rol</th>
-<th>Estado</th>
-<th>Acciones</th>
-</tr>
-</thead>
+            <input
+            type="text"
+            id="nombreUsuario"
+            placeholder="Nombre Completo">
 
-<tbody id="tablaUsuarios">
-</tbody>
+            <input
+            type="email"
+            id="correoUsuario"
+            placeholder="Correo">
 
-</table>
+            <input
+            type="password"
+            id="passwordUsuario"
+            placeholder="Contraseña">
+
+            <select id="rolUsuario">
+
+                <option value="ADMIN">
+                    ADMIN
+                </option>
+
+                <option value="RRHH">
+                    RRHH
+                </option>
+
+                <option value="SUPERVISOR">
+                    SUPERVISOR
+                </option>
+
+                <option value="CONSULTA">
+                    CONSULTA
+                </option>
+
+            </select>
+
+        </div>
+
+        <button
+        id="btnCrearUsuario"
+        class="btn-guardar">
+
+            Crear Usuario
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Usuarios Registrados</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="tablaUsuarios">
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 <script type="module" src="empresa.js"></script>
 
