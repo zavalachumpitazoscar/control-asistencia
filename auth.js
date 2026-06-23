@@ -8,17 +8,17 @@ import {
 import {
     getFirestore,
     collection,
-    query,
-    where,
-    getDocs,
-    doc,
-    getDoc
+    addDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
     getFirestore,
     collection,
-    addDoc
+    query,
+    where,
+    getDocs,
+    doc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 const auth = getAuth(app);
