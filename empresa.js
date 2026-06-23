@@ -268,46 +268,73 @@ async function(id,estadoActual){
 window.editarUsuario =
 async function(id){
 
-    const roles = [
-        "ADMIN",
-        "RRHH",
-        "SUPERVISOR",
-        "CONSULTA"
-    ];
-
-    let opciones = "";
-
-    roles.forEach((rol,index)=>{
-
-        opciones +=
-        `${index + 1} - ${rol}\n`;
-
-    });
-
-    const seleccion =
-    prompt(
-        "Seleccione un rol:\n\n" +
-        opciones
+    const usuarioRef =
+    doc(
+        db,
+        "usuarios",
+        id
     );
 
-    if(!seleccion){
+    const usuarioSnap =
+    await getDoc(
+        usuarioRef
+    );
+
+    if(!usuarioSnap.exists()){
         return;
     }
 
-    const nuevoRol =
-    roles[
-        parseInt(seleccion) - 1
-    ];
+    const usuario =
+    usuarioSnap.data();
 
-    if(!nuevoRol){
+    document.getElementById(
+        "editId"
+    ).value = id;
 
-        alert(
-            "Opción inválida"
-        );
+    document.getElementById(
+        "editNombre"
+    ).value =
+    usuario.nombre;
 
-        return;
+    document.getElementById(
+        "editCorreo"
+    ).value =
+    usuario.correo;
 
-    }
+    document.getElementById(
+        "editRol"
+    ).value =
+    usuario.rol;
+
+    document.getElementById(
+        "editEstado"
+    ).value =
+    usuario.estado.toString();
+
+    document.getElementById(
+        "modalUsuario"
+    ).style.display =
+    "block";
+
+}
+
+window.cerrarModal =
+function(){
+
+    document.getElementById(
+        "modalUsuario"
+    ).style.display =
+    "none";
+
+}
+
+window.guardarEdicion =
+async function(){
+
+    const id =
+    document.getElementById(
+        "editId"
+    ).value;
 
     try{
 
@@ -318,15 +345,35 @@ async function(id){
                 id
             ),
             {
-                rol:nuevoRol
+                nombre:
+                document.getElementById(
+                    "editNombre"
+                ).value,
+
+                correo:
+                document.getElementById(
+                    "editCorreo"
+                ).value,
+
+                rol:
+                document.getElementById(
+                    "editRol"
+                ).value,
+
+                estado:
+                document.getElementById(
+                    "editEstado"
+                ).value === "true"
             }
         );
 
-        alert(
-            "Rol actualizado"
-        );
+        cerrarModal();
 
         cargarUsuarios();
+
+        alert(
+            "Usuario actualizado"
+        );
 
     }
     catch(error){
@@ -334,7 +381,7 @@ async function(id){
         console.error(error);
 
         alert(
-            "Error al actualizar rol"
+            "Error al actualizar"
         );
 
     }
