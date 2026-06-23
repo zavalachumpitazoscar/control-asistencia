@@ -327,20 +327,14 @@ async function(id){
     ).value =
     usuario.estado.toString();
 
-    document.getElementById(
-        "modalUsuario"
-    ).style.display =
-    "block";
+    document.getElementById("modalUsuario").classList.add("show");
 
 }
 
 window.cerrarModal =
 function(){
 
-    document.getElementById(
-        "modalUsuario"
-    ).style.display =
-    "none";
+    document.getElementById("modalUsuario").classList.remove("show");
 
 }
 
