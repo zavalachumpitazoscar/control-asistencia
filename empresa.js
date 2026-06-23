@@ -187,16 +187,44 @@ async function cargarUsuarios(){
     const snapshot =
     await getDocs(q);
 
-    snapshot.forEach(doc=>{
+    snapshot.forEach(docSnap=>{
 
         const usuario =
-        doc.data();
+        docSnap.data();
 
         tabla.innerHTML += `
             <tr>
                 <td>${usuario.nombre}</td>
                 <td>${usuario.correo}</td>
                 <td>${usuario.rol}</td>
+
+                <td>
+                    ${usuario.estado ? "Activo" : "Inactivo"}
+                </td>
+
+                <td>
+
+                    <button
+                    onclick="editarUsuario('${docSnap.id}')">
+                    Editar
+                    </button>
+
+                    <button
+                    onclick="cambiarEstado(
+                    '${docSnap.id}',
+                    ${usuario.estado}
+                    )">
+
+                    ${
+                        usuario.estado
+                        ? "Desactivar"
+                        : "Activar"
+                    }
+
+                    </button>
+
+                </td>
+
             </tr>
         `;
 
