@@ -78,3 +78,11 @@ form.addEventListener("submit", async (e) => {
     }
 
 });
+
+window.abrirModalEmpresa = function () {
+    document.getElementById("modalEmpresa").style.display = "block";
+};
+
+window.cerrarModalEmpresa = function () {
+    document.getElementById("modalEmpresa").style.display = "none";
+};
