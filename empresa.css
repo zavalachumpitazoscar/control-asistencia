@@ -107,16 +107,13 @@ td{
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.55);
-    justify-content: center;
-    align-items: center;
     z-index: 9999;
 
-    /* esto es clave para centrar */
+    /* CLAVE: centrado real */
     justify-content: center;
     align-items: center;
 }
 
-/* cuando lo actives con display:flex */
 .modal.show {
     display: flex;
 }
@@ -128,6 +125,9 @@ td{
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+
+    /* importante para evitar “correrse a la izquierda” */
+    margin: 0;
 }
 
 .modal-header {
