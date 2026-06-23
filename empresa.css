@@ -103,14 +103,13 @@ td{
 
 /* ===== MODAL ===== */
 .modal {
-    display: none; 
+    display: none;
     position: fixed;
-    z-index: 9999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: rgba(0,0,0,0.55);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
 
     /* esto es clave para centrar */
     justify-content: center;
