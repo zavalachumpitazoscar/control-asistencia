@@ -100,3 +100,45 @@ td{
     color:#dc3545;
     font-weight:bold;
 }
+
+/* ===== MODAL ===== */
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+
+    /* esto es clave para centrar */
+    justify-content: center;
+    align-items: center;
+}
+
+/* cuando lo actives con display:flex */
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    width: 420px;
+    max-width: 90%;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.cerrar {
+    cursor: pointer;
+    font-size: 22px;
+}
