@@ -1,28 +1,83 @@
 body{
-    font-family: Arial;
-    margin:20px;
+    font-family: Arial, sans-serif;
+    margin:0;
+    background:#f5f7fa;
 }
 
-input,select{
-    display:block;
-    margin:10px 0;
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+    margin-bottom:20px;
+}
+
+input,
+select{
+    width:100%;
     padding:10px;
-    width:300px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    margin-top:5px;
+    margin-bottom:15px;
+    box-sizing:border-box;
 }
 
 button{
-    padding:10px;
+    border:none;
+    padding:10px 15px;
+    border-radius:6px;
     cursor:pointer;
 }
 
+.btn-guardar{
+    background:#0d6efd;
+    color:white;
+}
+
+.btn-editar{
+    background:#ffc107;
+}
+
+.btn-activar{
+    background:#198754;
+    color:white;
+}
+
+.btn-desactivar{
+    background:#dc3545;
+    color:white;
+}
+
 table{
-    border-collapse:collapse;
     width:100%;
-    margin-top:20px;
+    border-collapse:collapse;
+    background:white;
 }
 
-th,td{
-    border:1px solid #ccc;
-    padding:8px;
+th{
+    background:#f1f3f5;
 }
 
+th,
+td{
+    padding:10px;
+    border:1px solid #ddd;
+    text-align:left;
+}
+
+.estado-activo{
+    color:#198754;
+    font-weight:bold;
+}
+
+.estado-inactivo{
+    color:#dc3545;
+    font-weight:bold;
+}
