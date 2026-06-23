@@ -8,7 +8,8 @@ import {
     addDoc,
     getDocs,
     query,
-    where
+    where,
+    updateDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
