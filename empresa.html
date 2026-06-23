@@ -124,6 +124,100 @@
 
 </div>
 
+<!-- MODAL EDITAR USUARIO -->
+
+<div id="modalUsuario" class="modal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>Editar Usuario</h2>
+
+            <span
+            class="cerrar"
+            onclick="cerrarModal()">
+                ×
+            </span>
+
+        </div>
+
+        <input
+        type="hidden"
+        id="editId">
+
+        <label>Nombre</label>
+
+        <input
+        type="text"
+        id="editNombre">
+
+        <label>Correo</label>
+
+        <input
+        type="email"
+        id="editCorreo">
+
+        <label>Rol</label>
+
+        <select id="editRol">
+
+            <option value="ADMIN">
+                ADMIN
+            </option>
+
+            <option value="RRHH">
+                RRHH
+            </option>
+
+            <option value="SUPERVISOR">
+                SUPERVISOR
+            </option>
+
+            <option value="CONSULTA">
+                CONSULTA
+            </option>
+
+        </select>
+
+        <label>Estado</label>
+
+        <select id="editEstado">
+
+            <option value="true">
+                Activo
+            </option>
+
+            <option value="false">
+                Inactivo
+            </option>
+
+        </select>
+
+        <div class="modal-footer">
+
+            <button
+            class="btn-desactivar"
+            onclick="cerrarModal()">
+
+                Cancelar
+
+            </button>
+
+            <button
+            class="btn-guardar"
+            onclick="guardarEdicion()">
+
+                Guardar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script type="module" src="empresa.js"></script>
 
 </body>
