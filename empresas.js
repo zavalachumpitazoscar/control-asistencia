@@ -92,18 +92,18 @@ async function cargarEmpresas() {
             const empresa = doc.data();
 
             tabla.innerHTML += `
-                <tr>
-                    <td>${empresa.ruc || ""}</td>
-                    <td>${empresa.razonSocial || ""}</td>
-                    <td>${empresa.correo || ""}</td>
-                    <td>${empresa.estado ? "Activo" : "Inactivo"}</td>
-                    <td>
-                        <button onclick="abrirEmpresa('${doc.id}')">
-                            Administrar
-                        </button>
-                    </td>
-                </tr>
-            `;
+    <tr>
+        <td>${empresa.ruc || ""}</td>
+        <td>${empresa.razonSocial || ""}</td>
+        <td>${empresa.correo || ""}</td>
+        <td>${empresa.estado ? "Activo" : "Inactivo"}</td>
+        <td>
+            <button onclick="abrirEmpresa('${doc.id}')">
+                Administrar
+            </button>
+        </td>
+    </tr>
+`;
 
         });
 
