@@ -8,7 +8,10 @@ import {
 import {
     getFirestore,
     collection,
-    addDoc
+    addDoc,
+    query,
+    where,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 const auth = getAuth(app);
@@ -29,7 +32,20 @@ window.crearEmpresaPublica = async function () {
 
     try {
 
-        // 🏢 1. CREAR EMPRESA
+        // 🔎 1. VALIDAR RUC EXISTENTE
+        const q = query(
+            collection(db, "empresas"),
+            where("ruc", "==", ruc)
+        );
+
+        const snap = await getDocs(q);
+
+        if (!snap.empty) {
+            alert("❌ El RUC ya está registrado");
+            return;
+        }
+
+        // 🏢 2. CREAR EMPRESA
         const empresaRef = await addDoc(collection(db, "empresas"), {
             ruc,
             razonSocial,
@@ -40,24 +56,23 @@ window.crearEmpresaPublica = async function () {
             fechaCreacion: new Date()
         });
 
-        // 👤 2. CREAR USUARIO EN AUTH (ADMIN POR DEFECTO)
+        // 👤 3. CREAR USUARIO EN AUTH
         const userCredential = await createUserWithEmailAndPassword(
             auth,
             correo,
-            ruc // contraseña = RUC (como pediste)
+            ruc // contraseña = RUC
         );
 
         const uid = userCredential.user.uid;
 
-        // 👤 3. GUARDAR USUARIO EN FIRESTORE
+        // 👤 4. GUARDAR USUARIO EN FIRESTORE
         await addDoc(collection(db, "usuarios"), {
             uid,
             empresaId: empresaRef.id,
             nombre: razonSocial,
             correo,
             rol: "ADMIN",
-            estado: false, // 🔴 pendiente de activación
-            ultimoAcceso: null,
+            estado: false,
             fechaCreacion: new Date()
         });
 
@@ -66,7 +81,15 @@ window.crearEmpresaPublica = async function () {
         cerrarModalEmpresa();
 
     } catch (error) {
-        console.error("ERROR:", error);
-        alert(error.message);
+
+        console.error(error);
+
+        // 🚨 VALIDAR CORREO DUPLICADO EN AUTH
+        if (error.code === "auth/email-already-in-use") {
+            alert("❌ Este correo ya está registrado en el sistema");
+            return;
+        }
+
+        alert("Error al crear empresa");
     }
 };
