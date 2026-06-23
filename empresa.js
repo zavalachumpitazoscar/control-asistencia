@@ -38,48 +38,25 @@ cargarUsuarios();
 
 async function cargarEmpresa(){
 
-    const empresaRef =
-    doc(
-        db,
-        "empresas",
-        empresaId
-    );
+    try {
 
-    const empresaSnap =
-    await getDoc(
-        empresaRef
-    );
+        console.log("Cargando empresa...");
 
-    if(!empresaSnap.exists()){
+        const empresaRef = doc(db, "empresas", empresaId);
+        const empresaSnap = await getDoc(empresaRef);
 
-        alert("Empresa no encontrada");
-        return;
+        if(!empresaSnap.exists()){
+            console.log("Empresa no existe");
+            return;
+        }
 
+        const empresa = empresaSnap.data();
+
+        document.getElementById("nombreEmpresa").textContent = empresa.razonSocial;
+
+    } catch (error) {
+        console.error("ERROR CARGANDO EMPRESA:", error);
     }
-
-    const empresa =
-    empresaSnap.data();
-
-    document.getElementById(
-        "nombreEmpresa"
-    ).textContent =
-    empresa.razonSocial;
-
-    document.getElementById(
-        "ruc"
-    ).textContent =
-    empresa.ruc;
-
-    document.getElementById(
-        "correoEmpresa"
-    ).textContent =
-    empresa.correo;
-
-    document.getElementById(
-        "telefonoEmpresa"
-    ).textContent =
-    empresa.telefono;
-
 }
 
 const auth = getAuth(app);
