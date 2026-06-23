@@ -10,12 +10,12 @@ import {
     query,
     where,
     updateDoc
-}
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-import { getAuth, createUserWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import {
+    getAuth,
+    createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
