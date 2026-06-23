@@ -103,6 +103,7 @@ td{
 
 /* ===== MODAL ===== */
 .modal {
+    padding: 10px;
     display: none;
     position: fixed;
     inset: 0;
