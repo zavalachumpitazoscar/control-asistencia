@@ -18,7 +18,7 @@ window.login = async function () {
 
         alert("Login correcto");
 
-        window.location.href = "empresa.html?id=XXXX";
+        window.location.href = "index.html?id=XXXX";
 
     } catch (error) {
         alert("Error de login");
