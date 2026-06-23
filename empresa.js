@@ -86,6 +86,16 @@ const auth = getAuth(app);
 
 async function crearUsuario(){
 
+    const nombre = document.getElementById("nombreUsuario").value.trim();
+    const correo = document.getElementById("correoUsuario").value.trim();
+    const password = document.getElementById("passwordUsuario").value.trim();
+    const rol = document.getElementById("rolUsuario").value;
+
+    if(!nombre || !correo || !password){
+        alert("Complete todos los campos");
+        return;
+    }
+
     try {
 
         console.log("Creando usuario en AUTH...");
@@ -113,13 +123,20 @@ async function crearUsuario(){
 
         alert("Usuario creado correctamente");
 
+        document.getElementById("nombreUsuario").value = "";
+        document.getElementById("correoUsuario").value = "";
+        document.getElementById("passwordUsuario").value = "";
+
+        cargarUsuarios();
+
     } catch (error) {
 
-        console.error("ERROR CREANDO USUARIO:", error);
+        console.error("ERROR:", error);
         alert(error.message);
 
     }
 }
+
 
 const uid = userCredential.user.uid;
 
