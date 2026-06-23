@@ -11,6 +11,7 @@ import {
     where,
     updateDoc
 }
+
 import { getAuth, createUserWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
@@ -81,49 +82,44 @@ async function cargarEmpresa(){
 
 }
 
+const auth = getAuth(app);
+
 async function crearUsuario(){
 
-    const nombre =
-    document
-    .getElementById("nombreUsuario")
-    .value
-    .trim();
+    try {
 
-    const correo =
-    document
-    .getElementById("correoUsuario")
-    .value
-    .trim();
-
-    const password =
-    document
-    .getElementById("passwordUsuario")
-    .value
-    .trim();
-
-    const rol =
-    document
-    .getElementById("rolUsuario")
-    .value;
-
-    if(
-        !nombre ||
-        !correo ||
-        !password
-    ){
-        alert(
-            "Complete todos los campos"
-        );
-        return;
-    }
-
-    try{
+        console.log("Creando usuario en AUTH...");
 
         const userCredential = await createUserWithEmailAndPassword(
-    auth,
-    correo,
-    password
-);
+            auth,
+            correo,
+            password
+        );
+
+        const uid = userCredential.user.uid;
+
+        console.log("CREADO EN AUTH:", uid);
+
+        await addDoc(collection(db, "usuarios"), {
+            uid,
+            empresaId,
+            nombre,
+            correo,
+            rol,
+            estado: true,
+            ultimoAcceso: null,
+            fechaCreacion: new Date()
+        });
+
+        alert("Usuario creado correctamente");
+
+    } catch (error) {
+
+        console.error("ERROR CREANDO USUARIO:", error);
+        alert(error.message);
+
+    }
+}
 
 const uid = userCredential.user.uid;
 
