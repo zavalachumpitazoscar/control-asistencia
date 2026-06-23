@@ -1,0 +1,41 @@
+body{
+    font-family:Segoe UI,sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+.formulario{
+    display:grid;
+    gap:10px;
+}
+
+input{
+    padding:10px;
+}
+
+button{
+    padding:12px;
+    cursor:pointer;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+}
