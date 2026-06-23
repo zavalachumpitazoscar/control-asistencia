@@ -11,9 +11,13 @@ import {
     where,
     updateDoc
 }
+import { getAuth, createUserWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const params =
 new URLSearchParams(window.location.search);
@@ -115,22 +119,24 @@ async function crearUsuario(){
 
     try{
 
-        await addDoc(
-            collection(
-                db,
-                "usuarios"
-            ),
-            {
-                empresaId,
-                nombre,
-                correo,
-                password,
-                rol,
-                estado:true,
-                ultimoAcceso:null,
-                fechaCreacion:new Date()
-            }
-        );
+        const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    correo,
+    password
+);
+
+const uid = userCredential.user.uid;
+
+await addDoc(collection(db, "usuarios"), {
+    uid: uid,
+    empresaId,
+    nombre,
+    correo,
+    rol,
+    estado: true,
+    ultimoAcceso: null,
+    fechaCreacion: new Date()
+});
 
         alert(
             "Usuario creado"
