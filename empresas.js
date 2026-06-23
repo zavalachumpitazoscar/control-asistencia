@@ -20,7 +20,7 @@ guardarEmpresa
 
 async function guardarEmpresa(){
 
-```
+
 const ruc =
 document.getElementById("ruc").value.trim();
 
@@ -78,13 +78,13 @@ catch(error){
     alert("Error al guardar empresa");
 
 }
-```
+
 
 }
 
 async function cargarEmpresas(){
 
-```
+
 const tabla =
 document.getElementById("tablaEmpresas");
 
@@ -101,7 +101,7 @@ try{
 
         const empresa = doc.data();
 
-        tabla.innerHTML += `
+        tabla.innerHTML += 
             <tr>
                 <td>${empresa.ruc || ""}</td>
                 <td>${empresa.razonSocial || ""}</td>
@@ -115,7 +115,7 @@ try{
                     </button>
                 </td>
             </tr>
-        `;
+        ;
 
     });
 
@@ -127,16 +127,16 @@ catch(error){
     alert("Error al cargar empresas");
 
 }
-```
+
 
 }
 
 window.abrirEmpresa = function(id){
 
-```
+
 window.location.href =
-`empresa.html?id=${id}`;
-```
+empresa.html?id=${id};
+
 
 }
 
