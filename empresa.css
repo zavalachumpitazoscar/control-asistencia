@@ -141,3 +141,15 @@ td{
     cursor: pointer;
     font-size: 22px;
 }
+
+.modal-content {
+    transform: scale(0.85);
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+/* cuando el modal está activo */
+.modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
