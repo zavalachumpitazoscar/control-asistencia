@@ -59,7 +59,6 @@ async function cargarEmpresa(){
     }
 }
 
-const auth = getAuth(app);
 
 async function crearUsuario(){
 
