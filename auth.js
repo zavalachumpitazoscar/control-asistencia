@@ -10,7 +10,9 @@ import {
     collection,
     query,
     where,
-    getDocs
+    getDocs,
+    doc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 const auth = getAuth(app);
@@ -31,12 +33,12 @@ form.addEventListener("submit", async (e) => {
 
     try {
 
-        // 🔐 1. LOGIN EN FIREBASE AUTH
+        // 🔐 LOGIN
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
         const uid = userCredential.user.uid;
 
-        // 🔎 2. BUSCAR USUARIO EN FIRESTORE
+        // 🔎 BUSCAR USUARIO
         const q = query(
             collection(db, "usuarios"),
             where("uid", "==", uid)
@@ -46,26 +48,49 @@ form.addEventListener("submit", async (e) => {
 
         if (snapshot.empty) {
             mensaje.style.color = "red";
-            mensaje.innerHTML = "Usuario no registrado en sistema";
+            mensaje.innerHTML = "Usuario no registrado";
             return;
         }
 
         const userData = snapshot.docs[0].data();
-        const empresaId = userData.empresaId;
 
-        if (!empresaId) {
+        // 🚨 USUARIO INACTIVO
+        if (!userData.estado) {
             mensaje.style.color = "red";
-            mensaje.innerHTML = "Usuario sin empresa asignada";
+            mensaje.innerHTML = "Usuario pendiente de activación";
             return;
         }
 
-        // ✅ 3. LOGIN OK
+        const empresaId = userData.empresaId;
+
+        // 🔎 BUSCAR EMPRESA
+        const empresaRef = await getDoc(doc(db, "empresas", empresaId));
+
+        if (!empresaRef.exists()) {
+            mensaje.style.color = "red";
+            mensaje.innerHTML = "Empresa no encontrada";
+            return;
+        }
+
+        const empresa = empresaRef.data();
+
+        // 🚨 EMPRESA PENDIENTE
+        if (empresa.estado === "pendiente") {
+            mensaje.style.color = "orange";
+            mensaje.innerHTML = "Empresa pendiente de aprobación";
+            return;
+        }
+
+        if (empresa.estado === false) {
+            mensaje.style.color = "red";
+            mensaje.innerHTML = "Empresa inactiva";
+            return;
+        }
+
+        // ✅ LOGIN OK
         mensaje.style.color = "green";
         mensaje.innerHTML = "Acceso correcto";
 
-        console.log("Empresa encontrada:", empresaId);
-
-        // 🚀 4. REDIRECCIÓN DINÁMICA
         window.location.href = `empresa.html?id=${empresaId}`;
 
     } catch (error) {
@@ -73,11 +98,16 @@ form.addEventListener("submit", async (e) => {
         console.error(error);
 
         mensaje.style.color = "red";
-        mensaje.innerHTML = "Correo o contraseña incorrectos";
+        mensaje.innerHTML = "Error de login";
 
     }
 
 });
+
+
+// =========================
+// MODAL EMPRESA
+// =========================
 
 window.abrirModalEmpresa = function () {
     document.getElementById("modalEmpresa").style.display = "block";
@@ -85,4 +115,45 @@ window.abrirModalEmpresa = function () {
 
 window.cerrarModalEmpresa = function () {
     document.getElementById("modalEmpresa").style.display = "none";
+};
+
+
+// =========================
+// CREAR EMPRESA PUBLICA
+// =========================
+
+window.crearEmpresaPublica = async function () {
+
+    const ruc = document.getElementById("rucEmpresa").value.trim();
+    const razonSocial = document.getElementById("razonSocialEmpresa").value.trim();
+    const direccion = document.getElementById("direccionEmpresa").value.trim();
+    const correo = document.getElementById("correoEmpresa").value.trim();
+    const telefono = document.getElementById("telefonoEmpresa").value.trim();
+
+    if (!ruc || !razonSocial || !correo) {
+        alert("Complete los campos");
+        return;
+    }
+
+    try {
+
+        await addDoc(collection(db, "empresas"), {
+            ruc,
+            razonSocial,
+            direccion,
+            correo,
+            telefono,
+            estado: "pendiente",
+            fechaCreacion: new Date()
+        });
+
+        alert("Solicitud enviada. Pendiente de aprobación.");
+
+        cerrarModalEmpresa();
+
+    } catch (error) {
+        console.error(error);
+        alert("Error al crear empresa");
+    }
+
 };
