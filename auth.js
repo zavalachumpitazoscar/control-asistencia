@@ -15,6 +15,12 @@ import {
     getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+import {
+    getFirestore,
+    collection,
+    addDoc
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
