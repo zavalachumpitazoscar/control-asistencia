@@ -20,27 +20,34 @@ import {
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const params =
-new URLSearchParams(window.location.search);
+// 🔥 URL PARAMS
+const params = new URLSearchParams(window.location.search);
+const empresaId = params.get("id");
 
-const empresaId =
-params.get("id");
+// 👇 DEBUG IMPORTANTE
+console.log("empresaId:", empresaId);
 
+// BOTÓN CREAR USUARIO
 document
 .getElementById("btnCrearUsuario")
-.addEventListener(
-    "click",
-    crearUsuario
-);
+.addEventListener("click", crearUsuario);
 
+// INICIO
 cargarEmpresa();
 cargarUsuarios();
 
+
+// =====================
+// 🔵 CARGAR EMPRESA
+// =====================
 async function cargarEmpresa(){
 
     try {
 
-        console.log("Cargando empresa...");
+        if(!empresaId){
+            console.log("No hay empresaId en URL");
+            return;
+        }
 
         const empresaRef = doc(db, "empresas", empresaId);
         const empresaSnap = await getDoc(empresaRef);
@@ -53,6 +60,9 @@ async function cargarEmpresa(){
         const empresa = empresaSnap.data();
 
         document.getElementById("nombreEmpresa").textContent = empresa.razonSocial;
+        document.getElementById("ruc").textContent = empresa.ruc;
+        document.getElementById("correoEmpresa").textContent = empresa.correo;
+        document.getElementById("telefonoEmpresa").textContent = empresa.telefono;
 
     } catch (error) {
         console.error("ERROR CARGANDO EMPRESA:", error);
@@ -60,6 +70,9 @@ async function cargarEmpresa(){
 }
 
 
+// =====================
+// 🟢 CREAR USUARIO
+// =====================
 async function crearUsuario(){
 
     const nombre = document.getElementById("nombreUsuario").value.trim();
@@ -107,86 +120,31 @@ async function crearUsuario(){
 
     } catch (error) {
 
-        console.error("ERROR:", error);
+        console.error("ERROR CREANDO USUARIO:", error);
         alert(error.message);
 
     }
 }
 
 
-const uid = userCredential.user.uid;
-
-await addDoc(collection(db, "usuarios"), {
-    uid: uid,
-    empresaId,
-    nombre,
-    correo,
-    rol,
-    estado: true,
-    ultimoAcceso: null,
-    fechaCreacion: new Date()
-});
-
-        alert(
-            "Usuario creado"
-        );
-
-        document
-        .getElementById("nombreUsuario")
-        .value = "";
-
-        document
-        .getElementById("correoUsuario")
-        .value = "";
-
-        document
-        .getElementById("passwordUsuario")
-        .value = "";
-
-        cargarUsuarios();
-        
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        alert(
-            "Error al crear usuario"
-        );
-
-    }
-
-
+// =====================
+// 📋 CARGAR USUARIOS
+// =====================
 async function cargarUsuarios(){
 
-    const tabla =
-    document.getElementById(
-        "tablaUsuarios"
-    );
-
+    const tabla = document.getElementById("tablaUsuarios");
     tabla.innerHTML = "";
 
-    const q =
-    query(
-        collection(
-            db,
-            "usuarios"
-        ),
-        where(
-            "empresaId",
-            "==",
-            empresaId
-        )
+    const q = query(
+        collection(db, "usuarios"),
+        where("empresaId", "==", empresaId)
     );
 
-    const snapshot =
-    await getDocs(q);
+    const snapshot = await getDocs(q);
 
-    snapshot.forEach(docSnap=>{
+    snapshot.forEach(docSnap => {
 
-        const usuario =
-        docSnap.data();
+        const usuario = docSnap.data();
 
         tabla.innerHTML += `
             <tr>
@@ -195,66 +153,43 @@ async function cargarUsuarios(){
                 <td>${usuario.rol}</td>
 
                 <td>
-    <span class="${
-        usuario.estado
-        ? "estado-activo"
-        : "estado-inactivo"
-    }">
-        ${
-            usuario.estado
-            ? "Activo"
-            : "Inactivo"
-        }
-    </span>
-</td>
-
-                <td>
-
-                    <button
-class="btn-editar"
-onclick="editarUsuario('${docSnap.id}')">
-✏️ Editar
-</button>
-
-                    <button
-class="${
-    usuario.estado
-    ? 'btn-desactivar'
-    : 'btn-activar'
-}"
-onclick="cambiarEstado(
-'${docSnap.id}',
-${usuario.estado}
-)">
-
-                    ${
-                        usuario.estado
-                        ? "Desactivar"
-                        : "Activar"
-                    }
-
-                    </button>
-
+                    <span class="${
+                        usuario.estado ? "estado-activo" : "estado-inactivo"
+                    }">
+                        ${usuario.estado ? "Activo" : "Inactivo"}
+                    </span>
                 </td>
 
+                <td>
+                    <button class="btn-editar"
+                        onclick="editarUsuario('${docSnap.id}')">
+                        ✏️ Editar
+                    </button>
+
+                    <button class="${
+                        usuario.estado ? "btn-desactivar" : "btn-activar"
+                    }"
+                        onclick="cambiarEstado('${docSnap.id}', ${usuario.estado})">
+
+                        ${usuario.estado ? "Desactivar" : "Activar"}
+
+                    </button>
+                </td>
             </tr>
         `;
-
     });
-
 }
 
-window.cambiarEstado =
-async function(id,estadoActual){
 
-    try{
+// =====================
+// 🔁 CAMBIAR ESTADO
+// =====================
+window.cambiarEstado = async function(id, estadoActual){
+
+    try {
 
         await updateDoc(
-            doc(
-                db,
-                "usuarios",
-                id
-            ),
+            doc(db, "usuarios", id),
             {
                 estado: !estadoActual
             }
@@ -262,134 +197,69 @@ async function(id,estadoActual){
 
         cargarUsuarios();
 
-    }
-    catch(error){
-
+    } catch (error) {
         console.error(error);
-
-        alert(
-            "Error al actualizar estado"
-        );
-
+        alert("Error al actualizar estado");
     }
+};
 
-}
 
-window.editarUsuario =
-async function(id){
+// =====================
+// ✏️ EDITAR USUARIO
+// =====================
+window.editarUsuario = async function(id){
 
-    const usuarioRef =
-    doc(
-        db,
-        "usuarios",
-        id
-    );
+    const usuarioRef = doc(db, "usuarios", id);
+    const usuarioSnap = await getDoc(usuarioRef);
 
-    const usuarioSnap =
-    await getDoc(
-        usuarioRef
-    );
+    if(!usuarioSnap.exists()) return;
 
-    if(!usuarioSnap.exists()){
-        return;
-    }
+    const usuario = usuarioSnap.data();
 
-    const usuario =
-    usuarioSnap.data();
-
-    document.getElementById(
-        "editId"
-    ).value = id;
-
-    document.getElementById(
-        "editNombre"
-    ).value =
-    usuario.nombre;
-
-    document.getElementById(
-        "editCorreo"
-    ).value =
-    usuario.correo;
-
-    document.getElementById(
-        "editRol"
-    ).value =
-    usuario.rol;
-
-    document.getElementById(
-        "editEstado"
-    ).value =
-    usuario.estado.toString();
+    document.getElementById("editId").value = id;
+    document.getElementById("editNombre").value = usuario.nombre;
+    document.getElementById("editCorreo").value = usuario.correo;
+    document.getElementById("editRol").value = usuario.rol;
+    document.getElementById("editEstado").value = usuario.estado.toString();
 
     document.getElementById("modalUsuario").classList.add("show");
+};
 
-}
 
-window.cerrarModal =
-function(){
-
+// =====================
+// ❌ CERRAR MODAL
+// =====================
+window.cerrarModal = function(){
     document.getElementById("modalUsuario").classList.remove("show");
+};
 
-}
 
-window.guardarEdicion =
-async function(){
+// =====================
+// 💾 GUARDAR EDICIÓN
+// =====================
+window.guardarEdicion = async function(){
 
-    const id =
-    document.getElementById(
-        "editId"
-    ).value;
+    const id = document.getElementById("editId").value;
 
-    try{
+    try {
 
         await updateDoc(
-            doc(
-                db,
-                "usuarios",
-                id
-            ),
+            doc(db, "usuarios", id),
             {
-                nombre:
-                document.getElementById(
-                    "editNombre"
-                ).value,
-
-                correo:
-                document.getElementById(
-                    "editCorreo"
-                ).value,
-
-                rol:
-                document.getElementById(
-                    "editRol"
-                ).value,
-
-                estado:
-                document.getElementById(
-                    "editEstado"
-                ).value === "true"
+                nombre: document.getElementById("editNombre").value,
+                correo: document.getElementById("editCorreo").value,
+                rol: document.getElementById("editRol").value,
+                estado: document.getElementById("editEstado").value === "true"
             }
         );
 
         cerrarModal();
-
         cargarUsuarios();
 
-        alert(
-            "Usuario actualizado"
-        );
+        alert("Usuario actualizado");
 
-    }
-    catch(error){
-
+    } catch (error) {
         console.error(error);
-
-        alert(
-            "Error al actualizar"
-        );
-
+        alert("Error al actualizar");
     }
-
-}
-
-
+};
