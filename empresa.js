@@ -201,21 +201,37 @@ async function cargarUsuarios(){
                 <td>${usuario.rol}</td>
 
                 <td>
-                    ${usuario.estado ? "Activo" : "Inactivo"}
-                </td>
+    <span class="${
+        usuario.estado
+        ? "estado-activo"
+        : "estado-inactivo"
+    }">
+        ${
+            usuario.estado
+            ? "Activo"
+            : "Inactivo"
+        }
+    </span>
+</td>
 
                 <td>
 
                     <button
-                    onclick="editarUsuario('${docSnap.id}')">
-                    Editar
-                    </button>
+class="btn-editar"
+onclick="editarUsuario('${docSnap.id}')">
+✏️ Editar
+</button>
 
                     <button
-                    onclick="cambiarEstado(
-                    '${docSnap.id}',
-                    ${usuario.estado}
-                    )">
+class="${
+    usuario.estado
+    ? 'btn-desactivar'
+    : 'btn-activar'
+}"
+onclick="cambiarEstado(
+'${docSnap.id}',
+${usuario.estado}
+)">
 
                     ${
                         usuario.estado
