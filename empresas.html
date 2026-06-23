@@ -1,1 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empresas</title>
 
+    <link rel="stylesheet" href="css/empresas.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Empresas</h1>
+
+    <div class="formulario">
+
+        <input type="text" id="ruc" placeholder="RUC">
+
+        <input type="text" id="razonSocial" placeholder="Razón Social">
+
+        <input type="text" id="direccion" placeholder="Dirección">
+
+        <input type="email" id="correo" placeholder="Correo">
+
+        <input type="text" id="telefono" placeholder="Teléfono">
+
+        <button id="btnGuardar">
+            Guardar Empresa
+        </button>
+
+    </div>
+
+    <hr>
+
+    <h2>Empresas Registradas</h2>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>RUC</th>
+                <th>Razón Social</th>
+                <th>Correo</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+
+        <tbody id="tablaEmpresas">
+        </tbody>
+
+    </table>
+
+</div>
+
+<script type="module" src="js/empresas.js"></script>
+
+</body>
+</html>
