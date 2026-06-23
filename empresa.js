@@ -268,13 +268,45 @@ async function(id,estadoActual){
 window.editarUsuario =
 async function(id){
 
-    const nuevoRol =
+    const roles = [
+        "ADMIN",
+        "RRHH",
+        "SUPERVISOR",
+        "CONSULTA"
+    ];
+
+    let opciones = "";
+
+    roles.forEach((rol,index)=>{
+
+        opciones +=
+        `${index + 1} - ${rol}\n`;
+
+    });
+
+    const seleccion =
     prompt(
-        "Nuevo rol:\nADMIN\nRRHH\nSUPERVISOR\nCONSULTA"
+        "Seleccione un rol:\n\n" +
+        opciones
     );
 
-    if(!nuevoRol){
+    if(!seleccion){
         return;
+    }
+
+    const nuevoRol =
+    roles[
+        parseInt(seleccion) - 1
+    ];
+
+    if(!nuevoRol){
+
+        alert(
+            "Opción inválida"
+        );
+
+        return;
+
     }
 
     try{
@@ -286,8 +318,12 @@ async function(id){
                 id
             ),
             {
-                rol: nuevoRol.toUpperCase()
+                rol:nuevoRol
             }
+        );
+
+        alert(
+            "Rol actualizado"
         );
 
         cargarUsuarios();
