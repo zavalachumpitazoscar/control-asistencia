@@ -162,3 +162,38 @@ td{
     from { background: rgba(0,0,0,0); }
     to { background: rgba(0,0,0,0.55); }
 }
+
+
+/* CELULAR */
+
+@media (max-width: 600px) {
+
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .modal-header h2 {
+        font-size: 18px;
+    }
+
+    input,
+    select {
+        font-size: 14px;
+        padding: 9px;
+    }
+
+    button {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .modal-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
