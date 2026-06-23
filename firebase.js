@@ -6,7 +6,7 @@ import {
 
 const firebaseConfig = {
 
-  apiKey: "TU_API_KEY",
+  apiKey: "AIzaSyCX3M6ttukx2nsKE4g3WkpqOTS9ECR_gvM",
 
   authDomain: "control-asistencia-82fe2.firebaseapp.com",
 
