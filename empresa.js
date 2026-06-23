@@ -127,6 +127,7 @@ async function crearUsuario(){
                 password,
                 rol,
                 estado:true,
+                ultimoAcceso:null,
                 fechaCreacion:new Date()
             }
         );
@@ -148,6 +149,7 @@ async function crearUsuario(){
         .value = "";
 
         cargarUsuarios();
+        
 
     }
     catch(error){
@@ -231,3 +233,76 @@ async function cargarUsuarios(){
     });
 
 }
+
+window.cambiarEstado =
+async function(id,estadoActual){
+
+    try{
+
+        await updateDoc(
+            doc(
+                db,
+                "usuarios",
+                id
+            ),
+            {
+                estado: !estadoActual
+            }
+        );
+
+        cargarUsuarios();
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        alert(
+            "Error al actualizar estado"
+        );
+
+    }
+
+}
+
+window.editarUsuario =
+async function(id){
+
+    const nuevoRol =
+    prompt(
+        "Nuevo rol:\nADMIN\nRRHH\nSUPERVISOR\nCONSULTA"
+    );
+
+    if(!nuevoRol){
+        return;
+    }
+
+    try{
+
+        await updateDoc(
+            doc(
+                db,
+                "usuarios",
+                id
+            ),
+            {
+                rol: nuevoRol.toUpperCase()
+            }
+        );
+
+        cargarUsuarios();
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        alert(
+            "Error al actualizar rol"
+        );
+
+    }
+
+}
+
+
