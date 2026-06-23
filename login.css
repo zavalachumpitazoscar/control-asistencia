@@ -94,7 +94,8 @@ button:hover{
 ========================= */
 
 .modal {
-    display: none;
+    display: none; /* oculto por defecto */
+
     position: fixed;
     z-index: 999;
     left: 0;
@@ -104,7 +105,6 @@ button:hover{
 
     background: rgba(0,0,0,0.5);
 
-    display: flex;
     justify-content: center;
     align-items: center;
 }
