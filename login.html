@@ -42,6 +42,11 @@
 
                 <div id="mensaje"></div>
 
+                <p style="margin-top:15px; text-align:center;">
+    ¿No tienes empresa?
+    <a href="#" onclick="abrirModalEmpresa()">Crea tu empresa</a>
+</p>
+
             </form>
 
         </div>
@@ -49,6 +54,30 @@
     </div>
 
 <script type="module" src="auth.js"></script>
+    
+<div id="modalEmpresa" class="modal">
 
+    <div class="modal-content">
+
+        <h2>Registrar Empresa</h2>
+
+        <input id="rucEmpresa" placeholder="RUC">
+        <input id="razonSocialEmpresa" placeholder="Razón Social">
+        <input id="direccionEmpresa" placeholder="Dirección">
+        <input id="correoEmpresa" placeholder="Correo">
+        <input id="telefonoEmpresa" placeholder="Teléfono">
+
+        <button onclick="crearEmpresaPublica()">
+            Solicitar registro
+        </button>
+
+        <button onclick="cerrarModalEmpresa()">
+            Cancelar
+        </button>
+
+    </div>
+
+</div>
+    
 </body>
 </html>
