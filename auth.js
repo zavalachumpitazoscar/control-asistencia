@@ -8,12 +8,7 @@ import {
 import {
     getFirestore,
     collection,
-    addDoc
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-import {
-    getFirestore,
-    collection,
+    addDoc,
     query,
     where,
     getDocs,
@@ -23,6 +18,10 @@ import {
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// =========================
+// LOGIN
+// =========================
 
 const form = document.getElementById("loginForm");
 
@@ -39,9 +38,8 @@ form.addEventListener("submit", async (e) => {
 
     try {
 
-        // 🔐 LOGIN
+        // 🔐 LOGIN FIREBASE AUTH
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
         const uid = userCredential.user.uid;
 
         // 🔎 BUSCAR USUARIO
@@ -70,15 +68,15 @@ form.addEventListener("submit", async (e) => {
         const empresaId = userData.empresaId;
 
         // 🔎 BUSCAR EMPRESA
-        const empresaRef = await getDoc(doc(db, "empresas", empresaId));
+        const empresaSnap = await getDoc(doc(db, "empresas", empresaId));
 
-        if (!empresaRef.exists()) {
+        if (!empresaSnap.exists()) {
             mensaje.style.color = "red";
             mensaje.innerHTML = "Empresa no encontrada";
             return;
         }
 
-        const empresa = empresaRef.data();
+        const empresa = empresaSnap.data();
 
         // 🚨 EMPRESA PENDIENTE
         if (empresa.estado === "pendiente") {
@@ -93,7 +91,7 @@ form.addEventListener("submit", async (e) => {
             return;
         }
 
-        // ✅ LOGIN OK
+        // ✅ OK
         mensaje.style.color = "green";
         mensaje.innerHTML = "Acceso correcto";
 
@@ -102,7 +100,6 @@ form.addEventListener("submit", async (e) => {
     } catch (error) {
 
         console.error(error);
-
         mensaje.style.color = "red";
         mensaje.innerHTML = "Error de login";
 
@@ -137,7 +134,7 @@ window.crearEmpresaPublica = async function () {
     const telefono = document.getElementById("telefonoEmpresa").value.trim();
 
     if (!ruc || !razonSocial || !correo) {
-        alert("Complete los campos");
+        alert("Complete los campos obligatorios");
         return;
     }
 
@@ -153,13 +150,15 @@ window.crearEmpresaPublica = async function () {
             fechaCreacion: new Date()
         });
 
-        alert("Solicitud enviada. Pendiente de aprobación.");
+        alert("Solicitud enviada. Está pendiente de aprobación.");
 
         cerrarModalEmpresa();
 
     } catch (error) {
-        console.error(error);
+
+        console.error("ERROR CREANDO EMPRESA:", error);
         alert("Error al crear empresa");
+
     }
 
 };
