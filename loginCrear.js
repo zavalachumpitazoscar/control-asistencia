@@ -1,6 +1,17 @@
-import { getFirestore, collection, addDoc } 
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+import { app } from "./firebase.js";
 
+import {
+    getAuth,
+    createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 window.crearEmpresaPublica = async function () {
@@ -18,22 +29,44 @@ window.crearEmpresaPublica = async function () {
 
     try {
 
-        await addDoc(collection(db, "empresas"), {
+        // 🏢 1. CREAR EMPRESA
+        const empresaRef = await addDoc(collection(db, "empresas"), {
             ruc,
             razonSocial,
             direccion,
             correo,
             telefono,
-            estado: "pendiente", // 🔥 CLAVE
+            estado: "pendiente",
             fechaCreacion: new Date()
         });
 
-        alert("Solicitud enviada. Está pendiente de aprobación.");
+        // 👤 2. CREAR USUARIO EN AUTH (ADMIN POR DEFECTO)
+        const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            correo,
+            ruc // contraseña = RUC (como pediste)
+        );
+
+        const uid = userCredential.user.uid;
+
+        // 👤 3. GUARDAR USUARIO EN FIRESTORE
+        await addDoc(collection(db, "usuarios"), {
+            uid,
+            empresaId: empresaRef.id,
+            nombre: razonSocial,
+            correo,
+            rol: "ADMIN",
+            estado: false, // 🔴 pendiente de activación
+            ultimoAcceso: null,
+            fechaCreacion: new Date()
+        });
+
+        alert("Empresa creada. Pendiente de aprobación.");
 
         cerrarModalEmpresa();
 
     } catch (error) {
-        console.error(error);
-        alert("Error al enviar solicitud");
+        console.error("ERROR:", error);
+        alert(error.message);
     }
 };
