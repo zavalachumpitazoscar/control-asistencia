@@ -35,7 +35,7 @@ body{
         #764ba2
     );
 
-    overflow-x:clip;
+    overflow:clip;
 
     position:relative;
 }
