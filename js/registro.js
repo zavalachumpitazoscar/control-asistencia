@@ -54,7 +54,7 @@ const regexDni = /^\d{8}$/;
 
 const regexTelefono = /^[0-9+\-() ]{7,20}$/;
 
-const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.!@#$%^&*]).{8,}$/;
 
 
 
@@ -693,17 +693,34 @@ function validarPaso1(){
 
     }
 
-    if(!regexPassword.test(password.value)){
+const erroresPassword =
+    validarFormatoPassword(password.value);
 
-        marcarError(password);
 
-        valido = false;
 
-    }else{
+if(erroresPassword.length > 0){
 
-        marcarCorrecto(password);
 
-    }
+    marcarError(password);
+
+
+    mostrarToast(
+        "error",
+        "La contraseña requiere: " +
+        erroresPassword.join(", ")
+    );
+
+
+    valido=false;
+
+
+}else{
+
+
+    marcarCorrecto(password);
+
+
+}
 
 if(
     confirmar.value.trim()==="" ||
@@ -912,6 +929,65 @@ function validarPasoActual(){
     }
 
 }
+
+
+function validarFormatoPassword(password){
+
+
+    const errores=[];
+
+
+    if(password.length < 8){
+
+        errores.push(
+            "mínimo 8 caracteres"
+        );
+
+    }
+
+
+    if(!/[A-Z]/.test(password)){
+
+        errores.push(
+            "una mayúscula"
+        );
+
+    }
+
+
+    if(!/[a-z]/.test(password)){
+
+        errores.push(
+            "una minúscula"
+        );
+
+    }
+
+
+    if(!/\d/.test(password)){
+
+        errores.push(
+            "un número"
+        );
+
+    }
+
+
+    if(!/[.!@#$%^&*]/.test(password)){
+
+        errores.push(
+            "un carácter especial (. ! @ # $ %)"
+        );
+
+    }
+
+
+    return errores;
+
+}
+
+
+
 
 btnSiguiente.addEventListener(
     "click",
