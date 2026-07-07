@@ -8,34 +8,15 @@ from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 
+const sidebar = document.querySelector(".sidebar");
 
+const botonMenu = document.querySelector(".btn-menu");
 
-const sidebar =
-document.querySelector(".sidebar");
+const botones = document.querySelectorAll(".item");
 
+const contenedor = document.getElementById("contenedorVista");
 
-const botonMenu =
-document.querySelector(".btn-menu");
-
-
-
-const botones =
-document.querySelectorAll(".item");
-
-
-const contenedor =
-document.getElementById(
-"contenedorVista"
-);
-
-
-
-const titulo =
-document.querySelector(
-".topbar h1"
-);
-
-
+const titulo = document.querySelector(".topbar h1");
 
 
 // ============================
@@ -186,24 +167,6 @@ window.location.href =
 
 
 });
-
-
-
-
-const botones =
-document.querySelectorAll(".item");
-
-
-const contenedor =
-document.getElementById("contenedorVista");
-
-
-const titulo =
-document.querySelector(".topbar h1");
-
-
-
-
 
 botones.forEach(btn=>{
 
