@@ -2,46 +2,211 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
 
-    <link rel="stylesheet" href="css/login.css">
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Control Empresarial - Login
+    </title>
+
+
+    <link rel="stylesheet"
+          href="css/login.css">
+
 </head>
+
 
 <body>
 
-    <div class="contenedor">
 
-    <h1>🍰 PostresAO</h1>
+    <main class="contenedor">
 
-    <input
-        type="email"
-        id="correo"
-        placeholder="Correo electrónico">
 
-    <input
-        type="password"
-        id="password"
-        placeholder="Contraseña">
+        <div class="logo">
 
-    <button id="btnLogin">
-        Ingresar
-    </button>
 
-    <p>
-        ¿No tienes cuenta?
-        <a href="registro.html">
-            Crear cuenta
-        </a>
-    </p>
+            <div class="logo-icon">
+                🏢
+            </div>
 
-</div>
 
-    <div id="toast" class="toast"></div>
+            <h1>
+                Control Empresarial
+            </h1>
 
-    <script type="module" src="js/login.js"></script>
+
+            <p>
+                Sistema inteligente de asistencia
+            </p>
+
+
+        </div>
+
+
+
+
+        <div class="formulario">
+
+
+            <h2>
+                Iniciar sesión
+            </h2>
+
+
+            <p class="descripcion">
+
+                Ingresa con las credenciales
+                de tu empresa.
+
+            </p>
+
+
+
+            <div class="campo">
+
+
+                <label for="correo">
+                    Correo electrónico
+                </label>
+
+
+                <input
+
+                    type="email"
+
+                    id="correo"
+
+                    placeholder="empresa@correo.com"
+
+                    autocomplete="email"
+
+                >
+
+
+            </div>
+
+
+
+
+
+            <div class="campo">
+
+
+                <label for="password">
+
+                    Contraseña
+
+                </label>
+
+
+                <input
+
+                    type="password"
+
+                    id="password"
+
+                    placeholder="Ingrese su contraseña"
+
+                    autocomplete="current-password"
+
+                >
+
+
+            </div>
+
+
+
+
+
+            <button id="btnLogin">
+
+
+                Ingresar
+
+
+            </button>
+
+
+
+
+
+            <div class="separador">
+
+                <span>
+                    ¿Aún no tienes una cuenta?
+                </span>
+
+
+            </div>
+
+
+
+
+
+            <a class="registro"
+
+               href="registro.html">
+
+
+                Registrar empresa
+
+
+            </a>
+
+
+
+
+        </div>
+
+
+
+
+        <footer>
+
+
+            <p>
+
+                © 2026 Control Empresarial
+
+                <br>
+
+                Gestión segura de asistencia
+
+            </p>
+
+
+        </footer>
+
+
+
+    </main>
+
+
+
+
+    <div id="toast"
+         class="toast">
+
+    </div>
+
+
+
+
+
+    <script
+
+        type="module"
+
+        src="js/login.js">
+
+    </script>
+
+
 
 </body>
+
 
 </html>
