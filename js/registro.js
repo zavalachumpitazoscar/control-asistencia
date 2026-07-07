@@ -333,6 +333,12 @@ btnRegistrar.addEventListener(
 
 function actualizarVista(){
 
+    if(pasoActual===5){
+
+    construirResumen();
+
+    }
+
     pasos.forEach(p=>{
 
         p.classList.remove("active");
@@ -390,6 +396,7 @@ function actualizarVista(){
         btnSiguiente.classList.remove("oculto");
 
     }
+    
 
 }
 
@@ -903,5 +910,223 @@ function obtenerRepresentantes(){
         });
 
     return representantes;
+
+}
+
+function construirResumen(){
+
+    const resumen =
+        document.getElementById("resumen");
+
+    const representantes =
+        obtenerRepresentantes();
+
+    resumen.innerHTML = `
+
+<div class="resumen-card">
+
+<h3>
+
+🏢 Empresa
+
+</h3>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+RUC
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("ruc").value}
+
+</span>
+
+</div>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+Razón Social
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("razonSocial").value}
+
+</span>
+
+</div>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+Giro
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("giro").value}
+
+</span>
+
+</div>
+
+</div>
+
+<div class="resumen-card">
+
+<h3>
+
+📍 Ubicación
+
+</h3>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+Dirección
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("direccion").value}
+
+</span>
+
+</div>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+Departamento
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("departamento").value}
+
+</span>
+
+</div>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+Provincia
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("provincia").value}
+
+</span>
+
+</div>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+Distrito
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("distrito").value}
+
+</span>
+
+</div>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+País
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("pais").value}
+
+</span>
+
+</div>
+
+</div>
+
+<div class="resumen-card">
+
+<h3>
+
+👤 Representantes (${representantes.length})
+
+</h3>
+
+${representantes.map(rep=>`
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+${rep.nombre}
+
+</span>
+
+<span class="resumen-value">
+
+${rep.correo}
+
+</span>
+
+</div>
+
+`).join("")}
+
+</div>
+
+<div class="resumen-card">
+
+<h3>
+
+🔐 Cuenta
+
+</h3>
+
+<div class="resumen-item">
+
+<span class="resumen-label">
+
+Correo de acceso
+
+</span>
+
+<span class="resumen-value">
+
+${document.getElementById("correo").value}
+
+</span>
+
+</div>
+
+</div>
+
+`;
 
 }
