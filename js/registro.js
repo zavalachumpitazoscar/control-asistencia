@@ -1,11 +1,13 @@
 import {
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    deleteUser
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import {
     doc,
-    setDoc
+    setDoc,
+    serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -21,127 +23,156 @@ const btnRegistrar =
 const toast =
     document.getElementById("toast");
 
-function mostrarToast(tipo,mensaje){
+function mostrarToast(tipo, mensaje) {
 
-    toast.className="toast "+tipo;
-
-    toast.textContent=mensaje;
-
+    toast.className = "toast " + tipo;
+    toast.textContent = mensaje;
     toast.classList.add("mostrar");
 
-    setTimeout(()=>{
-
+    setTimeout(() => {
         toast.classList.remove("mostrar");
-
-    },3000);
-
-}
-
-btnRegistrar.addEventListener(
-    "click",
-    async () => {
-
-        const nombre =
-            document.getElementById("nombre").value;
-
-        const correo =
-            document.getElementById("correo").value;
-
-        const password =
-            document.getElementById("password").value;
-
-        if(
-    nombre.trim()==="" ||
-    correo.trim()==="" ||
-    password.trim()===""
-){
-
-    mostrarToast(
-        "error",
-        "Completa todos los campos."
-    );
-
-    return;
+    }, 3000);
 
 }
 
-btnRegistrar.classList.add("cargando");
-btnRegistrar.innerHTML="Registrando...";
-btnRegistrar.disabled=true;
+btnRegistrar.addEventListener("click", async () => {
 
-        try {
+    const nombre =
+        document.getElementById("nombre").value.trim();
 
-            const credencial =
-                await createUserWithEmailAndPassword(
-                    auth,
-                    correo,
-                    password
-                );
+    const correo =
+        document.getElementById("correo").value.trim();
 
-            await setDoc(
-                doc(
-                    db,
-                    "usuarios",
-                    credencial.user.uid
-                ),
-                {
-                    nombreCompleto: nombre,
-                    correo: correo,
-                    estado: "INACTIVO",
-                    rol: "CLIENTE",
-                    fechaRegistro:
-                        new Date().toISOString()
-                }
+    const password =
+        document.getElementById("password").value.trim();
+
+    if (!nombre || !correo || !password) {
+
+        mostrarToast(
+            "error",
+            "Completa todos los campos."
+        );
+
+        return;
+    }
+
+    btnRegistrar.disabled = true;
+    btnRegistrar.classList.add("cargando");
+    btnRegistrar.innerHTML = "Registrando...";
+
+    let credencial = null;
+
+    try {
+
+        // Crear usuario en Authentication
+        credencial =
+            await createUserWithEmailAndPassword(
+                auth,
+                correo,
+                password
             );
 
-mostrarToast(
-    "exito",
-    "Cuenta creada. Espera la activación del administrador."
-);
+        console.log("Usuario creado:", credencial.user.uid);
 
-setTimeout(()=>{
+        // Crear documento en Firestore
+        await setDoc(
+            doc(
+                db,
+                "usuarios",
+                credencial.user.uid
+            ),
+            {
+                uid: credencial.user.uid,
+                nombreCompleto: nombre,
+                correo: correo,
+                estado: "ACTIVO",
+                rol: "USUARIO",
+                fechaRegistro: serverTimestamp()
+            }
+        );
 
-    window.location="index.html";
+        console.log("Documento creado en Firestore");
 
-},2000);
+        mostrarToast(
+            "exito",
+            "Cuenta creada correctamente."
+        );
+
+        setTimeout(() => {
+
+            window.location.href = "index.html";
+
+        }, 2000);
+
+    }
+    catch (error) {
+
+        console.error(error);
+        console.error(error.code);
+        console.error(error.message);
+
+        // Si el usuario ya fue creado en Authentication
+        // pero falló Firestore, lo eliminamos.
+        if (credencial && credencial.user) {
+
+            try {
+
+                await deleteUser(credencial.user);
+
+            } catch (e) {
+
+                console.error("No se pudo eliminar el usuario:", e);
+
+            }
+
         }
-catch(error){
 
-    btnRegistrar.classList.remove("cargando");
-    btnRegistrar.innerHTML="Registrarse";
-    btnRegistrar.disabled=false;
+        switch (error.code) {
 
-    if(error.code==="auth/email-already-in-use"){
+            case "auth/email-already-in-use":
+                mostrarToast(
+                    "error",
+                    "Ese correo ya está registrado."
+                );
+                break;
 
-        mostrarToast(
-            "error",
-            "Ese correo ya está registrado."
-        );
+            case "auth/invalid-email":
+                mostrarToast(
+                    "error",
+                    "Correo inválido."
+                );
+                break;
 
-    }else if(error.code==="auth/invalid-email"){
+            case "auth/weak-password":
+                mostrarToast(
+                    "error",
+                    "La contraseña debe tener al menos 6 caracteres."
+                );
+                break;
 
-        mostrarToast(
-            "error",
-            "Correo electrónico inválido."
-        );
+            case "permission-denied":
+            case "firestore/permission-denied":
+                mostrarToast(
+                    "error",
+                    "Firestore no permite escribir. Revisa las reglas."
+                );
+                break;
 
-    }else if(error.code==="auth/weak-password"){
+            default:
+                mostrarToast(
+                    "error",
+                    error.message
+                );
 
-        mostrarToast(
-            "error",
-            "La contraseña debe tener al menos 6 caracteres."
-        );
+        }
 
-    }else{
+    }
+    finally {
 
-        mostrarToast(
-            "error",
-            "Ocurrió un error. Inténtalo nuevamente."
-        );
+        btnRegistrar.disabled = false;
+        btnRegistrar.classList.remove("cargando");
+        btnRegistrar.innerHTML = "Registrarse";
 
     }
 
-}
-
-    }
-);
+});
