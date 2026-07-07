@@ -884,16 +884,78 @@ label{
 
 .btn-principal{
 
-    background:linear-gradient(
-        135deg,
-        #2563eb,
-        #3b82f6
-    );
 
-    color:white;
+    min-height:54px;
 
-    box-shadow:
-        0 14px 30px rgba(37,99,235,.28);
+
+    display:flex;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+    gap:10px;
+
+
+}
+
+
+.btn-principal.loading{
+
+
+    pointer-events:none;
+
+
+    opacity:.8;
+
+
+}
+
+
+.btn-principal.loading::after{
+
+
+    content:"";
+
+
+    width:18px;
+
+
+    height:18px;
+
+
+    border:
+
+    3px solid rgba(255,255,255,.4);
+
+
+    border-top-color:white;
+
+
+    border-radius:50%;
+
+
+    animation:
+
+    spin .8s linear infinite;
+
+
+}
+
+
+
+@keyframes spin{
+
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
 
 }
 
