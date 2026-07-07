@@ -24,6 +24,8 @@ from "./firebase-config.js";
 
 let pasoActual = 1;
 
+let totalRepresentantes = 1;
+
 const totalPasos = 5;
 
 const pasos = document.querySelectorAll(".form-step");
@@ -41,6 +43,18 @@ const btnRegistrar = document.getElementById("btnRegistrar");
 const contenedorRepresentantes = document.getElementById("contenedorRepresentantes");
 
 const btnAgregarRepresentante = document.getElementById("btnAgregarRepresentante");
+
+const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const regexRuc = /^\d{11}$/;
+
+const regexDni = /^\d{8}$/;
+
+const regexTelefono = /^[0-9+\-() ]{7,20}$/;
+
+const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+
 
 const toast = document.getElementById("toast");
 
@@ -298,3 +312,155 @@ btnAnterior.addEventListener(
 );
 
 actualizarVista();
+
+
+function crearRepresentante(numero){
+
+    return `
+
+<div class="representante" data-index="${numero}">
+
+<h3>
+
+Representante ${numero}
+
+</h3>
+
+<input
+type="text"
+class="repNombre"
+placeholder="Nombre Completo">
+
+<input
+type="text"
+class="repDni"
+maxlength="8"
+placeholder="DNI">
+
+<input
+type="email"
+class="repCorreo"
+placeholder="Correo">
+
+<input
+type="text"
+class="repTelefono"
+placeholder="Teléfono">
+
+<button
+type="button"
+class="btnEliminarRepresentante">
+
+Eliminar representante
+
+</button>
+
+</div>
+
+`;
+
+}
+
+btnAgregarRepresentante.addEventListener(
+
+    "click",
+
+    ()=>{
+
+        totalRepresentantes++;
+
+        contenedorRepresentantes.insertAdjacentHTML(
+
+            "beforeend",
+
+            crearRepresentante(
+                totalRepresentantes
+            )
+
+        );
+
+        actualizarRepresentantes();
+
+    }
+
+);
+
+contenedorRepresentantes.addEventListener(
+
+    "click",
+
+    e=>{
+
+        if(
+
+            !e.target.classList.contains(
+
+                "btnEliminarRepresentante"
+
+            )
+
+        ){
+
+            return;
+
+        }
+
+        e.target
+            .closest(".representante")
+            .remove();
+
+        actualizarRepresentantes();
+
+    }
+
+);
+
+function actualizarRepresentantes(){
+
+    const tarjetas=
+
+        document.querySelectorAll(
+
+            ".representante"
+
+        );
+
+    totalRepresentantes=
+
+        tarjetas.length;
+
+    tarjetas.forEach(
+
+        (tarjeta,index)=>{
+
+            tarjeta.dataset.index=index+1;
+
+            tarjeta.querySelector("h3").textContent=
+
+                "Representante "+(index+1);
+
+            const boton=
+
+                tarjeta.querySelector(
+
+                    ".btnEliminarRepresentante"
+
+                );
+
+            if(index===0){
+
+                boton.classList.add("oculto");
+
+            }else{
+
+                boton.classList.remove("oculto");
+
+            }
+
+        }
+
+    );
+
+}
+
+actualizarRepresentantes();
