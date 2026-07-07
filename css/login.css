@@ -1,16 +1,22 @@
 /* ======================================
-   LOGIN - ESTILO SAAS CORPORATIVO
+   RESET
 ====================================== */
 
 
 *{
+
     box-sizing:border-box;
+
     margin:0;
+
     padding:0;
+
     font-family:
     "Inter",
     "Segoe UI",
+    Arial,
     sans-serif;
+
 }
 
 
@@ -25,12 +31,15 @@ body{
 
     align-items:center;
 
+
     background:
+
     linear-gradient(
         135deg,
         #667eea,
         #764ba2
     );
+
 
     overflow:hidden;
 
@@ -38,7 +47,10 @@ body{
 
 
 
-/* Decoración fondo */
+/* ======================================
+   FONDO ANIMADO
+====================================== */
+
 
 body::before{
 
@@ -46,23 +58,30 @@ body::before{
 
     position:absolute;
 
-    width:450px;
+    width:500px;
 
-    height:450px;
+    height:500px;
+
 
     background:
-    rgba(255,255,255,.12);
+
+    rgba(255,255,255,.10);
+
 
     border-radius:50%;
 
-    top:-150px;
 
-    left:-150px;
+    top:-180px;
+
+    left:-180px;
+
 
     animation:
-    flotar 8s infinite alternate;
+
+    movimiento 10s infinite alternate;
 
 }
+
 
 
 
@@ -72,33 +91,41 @@ body::after{
 
     position:absolute;
 
-    width:350px;
 
-    height:350px;
+    width:400px;
+
+    height:400px;
+
 
     background:
+
     rgba(255,255,255,.08);
+
 
     border-radius:50%;
 
-    bottom:-100px;
 
-    right:-100px;
+    bottom:-150px;
+
+    right:-120px;
+
 
     animation:
-    flotar 10s infinite alternate;
+
+    movimiento 12s infinite alternate;
 
 }
 
 
 
 
-@keyframes flotar{
+@keyframes movimiento{
+
 
     from{
 
         transform:
-        translateY(0px);
+        translateY(0);
 
     }
 
@@ -106,7 +133,7 @@ body::after{
     to{
 
         transform:
-        translateY(30px);
+        translateY(40px);
 
     }
 
@@ -114,8 +141,10 @@ body::after{
 
 
 
+
+
 /* ======================================
-   CONTENEDOR LOGIN
+   TARJETA PRINCIPAL
 ====================================== */
 
 
@@ -127,21 +156,28 @@ body::after{
     z-index:2;
 
 
-    width:420px;
+    width:430px;
+
 
     max-width:90%;
 
 
-    padding:45px 40px;
+    padding:
+
+    45px 40px;
+
 
 
     background:
 
-    rgba(255,255,255,.15);
+    rgba(255,255,255,.16);
+
 
 
     backdrop-filter:
-    blur(20px);
+
+    blur(25px);
+
 
 
     border:
@@ -152,12 +188,13 @@ body::after{
 
 
 
-    border-radius:24px;
+    border-radius:28px;
+
 
 
     box-shadow:
 
-    0 25px 60px
+    0 30px 70px
 
     rgba(0,0,0,.25);
 
@@ -171,6 +208,7 @@ body::after{
 
 
 
+
 @keyframes aparecer{
 
 
@@ -179,7 +217,8 @@ body::after{
         opacity:0;
 
         transform:
-        translateY(40px);
+        translateY(40px)
+        scale(.95);
 
     }
 
@@ -189,25 +228,46 @@ body::after{
         opacity:1;
 
         transform:
-        translateY(0);
+        translateY(0)
+        scale(1);
 
     }
-
 
 }
 
 
 
 
+
 /* ======================================
-   TITULO
+   LOGO
 ====================================== */
 
 
-.contenedor h1{
-
+.logo{
 
     text-align:center;
+
+    margin-bottom:30px;
+
+}
+
+
+
+.logo-icon{
+
+
+    font-size:42px;
+
+
+    margin-bottom:10px;
+
+
+}
+
+
+
+.logo h1{
 
 
     color:white;
@@ -216,10 +276,7 @@ body::after{
     font-size:32px;
 
 
-    margin-bottom:35px;
-
-
-    font-weight:700;
+    font-weight:800;
 
 
     letter-spacing:.5px;
@@ -229,9 +286,109 @@ body::after{
 
 
 
+.logo p{
+
+
+    margin-top:10px;
+
+
+    color:
+
+    rgba(255,255,255,.9);
+
+
+    font-size:14px;
+
+
+}
+
+
+
+
+
 /* ======================================
-   INPUTS
+   FORMULARIO
 ====================================== */
+
+
+.formulario h2{
+
+
+    color:#111827;
+
+
+    text-align:center;
+
+
+    font-size:26px;
+
+
+    margin-bottom:10px;
+
+
+}
+
+
+
+
+.descripcion{
+
+
+    text-align:center;
+
+
+    color:white;
+
+
+    font-size:14px;
+
+
+    margin-bottom:25px;
+
+
+}
+
+
+
+
+
+
+/* ======================================
+   CAMPOS
+====================================== */
+
+
+.campo{
+
+
+    margin-bottom:18px;
+
+}
+
+
+
+.campo label{
+
+
+    display:block;
+
+
+    margin-bottom:7px;
+
+
+    color:#111827;
+
+
+    font-size:14px;
+
+
+    font-weight:600;
+
+
+}
+
+
+
 
 
 input{
@@ -245,30 +402,25 @@ input{
     15px 18px;
 
 
-    margin-bottom:18px;
+
+    border-radius:15px;
 
 
-    border-radius:14px;
+    border:none;
 
 
-    border:
-
-    1px solid
-
-    rgba(255,255,255,.35);
+    outline:none;
 
 
 
     background:
 
-    rgba(255,255,255,.9);
+    rgba(255,255,255,.95);
 
 
 
     font-size:15px;
 
-
-    outline:none;
 
 
     transition:.3s;
@@ -278,18 +430,26 @@ input{
 
 
 
+
+
 input::placeholder{
 
-    color:#777;
+
+    color:#8b8b8b;
 
 }
+
+
 
 
 
 input:focus{
 
 
-    border-color:#667eea;
+    transform:
+
+    translateY(-2px);
+
 
 
     box-shadow:
@@ -298,11 +458,8 @@ input:focus{
 
     rgba(102,126,234,.25);
 
-
-    transform:
-    translateY(-2px);
-
 }
+
 
 
 
@@ -318,13 +475,17 @@ button{
     width:100%;
 
 
-    padding:15px;
+    margin-top:5px;
+
+
+    padding:16px;
 
 
     border:none;
 
 
-    border-radius:14px;
+    border-radius:16px;
+
 
 
     background:
@@ -348,24 +509,26 @@ button{
     font-size:16px;
 
 
-    font-weight:600;
+    font-weight:700;
 
 
     cursor:pointer;
 
 
+
     transition:.3s;
+
 
 
     box-shadow:
 
-
-    0 10px 25px
+    0 15px 30px
 
     rgba(102,126,234,.35);
 
-
 }
+
+
 
 
 
@@ -373,18 +536,12 @@ button:hover{
 
 
     transform:
+
     translateY(-3px);
 
 
-    box-shadow:
-
-
-    0 15px 35px
-
-    rgba(102,126,234,.45);
-
-
 }
+
 
 
 
@@ -392,25 +549,34 @@ button:active{
 
 
     transform:
+
     scale(.97);
+
+}
+
+
+
+
+/* ======================================
+   REGISTRO
+====================================== */
+
+
+.separador{
+
+
+    text-align:center;
+
+
+    margin-top:25px;
 
 
 }
 
 
 
-/* ======================================
-   TEXTO INFERIOR
-====================================== */
 
-
-p{
-
-
-    margin-top:25px;
-
-
-    text-align:center;
+.separador span{
 
 
     color:white;
@@ -423,7 +589,18 @@ p{
 
 
 
-a{
+
+.registro{
+
+
+    display:block;
+
+
+    margin-top:8px;
+
+
+    text-align:center;
+
 
 
     color:white;
@@ -435,22 +612,58 @@ a{
     text-decoration:none;
 
 
-    border-bottom:
-
-    1px solid
-
-    rgba(255,255,255,.7);
-
-
 }
 
 
 
-a:hover{
+.registro:hover{
+
 
     opacity:.8;
 
+
 }
+
+
+
+
+
+
+/* ======================================
+   FOOTER
+====================================== */
+
+
+footer{
+
+
+    margin-top:35px;
+
+
+    text-align:center;
+
+
+}
+
+
+
+footer p{
+
+
+    color:
+
+    rgba(255,255,255,.9);
+
+
+    font-size:13px;
+
+
+    line-height:20px;
+
+
+}
+
+
 
 
 
@@ -468,11 +681,13 @@ a:hover{
 
     top:30px;
 
-
     right:30px;
 
 
-    padding:16px 25px;
+    padding:
+
+    15px 25px;
+
 
 
     border-radius:14px;
@@ -488,7 +703,9 @@ a:hover{
 
 
     transform:
+
     translateY(-20px);
+
 
 
     transition:.3s;
@@ -496,8 +713,9 @@ a:hover{
 
     z-index:100;
 
-
 }
+
+
 
 
 
@@ -508,10 +726,12 @@ a:hover{
 
 
     transform:
+
     translateY(0);
 
 
 }
+
 
 
 
@@ -521,6 +741,7 @@ a:hover{
     background:#16a34a;
 
 }
+
 
 
 
@@ -534,12 +755,25 @@ a:hover{
 
 
 
+
+.toast.info{
+
+
+    background:#2563eb;
+
+}
+
+
+
+
+
 /* ======================================
    RESPONSIVE
 ====================================== */
 
 
 @media(max-width:480px){
+
 
 
     .contenedor{
@@ -550,30 +784,31 @@ a:hover{
         35px 25px;
 
 
-        border-radius:20px;
+        border-radius:22px;
 
 
     }
 
 
 
-    .contenedor h1{
+    .logo h1{
 
 
-        font-size:26px;
+        font-size:25px;
+
+
+    }
+
+
+
+    .logo-icon{
+
+
+        font-size:35px;
 
 
     }
 
-
-    input,
-    button{
-
-
-        padding:14px;
-
-
-    }
 
 
 }
