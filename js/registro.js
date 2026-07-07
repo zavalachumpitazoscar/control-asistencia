@@ -70,147 +70,265 @@ function mostrarToast(tipo, mensaje) {
 
 }
 
-btnRegistrar.addEventListener("click", async () => {
+btnRegistrar.addEventListener(
 
-    const nombre =
-        document.getElementById("nombre").value.trim();
+    "click",
 
-    const correo =
-        document.getElementById("correo").value.trim();
+    async()=>{
 
-    const password =
-        document.getElementById("password").value.trim();
+        if(!validarPasoActual()){
 
-    if (!nombre || !correo || !password) {
+            mostrarToast(
 
-        mostrarToast(
-            "error",
-            "Completa todos los campos."
-        );
+                "error",
 
-        return;
-    }
+                "Complete correctamente toda la información."
 
-    btnRegistrar.disabled = true;
-    btnRegistrar.classList.add("cargando");
-    btnRegistrar.innerHTML = "Registrando...";
-
-    let credencial = null;
-
-    try {
-
-        // Crear usuario en Authentication
-        credencial =
-            await createUserWithEmailAndPassword(
-                auth,
-                correo,
-                password
             );
 
-        console.log("Usuario creado:", credencial.user.uid);
+            return;
 
-        // Crear documento en Firestore
-        await setDoc(
-            doc(
-                db,
-                "usuarios",
-                credencial.user.uid
-            ),
-            {
-                uid: credencial.user.uid,
-                nombreCompleto: nombre,
-                correo: correo,
-                estado: "ACTIVO",
-                rol: "USUARIO",
-                fechaRegistro: serverTimestamp()
+        }
+
+        btnRegistrar.disabled=true;
+
+        btnRegistrar.classList.add("cargando");
+
+        btnRegistrar.innerHTML="Creando empresa...";
+
+        let credencial=null;
+
+        try{
+
+            const correo=
+
+                document
+                    .getElementById("correo")
+                    .value.trim();
+
+            const password=
+
+                document
+                    .getElementById("password")
+                    .value;
+
+            credencial=
+
+                await createUserWithEmailAndPassword(
+
+                    auth,
+
+                    correo,
+
+                    password
+
+                );
+
+            const uid=
+
+                credencial.user.uid;
+
+            await setDoc(
+
+                doc(
+
+                    db,
+
+                    "usuarios",
+
+                    uid
+
+                ),
+
+                {
+
+                    uid,
+
+                    correoLogin:correo,
+
+                    rol:"EMPRESA",
+
+                    estado:"ACTIVO",
+
+                    fechaRegistro:
+
+                        serverTimestamp(),
+
+                    empresa:{
+
+                        ruc:
+
+                            document
+                                .getElementById("ruc")
+                                .value.trim(),
+
+                        razonSocial:
+
+                            document
+                                .getElementById("razonSocial")
+                                .value.trim(),
+
+                        giro:
+
+                            document
+                                .getElementById("giro")
+                                .value.trim()
+
+                    },
+
+                    ubicacion:{
+
+                        direccion:
+
+                            document
+                                .getElementById("direccion")
+                                .value.trim(),
+
+                        departamento:
+
+                            document
+                                .getElementById("departamento")
+                                .value.trim(),
+
+                        provincia:
+
+                            document
+                                .getElementById("provincia")
+                                .value.trim(),
+
+                        distrito:
+
+                            document
+                                .getElementById("distrito")
+                                .value.trim(),
+
+                        pais:
+
+                            document
+                                .getElementById("pais")
+                                .value.trim(),
+
+                        codigoPostal:
+
+                            document
+                                .getElementById("codigoPostal")
+                                .value.trim()
+
+                    },
+
+                    representantes:
+
+                        obtenerRepresentantes()
+
+                }
+
+            );
+
+            mostrarToast(
+
+                "exito",
+
+                "Empresa registrada correctamente."
+
+            );
+
+            setTimeout(()=>{
+
+                window.location="index.html";
+
+            },2000);
+
+        }
+
+        catch(error){
+
+            console.error(error);
+
+            if(credencial?.user){
+
+                try{
+
+                    await deleteUser(
+
+                        credencial.user
+
+                    );
+
+                }
+
+                catch(e){
+
+                    console.error(e);
+
+                }
+
             }
-        );
 
-        console.log("Documento creado en Firestore");
+            switch(error.code){
 
-        mostrarToast(
-            "exito",
-            "Cuenta creada correctamente."
-        );
+                case "auth/email-already-in-use":
 
-        setTimeout(() => {
+                    mostrarToast(
 
-            window.location.href = "index.html";
+                        "error",
 
-        }, 2000);
+                        "Ese correo ya está registrado."
 
-    }
-    catch (error) {
+                    );
 
-        console.error(error);
-        console.error(error.code);
-        console.error(error.message);
+                    break;
 
-        // Si el usuario ya fue creado en Authentication
-        // pero falló Firestore, lo eliminamos.
-        if (credencial && credencial.user) {
+                case "auth/invalid-email":
 
-            try {
+                    mostrarToast(
 
-                await deleteUser(credencial.user);
+                        "error",
 
-            } catch (e) {
+                        "Correo electrónico inválido."
 
-                console.error("No se pudo eliminar el usuario:", e);
+                    );
+
+                    break;
+
+                case "auth/weak-password":
+
+                    mostrarToast(
+
+                        "error",
+
+                        "La contraseña debe tener al menos 8 caracteres."
+
+                    );
+
+                    break;
+
+                default:
+
+                    mostrarToast(
+
+                        "error",
+
+                        error.message
+
+                    );
 
             }
 
         }
 
-        switch (error.code) {
+        finally{
 
-            case "auth/email-already-in-use":
-                mostrarToast(
-                    "error",
-                    "Ese correo ya está registrado."
-                );
-                break;
+            btnRegistrar.disabled=false;
 
-            case "auth/invalid-email":
-                mostrarToast(
-                    "error",
-                    "Correo inválido."
-                );
-                break;
+            btnRegistrar.classList.remove("cargando");
 
-            case "auth/weak-password":
-                mostrarToast(
-                    "error",
-                    "La contraseña debe tener al menos 6 caracteres."
-                );
-                break;
-
-            case "permission-denied":
-            case "firestore/permission-denied":
-                mostrarToast(
-                    "error",
-                    "Firestore no permite escribir. Revisa las reglas."
-                );
-                break;
-
-            default:
-                mostrarToast(
-                    "error",
-                    error.message
-                );
+            btnRegistrar.innerHTML="Crear Empresa";
 
         }
 
     }
-    finally {
 
-        btnRegistrar.disabled = false;
-        btnRegistrar.classList.remove("cargando");
-        btnRegistrar.innerHTML = "Registrarse";
-
-    }
-
-});
+);
 
 
 function actualizarVista(){
@@ -751,3 +869,39 @@ btnSiguiente.addEventListener("click",()=>{
     actualizarVista();
 
 });
+
+
+function obtenerRepresentantes(){
+
+    const representantes=[];
+
+    document
+        .querySelectorAll(".representante")
+        .forEach(rep=>{
+
+            representantes.push({
+
+                nombre:
+                    rep.querySelector(".repNombre").value.trim(),
+
+                dni:
+                    rep.querySelector(".repDni").value.trim(),
+
+                correo:
+                    rep.querySelector(".repCorreo").value.trim(),
+
+                telefono:
+                    rep.querySelector(".repTelefono").value.trim(),
+
+                cargo:
+                    rep.querySelector(".repCargo")
+                        ? rep.querySelector(".repCargo").value.trim()
+                        : "Representante Legal"
+
+            });
+
+        });
+
+    return representantes;
+
+}
