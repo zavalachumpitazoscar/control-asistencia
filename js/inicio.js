@@ -120,33 +120,6 @@ sidebar.classList.remove(
 });
 
 
-
-
-
-async function cargarVista(vista){
-
-
-const respuesta =
-await fetch(
-`vistas/${vista}.html`
-);
-
-
-const html =
-await respuesta.text();
-
-
-
-contenedor.innerHTML =
-html;
-
-
-}
-
-
-
-
-
 // ============================
 // CERRAR SESIÓN
 // ============================
