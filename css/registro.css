@@ -2127,3 +2127,240 @@ button,
         all .28s ease;
 
 }
+
+
+
+
+
+/*==================================================
+=        ANIMACIONES PROFESIONALES
+==================================================*/
+
+.anim-fade{
+
+    animation:animFade .35s ease forwards;
+
+}
+
+.anim-slide-left{
+
+    animation:animSlideLeft .35s ease forwards;
+
+}
+
+.anim-slide-right{
+
+    animation:animSlideRight .35s ease forwards;
+
+}
+
+.anim-pop{
+
+    animation:animPop .30s ease forwards;
+
+}
+
+.anim-bounce{
+
+    animation:animBounce .45s ease;
+
+}
+
+.anim-shake{
+
+    animation:animShake .35s ease;
+
+}
+
+.anim-success{
+
+    animation:animSuccess .6s ease;
+
+}
+
+
+/* Fade */
+
+@keyframes animFade{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+
+/* Slide izquierda */
+
+@keyframes animSlideLeft{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(35px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+
+/* Slide derecha */
+
+@keyframes animSlideRight{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(-35px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+
+/* Pop */
+
+@keyframes animPop{
+
+    0%{
+
+        opacity:0;
+
+        transform:scale(.9);
+
+    }
+
+    70%{
+
+        transform:scale(1.03);
+
+    }
+
+    100%{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+}
+
+
+/* Bounce */
+
+@keyframes animBounce{
+
+    0%{
+
+        transform:scale(.9);
+
+    }
+
+    50%{
+
+        transform:scale(1.05);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}
+
+
+/* Shake */
+
+@keyframes animShake{
+
+    0%{
+
+        transform:translateX(0);
+
+    }
+
+    20%{
+
+        transform:translateX(-6px);
+
+    }
+
+    40%{
+
+        transform:translateX(6px);
+
+    }
+
+    60%{
+
+        transform:translateX(-6px);
+
+    }
+
+    80%{
+
+        transform:translateX(6px);
+
+    }
+
+    100%{
+
+        transform:translateX(0);
+
+    }
+
+}
+
+
+/* Success */
+
+@keyframes animSuccess{
+
+    0%{
+
+        transform:scale(.9);
+
+    }
+
+    40%{
+
+        transform:scale(1.05);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}
