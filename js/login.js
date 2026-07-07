@@ -315,7 +315,7 @@ async()=>{
 
 
             window.location.href =
-                "dashboard.html";
+                "inicio.html";
 
 
         },1000);
