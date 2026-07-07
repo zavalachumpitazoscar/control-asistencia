@@ -28,6 +28,8 @@ let totalRepresentantes = 1;
 
 let registrando=false;
 
+let mensajeValidacion="";
+
 const totalPasos = 5;
 
 const pasos = document.querySelectorAll(".form-step");
@@ -670,72 +672,101 @@ function limpiarEstado(input){
 
 function validarPaso1(){
 
+    mensajeValidacion="";
+
+
     const correo =
         document.getElementById("correo");
+
 
     const password =
         document.getElementById("password");
 
+
     const confirmar =
         document.getElementById("confirmPassword");
 
+
     let valido = true;
+
+
 
     if(!regexCorreo.test(correo.value.trim())){
 
+
         marcarError(correo);
+
+        mensajeValidacion =
+            "Ingrese un correo electrónico válido.";
 
         valido = false;
 
+
     }else{
+
 
         marcarCorrecto(correo);
 
+
     }
 
-const erroresPassword =
-    validarFormatoPassword(password.value);
+
+
+    const erroresPassword =
+        validarFormatoPassword(password.value);
 
 
 
-if(erroresPassword.length > 0){
+    if(erroresPassword.length > 0){
 
 
-    marcarError(password);
+        marcarError(password);
 
 
-    mostrarToast(
-        "error",
-        "La contraseña requiere: " +
-        erroresPassword.join(", ")
-    );
+        mensajeValidacion =
+            "La contraseña debe contener: " +
+            erroresPassword.join(", ");
 
 
-    valido=false;
+        valido=false;
 
 
-}else{
+    }else{
 
 
-    marcarCorrecto(password);
+        marcarCorrecto(password);
 
 
-}
+    }
 
-if(
-    confirmar.value.trim()==="" ||
-    confirmar.value !== password.value
-){
 
-    marcarError(confirmar);
 
-    valido = false;
 
-}else{
+    if(
+        confirmar.value.trim()==="" ||
+        confirmar.value !== password.value
+    ){
 
-    marcarCorrecto(confirmar);
 
-}
+        marcarError(confirmar);
+
+
+        mensajeValidacion =
+            "Las contraseñas no coinciden.";
+
+
+        valido=false;
+
+
+    }else{
+
+
+        marcarCorrecto(confirmar);
+
+
+    }
+
+
 
     return valido;
 
@@ -994,19 +1025,19 @@ btnSiguiente.addEventListener(
     ()=>{
 
 
-        if(!validarPasoActual()){
+if(!validarPasoActual()){
 
 
-            mostrarToast(
-                "error",
-                "Complete correctamente los campos antes de continuar."
-            );
+    mostrarToast(
+        "error",
+        mensajeValidacion ||
+        "Complete correctamente los campos antes de continuar."
+    );
 
 
-            return; // IMPORTANTE: detiene el avance
+    return;
 
-
-        }
+}
 
 
 
