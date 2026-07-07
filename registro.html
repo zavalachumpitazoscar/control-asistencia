@@ -5,60 +5,365 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-    <title>Registro</title>
+    <title>Registro de Empresa</title>
 
-    <link rel="stylesheet"
-          href="css/registro.css">
+    <link
+        rel="stylesheet"
+        href="css/registro.css">
 
 </head>
 
 <body>
 
-    <div class="contenedor">
+    <div class="registro-container">
 
-        <h1>🍰 Crear Cuenta</h1>
+        <!-- Tarjeta -->
 
-        <input
-            type="text"
-            id="nombre"
-            placeholder="Nombres y Apellidos">
+        <div class="registro-card">
 
-        <input
-            type="email"
-            id="correo"
-            placeholder="Correo electrónico">
+            <!-- Encabezado -->
 
-        <input
-            type="password"
-            id="password"
-            placeholder="Contraseña">
+            <div class="registro-header">
 
-        <button id="btnRegistrar">
+                <div class="logo">
 
-            Registrarse
+                    🏢
 
-        </button>
+                </div>
 
-        <p>
+                <h1>
 
-            ¿Ya tienes cuenta?
+                    Crear Empresa
 
-            <a href="index.html">
+                </h1>
 
-                Iniciar Sesión
+                <p>
 
-            </a>
+                    Complete la información para registrar su empresa.
 
-        </p>
+                </p>
+
+            </div>
+
+            <!-- Barra de progreso -->
+
+            <div class="progress">
+
+                <div
+                    id="progressBar"
+                    class="progress-bar">
+
+                </div>
+
+            </div>
+
+            <!-- Indicadores -->
+
+            <div class="steps">
+
+                <div class="step active">
+
+                    <span>1</span>
+
+                    <small>Acceso</small>
+
+                </div>
+
+                <div class="step">
+
+                    <span>2</span>
+
+                    <small>Empresa</small>
+
+                </div>
+
+                <div class="step">
+
+                    <span>3</span>
+
+                    <small>Ubicación</small>
+
+                </div>
+
+                <div class="step">
+
+                    <span>4</span>
+
+                    <small>Representantes</small>
+
+                </div>
+
+                <div class="step">
+
+                    <span>5</span>
+
+                    <small>Resumen</small>
+
+                </div>
+
+            </div>
+
+            <!-- ============================= -->
+
+            <!-- PASO 1 -->
+
+            <!-- ============================= -->
+
+            <section
+                class="form-step active"
+                id="paso1">
+
+                <h2>
+
+                    Datos de acceso
+
+                </h2>
+
+                <input
+                    type="email"
+                    id="correo"
+                    placeholder="Correo empresarial">
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Contraseña">
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    placeholder="Confirmar contraseña">
+
+            </section>
+
+            <!-- ============================= -->
+
+            <!-- PASO 2 -->
+
+            <!-- ============================= -->
+
+            <section
+                class="form-step"
+                id="paso2">
+
+                <h2>
+
+                    Información de la empresa
+
+                </h2>
+
+                <input
+                    type="text"
+                    id="ruc"
+                    maxlength="11"
+                    placeholder="RUC">
+
+                <input
+                    type="text"
+                    id="razonSocial"
+                    placeholder="Razón Social">
+
+                <input
+                    type="text"
+                    id="giro"
+                    placeholder="Giro Comercial">
+
+            </section>
+
+            <!-- ============================= -->
+
+            <!-- PASO 3 -->
+
+            <!-- ============================= -->
+
+            <section
+                class="form-step"
+                id="paso3">
+
+                <h2>
+
+                    Ubicación
+
+                </h2>
+
+                <input
+                    type="text"
+                    id="direccion"
+                    placeholder="Dirección">
+
+                <input
+                    type="text"
+                    id="departamento"
+                    placeholder="Departamento">
+
+                <input
+                    type="text"
+                    id="provincia"
+                    placeholder="Provincia">
+
+                <input
+                    type="text"
+                    id="distrito"
+                    placeholder="Distrito">
+
+                <input
+                    type="text"
+                    id="pais"
+                    value="Perú">
+
+                <input
+                    type="text"
+                    id="codigoPostal"
+                    placeholder="Código Postal (Opcional)">
+
+            </section>
+
+            <!-- ============================= -->
+
+            <!-- PASO 4 -->
+
+            <!-- ============================= -->
+
+            <section
+                class="form-step"
+                id="paso4">
+
+                <h2>
+
+                    Representantes legales
+
+                </h2>
+
+                <div
+                    id="contenedorRepresentantes">
+
+                    <div class="representante">
+
+                        <h3>
+
+                            Representante 1
+
+                        </h3>
+
+                        <input
+                            type="text"
+                            class="repNombre"
+                            placeholder="Nombre Completo">
+
+                        <input
+                            type="text"
+                            class="repDni"
+                            maxlength="8"
+                            placeholder="DNI">
+
+                        <input
+                            type="email"
+                            class="repCorreo"
+                            placeholder="Correo">
+
+                        <input
+                            type="text"
+                            class="repTelefono"
+                            placeholder="Teléfono">
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="btnAgregarRepresentante"
+                    class="btn-secundario">
+
+                    + Agregar otro representante
+
+                </button>
+
+            </section>
+
+            <!-- ============================= -->
+
+            <!-- PASO 5 -->
+
+            <!-- ============================= -->
+
+            <section
+                class="form-step"
+                id="paso5">
+
+                <h2>
+
+                    Confirmar información
+
+                </h2>
+
+                <div id="resumen">
+
+                </div>
+
+            </section>
+
+            <!-- Botones -->
+
+            <div class="acciones">
+
+                <button
+                    id="btnAnterior"
+                    class="btn-secundario">
+
+                    ← Anterior
+
+                </button>
+
+                <button
+                    id="btnSiguiente"
+                    class="btn-principal">
+
+                    Siguiente →
+
+                </button>
+
+                <button
+                    id="btnRegistrar"
+                    class="btn-principal oculto">
+
+                    Crear Empresa
+
+                </button>
+
+            </div>
+
+            <div class="login-link">
+
+                ¿Ya tiene una cuenta?
+
+                <a href="index.html">
+
+                    Iniciar sesión
+
+                </a>
+
+            </div>
+
+        </div>
 
     </div>
 
-    <div id="toast" class="toast"></div>
+    <div
+        id="toast"
+        class="toast">
 
-    <script type="module" src="js/registro.js"></script>
+    </div>
+
+    <script
+        type="module"
+        src="js/registro.js">
+
+    </script>
 
 </body>
 
