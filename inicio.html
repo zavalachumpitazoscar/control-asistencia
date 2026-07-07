@@ -7,9 +7,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Panel Principal</title>
+<title>Control de Asistencia</title>
+
 
 <link rel="stylesheet" href="css/inicio.css">
+
 
 </head>
 
@@ -20,76 +22,139 @@
 <div class="app">
 
 
-    <!-- MENU LATERAL -->
+    <!-- SIDEBAR -->
 
     <aside class="sidebar">
 
 
-        <div class="logo">
+        <div class="marca">
 
-            🍰
+            <div class="logo">
+                ⏱️
+            </div>
 
-            <h2>
-                PostresAO
-            </h2>
+
+            <div>
+
+                <h2>
+                    Control
+                </h2>
+
+                <span>
+                    Asistencia
+                </span>
+
+            </div>
+
 
         </div>
 
 
 
-        <nav>
+
+        <nav class="menu">
 
 
             <button 
-            class="opcion activo"
+            class="item activo"
             data-vista="dashboard">
 
-                🏠
-                Inicio
+
+                <span>
+                    📊
+                </span>
+
+                Dashboard
+
 
             </button>
 
 
 
-            <button 
-            class="opcion"
-            data-vista="productos">
 
-                🍰
-                Productos
+            <button 
+            class="item"
+            data-vista="asistencia">
+
+
+                <span>
+                    🕒
+                </span>
+
+                Asistencia
+
 
             </button>
 
 
 
-            <button 
-            class="opcion"
-            data-vista="pedidos">
 
-                🛒
-                Pedidos
+
+            <button 
+            class="item"
+            data-vista="empleados">
+
+
+                <span>
+                    👥
+                </span>
+
+                Empleados
+
 
             </button>
 
 
 
-            <button 
-            class="opcion"
-            data-vista="usuarios">
 
-                👥
-                Usuarios
+
+            <button 
+            class="item"
+            data-vista="horarios">
+
+
+                <span>
+                    📅
+                </span>
+
+                Horarios
+
 
             </button>
 
 
 
+
+
             <button 
-            class="opcion"
+            class="item"
+            data-vista="reportes">
+
+
+                <span>
+                    📈
+                </span>
+
+                Reportes
+
+
+            </button>
+
+
+
+
+
+            <button 
+            class="item"
             data-vista="configuracion">
 
-                ⚙️
+
+                <span>
+                    ⚙️
+                </span>
+
                 Configuración
+
 
             </button>
 
@@ -98,11 +163,18 @@
 
 
 
-        <button class="cerrar">
 
-            🚪 Cerrar sesión
+
+        <button class="salir">
+
+
+            🚪
+
+            Cerrar sesión
+
 
         </button>
+
 
 
     </aside>
@@ -111,26 +183,43 @@
 
 
 
+
     <!-- CONTENIDO -->
 
-    <main class="contenido">
+    <section class="contenido">
 
 
-        <div id="vista">
+        <header class="topbar">
+
 
             <h1>
-                Bienvenido
+                Dashboard
             </h1>
 
-            <p>
-                Selecciona una opción del menú
-            </p>
+
+            <div class="usuario">
+
+                👤 Usuario
+
+            </div>
 
 
-        </div>
+        </header>
 
 
-    </main>
+
+
+
+        <main id="contenedorVista">
+
+
+            <!-- Aquí carga dashboard -->
+
+        </main>
+
+
+
+    </section>
 
 
 
@@ -139,9 +228,11 @@
 
 
 
+
 <script src="js/inicio.js"></script>
 
 
 </body>
+
 
 </html>
