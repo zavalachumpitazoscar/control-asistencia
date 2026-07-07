@@ -2,53 +2,48 @@
    RESET
 ====================================== */
 
-
 *{
-
     box-sizing:border-box;
-
     margin:0;
-
     padding:0;
-
     font-family:
     "Inter",
     "Segoe UI",
     Arial,
     sans-serif;
-
 }
 
 
+/* ======================================
+   BODY
+====================================== */
 
 body{
 
-    min-height:100vh;
+    min-height:100dvh;
 
     display:flex;
-
     justify-content:center;
-
     align-items:center;
 
+    padding:20px;
 
     background:
-
     linear-gradient(
         135deg,
         #667eea,
         #764ba2
     );
 
+    overflow-x:hidden;
 
-    overflow:hidden;
-
+    position:relative;
 }
 
 
 
 /* ======================================
-   FONDO ANIMADO
+   FONDO DECORATIVO
 ====================================== */
 
 
@@ -58,31 +53,21 @@ body::before{
 
     position:absolute;
 
-    width:500px;
-
-    height:500px;
-
+    width:350px;
+    height:350px;
 
     background:
-
     rgba(255,255,255,.10);
-
 
     border-radius:50%;
 
-
-    top:-180px;
-
-    left:-180px;
-
+    top:-120px;
+    left:-120px;
 
     animation:
-
-    movimiento 10s infinite alternate;
+    movimiento 12s infinite alternate;
 
 }
-
-
 
 
 body::after{
@@ -91,107 +76,89 @@ body::after{
 
     position:absolute;
 
-
-    width:400px;
-
-    height:400px;
-
+    width:300px;
+    height:300px;
 
     background:
-
     rgba(255,255,255,.08);
-
 
     border-radius:50%;
 
-
-    bottom:-150px;
-
-    right:-120px;
-
+    bottom:-100px;
+    right:-100px;
 
     animation:
-
-    movimiento 12s infinite alternate;
+    movimiento 15s infinite alternate;
 
 }
-
-
 
 
 @keyframes movimiento{
 
-
     from{
-
-        transform:
-        translateY(0);
-
+        transform:translateY(0);
     }
 
-
     to{
-
-        transform:
-        translateY(40px);
-
+        transform:translateY(30px);
     }
 
 }
 
 
 
-
-
 /* ======================================
-   TARJETA PRINCIPAL
+   TARJETA LOGIN
 ====================================== */
 
 
 .contenedor{
+
     position:relative;
 
     z-index:2;
 
-    width:480px;
 
-    max-width:92%;
+    width:430px;
 
-    padding:
+    max-width:100%;
 
-    50px 55px;
+
+    padding:40px 42px;
+
 
     background:
+    rgba(255,255,255,.18);
 
-    rgba(255,255,255,.16);
 
     backdrop-filter:
+    blur(18px);
 
-    blur(25px);
+
+    -webkit-backdrop-filter:
+    blur(18px);
+
+
 
     border:
-
     1px solid
-
     rgba(255,255,255,.25);
 
 
 
-    border-radius:28px;
+    border-radius:24px;
 
 
 
     box-shadow:
 
-    0 30px 70px
-
-    rgba(0,0,0,.25);
+    0 15px 40px
+    rgba(0,0,0,.18);
 
 
 
     animation:
-
-    aparecer .7s ease;
+    aparecer .45s ease;
 
 }
 
@@ -206,8 +173,8 @@ body::after{
         opacity:0;
 
         transform:
-        translateY(40px)
-        scale(.95);
+        translateY(15px)
+        scale(.98);
 
     }
 
@@ -226,8 +193,6 @@ body::after{
 
 
 
-
-
 /* ======================================
    LOGO
 ====================================== */
@@ -237,7 +202,7 @@ body::after{
 
     text-align:center;
 
-    margin-bottom:30px;
+    margin-bottom:25px;
 
 }
 
@@ -245,34 +210,32 @@ body::after{
 
 .logo-icon{
 
-    width:70px;
 
-    height:70px;
+    width:65px;
+
+    height:65px;
+
 
     margin:auto;
 
-    margin-bottom:15px;
+    margin-bottom:12px;
 
 
     display:flex;
 
-    align-items:center;
-
     justify-content:center;
 
+    align-items:center;
 
-    font-size:38px;
+
+    font-size:34px;
 
 
     background:
-
-    rgba(255,255,255,.18);
-
-
-    border-radius:20px;
+    rgba(255,255,255,.20);
 
 
-    backdrop-filter:blur(10px);
+    border-radius:18px;
 
 }
 
@@ -282,11 +245,9 @@ body::after{
 
     color:white;
 
-    font-size:34px;
+    font-size:30px;
 
     font-weight:800;
-
-    letter-spacing:.3px;
 
 }
 
@@ -294,21 +255,14 @@ body::after{
 
 .logo p{
 
-
-    margin-top:10px;
-
+    margin-top:8px;
 
     color:
-
     rgba(255,255,255,.9);
 
-
-    font-size:14px;
-
+    font-size:13px;
 
 }
-
-
 
 
 
@@ -319,52 +273,44 @@ body::after{
 
 .formulario h2{
 
-    color:white;
 
     text-align:center;
 
-    font-size:28px;
+    color:white;
 
-    margin-top:15px;
 
-    margin-bottom:12px;
+    font-size:24px;
+
+
+    margin-bottom:10px;
+
 
 }
-
 
 
 
 .descripcion{
 
-
     text-align:center;
-
 
     color:white;
 
+    font-size:13px;
 
-    font-size:14px;
-
-
-    margin-bottom:25px;
-
+    margin-bottom:22px;
 
 }
 
 
 
-
-
-
 /* ======================================
-   CAMPOS
+   INPUTS
 ====================================== */
 
 
 .campo{
 
-
-    margin-bottom:18px;
+    margin-bottom:15px;
 
 }
 
@@ -372,19 +318,20 @@ body::after{
 
 .campo label{
 
+
     display:block;
 
-    margin-bottom:7px;
+    margin-bottom:6px;
+
 
     color:white;
 
-    font-size:14px;
+
+    font-size:13px;
 
     font-weight:600;
 
 }
-
-
 
 
 
@@ -393,39 +340,28 @@ input{
 
     width:100%;
 
-    padding:
 
-    16px 20px;
+    padding:14px 18px;
 
-    border-radius:16px;
 
-    font-size:15px;
+    border-radius:14px;
+
 
     border:none;
 
+
     outline:none;
 
-    background:
 
-    rgba(255,255,255,.95);
-
-    transition:.3s;
+    font-size:15px;
 
 
-}
+    background:white;
 
 
-
-
-
-input::placeholder{
-
-
-    color:#8b8b8b;
+    transition:.25s;
 
 }
-
-
 
 
 
@@ -433,20 +369,15 @@ input:focus{
 
 
     transform:
-
-    translateY(-2px);
-
+    translateY(-1px);
 
 
     box-shadow:
 
     0 0 0 4px
-
-    rgba(102,126,234,.25);
+    rgba(255,255,255,.25);
 
 }
-
-
 
 
 
@@ -460,38 +391,33 @@ button{
 
     width:100%;
 
-    margin-top:15px;
+
+    margin-top:12px;
 
 
-    padding:17px;
+    padding:15px;
 
 
-    font-size:16px;
+    border-radius:14px;
 
 
     border:none;
 
 
-    border-radius:16px;
-
-
-
     background:
 
-
     linear-gradient(
-
         135deg,
-
         #667eea,
-
         #764ba2
-
     );
 
 
-
     color:white;
+
+
+    font-size:15px;
+
 
     font-weight:700;
 
@@ -499,45 +425,19 @@ button{
     cursor:pointer;
 
 
+    transition:.25s;
 
-    transition:.3s;
-
-
-
-    box-shadow:
-
-    0 15px 30px
-
-    rgba(102,126,234,.35);
 
 }
-
-
 
 
 
 button:hover{
 
-
     transform:
-
-    translateY(-3px);
-
+    translateY(-2px);
 
 }
-
-
-
-
-button:active{
-
-
-    transform:
-
-    scale(.97);
-
-}
-
 
 
 
@@ -548,29 +448,21 @@ button:active{
 
 .separador{
 
-
     text-align:center;
 
-
-    margin-top:25px;
-
+    margin-top:22px;
 
 }
-
 
 
 
 .separador span{
 
-
     color:white;
 
-
-    font-size:14px;
-
+    font-size:13px;
 
 }
-
 
 
 
@@ -579,37 +471,20 @@ button:active{
 
     display:block;
 
+    text-align:center;
+
 
     margin-top:8px;
 
 
-    text-align:center;
-
-
-
     color:white;
-
 
     font-weight:700;
 
 
     text-decoration:none;
 
-
 }
-
-
-
-.registro:hover{
-
-
-    opacity:.8;
-
-
-}
-
-
-
 
 
 
@@ -620,32 +495,22 @@ button:active{
 
 footer{
 
-    margin-top:25px;
+    margin-top:20px;
 
-    opacity:.85;
+    text-align:center;
 
 }
-
 
 
 footer p{
 
-
     color:
-
-    rgba(255,255,255,.9);
-
-
-    font-size:13px;
+    rgba(255,255,255,.85);
 
 
-    line-height:20px;
-
+    font-size:12px;
 
 }
-
-
-
 
 
 
@@ -656,40 +521,20 @@ footer p{
 
 .toast{
 
-
     position:fixed;
 
+    top:20px;
 
-    top:30px;
-
-    right:30px;
-
-
-    padding:
-
-    15px 25px;
+    right:20px;
 
 
+    padding:14px 20px;
 
-    border-radius:14px;
+
+    border-radius:12px;
 
 
     color:white;
-
-
-    font-weight:600;
-
-
-    opacity:0;
-
-
-    transform:
-
-    translateY(-20px);
-
-
-
-    transition:.3s;
 
 
     z-index:100;
@@ -698,88 +543,91 @@ footer p{
 
 
 
-
-
-.toast.mostrar{
-
-
-    opacity:1;
-
-
-    transform:
-
-    translateY(0);
-
-
-}
-
-
-
-
-.toast.exito{
-
-
-    background:#16a34a;
-
-}
-
-
-
-
-.toast.error{
-
-
-    background:#dc2626;
-
-}
-
-
-
-
-
-.toast.info{
-
-
-    background:#2563eb;
-
-}
-
-
-
-
-
 /* ======================================
-   RESPONSIVE
+   MOBILE
 ====================================== */
 
 
 @media(max-width:480px){
 
-  .contenedor{
+
+    body{
+
+        padding:15px;
+
+        align-items:center;
+
+    }
+
+
+
+    .contenedor{
+
+
+        width:100%;
+
 
         padding:
 
-        35px 25px;
+        30px 22px;
 
-        width:95%;
+
+        border-radius:20px;
+
 
     }
+
+
+
+    .logo{
+
+        margin-bottom:20px;
+
+    }
+
+
+
+    .logo-icon{
+
+        width:58px;
+
+        height:58px;
+
+        font-size:30px;
+
+    }
+
 
 
     .logo h1{
 
-        font-size:26px;
+        font-size:24px;
 
     }
 
-    .logo-icon{
 
 
-        font-size:35px;
+    .formulario h2{
 
+        font-size:21px;
 
     }
 
+
+
+    input{
+
+        padding:13px 15px;
+
+    }
+
+
+
+    button{
+
+        padding:14px;
+
+    }
 
 
 }
