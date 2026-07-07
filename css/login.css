@@ -149,36 +149,25 @@ body::after{
 
 
 .contenedor{
-
-
     position:relative;
 
     z-index:2;
 
+    width:480px;
 
-    width:430px;
-
-
-    max-width:90%;
-
+    max-width:92%;
 
     padding:
 
-    45px 40px;
-
-
+    50px 55px;
 
     background:
 
     rgba(255,255,255,.16);
 
-
-
     backdrop-filter:
 
     blur(25px);
-
-
 
     border:
 
@@ -256,12 +245,34 @@ body::after{
 
 .logo-icon{
 
+    width:70px;
 
-    font-size:42px;
+    height:70px;
+
+    margin:auto;
+
+    margin-bottom:15px;
 
 
-    margin-bottom:10px;
+    display:flex;
 
+    align-items:center;
+
+    justify-content:center;
+
+
+    font-size:38px;
+
+
+    background:
+
+    rgba(255,255,255,.18);
+
+
+    border-radius:20px;
+
+
+    backdrop-filter:blur(10px);
 
 }
 
@@ -269,18 +280,13 @@ body::after{
 
 .logo h1{
 
-
     color:white;
 
-
-    font-size:32px;
-
+    font-size:34px;
 
     font-weight:800;
 
-
-    letter-spacing:.5px;
-
+    letter-spacing:.3px;
 
 }
 
@@ -313,18 +319,15 @@ body::after{
 
 .formulario h2{
 
-
-    color:#111827;
-
+    color:white;
 
     text-align:center;
 
+    font-size:28px;
 
-    font-size:26px;
+    margin-top:15px;
 
-
-    margin-bottom:10px;
-
+    margin-bottom:12px;
 
 }
 
@@ -369,21 +372,15 @@ body::after{
 
 .campo label{
 
-
     display:block;
-
 
     margin-bottom:7px;
 
-
-    color:#111827;
-
+    color:white;
 
     font-size:14px;
 
-
     font-weight:600;
-
 
 }
 
@@ -396,32 +393,21 @@ input{
 
     width:100%;
 
-
     padding:
 
-    15px 18px;
+    16px 20px;
 
+    border-radius:16px;
 
-
-    border-radius:15px;
-
+    font-size:15px;
 
     border:none;
 
-
     outline:none;
-
-
 
     background:
 
     rgba(255,255,255,.95);
-
-
-
-    font-size:15px;
-
-
 
     transition:.3s;
 
@@ -474,11 +460,13 @@ button{
 
     width:100%;
 
+    margin-top:15px;
 
-    margin-top:5px;
+
+    padding:17px;
 
 
-    padding:16px;
+    font-size:16px;
 
 
     border:none;
@@ -504,10 +492,6 @@ button{
 
 
     color:white;
-
-
-    font-size:16px;
-
 
     font-weight:700;
 
@@ -636,12 +620,9 @@ button:active{
 
 footer{
 
+    margin-top:25px;
 
-    margin-top:35px;
-
-
-    text-align:center;
-
+    opacity:.85;
 
 }
 
@@ -774,32 +755,22 @@ footer p{
 
 @media(max-width:480px){
 
-
-
-    .contenedor{
-
+  .contenedor{
 
         padding:
 
         35px 25px;
 
-
-        border-radius:22px;
-
+        width:95%;
 
     }
-
 
 
     .logo h1{
 
-
-        font-size:25px;
-
+        font-size:26px;
 
     }
-
-
 
     .logo-icon{
 
