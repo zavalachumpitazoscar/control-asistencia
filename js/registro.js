@@ -569,12 +569,6 @@ contenedorRepresentantes.addEventListener(
         },250);
 
         return;
-        
-        e.target
-            .closest(".representante")
-            .remove();
-
-        actualizarRepresentantes();
 
     }
 
@@ -633,21 +627,35 @@ actualizarRepresentantes();
 
 function marcarError(input){
 
-    input.classList.remove("ok-input");
+    input.classList.remove(
+        "input-success"
+    );
 
-    input.classList.add("input-error");
+    input.classList.add(
+        "input-error"
+    );
 
-    animarElemento(input,"anim-shake");
+    animarElemento(
+        input,
+        "anim-shake"
+    );
 
 }
 
 function marcarCorrecto(input){
 
-    input.classList.remove("error-input");
+    input.classList.remove(
+        "input-error"
+    );
 
-    input.classList.add("input-success");
+    input.classList.add(
+        "input-success"
+    );
 
-    animarElemento(input,"anim-success");
+    animarElemento(
+        input,
+        "anim-success"
+    );
 
 }
 
@@ -916,7 +924,7 @@ btnSiguiente.addEventListener(
                 "Complete correctamente los campos antes de continuar."
             );
 
-            return;
+            ;
 
         }
 
