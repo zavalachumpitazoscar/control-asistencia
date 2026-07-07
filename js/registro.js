@@ -464,3 +464,290 @@ function actualizarRepresentantes(){
 }
 
 actualizarRepresentantes();
+
+
+function marcarError(input){
+
+    input.classList.remove("ok-input");
+
+    input.classList.add("error-input");
+
+}
+
+function marcarCorrecto(input){
+
+    input.classList.remove("error-input");
+
+    input.classList.add("ok-input");
+
+}
+
+function limpiarEstado(input){
+
+    input.classList.remove(
+        "error-input",
+        "ok-input"
+    );
+
+}
+
+function validarPaso1(){
+
+    const correo =
+        document.getElementById("correo");
+
+    const password =
+        document.getElementById("password");
+
+    const confirmar =
+        document.getElementById("confirmPassword");
+
+    let valido = true;
+
+    if(!regexCorreo.test(correo.value.trim())){
+
+        marcarError(correo);
+
+        valido = false;
+
+    }else{
+
+        marcarCorrecto(correo);
+
+    }
+
+    if(!regexPassword.test(password.value)){
+
+        marcarError(password);
+
+        valido = false;
+
+    }else{
+
+        marcarCorrecto(password);
+
+    }
+
+    if(confirmar.value !== password.value){
+
+        marcarError(confirmar);
+
+        valido = false;
+
+    }else{
+
+        marcarCorrecto(confirmar);
+
+    }
+
+    return valido;
+
+}
+
+function validarPaso2(){
+
+    let valido = true;
+
+    const ruc =
+        document.getElementById("ruc");
+
+    const razon =
+        document.getElementById("razonSocial");
+
+    const giro =
+        document.getElementById("giro");
+
+    if(!regexRuc.test(ruc.value.trim())){
+
+        marcarError(ruc);
+
+        valido = false;
+
+    }else{
+
+        marcarCorrecto(ruc);
+
+    }
+
+    if(razon.value.trim()===""){
+
+        marcarError(razon);
+
+        valido = false;
+
+    }else{
+
+        marcarCorrecto(razon);
+
+    }
+
+    if(giro.value.trim()===""){
+
+        marcarError(giro);
+
+        valido = false;
+
+    }else{
+
+        marcarCorrecto(giro);
+
+    }
+
+    return valido;
+
+}
+
+function validarPaso3(){
+
+    let valido = true;
+
+    [
+
+        "direccion",
+
+        "departamento",
+
+        "provincia",
+
+        "distrito",
+
+        "pais"
+
+    ].forEach(id=>{
+
+        const input =
+            document.getElementById(id);
+
+        if(input.value.trim()===""){
+
+            marcarError(input);
+
+            valido = false;
+
+        }else{
+
+            marcarCorrecto(input);
+
+        }
+
+    });
+
+    return valido;
+
+}
+
+function validarPaso4(){
+
+    let valido = true;
+
+    document
+        .querySelectorAll(".representante")
+        .forEach(rep=>{
+
+            const nombre =
+                rep.querySelector(".repNombre");
+
+            const dni =
+                rep.querySelector(".repDni");
+
+            const correo =
+                rep.querySelector(".repCorreo");
+
+            const telefono =
+                rep.querySelector(".repTelefono");
+
+            if(nombre.value.trim()===""){
+
+                marcarError(nombre);
+
+                valido = false;
+
+            }else{
+
+                marcarCorrecto(nombre);
+
+            }
+
+            if(!regexDni.test(dni.value.trim())){
+
+                marcarError(dni);
+
+                valido = false;
+
+            }else{
+
+                marcarCorrecto(dni);
+
+            }
+
+            if(!regexCorreo.test(correo.value.trim())){
+
+                marcarError(correo);
+
+                valido = false;
+
+            }else{
+
+                marcarCorrecto(correo);
+
+            }
+
+            if(!regexTelefono.test(telefono.value.trim())){
+
+                marcarError(telefono);
+
+                valido = false;
+
+            }else{
+
+                marcarCorrecto(telefono);
+
+            }
+
+        });
+
+    return valido;
+
+}
+
+function validarPasoActual(){
+
+    switch(pasoActual){
+
+        case 1:
+            return validarPaso1();
+
+        case 2:
+            return validarPaso2();
+
+        case 3:
+            return validarPaso3();
+
+        case 4:
+            return validarPaso4();
+
+        default:
+            return true;
+
+    }
+
+}
+
+btnSiguiente.addEventListener("click",()=>{
+
+    if(!validarPasoActual()){
+
+        mostrarToast(
+            "error",
+            "Complete correctamente los campos antes de continuar."
+        );
+
+        return;
+
+    }
+
+    pasoActual++;
+
+    actualizarVista();
+
+});
