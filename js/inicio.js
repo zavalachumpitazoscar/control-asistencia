@@ -31,7 +31,7 @@ onAuthStateChanged(auth,(usuario)=>{
 
 
         window.location.href =
-        "login.html";
+        "index.html";
 
 
         return;
