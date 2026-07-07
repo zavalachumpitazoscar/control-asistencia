@@ -17,8 +17,34 @@ import {
 }
 from "./firebase-config.js";
 
+
+//========================================
+// VARIABLES DE PASOS
+//========================================
+
+let pasoActual = 1;
+
+const totalPasos = 5;
+
+const pasos =
+    document.querySelectorAll(".form-step");
+
+const indicadores =
+    document.querySelectorAll(".step");
+
+const progressBar =
+    document.getElementById("progressBar");
+
+const btnAnterior =
+    document.getElementById("btnAnterior");
+
+const btnSiguiente =
+    document.getElementById("btnSiguiente");
+
 const btnRegistrar =
     document.getElementById("btnRegistrar");
+
+
 
 const toast =
     document.getElementById("toast");
@@ -176,3 +202,104 @@ btnRegistrar.addEventListener("click", async () => {
     }
 
 });
+
+
+function actualizarVista(){
+
+    pasos.forEach(p=>{
+
+        p.classList.remove("active");
+
+    });
+
+    document
+        .getElementById("paso"+pasoActual)
+        .classList.add("active");
+
+
+
+    indicadores.forEach((step,index)=>{
+
+        step.classList.remove("active");
+
+        if(index+1<=pasoActual){
+
+            step.classList.add("active");
+
+        }
+
+    });
+
+
+
+    progressBar.style.width=
+
+        ((pasoActual-1)/(totalPasos-1))*100+"%";
+
+
+
+    if(pasoActual===1){
+
+        btnAnterior.style.visibility="hidden";
+
+    }else{
+
+        btnAnterior.style.visibility="visible";
+
+    }
+
+
+
+    if(pasoActual===totalPasos){
+
+        btnSiguiente.classList.add("oculto");
+
+        btnRegistrar.classList.remove("oculto");
+
+    }else{
+
+        btnRegistrar.classList.add("oculto");
+
+        btnSiguiente.classList.remove("oculto");
+
+    }
+
+}
+
+btnSiguiente.addEventListener(
+
+    "click",
+
+    ()=>{
+
+        if(pasoActual<totalPasos){
+
+            pasoActual++;
+
+            actualizarVista();
+
+        }
+
+    }
+
+);
+
+btnAnterior.addEventListener(
+
+    "click",
+
+    ()=>{
+
+        if(pasoActual>1){
+
+            pasoActual--;
+
+            actualizarVista();
+
+        }
+
+    }
+
+);
+
+actualizarVista();
