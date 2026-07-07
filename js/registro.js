@@ -159,7 +159,7 @@ Creando empresa...
 
                     rol:"EMPRESA",
 
-                    estado:"ACTIVO",
+                    estado:"INACTIVO",
 
                     fechaRegistro:
 
