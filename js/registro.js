@@ -437,24 +437,6 @@ function actualizarVista(){
 
 }
 
-btnSiguiente.addEventListener(
-
-    "click",
-
-    ()=>{
-
-        if(pasoActual<totalPasos){
-
-            pasoActual++;
-
-            actualizarVista();
-
-        }
-
-    }
-
-);
-
 btnAnterior.addEventListener(
 
     "click",
@@ -715,17 +697,20 @@ function validarPaso1(){
 
     }
 
-    if(confirmar.value !== password.value){
+if(
+    confirmar.value.trim()==="" ||
+    confirmar.value !== password.value
+){
 
-        marcarError(confirmar);
+    marcarError(confirmar);
 
-        valido = false;
+    valido = false;
 
-    }else{
+}else{
 
-        marcarCorrecto(confirmar);
+    marcarCorrecto(confirmar);
 
-    }
+}
 
     return valido;
 
@@ -920,24 +905,32 @@ function validarPasoActual(){
 
 }
 
-btnSiguiente.addEventListener("click",()=>{
+btnSiguiente.addEventListener(
+    "click",
+    ()=>{
 
-    if(!validarPasoActual()){
+        if(!validarPasoActual()){
 
-        mostrarToast(
-            "error",
-            "Complete correctamente los campos antes de continuar."
-        );
+            mostrarToast(
+                "error",
+                "Complete correctamente los campos antes de continuar."
+            );
 
-        return;
+            return;
+
+        }
+
+
+        if(pasoActual < totalPasos){
+
+            pasoActual++;
+
+            actualizarVista();
+
+        }
 
     }
-
-    pasoActual++;
-
-    actualizarVista();
-
-});
+);
 
 
 function obtenerRepresentantes(){
