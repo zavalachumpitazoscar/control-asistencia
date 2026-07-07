@@ -586,3 +586,23 @@ padding:12px;
 
 
 }
+
+
+.overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: .25s;
+    z-index: 90;
+}
+
+.overlay.mostrar{
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidebar{
+    z-index: 100;
+}
