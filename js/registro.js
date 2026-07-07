@@ -662,8 +662,8 @@ function marcarCorrecto(input){
 function limpiarEstado(input){
 
     input.classList.remove(
-        "error-input",
-        "ok-input"
+        "input-error",
+        "input-success"
     );
 
 }
@@ -1214,3 +1214,23 @@ function animarElemento(elemento, clase){
     elemento.classList.add(clase);
 
 }
+
+
+document.addEventListener(
+    "input",
+    (e)=>{
+
+
+        if(
+            e.target.matches(
+                "input,select,textarea"
+            )
+        ){
+
+            limpiarEstado(e.target);
+
+        }
+
+
+    }
+);
