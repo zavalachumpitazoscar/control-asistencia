@@ -26,6 +26,8 @@ let pasoActual = 1;
 
 let totalRepresentantes = 1;
 
+let registrando=false;
+
 const totalPasos = 5;
 
 const pasos = document.querySelectorAll(".form-step");
@@ -92,9 +94,14 @@ btnRegistrar.addEventListener(
 
         btnRegistrar.disabled=true;
 
-        btnRegistrar.classList.add("cargando");
+        btnRegistrar.classList.add("loading");
 
-        btnRegistrar.innerHTML="Creando empresa...";
+        btnRegistrar.innerHTML=
+`
+<span>
+Creando empresa...
+</span>
+`;
 
         let credencial=null;
 
@@ -320,9 +327,11 @@ btnRegistrar.addEventListener(
 
             btnRegistrar.disabled=false;
 
-            btnRegistrar.classList.remove("cargando");
+            btnRegistrar.classList.remove("loading");
 
             btnRegistrar.innerHTML="Crear Empresa";
+
+            registrando=false;
 
         }
 
