@@ -337,7 +337,16 @@ function actualizarVista(){
 
     construirResumen();
 
+    document.querySelectorAll(".resumen-card").forEach(card=>{
+
+    animarElemento(card,"anim-pop");
+    });
+
     }
+
+    const paso= document.getElementById("paso"+pasoActual);
+
+    animarElemento(paso,"anim-slide-left");
 
     pasos.forEach(p=>{
 
@@ -369,7 +378,7 @@ function actualizarVista(){
 
         ((pasoActual-1)/(totalPasos-1))*100+"%";
 
-
+    animarElemento(progressBar,"animFade");
 
     if(pasoActual===1){
 
@@ -504,6 +513,9 @@ btnAgregarRepresentante.addEventListener(
 
         );
 
+        const ultimo= contenedorRepresentantes.lastElementChild; 
+        animarElemento(ultimo,"anim-pop");
+
         actualizarRepresentantes();
 
     }
@@ -530,6 +542,24 @@ contenedorRepresentantes.addEventListener(
 
         }
 
+        const tarjeta= e.target.closest(".representante");
+
+        tarjeta.style.transition=".25s";
+
+        tarjeta.style.opacity="0";
+
+        tarjeta.style.transform="scale(.95)";
+
+        setTimeout(()=>{
+
+        tarjeta.remove();
+
+        actualizarRepresentantes();
+
+        },250);
+
+        return;
+        
         e.target
             .closest(".representante")
             .remove();
@@ -597,6 +627,8 @@ function marcarError(input){
 
     input.classList.add("error-input");
 
+    animarElemento(input,"anim-shake");
+
 }
 
 function marcarCorrecto(input){
@@ -604,6 +636,8 @@ function marcarCorrecto(input){
     input.classList.remove("error-input");
 
     input.classList.add("ok-input");
+
+    animarElemento(input,"anim-success");
 
 }
 
@@ -1128,5 +1162,17 @@ ${document.getElementById("correo").value}
 </div>
 
 `;
+
+}
+
+
+
+function animarElemento(elemento, clase){
+
+    elemento.classList.remove(clase);
+
+    void elemento.offsetWidth;
+
+    elemento.classList.add(clase);
 
 }
