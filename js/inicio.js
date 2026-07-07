@@ -18,6 +18,8 @@ const contenedor = document.getElementById("contenedorVista");
 
 const titulo = document.querySelector(".topbar h1");
 
+const overlay = document.querySelector(".overlay");
+
 
 // ============================
 // PROTEGER PAGINA
@@ -56,19 +58,19 @@ onAuthStateChanged(auth,(usuario)=>{
 // ============================
 
 
-botonMenu.addEventListener(
-"click",
-()=>{
+botonMenu.addEventListener("click", () => {
 
-
-sidebar.classList.toggle(
-"mostrar"
-);
-
+    sidebar.classList.toggle("mostrar");
+    overlay.classList.toggle("mostrar");
 
 });
 
+overlay.addEventListener("click", () => {
 
+    sidebar.classList.remove("mostrar");
+    overlay.classList.remove("mostrar");
+
+});
 
 
 
@@ -108,9 +110,8 @@ btn.dataset.vista
 
 // cerrar menú en celular
 
-sidebar.classList.remove(
-"mostrar"
-);
+sidebar.classList.remove("mostrar");
+overlay.classList.remove("mostrar");
 
 
 
