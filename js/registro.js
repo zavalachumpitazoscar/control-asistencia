@@ -26,28 +26,23 @@ let pasoActual = 1;
 
 const totalPasos = 5;
 
-const pasos =
-    document.querySelectorAll(".form-step");
+const pasos = document.querySelectorAll(".form-step");
 
-const indicadores =
-    document.querySelectorAll(".step");
+const indicadores = document.querySelectorAll(".step");
 
-const progressBar =
-    document.getElementById("progressBar");
+const progressBar = document.getElementById("progressBar");
 
-const btnAnterior =
-    document.getElementById("btnAnterior");
+const btnAnterior = document.getElementById("btnAnterior");
 
-const btnSiguiente =
-    document.getElementById("btnSiguiente");
+const btnSiguiente = document.getElementById("btnSiguiente");
 
-const btnRegistrar =
-    document.getElementById("btnRegistrar");
+const btnRegistrar = document.getElementById("btnRegistrar");
 
+const contenedorRepresentantes = document.getElementById("contenedorRepresentantes");
 
+const btnAgregarRepresentante = document.getElementById("btnAgregarRepresentante");
 
-const toast =
-    document.getElementById("toast");
+const toast = document.getElementById("toast");
 
 function mostrarToast(tipo, mensaje) {
 
