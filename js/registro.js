@@ -625,7 +625,7 @@ function marcarError(input){
 
     input.classList.remove("ok-input");
 
-    input.classList.add("error-input");
+    input.classList.add("input-error");
 
     animarElemento(input,"anim-shake");
 
@@ -635,7 +635,7 @@ function marcarCorrecto(input){
 
     input.classList.remove("error-input");
 
-    input.classList.add("ok-input");
+    input.classList.add("input-success");
 
     animarElemento(input,"anim-success");
 
