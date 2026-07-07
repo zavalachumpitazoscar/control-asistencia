@@ -1,0 +1,579 @@
+/* ======================================
+   LOGIN - ESTILO SAAS CORPORATIVO
+====================================== */
+
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:
+    "Inter",
+    "Segoe UI",
+    sans-serif;
+}
+
+
+
+body{
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:
+    linear-gradient(
+        135deg,
+        #667eea,
+        #764ba2
+    );
+
+    overflow:hidden;
+
+}
+
+
+
+/* Decoración fondo */
+
+body::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:450px;
+
+    height:450px;
+
+    background:
+    rgba(255,255,255,.12);
+
+    border-radius:50%;
+
+    top:-150px;
+
+    left:-150px;
+
+    animation:
+    flotar 8s infinite alternate;
+
+}
+
+
+
+body::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:350px;
+
+    height:350px;
+
+    background:
+    rgba(255,255,255,.08);
+
+    border-radius:50%;
+
+    bottom:-100px;
+
+    right:-100px;
+
+    animation:
+    flotar 10s infinite alternate;
+
+}
+
+
+
+
+@keyframes flotar{
+
+    from{
+
+        transform:
+        translateY(0px);
+
+    }
+
+
+    to{
+
+        transform:
+        translateY(30px);
+
+    }
+
+}
+
+
+
+/* ======================================
+   CONTENEDOR LOGIN
+====================================== */
+
+
+.contenedor{
+
+
+    position:relative;
+
+    z-index:2;
+
+
+    width:420px;
+
+    max-width:90%;
+
+
+    padding:45px 40px;
+
+
+    background:
+
+    rgba(255,255,255,.15);
+
+
+    backdrop-filter:
+    blur(20px);
+
+
+    border:
+
+    1px solid
+
+    rgba(255,255,255,.25);
+
+
+
+    border-radius:24px;
+
+
+    box-shadow:
+
+    0 25px 60px
+
+    rgba(0,0,0,.25);
+
+
+
+    animation:
+
+    aparecer .7s ease;
+
+}
+
+
+
+@keyframes aparecer{
+
+
+    from{
+
+        opacity:0;
+
+        transform:
+        translateY(40px);
+
+    }
+
+
+    to{
+
+        opacity:1;
+
+        transform:
+        translateY(0);
+
+    }
+
+
+}
+
+
+
+
+/* ======================================
+   TITULO
+====================================== */
+
+
+.contenedor h1{
+
+
+    text-align:center;
+
+
+    color:white;
+
+
+    font-size:32px;
+
+
+    margin-bottom:35px;
+
+
+    font-weight:700;
+
+
+    letter-spacing:.5px;
+
+
+}
+
+
+
+/* ======================================
+   INPUTS
+====================================== */
+
+
+input{
+
+
+    width:100%;
+
+
+    padding:
+
+    15px 18px;
+
+
+    margin-bottom:18px;
+
+
+    border-radius:14px;
+
+
+    border:
+
+    1px solid
+
+    rgba(255,255,255,.35);
+
+
+
+    background:
+
+    rgba(255,255,255,.9);
+
+
+
+    font-size:15px;
+
+
+    outline:none;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+input::placeholder{
+
+    color:#777;
+
+}
+
+
+
+input:focus{
+
+
+    border-color:#667eea;
+
+
+    box-shadow:
+
+    0 0 0 4px
+
+    rgba(102,126,234,.25);
+
+
+    transform:
+    translateY(-2px);
+
+}
+
+
+
+
+/* ======================================
+   BOTON
+====================================== */
+
+
+button{
+
+
+    width:100%;
+
+
+    padding:15px;
+
+
+    border:none;
+
+
+    border-radius:14px;
+
+
+    background:
+
+
+    linear-gradient(
+
+        135deg,
+
+        #667eea,
+
+        #764ba2
+
+    );
+
+
+
+    color:white;
+
+
+    font-size:16px;
+
+
+    font-weight:600;
+
+
+    cursor:pointer;
+
+
+    transition:.3s;
+
+
+    box-shadow:
+
+
+    0 10px 25px
+
+    rgba(102,126,234,.35);
+
+
+}
+
+
+
+button:hover{
+
+
+    transform:
+    translateY(-3px);
+
+
+    box-shadow:
+
+
+    0 15px 35px
+
+    rgba(102,126,234,.45);
+
+
+}
+
+
+
+button:active{
+
+
+    transform:
+    scale(.97);
+
+
+}
+
+
+
+/* ======================================
+   TEXTO INFERIOR
+====================================== */
+
+
+p{
+
+
+    margin-top:25px;
+
+
+    text-align:center;
+
+
+    color:white;
+
+
+    font-size:14px;
+
+
+}
+
+
+
+a{
+
+
+    color:white;
+
+
+    font-weight:700;
+
+
+    text-decoration:none;
+
+
+    border-bottom:
+
+    1px solid
+
+    rgba(255,255,255,.7);
+
+
+}
+
+
+
+a:hover{
+
+    opacity:.8;
+
+}
+
+
+
+
+/* ======================================
+   TOAST
+====================================== */
+
+
+.toast{
+
+
+    position:fixed;
+
+
+    top:30px;
+
+
+    right:30px;
+
+
+    padding:16px 25px;
+
+
+    border-radius:14px;
+
+
+    color:white;
+
+
+    font-weight:600;
+
+
+    opacity:0;
+
+
+    transform:
+    translateY(-20px);
+
+
+    transition:.3s;
+
+
+    z-index:100;
+
+
+}
+
+
+
+.toast.mostrar{
+
+
+    opacity:1;
+
+
+    transform:
+    translateY(0);
+
+
+}
+
+
+
+.toast.exito{
+
+
+    background:#16a34a;
+
+}
+
+
+
+.toast.error{
+
+
+    background:#dc2626;
+
+}
+
+
+
+
+/* ======================================
+   RESPONSIVE
+====================================== */
+
+
+@media(max-width:480px){
+
+
+    .contenedor{
+
+
+        padding:
+
+        35px 25px;
+
+
+        border-radius:20px;
+
+
+    }
+
+
+
+    .contenedor h1{
+
+
+        font-size:26px;
+
+
+    }
+
+
+    input,
+    button{
+
+
+        padding:14px;
+
+
+    }
+
+
+}
