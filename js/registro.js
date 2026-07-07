@@ -78,21 +78,25 @@ btnRegistrar.addEventListener(
 
     async()=>{
 
+        if(registrando){
+            return;
+        }
+
+        registrando = true;
+
         if(!validarPasoActual()){
 
-            mostrarToast(
+            registrando = false;
 
-                "error",
-
-                "Complete correctamente toda la información."
-
-            );
+            mostrarToast("error", "Complete correctamente toda la información.");
 
             return;
 
         }
 
         btnRegistrar.disabled=true;
+
+        btnRegistrar.classList.add("cargando");
 
         btnRegistrar.classList.add("loading");
 
@@ -241,7 +245,13 @@ Creando empresa...
 
             setTimeout(()=>{
 
+                document.getElementById("pantallaExito").classList.remove("oculto");
+
+                setTimeout(()=>{
+
                 window.location="index.html";
+
+},3000);
 
             },2000);
 
@@ -325,15 +335,24 @@ Creando empresa...
 
         finally{
 
+            registrando=false;
+
+
             btnRegistrar.disabled=false;
+
+
+            btnRegistrar.classList.remove("cargando");
 
             btnRegistrar.classList.remove("loading");
 
-            btnRegistrar.innerHTML="Crear Empresa";
 
-            registrando=false;
+            btnRegistrar.innerHTML=
+
+            "Crear Empresa";
+
 
         }
+
 
     }
 
