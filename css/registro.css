@@ -1,0 +1,2100 @@
+/*==================================================
+=               IMPORTAR FUENTE
+==================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+
+/*==================================================
+=               VARIABLES
+==================================================*/
+
+:root{
+
+    --color-principal:#2563eb;
+    --color-principal-hover:#1d4ed8;
+
+    --color-exito:#10b981;
+    --color-error:#ef4444;
+    --color-warning:#f59e0b;
+
+    --texto:#111827;
+    --texto-secundario:#6b7280;
+
+    --borde:#e5e7eb;
+
+    --fondo:#f4f7fb;
+
+    --blanco:#ffffff;
+
+    --radio:18px;
+
+    --sombra-suave:
+        0 10px 30px rgba(15,23,42,.06);
+
+    --sombra-card:
+        0 20px 60px rgba(15,23,42,.10);
+
+    --transicion:.30s ease;
+
+}
+
+
+/*==================================================
+=               RESET
+==================================================*/
+
+*{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+
+}
+
+
+html{
+
+    scroll-behavior:smooth;
+
+}
+
+
+body{
+
+    font-family:"Inter",sans-serif;
+
+    background:
+        radial-gradient(circle at top left,#dbeafe 0%,transparent 30%),
+        radial-gradient(circle at bottom right,#e0f2fe 0%,transparent 35%),
+        var(--fondo);
+
+    color:var(--texto);
+
+    min-height:100vh;
+
+}
+
+
+/*==================================================
+=            CONTENEDOR PRINCIPAL
+==================================================*/
+
+.registro-container{
+
+    width:100%;
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:50px 20px;
+
+}
+
+
+/*==================================================
+=                 TARJETA
+==================================================*/
+
+.registro-card{
+
+    width:100%;
+
+    max-width:920px;
+
+    background:var(--blanco);
+
+    border-radius:28px;
+
+    box-shadow:var(--sombra-card);
+
+    padding:45px;
+
+    position:relative;
+
+    overflow:hidden;
+
+    animation:entrada .5s ease;
+
+}
+
+
+/* Línea superior */
+
+.registro-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:0;
+
+    width:100%;
+
+    height:6px;
+
+    background:linear-gradient(
+        90deg,
+        #2563eb,
+        #3b82f6,
+        #60a5fa
+    );
+
+}
+
+
+/*==================================================
+=               HEADER
+==================================================*/
+
+.registro-header{
+
+    text-align:center;
+
+    margin-bottom:35px;
+
+}
+
+
+.logo{
+
+    width:78px;
+
+    height:78px;
+
+    margin:auto;
+
+    margin-bottom:18px;
+
+    border-radius:22px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:38px;
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    color:white;
+
+    box-shadow:
+        0 15px 35px rgba(37,99,235,.35);
+
+}
+
+
+.registro-header h1{
+
+    font-size:34px;
+
+    font-weight:800;
+
+    color:#111827;
+
+    margin-bottom:10px;
+
+}
+
+
+.registro-header p{
+
+    color:var(--texto-secundario);
+
+    font-size:15px;
+
+    line-height:1.7;
+
+}
+
+
+/*==================================================
+=            BARRA DE PROGRESO
+==================================================*/
+
+.progress{
+
+    width:100%;
+
+    height:10px;
+
+    border-radius:30px;
+
+    background:#edf2f7;
+
+    overflow:hidden;
+
+    margin-bottom:28px;
+
+}
+
+
+.progress-bar{
+
+    width:20%;
+
+    height:100%;
+
+    border-radius:30px;
+
+    background:linear-gradient(
+        90deg,
+        #2563eb,
+        #60a5fa
+    );
+
+    transition:.45s;
+
+}
+
+
+/*==================================================
+=              INDICADORES
+==================================================*/
+
+.steps{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:12px;
+
+    margin-bottom:45px;
+
+}
+
+
+.step{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    position:relative;
+
+}
+
+
+.step span{
+
+    width:46px;
+
+    height:46px;
+
+    border-radius:50%;
+
+    background:#eef2ff;
+
+    border:2px solid #dbeafe;
+
+    color:#2563eb;
+
+    font-weight:700;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    transition:var(--transicion);
+
+}
+
+
+.step small{
+
+    margin-top:10px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:#94a3b8;
+
+    transition:var(--transicion);
+
+}
+
+
+.step.active span{
+
+    background:#2563eb;
+
+    color:white;
+
+    border-color:#2563eb;
+
+    transform:scale(1.08);
+
+    box-shadow:
+        0 12px 25px rgba(37,99,235,.25);
+
+}
+
+
+.step.active small{
+
+    color:#2563eb;
+
+}
+
+
+/* Línea entre pasos */
+
+.step:not(:last-child)::after{
+
+    content:"";
+
+    position:absolute;
+
+    top:22px;
+
+    left:58%;
+
+    width:100%;
+
+    height:2px;
+
+    background:#e5e7eb;
+
+    z-index:-1;
+
+}
+
+
+/*==================================================
+=             SEPARADOR TITULO
+==================================================*/
+
+.form-step h2{
+
+    font-size:26px;
+
+    font-weight:700;
+
+    color:#111827;
+
+    margin-bottom:28px;
+
+}
+
+
+/*==================================================
+=           ANIMACIÓN ENTRADA
+==================================================*/
+
+@keyframes entrada{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateY(30px)
+            scale(.98);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateY(0)
+            scale(1);
+
+    }
+
+}
+
+/*==================================================
+=              FORMULARIOS
+==================================================*/
+
+.form-step{
+
+    display:none;
+
+    animation:fadeSlide .35s ease;
+
+}
+
+.form-step.active{
+
+    display:block;
+
+}
+
+
+/*==================================================
+=            CONTENEDOR DE CAMPOS
+==================================================*/
+
+.form-step{
+
+    display:none;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:22px;
+
+}
+
+.form-step.active{
+
+    display:grid;
+
+}
+
+
+/* Título */
+
+.form-step h2{
+
+    grid-column:1/-1;
+
+}
+
+
+/*==================================================
+=               INPUTS
+==================================================*/
+
+.form-step input,
+
+.form-step select,
+
+.form-step textarea{
+
+    width:100%;
+
+    height:58px;
+
+    padding:0 18px;
+
+    border:2px solid var(--borde);
+
+    border-radius:16px;
+
+    outline:none;
+
+    font-size:15px;
+
+    font-family:"Inter",sans-serif;
+
+    color:var(--texto);
+
+    background:white;
+
+    transition:all .25s ease;
+
+}
+
+
+/* Textarea */
+
+.form-step textarea{
+
+    resize:vertical;
+
+    min-height:120px;
+
+    padding-top:15px;
+
+}
+
+
+/*==================================================
+=          PLACEHOLDER
+==================================================*/
+
+.form-step input::placeholder,
+
+.form-step textarea::placeholder{
+
+    color:#9ca3af;
+
+}
+
+
+/*==================================================
+=            EFECTO HOVER
+==================================================*/
+
+.form-step input:hover,
+
+.form-step select:hover,
+
+.form-step textarea:hover{
+
+    border-color:#93c5fd;
+
+}
+
+
+/*==================================================
+=          EFECTO FOCUS
+==================================================*/
+
+.form-step input:focus,
+
+.form-step select:focus,
+
+.form-step textarea:focus{
+
+    border-color:var(--color-principal);
+
+    box-shadow:
+
+        0 0 0 5px rgba(37,99,235,.10);
+
+}
+
+
+/*==================================================
+=          INPUTS DESHABILITADOS
+==================================================*/
+
+.form-step input:disabled{
+
+    background:#f3f4f6;
+
+    color:#9ca3af;
+
+}
+
+
+/*==================================================
+=           INPUT SOLO LECTURA
+==================================================*/
+
+.form-step input[readonly]{
+
+    background:#f8fafc;
+
+}
+
+
+/*==================================================
+=           INPUTS ANCHOS
+==================================================*/
+
+.full{
+
+    grid-column:1/-1;
+
+}
+
+
+/*==================================================
+=             CAMPOS PEQUEÑOS
+==================================================*/
+
+.mitad{
+
+    grid-column:span 1;
+
+}
+
+
+/*==================================================
+=             SEPARADORES
+==================================================*/
+
+.separador{
+
+    grid-column:1/-1;
+
+    margin-top:15px;
+
+    margin-bottom:5px;
+
+    border-bottom:1px solid #edf2f7;
+
+}
+
+
+/*==================================================
+=          TARJETAS INTERNAS
+==================================================*/
+
+.card-interna{
+
+    grid-column:1/-1;
+
+    background:#f8fafc;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:18px;
+
+    padding:24px;
+
+}
+
+
+/*==================================================
+=         ETIQUETAS
+==================================================*/
+
+label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#374151;
+
+}
+
+
+/*==================================================
+=            MENSAJES
+==================================================*/
+
+.campo-ayuda{
+
+    margin-top:8px;
+
+    font-size:13px;
+
+    color:#6b7280;
+
+}
+
+
+/*==================================================
+=         CAMPOS CON ERROR
+==================================================*/
+
+.error-input{
+
+    border-color:#ef4444 !important;
+
+    box-shadow:
+
+        0 0 0 5px rgba(239,68,68,.10);
+
+}
+
+
+/*==================================================
+=         CAMPOS CORRECTOS
+==================================================*/
+
+.ok-input{
+
+    border-color:#10b981 !important;
+
+    box-shadow:
+
+        0 0 0 5px rgba(16,185,129,.10);
+
+}
+
+
+/*==================================================
+=          MENSAJES ERROR
+==================================================*/
+
+.error-texto{
+
+    margin-top:6px;
+
+    color:#ef4444;
+
+    font-size:13px;
+
+}
+
+
+/*==================================================
+=          MENSAJES OK
+==================================================*/
+
+.ok-texto{
+
+    margin-top:6px;
+
+    color:#10b981;
+
+    font-size:13px;
+
+}
+
+
+/*==================================================
+=      EFECTO DE APARICIÓN
+==================================================*/
+
+@keyframes fadeSlide{
+
+    from{
+
+        opacity:0;
+
+        transform:
+
+            translateY(15px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+
+            translateY(0);
+
+    }
+
+}
+
+
+/*==================================================
+=      CAMPOS OBLIGATORIOS
+==================================================*/
+
+.requerido::after{
+
+    content:" *";
+
+    color:#ef4444;
+
+}
+
+
+/*==================================================
+=      CONTENEDOR GENERAL
+==================================================*/
+
+.form-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:22px;
+
+}
+
+
+/*==================================================
+=      TITULOS SECUNDARIOS
+==================================================*/
+
+.subtitulo{
+
+    grid-column:1/-1;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    color:#111827;
+
+    margin-top:10px;
+
+}
+
+
+/*==================================================
+=      DESCRIPCIÓN
+==================================================*/
+
+.descripcion{
+
+    grid-column:1/-1;
+
+    color:#6b7280;
+
+    font-size:14px;
+
+    line-height:1.6;
+
+    margin-bottom:8px;
+
+}
+
+/*==================================================
+=                 BOTONES
+==================================================*/
+
+.acciones{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:18px;
+
+    margin-top:45px;
+
+}
+
+.btn-principal,
+
+.btn-secundario{
+
+    border:none;
+
+    border-radius:16px;
+
+    padding:16px 30px;
+
+    font-family:"Inter",sans-serif;
+
+    font-size:15px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:all .30s ease;
+
+}
+
+.btn-principal{
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    color:white;
+
+    box-shadow:
+        0 14px 30px rgba(37,99,235,.28);
+
+}
+
+.btn-principal:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 20px 38px rgba(37,99,235,.35);
+
+}
+
+.btn-principal:active{
+
+    transform:scale(.98);
+
+}
+
+.btn-principal:disabled{
+
+    opacity:.6;
+
+    cursor:not-allowed;
+
+    transform:none;
+
+    box-shadow:none;
+
+}
+
+.btn-secundario{
+
+    background:white;
+
+    color:#374151;
+
+    border:2px solid #dbe3ef;
+
+}
+
+.btn-secundario:hover{
+
+    background:#f8fafc;
+
+    border-color:#2563eb;
+
+    color:#2563eb;
+
+}
+
+.oculto{
+
+    display:none !important;
+
+}
+
+
+/*==================================================
+=          TARJETA REPRESENTANTE
+==================================================*/
+
+.representante{
+
+    background:white;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:22px;
+
+    padding:28px;
+
+    margin-bottom:25px;
+
+    box-shadow:
+        0 10px 25px rgba(15,23,42,.05);
+
+    position:relative;
+
+    transition:.30s;
+
+}
+
+.representante:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 18px 35px rgba(15,23,42,.10);
+
+}
+
+.representante h3{
+
+    margin-bottom:22px;
+
+    font-size:18px;
+
+    color:#2563eb;
+
+    font-weight:700;
+
+}
+
+
+/*==================================================
+=      BOTÓN AGREGAR REPRESENTANTE
+==================================================*/
+
+#btnAgregarRepresentante{
+
+    width:100%;
+
+    margin-top:10px;
+
+}
+
+
+/*==================================================
+=           CONTENEDOR RESUMEN
+==================================================*/
+
+#resumen{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+.resumen-card{
+
+    background:#f8fafc;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:18px;
+
+    padding:24px;
+
+}
+
+.resumen-card h3{
+
+    margin-bottom:16px;
+
+    color:#2563eb;
+
+    font-size:18px;
+
+}
+
+.resumen-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:20px;
+
+    padding:12px 0;
+
+    border-bottom:1px solid #edf2f7;
+
+}
+
+.resumen-item:last-child{
+
+    border-bottom:none;
+
+}
+
+.resumen-label{
+
+    font-weight:600;
+
+    color:#6b7280;
+
+}
+
+.resumen-value{
+
+    font-weight:600;
+
+    color:#111827;
+
+    text-align:right;
+
+}
+
+
+/*==================================================
+=          LINK LOGIN
+==================================================*/
+
+.login-link{
+
+    margin-top:35px;
+
+    text-align:center;
+
+    color:#6b7280;
+
+    font-size:15px;
+
+}
+
+.login-link a{
+
+    text-decoration:none;
+
+    color:#2563eb;
+
+    font-weight:700;
+
+}
+
+.login-link a:hover{
+
+    text-decoration:underline;
+
+}
+
+
+/*==================================================
+=               TOAST
+==================================================*/
+
+.toast{
+
+    position:fixed;
+
+    top:30px;
+
+    right:30px;
+
+    min-width:320px;
+
+    max-width:420px;
+
+    padding:18px 22px;
+
+    border-radius:16px;
+
+    color:white;
+
+    font-weight:600;
+
+    box-shadow:
+
+        0 18px 40px rgba(15,23,42,.25);
+
+    opacity:0;
+
+    transform:
+
+        translateX(100px);
+
+    transition:.35s;
+
+    z-index:9999;
+
+}
+
+.toast.mostrar{
+
+    opacity:1;
+
+    transform:
+
+        translateX(0);
+
+}
+
+.toast.exito{
+
+    background:linear-gradient(
+        135deg,
+        #10b981,
+        #34d399
+    );
+
+}
+
+.toast.error{
+
+    background:linear-gradient(
+        135deg,
+        #ef4444,
+        #f87171
+    );
+
+}
+
+.toast.info{
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #60a5fa
+    );
+
+}
+
+
+/*==================================================
+=         LOADER BOTÓN
+==================================================*/
+
+.cargando{
+
+    pointer-events:none;
+
+    opacity:.85;
+
+    position:relative;
+
+}
+
+.cargando::after{
+
+    content:"";
+
+    width:18px;
+
+    height:18px;
+
+    border:3px solid rgba(255,255,255,.4);
+
+    border-top-color:white;
+
+    border-radius:50%;
+
+    position:absolute;
+
+    right:18px;
+
+    top:50%;
+
+    margin-top:-9px;
+
+    animation:spin .8s linear infinite;
+
+}
+
+@keyframes spin{
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+
+/*==================================================
+=      SCROLL PERSONALIZADO
+==================================================*/
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#eef2f7;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#cbd5e1;
+
+    border-radius:20px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#94a3b8;
+
+}
+
+
+/*==================================================
+=         SELECCIÓN TEXTO
+==================================================*/
+
+::selection{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+/*==================================================
+=           RESPONSIVE - LAPTOP
+==================================================*/
+
+@media (max-width:1200px){
+
+    .registro-card{
+
+        max-width:850px;
+
+    }
+
+}
+
+
+/*==================================================
+=           RESPONSIVE - TABLET
+==================================================*/
+
+@media (max-width:992px){
+
+    .registro-container{
+
+        padding:30px 20px;
+
+    }
+
+    .registro-card{
+
+        padding:35px;
+
+    }
+
+    .form-step.active{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .form-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .full{
+
+        grid-column:auto;
+
+    }
+
+    .registro-header h1{
+
+        font-size:30px;
+
+    }
+
+    .steps{
+
+        gap:8px;
+
+    }
+
+    .step span{
+
+        width:42px;
+
+        height:42px;
+
+    }
+
+    .step small{
+
+        font-size:12px;
+
+    }
+
+}
+
+
+/*==================================================
+=           RESPONSIVE - CELULAR
+==================================================*/
+
+@media (max-width:768px){
+
+    body{
+
+        background:#f4f7fb;
+
+    }
+
+    .registro-container{
+
+        padding:15px;
+
+        align-items:flex-start;
+
+    }
+
+    .registro-card{
+
+        width:100%;
+
+        border-radius:22px;
+
+        padding:25px;
+
+    }
+
+    .registro-header{
+
+        margin-bottom:25px;
+
+    }
+
+    .registro-header h1{
+
+        font-size:28px;
+
+    }
+
+    .registro-header p{
+
+        font-size:14px;
+
+    }
+
+    .logo{
+
+        width:65px;
+
+        height:65px;
+
+        font-size:30px;
+
+        border-radius:18px;
+
+    }
+
+    .progress{
+
+        height:8px;
+
+        margin-bottom:22px;
+
+    }
+
+    .steps{
+
+        margin-bottom:30px;
+
+        gap:5px;
+
+    }
+
+    .step span{
+
+        width:38px;
+
+        height:38px;
+
+        font-size:14px;
+
+    }
+
+    .step small{
+
+        font-size:11px;
+
+        margin-top:6px;
+
+    }
+
+    .step::after{
+
+        display:none;
+
+    }
+
+    .form-step.active{
+
+        display:flex;
+
+        flex-direction:column;
+
+        gap:18px;
+
+    }
+
+    .form-step h2{
+
+        font-size:22px;
+
+        margin-bottom:8px;
+
+    }
+
+    .form-step input,
+
+    .form-step select,
+
+    .form-step textarea{
+
+        height:54px;
+
+        font-size:15px;
+
+    }
+
+    textarea{
+
+        min-height:120px;
+
+    }
+
+    .representante{
+
+        padding:20px;
+
+    }
+
+    .representante h3{
+
+        font-size:17px;
+
+    }
+
+    .acciones{
+
+        flex-direction:column;
+
+        gap:14px;
+
+    }
+
+    .btn-principal,
+
+    .btn-secundario{
+
+        width:100%;
+
+        height:54px;
+
+        font-size:15px;
+
+    }
+
+    .login-link{
+
+        margin-top:28px;
+
+        font-size:14px;
+
+    }
+
+    .toast{
+
+        left:15px;
+
+        right:15px;
+
+        top:20px;
+
+        min-width:auto;
+
+        max-width:none;
+
+        width:auto;
+
+    }
+
+}
+
+
+/*==================================================
+=        CELULARES PEQUEÑOS
+==================================================*/
+
+@media (max-width:480px){
+
+    .registro-card{
+
+        padding:20px;
+
+        border-radius:18px;
+
+    }
+
+    .logo{
+
+        width:58px;
+
+        height:58px;
+
+        font-size:28px;
+
+    }
+
+    .registro-header h1{
+
+        font-size:24px;
+
+    }
+
+    .registro-header p{
+
+        font-size:13px;
+
+        line-height:1.6;
+
+    }
+
+    .steps{
+
+        overflow-x:auto;
+
+        padding-bottom:8px;
+
+        justify-content:flex-start;
+
+        scrollbar-width:none;
+
+    }
+
+    .steps::-webkit-scrollbar{
+
+        display:none;
+
+    }
+
+    .step{
+
+        min-width:75px;
+
+        flex:none;
+
+    }
+
+    .step span{
+
+        width:34px;
+
+        height:34px;
+
+        font-size:13px;
+
+    }
+
+    .step small{
+
+        font-size:10px;
+
+    }
+
+    .form-step h2{
+
+        font-size:20px;
+
+    }
+
+    .form-step input,
+
+    .form-step select,
+
+    .form-step textarea{
+
+        height:50px;
+
+        padding:0 15px;
+
+        font-size:14px;
+
+    }
+
+    .btn-principal,
+
+    .btn-secundario{
+
+        height:50px;
+
+        font-size:14px;
+
+    }
+
+    .representante{
+
+        padding:18px;
+
+    }
+
+    .representante h3{
+
+        font-size:16px;
+
+    }
+
+}
+
+
+/*==================================================
+=         PANTALLAS MUY BAJAS
+==================================================*/
+
+@media (max-height:700px){
+
+    .registro-container{
+
+        align-items:flex-start;
+
+        padding-top:20px;
+
+        padding-bottom:20px;
+
+    }
+
+}
+
+/*==================================================
+=         EFECTOS DECORATIVOS DE FONDO
+==================================================*/
+
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    width:420px;
+
+    height:420px;
+
+    top:-180px;
+
+    left:-120px;
+
+    border-radius:50%;
+
+    background:rgba(37,99,235,.08);
+
+    filter:blur(90px);
+
+    pointer-events:none;
+
+    z-index:-2;
+
+}
+
+body::after{
+
+    content:"";
+
+    position:fixed;
+
+    width:380px;
+
+    height:380px;
+
+    right:-140px;
+
+    bottom:-140px;
+
+    border-radius:50%;
+
+    background:rgba(59,130,246,.08);
+
+    filter:blur(90px);
+
+    pointer-events:none;
+
+    z-index:-2;
+
+}
+
+
+/*==================================================
+=         EFECTO PREMIUM TARJETA
+==================================================*/
+
+.registro-card{
+
+    backdrop-filter:blur(10px);
+
+    transition:.35s;
+
+}
+
+.registro-card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:
+
+        0 30px 70px rgba(15,23,42,.14);
+
+}
+
+
+/*==================================================
+=            ANIMACIÓN INPUTS
+==================================================*/
+
+.form-step input,
+
+.form-step select,
+
+.form-step textarea{
+
+    transform:translateY(0);
+
+}
+
+.form-step input:hover,
+
+.form-step select:hover,
+
+.form-step textarea:hover{
+
+    transform:translateY(-1px);
+
+}
+
+.form-step input:focus,
+
+.form-step select:focus,
+
+.form-step textarea:focus{
+
+    transform:translateY(-2px);
+
+}
+
+
+/*==================================================
+=         EFECTO BOTONES
+==================================================*/
+
+.btn-principal{
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+.btn-principal::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:-120%;
+
+    width:60%;
+
+    height:100%;
+
+    background:
+
+        linear-gradient(
+
+            90deg,
+
+            transparent,
+
+            rgba(255,255,255,.35),
+
+            transparent
+
+        );
+
+    transition:.6s;
+
+}
+
+.btn-principal:hover::before{
+
+    left:150%;
+
+}
+
+
+/*==================================================
+=         INPUTS VÁLIDOS
+==================================================*/
+
+input:valid{
+
+    transition:.25s;
+
+}
+
+input:valid:not(:placeholder-shown){
+
+    border-color:#10b981;
+
+}
+
+
+/*==================================================
+=         TARJETAS REPRESENTANTE
+==================================================*/
+
+.representante{
+
+    overflow:hidden;
+
+}
+
+.representante::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:0;
+
+    width:5px;
+
+    height:100%;
+
+    background:
+
+        linear-gradient(
+
+            to bottom,
+
+            #2563eb,
+
+            #60a5fa
+
+        );
+
+}
+
+
+/*==================================================
+=         RESUMEN
+==================================================*/
+
+.resumen-card{
+
+    transition:.30s;
+
+}
+
+.resumen-card:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:
+
+        0 16px 35px rgba(15,23,42,.08);
+
+}
+
+
+/*==================================================
+=         PASOS
+==================================================*/
+
+.step{
+
+    transition:.30s;
+
+}
+
+.step:hover span{
+
+    transform:scale(1.08);
+
+}
+
+
+/*==================================================
+=         TRANSICIÓN PASOS
+==================================================*/
+
+.form-step{
+
+    animation:mostrarPaso .35s ease;
+
+}
+
+@keyframes mostrarPaso{
+
+    from{
+
+        opacity:0;
+
+        transform:
+
+            translateX(25px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+
+            translateX(0);
+
+    }
+
+}
+
+
+/*==================================================
+=         TOAST
+==================================================*/
+
+.toast{
+
+    backdrop-filter:blur(12px);
+
+}
+
+
+/*==================================================
+=         ANIMACIÓN TOAST
+==================================================*/
+
+.toast.mostrar{
+
+    animation:toastEntrada .35s ease;
+
+}
+
+@keyframes toastEntrada{
+
+    from{
+
+        opacity:0;
+
+        transform:
+
+            translateY(-20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+
+            translateY(0);
+
+    }
+
+}
+
+
+/*==================================================
+=         BOTONES EN MÓVIL
+==================================================*/
+
+@media (hover:hover){
+
+    .btn-principal:hover{
+
+        filter:brightness(1.03);
+
+    }
+
+}
+
+
+/*==================================================
+=         EFECTO CLICK
+==================================================*/
+
+.btn-principal:active,
+
+.btn-secundario:active{
+
+    transform:scale(.98);
+
+}
+
+
+/*==================================================
+=         TRANSICIÓN GLOBAL
+==================================================*/
+
+input,
+select,
+textarea,
+button,
+.step,
+.representante,
+.resumen-card{
+
+    transition:
+
+        all .28s ease;
+
+}
