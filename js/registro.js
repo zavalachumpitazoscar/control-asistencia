@@ -917,25 +917,34 @@ btnSiguiente.addEventListener(
     "click",
     ()=>{
 
+
         if(!validarPasoActual()){
+
 
             mostrarToast(
                 "error",
                 "Complete correctamente los campos antes de continuar."
             );
 
-            ;
+
+            return; // IMPORTANTE: detiene el avance
+
 
         }
+
 
 
         if(pasoActual < totalPasos){
 
+
             pasoActual++;
+
 
             actualizarVista();
 
+
         }
+
 
     }
 );
