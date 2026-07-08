@@ -7,7 +7,7 @@ import {
     doc,
     getDoc,
     updateDoc,
-    setdoc,
+    setDoc,
     collection,
     addDoc
 }
@@ -138,17 +138,17 @@ document.getElementById("rolAcceso").value;
 
 
 
-const usuarioActual = auth.currentUser;
-
-
-const empresaSnap =
-await getDoc(
-doc(db,"usuarios",usuarioActual.uid)
-);
-
-
 const empresaId =
-empresaSnap.data().empresaId;
+    sessionStorage.getItem("empresaId");
+
+
+if(!empresaId){
+
+    alert("No se encontró la empresa");
+
+    return;
+
+}
 
 
 
