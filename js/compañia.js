@@ -54,14 +54,40 @@ async function cargarTab(tab) {
         contenedor.innerHTML =
             html;
 
+        switch(tab){
+
+            case "informacion":
+
+                iniciarInformacion();
+
+            break;
+
+            case "sucursales":
+
+                iniciarSucursales();
+
+            break;
+
+            case "areas":
+
+                iniciarAreas();
+
+            break;
+
+            case "subareas":
+
+                iniciarSubareas();
+
+            break;
+
+        }
+
     }
 
     catch (error) {
 
         contenedor.innerHTML = `
-
             <h2>No se pudo cargar la pestaña.</h2>
-
         `;
 
         console.error(error);
