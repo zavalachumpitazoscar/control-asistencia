@@ -147,58 +147,64 @@
     =========================== -->
 
     <h3 class="titulo-seccion">
-        🔐 Cuenta
+    🔐 Accesos al Sistema
     </h3>
 
-    <div class="grid-formulario">
+    <div class="header-lista">
 
-        <div class="campo">
+    <div>
 
-            <label>Correo de acceso</label>
+        <h4>Usuarios con acceso</h4>
 
-            <input
-                type="email"
-                id="correoLogin"
-                readonly>
-
-        </div>
-
-        <div class="campo">
-
-            <label>Estado</label>
-
-            <input
-                type="text"
-                id="estado"
-                readonly>
-
-        </div>
-
-        <div class="campo">
-
-            <label>Fecha de Registro</label>
-
-            <input
-                type="text"
-                id="fechaRegistro"
-                readonly>
-
-        </div>
+        <p>
+            Administra quién puede ingresar al sistema.
+        </p>
 
     </div>
 
+    <button
+        id="btnNuevoAcceso"
+        class="btn-secundario">
+
+        + Nuevo Acceso
+
+    </button>
+
+</div>
+
+<div id="listaAccesos">
+
+</div>
 
 
     <!-- ==========================
          REPRESENTANTES
     =========================== -->
 
-    <h3 class="titulo-seccion">
-        👥 Representantes
-    </h3>
+<div class="header-lista">
 
-    <div id="listaRepresentantes">
+    <div>
+
+        <h4>Representantes</h4>
+
+        <p>
+            Personas autorizadas de la empresa.
+        </p>
 
     </div>
+
+    <button
+        id="btnNuevoRepresentante"
+        class="btn-secundario">
+
+        + Agregar
+
+    </button>
+
+</div>
+
+<div id="listaRepresentantes">
+
+</div>
 
 </div>
