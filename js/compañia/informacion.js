@@ -6,7 +6,10 @@ from "../firebase-config.js";
 import {
     doc,
     getDoc,
-    updateDoc
+    updateDoc,
+    setdoc,
+    collection,
+    addDoc
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -15,13 +18,86 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-import {
-    collection,
-    addDoc
-}
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 
+
+export async function iniciarInformacion(){
+
+    const empresaId =
+        sessionStorage.getItem("empresaId");
+
+    if(!empresaId){
+
+        console.error("No se encontró el empresaId.");
+
+        return;
+
+    }
+
+    const referencia =
+        doc(
+            db,
+            "companias",
+            empresaId
+        );
+
+    const documento =
+        await getDoc(referencia);
+
+    if(!documento.exists()){
+
+        console.error("No existe la empresa.");
+
+        return;
+
+    }
+
+    const datos =
+        documento.data();
+
+    
+
+
+    //=========================
+    // EMPRESA
+    //=========================
+
+    document.getElementById("ruc").value =
+        datos.empresa?.ruc || "";
+
+    document.getElementById("razonSocial").value =
+        datos.empresa?.razonSocial || "";
+
+    document.getElementById("giro").value =
+        datos.empresa?.giro || "";
+
+
+    //=========================
+    // UBICACIÓN
+    //=========================
+
+    document.getElementById("direccion").value =
+        datos.ubicacion?.direccion || "";
+
+    document.getElementById("departamento").value =
+        datos.ubicacion?.departamento || "";
+
+    document.getElementById("provincia").value =
+        datos.ubicacion?.provincia || "";
+
+    document.getElementById("distrito").value =
+        datos.ubicacion?.distrito || "";
+
+    document.getElementById("pais").value =
+        datos.ubicacion?.pais || "";
+
+    document.getElementById("codigoPostal").value =
+        datos.ubicacion?.codigoPostal || "";
+
+
+//=========================
+// ACCESOS AL SISTEMA
+//=========================
 
 const btnNuevoAcceso =
 document.getElementById("btnNuevoAcceso");
@@ -116,83 +192,6 @@ modalAcceso.style.display="none";
 
 };
 
-export async function iniciarInformacion(){
-
-    const empresaId =
-        sessionStorage.getItem("empresaId");
-
-    if(!empresaId){
-
-        console.error("No se encontró el empresaId.");
-
-        return;
-
-    }
-
-    const referencia =
-        doc(
-            db,
-            "companias",
-            empresaId
-        );
-
-    const documento =
-        await getDoc(referencia);
-
-    if(!documento.exists()){
-
-        console.error("No existe la empresa.");
-
-        return;
-
-    }
-
-    const datos =
-        documento.data();
-
-
-    //=========================
-    // EMPRESA
-    //=========================
-
-    document.getElementById("ruc").value =
-        datos.empresa?.ruc || "";
-
-    document.getElementById("razonSocial").value =
-        datos.empresa?.razonSocial || "";
-
-    document.getElementById("giro").value =
-        datos.empresa?.giro || "";
-
-
-    //=========================
-    // UBICACIÓN
-    //=========================
-
-    document.getElementById("direccion").value =
-        datos.ubicacion?.direccion || "";
-
-    document.getElementById("departamento").value =
-        datos.ubicacion?.departamento || "";
-
-    document.getElementById("provincia").value =
-        datos.ubicacion?.provincia || "";
-
-    document.getElementById("distrito").value =
-        datos.ubicacion?.distrito || "";
-
-    document.getElementById("pais").value =
-        datos.ubicacion?.pais || "";
-
-    document.getElementById("codigoPostal").value =
-        datos.ubicacion?.codigoPostal || "";
-
-
-//=========================
-// ACCESOS AL SISTEMA
-//=========================
-
-// Se implementará en el siguiente paso.
 
 
     //=========================
