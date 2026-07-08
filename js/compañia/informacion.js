@@ -1,5 +1,6 @@
 import {
-    db
+    db,
+    auth
 }
 from "../firebase-config.js";
 
