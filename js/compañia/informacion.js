@@ -353,28 +353,6 @@ if(lista){
 
 }
 
-    (datos.representantes || []).forEach(rep=>{
-
-        lista.innerHTML +=
-
-        `
-<div class="representante-card">
-
-<h4>${rep.nombre}</h4>
-
-<p><strong>Cargo:</strong> ${rep.cargo}</p>
-
-<p><strong>DNI:</strong> ${rep.dni}</p>
-
-<p><strong>Correo:</strong> ${rep.correo}</p>
-
-<p><strong>Teléfono:</strong> ${rep.telefono}</p>
-
-</div>
-        `;
-
-    });
-
 
     //=========================
     // GUARDAR
