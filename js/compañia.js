@@ -1,3 +1,9 @@
+import { iniciarInformacion } from "./compañia/informacion.js";
+import { iniciarSucursales } from "./compañia/sucursales.js";
+import { iniciarAreas } from "./compañia/areas.js";
+import { iniciarSubareas } from "./compañia/subareas.js";
+
+
 export function iniciarCompania() {
 
     const botones =
