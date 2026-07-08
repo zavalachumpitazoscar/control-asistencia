@@ -1,5 +1,4 @@
 import {
-    auth,
     db
 }
 from "../firebase-config.js";
@@ -15,11 +14,12 @@ from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 export async function iniciarInformacion(){
 
-    const usuario = auth.currentUser;
+    const empresaId =
+        sessionStorage.getItem("empresaId");
 
-    if(!usuario){
+    if(!empresaId){
 
-        console.error("No hay usuario autenticado.");
+        console.error("No se encontró el empresaId.");
 
         return;
 
@@ -28,8 +28,8 @@ export async function iniciarInformacion(){
     const referencia =
         doc(
             db,
-            "usuarios",
-            usuario.uid
+            "companias",
+            empresaId
         );
 
     const documento =
@@ -84,24 +84,11 @@ export async function iniciarInformacion(){
         datos.ubicacion?.codigoPostal || "";
 
 
-    //=========================
-    // CUENTA
-    //=========================
+//=========================
+// ACCESOS AL SISTEMA
+//=========================
 
-    document.getElementById("correoLogin").value =
-        datos.correoLogin || "";
-
-    document.getElementById("estado").value =
-        datos.estado || "";
-
-    if(datos.fechaRegistro){
-
-        document.getElementById("fechaRegistro").value =
-            datos.fechaRegistro
-            .toDate()
-            .toLocaleString("es-PE");
-
-    }
+// Se implementará en el siguiente paso.
 
 
     //=========================
