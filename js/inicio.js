@@ -200,7 +200,7 @@ async function cargarVista(vista){
 
         switch(vista){
 
-            case "compania":
+            case "compañia":
 
                 iniciarCompañia();
 
