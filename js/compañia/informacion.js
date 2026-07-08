@@ -295,7 +295,84 @@ modalAcceso.style.display="none";
 
 };
 
+//=========================
+// LISTAR ACCESOS
+//=========================
 
+
+const listaAccesos =
+document.getElementById("listaAccesos");
+
+
+if(listaAccesos){
+
+
+    listaAccesos.innerHTML = "";
+
+
+    const consulta =
+    query(
+        collection(db,"usuarios"),
+        where(
+            "empresaId",
+            "==",
+            empresaId
+        )
+    );
+
+
+
+    const usuarios =
+    await getDocs(consulta);
+
+
+
+    usuarios.forEach(usuario=>{
+
+
+        const datosUsuario =
+        usuario.data();
+
+
+
+        listaAccesos.innerHTML +=
+        `
+
+        <div class="acceso-card">
+
+
+            <h4>
+            ${datosUsuario.nombre}
+            </h4>
+
+
+            <p>
+            <strong>Correo:</strong>
+            ${datosUsuario.correo}
+            </p>
+
+
+            <p>
+            <strong>Rol:</strong>
+            ${datosUsuario.rol}
+            </p>
+
+
+            <p>
+            <strong>Estado:</strong>
+            ${datosUsuario.estado}
+            </p>
+
+
+        </div>
+
+        `;
+
+
+    });
+
+
+}
 
     //=========================
     // REPRESENTANTES
