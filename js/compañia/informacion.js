@@ -66,11 +66,15 @@ const modalRepresentante =
 document.getElementById("modalRepresentante");
 
 
-btnNuevoRepresentante.onclick = ()=>{
+if(btnNuevoRepresentante && modalRepresentante){
 
-    modalRepresentante.style.display="flex";
+    btnNuevoRepresentante.onclick = ()=>{
 
-};
+        modalRepresentante.style.display="flex";
+
+    };
+
+}
 
 
 document.getElementById("cerrarRepresentante")
@@ -197,18 +201,32 @@ const modalAcceso =
 document.getElementById("modalAcceso");
 
 
-btnNuevoAcceso.onclick = ()=>{
+const cerrarAcceso =
+document.getElementById("cerrarAcceso");
 
-    modalAcceso.style.display="flex";
 
-};
 
-document.getElementById("cerrarAcceso")
-.onclick=()=>{
+if(btnNuevoAcceso && modalAcceso){
 
-    modalAcceso.style.display="none";
+    btnNuevoAcceso.onclick = ()=>{
 
-};
+        modalAcceso.style.display="flex";
+
+    };
+
+}
+
+
+
+if(cerrarAcceso && modalAcceso){
+
+    cerrarAcceso.onclick = ()=>{
+
+        modalAcceso.style.display="none";
+
+    };
+
+}
 
 
 document.getElementById("guardarAcceso")
@@ -298,17 +316,19 @@ modalAcceso.style.display="none";
         lista.innerHTML +=
 
         `
-        <div class="representante-card">
+<div class="representante-card">
 
-            <h4>${rep.nombre}</h4>
+<h4>${rep.nombre}</h4>
 
-            <p><strong>DNI:</strong> ${rep.dni}</p>
+<p><strong>Cargo:</strong> ${rep.cargo}</p>
 
-            <p><strong>Correo:</strong> ${rep.correo}</p>
+<p><strong>DNI:</strong> ${rep.dni}</p>
 
-            <p><strong>Teléfono:</strong> ${rep.telefono}</p>
+<p><strong>Correo:</strong> ${rep.correo}</p>
 
-        </div>
+<p><strong>Teléfono:</strong> ${rep.telefono}</p>
+
+</div>
         `;
 
     });
