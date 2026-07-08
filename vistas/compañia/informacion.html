@@ -212,44 +212,102 @@
 
 <div id="modalAcceso" class="modal">
 
-    <div class="modal-contenido">
+<div class="modal-contenido">
 
-        <h2>Nuevo acceso</h2>
-
-        <input 
-        id="nombreAcceso"
-        placeholder="Nombre completo">
+<h2>Nuevo acceso</h2>
 
 
-        <input 
-        id="correoAcceso"
-        type="email"
-        placeholder="Correo">
+<input 
+id="nombreAcceso"
+placeholder="Nombre">
 
 
-        <select id="rolAcceso">
-
-            <option value="REPRESENTANTE">
-                Representante
-            </option>
-
-            <option value="ADMIN">
-                Administrador
-            </option>
-
-        </select>
+<input
+id="correoAcceso"
+type="email"
+placeholder="Correo de acceso">
 
 
-        <button id="guardarAcceso">
-            Crear acceso
-        </button>
+<select id="rolAcceso">
+
+<option value="ADMIN">
+Administrador
+</option>
 
 
-        <button id="cerrarAcceso">
-            Cancelar
-        </button>
+<option value="REVISOR">
+Revisor
+</option>
 
 
-    </div>
+<option value="SUPERVISOR">
+Supervisor
+</option>
+
+
+</select>
+
+
+<button id="guardarAcceso">
+Crear acceso
+</button>
+
+
+<button id="cerrarAcceso">
+Cancelar
+</button>
+
+
+</div>
+
+</div>
+
+
+<div id="modalRepresentante" class="modal">
+
+
+<div class="modal-contenido">
+
+
+<h2>Nuevo Representante</h2>
+
+
+<input
+id="nombreRepresentante"
+placeholder="Nombre completo">
+
+
+<input
+id="dniRepresentante"
+placeholder="DNI">
+
+
+<input
+id="correoRepresentante"
+placeholder="Correo">
+
+
+<input
+id="telefonoRepresentante"
+placeholder="Teléfono">
+
+
+<input
+id="cargoRepresentante"
+placeholder="Cargo">
+
+
+<button id="guardarRepresentante">
+Guardar representante
+</button>
+
+
+<button id="cerrarRepresentante">
+Cancelar
+</button>
+
+
+</div>
+
 
 </div>
