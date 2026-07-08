@@ -185,48 +185,40 @@ botones.forEach(btn=>{
 
 async function cargarVista(vista){
 
+    try{
 
-try{
+        const respuesta =
+        await fetch(
+        `vistas/${vista}.html`
+        );
 
+        const html =
+        await respuesta.text();
 
-const respuesta =
-await fetch(
-`vistas/${vista}.html`
-);
+        contenedor.innerHTML =
+        html;
 
+        switch(vista){
 
+            case "compania":
 
-const html =
-await respuesta.text();
+                iniciarCompania();
 
+            break;
 
+        }
 
-contenedor.innerHTML =
-html;
+    }
+    catch(error){
 
+        contenedor.innerHTML=
+        `
+        <h2>Vista no encontrada</h2>
+        `;
 
+        console.error(error);
 
-}
-catch(error){
-
-
-contenedor.innerHTML=
-`
-
-<h2>
-Vista no encontrada
-</h2>
-
-`;
-
-
-
-console.error(error);
-
-
-}
-
-
+    }
 
 }
 
