@@ -23,6 +23,7 @@ from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 
 export async function iniciarInformacion(){
+    
 
     const empresaId =
         sessionStorage.getItem("empresaId");
@@ -57,7 +58,95 @@ export async function iniciarInformacion(){
         documento.data();
 
     
+const btnNuevoRepresentante =
+document.getElementById("btnNuevoRepresentante");
 
+
+const modalRepresentante =
+document.getElementById("modalRepresentante");
+
+
+btnNuevoRepresentante.onclick = ()=>{
+
+    modalRepresentante.style.display="flex";
+
+};
+
+
+document.getElementById("cerrarRepresentante")
+.onclick=()=>{
+
+    modalRepresentante.style.display="none";
+
+};
+
+    document.getElementById("guardarRepresentante")
+.onclick = async()=>{
+
+
+const nuevoRepresentante = {
+
+    nombre:
+    document.getElementById("nombreRepresentante").value.trim(),
+
+    dni:
+    document.getElementById("dniRepresentante").value.trim(),
+
+    correo:
+    document.getElementById("correoRepresentante").value.trim(),
+
+    telefono:
+    document.getElementById("telefonoRepresentante").value.trim(),
+
+    cargo:
+    document.getElementById("cargoRepresentante").value.trim()
+
+};
+
+
+
+const representantes =
+datos.representantes || [];
+
+
+
+representantes.push(nuevoRepresentante);
+
+
+
+try{
+
+
+await updateDoc(
+    referencia,
+    {
+        representantes
+    }
+);
+
+
+
+alert("Representante agregado correctamente");
+
+
+modalRepresentante.style.display="none";
+
+
+location.reload();
+
+
+}
+
+catch(error){
+
+console.error(error);
+
+alert("Error al guardar representante");
+
+}
+
+
+};
 
     //=========================
     // EMPRESA
