@@ -57,8 +57,7 @@ export async function iniciarInformacion(){
     const datos =
         documento.data();
 
-    
-const btnNuevoRepresentante =
+    const btnNuevoRepresentante =
 document.getElementById("btnNuevoRepresentante");
 
 
@@ -66,91 +65,85 @@ const modalRepresentante =
 document.getElementById("modalRepresentante");
 
 
-if(btnNuevoRepresentante && modalRepresentante){
+const cerrarRepresentante =
+document.getElementById("cerrarRepresentante");
 
-    btnNuevoRepresentante.onclick = ()=>{
 
-        modalRepresentante.style.display="flex";
+const guardarRepresentante =
+document.getElementById("guardarRepresentante");
+
+
+if(guardarRepresentante){
+
+    guardarRepresentante.onclick = async()=>{
+
+
+        const nuevoRepresentante = {
+
+            nombre:
+            document.getElementById("nombreRepresentante").value.trim(),
+
+            dni:
+            document.getElementById("dniRepresentante").value.trim(),
+
+            correo:
+            document.getElementById("correoRepresentante").value.trim(),
+
+            telefono:
+            document.getElementById("telefonoRepresentante").value.trim(),
+
+            cargo:
+            document.getElementById("cargoRepresentante").value.trim()
+
+        };
+
+
+        const representantes =
+        datos.representantes || [];
+
+
+        representantes.push(nuevoRepresentante);
+
+
+        try{
+
+
+            await updateDoc(
+                referencia,
+                {
+                    representantes
+                }
+            );
+
+
+            alert("Representante agregado correctamente");
+
+
+            if(modalRepresentante){
+
+                modalRepresentante.style.display="none";
+
+            }
+
+
+            location.reload();
+
+
+        }
+
+
+        catch(error){
+
+            console.error(error);
+
+            alert("Error al guardar representante");
+
+        }
+
 
     };
 
 }
-
-
-document.getElementById("cerrarRepresentante")
-.onclick=()=>{
-
-    modalRepresentante.style.display="none";
-
-};
-
-    document.getElementById("guardarRepresentante")
-.onclick = async()=>{
-
-
-const nuevoRepresentante = {
-
-    nombre:
-    document.getElementById("nombreRepresentante").value.trim(),
-
-    dni:
-    document.getElementById("dniRepresentante").value.trim(),
-
-    correo:
-    document.getElementById("correoRepresentante").value.trim(),
-
-    telefono:
-    document.getElementById("telefonoRepresentante").value.trim(),
-
-    cargo:
-    document.getElementById("cargoRepresentante").value.trim()
-
-};
-
-
-
-const representantes =
-datos.representantes || [];
-
-
-
-representantes.push(nuevoRepresentante);
-
-
-
-try{
-
-
-await updateDoc(
-    referencia,
-    {
-        representantes
-    }
-);
-
-
-
-alert("Representante agregado correctamente");
-
-
-modalRepresentante.style.display="none";
-
-
-location.reload();
-
-
-}
-
-catch(error){
-
-console.error(error);
-
-alert("Error al guardar representante");
-
-}
-
-
-};
 
     //=========================
     // EMPRESA
@@ -306,10 +299,59 @@ modalAcceso.style.display="none";
     // REPRESENTANTES
     //=========================
 
-    const lista =
-        document.getElementById("listaRepresentantes");
+if(btnNuevoRepresentante && modalRepresentante){
+
+    btnNuevoRepresentante.onclick = ()=>{
+
+        modalRepresentante.style.display="flex";
+
+    };
+
+}
+
+
+
+if(cerrarRepresentante && modalRepresentante){
+
+    cerrarRepresentante.onclick = ()=>{
+
+        modalRepresentante.style.display="none";
+
+    };
+
+}
+
+const lista =
+document.getElementById("listaRepresentantes");
+
+
+if(lista){
 
     lista.innerHTML = "";
+
+    (datos.representantes || []).forEach(rep=>{
+
+        lista.innerHTML += `
+
+        <div class="representante-card">
+
+        <h4>${rep.nombre}</h4>
+
+        <p><strong>Cargo:</strong> ${rep.cargo}</p>
+
+        <p><strong>DNI:</strong> ${rep.dni}</p>
+
+        <p><strong>Correo:</strong> ${rep.correo}</p>
+
+        <p><strong>Teléfono:</strong> ${rep.telefono}</p>
+
+        </div>
+
+        `;
+
+    });
+
+}
 
     (datos.representantes || []).forEach(rep=>{
 
