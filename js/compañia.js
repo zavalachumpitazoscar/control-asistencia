@@ -1,4 +1,4 @@
-export function iniciarCompania(){
+export function iniciarCompañia(){
 
     console.log("Módulo Compañía iniciado.");
 
