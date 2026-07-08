@@ -7,12 +7,14 @@
             <h3>Información General</h3>
 
             <p>
-                Datos principales de la empresa.
+                Administra la información principal de tu empresa.
             </p>
 
         </div>
 
-        <button id="btnGuardarEmpresa" class="btn-guardar">
+        <button
+        id="btnGuardarEmpresa"
+        class="btn-guardar">
 
             💾 Guardar cambios
 
@@ -21,32 +23,9 @@
     </div>
 
 
-
     <div class="grid-formulario">
 
-        <div class="campo">
-
-            <label>Nombre Comercial</label>
-
-            <input
-            type="text"
-            id="nombreComercial">
-
-        </div>
-
-
-
-        <div class="campo">
-
-            <label>Razón Social</label>
-
-            <input
-            type="text"
-            id="razonSocial">
-
-        </div>
-
-
+        <!-- EMPRESA -->
 
         <div class="campo">
 
@@ -58,31 +37,28 @@
 
         </div>
 
-
-
         <div class="campo">
 
-            <label>Correo</label>
-
-            <input
-            type="email"
-            id="correo">
-
-        </div>
-
-
-
-        <div class="campo">
-
-            <label>Teléfono</label>
+            <label>Razón Social</label>
 
             <input
             type="text"
-            id="telefono">
+            id="razonSocial">
+
+        </div>
+
+        <div class="campo campo-completo">
+
+            <label>Giro del Negocio</label>
+
+            <input
+            type="text"
+            id="giro">
 
         </div>
 
 
+        <!-- UBICACIÓN -->
 
         <div class="campo campo-completo">
 
@@ -94,41 +70,103 @@
 
         </div>
 
-
-
         <div class="campo">
 
-            <label>Representante</label>
+            <label>Departamento</label>
 
             <input
             type="text"
-            id="representante">
+            id="departamento">
+
+        </div>
+
+        <div class="campo">
+
+            <label>Provincia</label>
+
+            <input
+            type="text"
+            id="provincia">
+
+        </div>
+
+        <div class="campo">
+
+            <label>Distrito</label>
+
+            <input
+            type="text"
+            id="distrito">
+
+        </div>
+
+        <div class="campo">
+
+            <label>País</label>
+
+            <input
+            type="text"
+            id="pais">
+
+        </div>
+
+        <div class="campo">
+
+            <label>Código Postal</label>
+
+            <input
+            type="text"
+            id="codigoPostal">
 
         </div>
 
 
+        <!-- CUENTA -->
+
+        <div class="campo">
+
+            <label>Correo de acceso</label>
+
+            <input
+            type="email"
+            id="correoLogin"
+            readonly>
+
+        </div>
 
         <div class="campo">
 
             <label>Estado</label>
 
-            <select id="estado">
-
-                <option value="ACTIVO">
-
-                    ACTIVO
-
-                </option>
-
-                <option value="INACTIVO">
-
-                    INACTIVO
-
-                </option>
-
-            </select>
+            <input
+            type="text"
+            id="estado"
+            readonly>
 
         </div>
+
+        <div class="campo">
+
+            <label>Fecha de Registro</label>
+
+            <input
+            type="text"
+            id="fechaRegistro"
+            readonly>
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h3>
+
+        Representantes
+
+    </h3>
+
+    <div id="listaRepresentantes">
 
     </div>
 
