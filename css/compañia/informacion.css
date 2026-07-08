@@ -432,3 +432,72 @@ select.estado-acceso{
     border:1px solid #dbe2ea;
 
 }
+
+
+.modal{
+
+    display:none;
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    align-items:center;
+
+    justify-content:center;
+
+    z-index:9999;
+
+}
+
+
+.modal-contenido{
+
+    background:white;
+
+    width:420px;
+
+    max-width:90%;
+
+    padding:30px;
+
+    border-radius:18px;
+
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:15px;
+
+}
+
+
+.modal-contenido input,
+.modal-contenido select{
+
+    padding:12px;
+
+    border-radius:10px;
+
+    border:1px solid #ddd;
+
+    font-size:14px;
+
+}
+
+
+.modal-contenido button{
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+}
