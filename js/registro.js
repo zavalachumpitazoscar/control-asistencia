@@ -12,6 +12,11 @@ import {
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js"; 
 
 import {
+    collection
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+import {
     auth,
     db
 }
@@ -73,6 +78,23 @@ function mostrarToast(tipo, mensaje) {
     }, 3000);
 
 }
+
+
+function generarEmpresaId(){
+
+    return "EMP-" +
+
+        Date.now().toString(36).toUpperCase() +
+
+        "-" +
+
+        Math.random()
+        .toString(36)
+        .substring(2,8)
+        .toUpperCase();
+
+}
+
 
 btnRegistrar.addEventListener(
 
@@ -141,101 +163,149 @@ Creando empresa...
 
                 credencial.user.uid;
 
-            await setDoc(
 
-                doc(
+const empresaId =
+    generarEmpresaId();
 
-                    db,
+await setDoc(
 
-                    "usuarios",
+    doc(
+        db,
+        "companias",
+        empresaId
+    ),
 
-                    uid
+    {
 
-                ),
+        empresaId,
 
-                {
+        estado:"ACTIVO",
 
-                    uid,
+        fechaRegistro:
+            serverTimestamp(),
 
-                    correoLogin:correo,
+        empresa:{
 
-                    rol:"EMPRESA",
+            ruc:
+                document
+                    .getElementById("ruc")
+                    .value.trim(),
 
-                    estado:"INACTIVO",
+            razonSocial:
+                document
+                    .getElementById("razonSocial")
+                    .value.trim(),
 
-                    fechaRegistro:
+            giro:
+                document
+                    .getElementById("giro")
+                    .value.trim()
 
-                        serverTimestamp(),
+        },
 
-                    empresa:{
+        ubicacion:{
 
-                        ruc:
+            direccion:
+                document
+                    .getElementById("direccion")
+                    .value.trim(),
 
-                            document
-                                .getElementById("ruc")
-                                .value.trim(),
+            departamento:
+                document
+                    .getElementById("departamento")
+                    .value.trim(),
 
-                        razonSocial:
+            provincia:
+                document
+                    .getElementById("provincia")
+                    .value.trim(),
 
-                            document
-                                .getElementById("razonSocial")
-                                .value.trim(),
+            distrito:
+                document
+                    .getElementById("distrito")
+                    .value.trim(),
 
-                        giro:
+            pais:
+                document
+                    .getElementById("pais")
+                    .value.trim(),
 
-                            document
-                                .getElementById("giro")
-                                .value.trim()
+            codigoPostal:
+                document
+                    .getElementById("codigoPostal")
+                    .value.trim()
 
-                    },
+        },
 
-                    ubicacion:{
+        representantes:
+            obtenerRepresentantes(),
 
-                        direccion:
+        configuracion:{
 
-                            document
-                                .getElementById("direccion")
-                                .value.trim(),
+            zonaHoraria:"America/Lima",
 
-                        departamento:
+            idioma:"es",
 
-                            document
-                                .getElementById("departamento")
-                                .value.trim(),
+            moneda:"PEN"
 
-                        provincia:
+        },
 
-                            document
-                                .getElementById("provincia")
-                                .value.trim(),
+        plan:{
 
-                        distrito:
+            nombre:"BASICO",
 
-                            document
-                                .getElementById("distrito")
-                                .value.trim(),
+            maxUsuarios:5,
 
-                        pais:
+            maxEmpleados:25,
 
-                            document
-                                .getElementById("pais")
-                                .value.trim(),
+            maxSucursales:1,
 
-                        codigoPostal:
+            maxAreas:10,
 
-                            document
-                                .getElementById("codigoPostal")
-                                .value.trim()
+            maxSubareas:30
 
-                    },
+        }
 
-                    representantes:
+    }
 
-                        obtenerRepresentantes()
+);
 
-                }
+await setDoc(
 
-            );
+    doc(
+        db,
+        "usuarios",
+        uid
+    ),
+
+    {
+
+        uid,
+
+        empresaId,
+
+        principal:true,
+
+        nombre:
+            obtenerRepresentantes()[0]?.nombre || "",
+
+        correoLogin:correo,
+
+        rol:"ADMINISTRADOR",
+
+        estado:"ACTIVO",
+
+        fechaRegistro:
+            serverTimestamp()
+
+    }
+
+);
+
+
+
+
+            
 
             mostrarToast(
 
