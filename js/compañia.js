@@ -1,48 +1,65 @@
-export function iniciarCompania(){
+export function iniciarCompania() {
 
     const botones =
         document.querySelectorAll(".tab");
 
-    const paneles =
-        document.querySelectorAll(".panel-tab");
+    botones.forEach(boton => {
 
+        boton.addEventListener("click", () => {
 
+            botones.forEach(b =>
 
-    botones.forEach(boton=>{
+                b.classList.remove("activo")
 
-        boton.addEventListener("click",()=>{
-
-            botones.forEach(b=>{
-
-                b.classList.remove("activo");
-
-            });
-
-
-            paneles.forEach(panel=>{
-
-                panel.classList.add("oculto");
-
-            });
-
-
+            );
 
             boton.classList.add("activo");
 
-
-
-            const nombre =
-                boton.dataset.tab;
-
-
-
-            document
-            .getElementById(nombre)
-            .classList
-            .remove("oculto");
+            cargarTab(
+                boton.dataset.tab
+            );
 
         });
 
     });
+
+    // Al abrir Compañía se carga Información
+    cargarTab("informacion");
+
+}
+
+
+
+async function cargarTab(tab) {
+
+    const contenedor =
+        document.getElementById("contenidoCompania");
+
+    try {
+
+        const respuesta =
+            await fetch(
+                `vistas/compañia/${tab}.html`
+            );
+
+        const html =
+            await respuesta.text();
+
+        contenedor.innerHTML =
+            html;
+
+    }
+
+    catch (error) {
+
+        contenedor.innerHTML = `
+
+            <h2>No se pudo cargar la pestaña.</h2>
+
+        `;
+
+        console.error(error);
+
+    }
 
 }
