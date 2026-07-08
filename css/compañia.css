@@ -1,0 +1,78 @@
+.compania{
+
+    display:flex;
+    flex-direction:column;
+    gap:30px;
+
+}
+
+
+
+.titulo-pagina h2{
+
+    font-size:30px;
+    color:#203864;
+
+}
+
+
+
+.titulo-pagina p{
+
+    color:#6b7280;
+    margin-top:6px;
+
+}
+
+
+
+.tabs-compania{
+
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+
+}
+
+
+
+.tab{
+
+    padding:12px 22px;
+    border:none;
+    border-radius:12px;
+    background:#eef2ff;
+    cursor:pointer;
+    font-weight:600;
+    transition:.25s;
+
+}
+
+
+
+.tab:hover{
+
+    background:#dbeafe;
+
+}
+
+
+
+.tab.activo{
+
+    background:#2563eb;
+    color:white;
+
+}
+
+
+
+#contenidoCompania{
+
+    background:white;
+    border-radius:18px;
+    padding:30px;
+    min-height:500px;
+    box-shadow:0 10px 35px rgba(0,0,0,.08);
+
+}
