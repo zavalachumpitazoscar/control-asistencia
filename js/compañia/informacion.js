@@ -10,7 +10,111 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+import {
+    createUserWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+import {
+    collection,
+    addDoc
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+
+
+const btnNuevoAcceso =
+document.getElementById("btnNuevoAcceso");
+
+
+const modalAcceso =
+document.getElementById("modalAcceso");
+
+
+btnNuevoAcceso.onclick = ()=>{
+
+    modalAcceso.style.display="flex";
+
+};
+
+document.getElementById("cerrarAcceso")
+.onclick=()=>{
+
+    modalAcceso.style.display="none";
+
+};
+
+
+document.getElementById("guardarAcceso")
+.onclick = async ()=>{
+
+
+const nombre =
+document.getElementById("nombreAcceso").value;
+
+
+const correo =
+document.getElementById("correoAcceso").value;
+
+
+const rol =
+document.getElementById("rolAcceso").value;
+
+
+
+const usuarioActual = auth.currentUser;
+
+
+const empresaSnap =
+await getDoc(
+doc(db,"usuarios",usuarioActual.uid)
+);
+
+
+const empresaId =
+empresaSnap.data().empresaId;
+
+
+
+const passwordTemporal =
+"123456";
+
+
+const nuevoUsuario =
+await createUserWithEmailAndPassword(
+auth,
+correo,
+passwordTemporal
+);
+
+
+
+await setDoc(
+doc(db,"usuarios",nuevoUsuario.user.uid),
+{
+
+nombre,
+
+correo,
+
+rol,
+
+estado:"ACTIVO",
+
+empresaId,
+
+creado:new Date()
+
+});
+
+
+alert("Usuario creado");
+
+
+modalAcceso.style.display="none";
+
+
+};
 
 export async function iniciarInformacion(){
 
