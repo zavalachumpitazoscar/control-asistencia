@@ -235,14 +235,40 @@ async()=>{
 
 
 
+// Guardar información de la sesión
 
-        const usuario =
+const usuario =
+    documento.data();
 
-            documento.data();
+sessionStorage.setItem(
+    "empresaId",
+    usuario.empresaId
+);
 
+sessionStorage.setItem(
+    "uid",
+    usuario.uid
+);
 
+sessionStorage.setItem(
+    "rol",
+    usuario.rol
+);
 
+sessionStorage.setItem(
+    "principal",
+    usuario.principal
+);
 
+sessionStorage.setItem(
+    "nombre",
+    usuario.nombre || ""
+);
+
+sessionStorage.setItem(
+    "correo",
+    usuario.correoLogin || ""
+);
 
         // Validar estado
 
@@ -258,7 +284,7 @@ async()=>{
 
                 "info",
 
-                "La empresa todavía no está activa."
+                "La cuenta se encuentra inactiva."
 
             );
 
@@ -274,27 +300,6 @@ async()=>{
 
         // Validar tipo de cuenta
 
-        if(usuario.rol !== "EMPRESA"){
-
-
-
-            await signOut(auth);
-
-
-
-            mostrarToast(
-
-                "error",
-
-                "Esta cuenta no pertenece a una empresa."
-
-            );
-
-
-
-            return;
-
-        }
 
 
 
@@ -312,7 +317,6 @@ async()=>{
 
 
         setTimeout(()=>{
-
 
             window.location.href =
                 "inicio.html";
