@@ -1,1 +1,185 @@
+/* ======================================
+   INFORMACIÓN DE LA EMPRESA
+====================================== */
 
+.card-compania{
+
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:35px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+}
+
+
+
+.card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:35px;
+
+    gap:20px;
+
+}
+
+
+
+.card-header h3{
+
+    font-size:28px;
+
+    color:#1e293b;
+
+    margin-bottom:6px;
+
+}
+
+
+
+.card-header p{
+
+    color:#64748b;
+
+    font-size:15px;
+
+}
+
+
+
+.btn-guardar{
+
+    border:none;
+
+    background:#2563eb;
+
+    color:white;
+
+    padding:14px 24px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+
+
+.btn-guardar:hover{
+
+    background:#1d4ed8;
+
+    transform:translateY(-2px);
+
+}
+
+
+
+.grid-formulario{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+
+    gap:25px;
+
+}
+
+
+
+.campo{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+}
+
+
+
+.campo-completo{
+
+    grid-column:1 / -1;
+
+}
+
+
+
+.campo label{
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#334155;
+
+}
+
+
+
+.campo input,
+
+.campo select{
+
+    padding:14px 16px;
+
+    border:1px solid #dbe2ea;
+
+    border-radius:12px;
+
+    font-size:15px;
+
+    transition:.25s;
+
+    outline:none;
+
+    background:white;
+
+}
+
+
+
+.campo input:focus,
+
+.campo select:focus{
+
+    border-color:#2563eb;
+
+    box-shadow:0 0 0 4px rgba(37,99,235,.12);
+
+}
+
+
+
+@media(max-width:768px){
+
+    .card-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+    .btn-guardar{
+
+        width:100%;
+
+    }
+
+}
