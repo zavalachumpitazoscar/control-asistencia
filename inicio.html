@@ -130,9 +130,31 @@
 
         </div>
 
-        <div class="usuario">
-            👤 Usuario
-        </div>
+<div class="usuario" id="btnUsuario">
+
+    <div class="usuario-avatar">
+        👤
+    </div>
+
+    <div class="usuario-info">
+
+        <span id="nombreUsuarioTop">
+            Usuario
+        </span>
+
+        <small>
+            Mi cuenta
+        </small>
+
+    </div>
+
+    <span class="usuario-flecha">
+        ▼
+    </span>
+
+</div>
+
+ 
 
     </header>
 
@@ -151,6 +173,75 @@
 
 
 </div>
+
+
+<div
+id="menuUsuario"
+class="menu-usuario">
+
+    <div class="menu-header">
+
+        <div class="avatar-grande">
+            👤
+        </div>
+
+        <h3 id="nombreUsuarioMenu">
+            Usuario
+        </h3>
+
+        <p id="correoUsuarioMenu">
+            correo@empresa.com
+        </p>
+
+        <span class="badge-rol">
+            Administrador
+        </span>
+
+    </div>
+
+    <div class="linea"></div>
+
+    <div class="campo-menu">
+
+        <label>Nombre</label>
+
+        <input
+        id="perfilNombre"
+        type="text">
+
+    </div>
+
+    <div class="campo-menu">
+
+        <label>Correo</label>
+
+        <input
+        id="perfilCorreo"
+        type="email">
+
+    </div>
+
+    <div class="campo-menu">
+
+        <label>Nueva contraseña</label>
+
+        <input
+        id="perfilPassword"
+        type="password"
+        placeholder="••••••••">
+
+    </div>
+
+    <button
+    id="guardarPerfil"
+    class="btn-guardar-perfil">
+
+        Guardar cambios
+
+    </button>
+
+</div>
+
 
 <script type="module" src="js/inicio.js"></script>
 
