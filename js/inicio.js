@@ -24,6 +24,42 @@ const overlay = document.querySelector(".overlay");
 
 
 // ============================
+// MENÚ USUARIO
+// ============================
+
+const btnUsuario =
+document.getElementById("btnUsuario");
+
+const menuUsuario =
+document.getElementById("menuUsuario");
+
+if(btnUsuario && menuUsuario){
+
+    btnUsuario.addEventListener("click",(e)=>{
+
+        e.stopPropagation();
+
+        menuUsuario.classList.toggle("mostrar");
+
+    });
+
+    document.addEventListener("click",(e)=>{
+
+        if(
+            !menuUsuario.contains(e.target) &&
+            !btnUsuario.contains(e.target)
+        ){
+
+            menuUsuario.classList.remove("mostrar");
+
+        }
+
+    });
+
+}
+
+
+// ============================
 // PROTEGER PAGINA
 // ============================
 
