@@ -11,9 +11,12 @@ from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 import {
     updateEmail,
-    updatePassword
+    updatePassword,
+    EmailAuthProvider,
+    reauthenticateWithCredential
 }
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+from
+"https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import {
 onAuthStateChanged,
@@ -282,43 +285,60 @@ async()=>{
     const usuario =
     auth.currentUser;
 
-    if(!usuario) return;
+    if(!usuario){
+
+        return;
+
+    }
 
     const nombre =
-    document.getElementById("perfilNombre")
+    document
+    .getElementById("perfilNombre")
     .value
     .trim();
 
     const correo =
-    document.getElementById("perfilCorreo")
+    document
+    .getElementById("perfilCorreo")
     .value
     .trim();
 
-    const password =
-    document.getElementById("perfilPassword")
+    const passwordActual =
+    document
+    .getElementById("perfilPasswordActual")
+    .value
+    .trim();
+
+    const passwordNueva =
+    document
+    .getElementById("perfilPassword")
     .value
     .trim();
 
     try{
 
-        const referencia =
-        doc(
-            db,
-            "usuarios",
-            usuario.uid
-        );
+        // Si cambia correo o contraseña,
+        // Firebase exige reautenticación.
 
-        const datosActualizar = {
+        if(
+            correo !== usuario.email ||
+            passwordNueva !== ""
+        ){
 
-            nombre,
-            correo
+            const credencial =
+            EmailAuthProvider.credential(
+                usuario.email,
+                passwordActual
+            );
 
-        };
+            await reauthenticateWithCredential(
+                usuario,
+                credencial
+            );
 
-        await updateDoc(
-            referencia,
-            datosActualizar
-        );
+        }
+
+        // Actualizar correo
 
         if(correo !== usuario.email){
 
@@ -329,27 +349,64 @@ async()=>{
 
         }
 
-        if(password !== ""){
+        // Actualizar contraseña
+
+        if(passwordNueva !== ""){
 
             await updatePassword(
                 usuario,
-                password
+                passwordNueva
             );
 
         }
 
-        document.getElementById("nombreUsuarioTop").textContent =
-        nombre;
+        // Actualizar Firestore
 
-        document.getElementById("nombreUsuarioMenu").textContent =
-        nombre;
+        await updateDoc(
 
-        document.getElementById("correoUsuarioMenu").textContent =
-        correo;
+            doc(
+                db,
+                "usuarios",
+                usuario.uid
+            ),
 
-        alert("Perfil actualizado correctamente.");
+            {
 
-        document.getElementById("perfilPassword").value="";
+                nombre,
+
+                correo
+
+            }
+
+        );
+
+        // Actualizar pantalla
+
+        document
+        .getElementById("nombreUsuarioTop")
+        .textContent = nombre;
+
+        document
+        .getElementById("nombreUsuarioMenu")
+        .textContent = nombre;
+
+        document
+        .getElementById("correoUsuarioMenu")
+        .textContent = correo;
+
+        // Limpiar contraseñas
+
+        document
+        .getElementById("perfilPassword")
+        .value = "";
+
+        document
+        .getElementById("perfilPasswordActual")
+        .value = "";
+
+        alert(
+            "Perfil actualizado correctamente."
+        );
 
     }
 
@@ -357,7 +414,39 @@ async()=>{
 
         console.error(error);
 
-        alert(error.message);
+        switch(error.code){
+
+            case "auth/invalid-credential":
+
+            case "auth/wrong-password":
+
+                alert(
+                    "La contraseña actual es incorrecta."
+                );
+
+            break;
+
+            case "auth/email-already-in-use":
+
+                alert(
+                    "Ese correo ya está siendo utilizado."
+                );
+
+            break;
+
+            case "auth/requires-recent-login":
+
+                alert(
+                    "Debes volver a iniciar sesión para realizar este cambio."
+                );
+
+            break;
+
+            default:
+
+                alert(error.message);
+
+        }
 
     }
 
