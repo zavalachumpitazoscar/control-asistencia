@@ -630,3 +630,462 @@ padding:15px;
 .sidebar{
     z-index: 100;
 }
+
+
+    //USUARIO CAMBIO DE CONTRASEÑA
+
+.usuario{
+
+display:flex;
+
+align-items:center;
+
+gap:12px;
+
+padding:8px 15px;
+
+border-radius:14px;
+
+background:#f8fafc;
+
+cursor:pointer;
+
+transition:.25s;
+
+position:relative;
+
+user-select:none;
+
+}
+
+.usuario:hover{
+
+background:#eef2ff;
+
+}
+
+.usuario-avatar{
+
+width:42px;
+
+height:42px;
+
+border-radius:50%;
+
+background:linear-gradient(
+135deg,
+#667eea,
+#764ba2
+);
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+color:white;
+
+font-size:20px;
+
+}
+
+.usuario-info{
+
+display:flex;
+
+flex-direction:column;
+
+}
+
+.usuario-info span{
+
+font-weight:700;
+
+color:#111827;
+
+}
+
+.usuario-info small{
+
+color:#6b7280;
+
+font-size:12px;
+
+}
+
+.usuario-flecha{
+
+font-size:12px;
+
+color:#6b7280;
+
+}
+
+.menu-usuario{
+
+position:absolute;
+
+top:82px;
+
+right:25px;
+
+width:340px;
+
+background:white;
+
+border-radius:22px;
+
+box-shadow:
+0 20px 60px rgba(0,0,0,.18);
+
+padding:22px;
+
+display:none;
+
+z-index:999;
+
+animation:aparecer .25s ease;
+
+}
+
+.menu-usuario.mostrar{
+
+display:block;
+
+}
+
+.menu-header{
+
+text-align:center;
+
+margin-bottom:20px;
+
+}
+
+.avatar-grande{
+
+width:72px;
+
+height:72px;
+
+margin:auto;
+
+border-radius:50%;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+background:linear-gradient(
+135deg,
+#667eea,
+#764ba2
+);
+
+color:white;
+
+font-size:34px;
+
+margin-bottom:15px;
+
+}
+
+.badge-rol{
+
+display:inline-block;
+
+margin-top:8px;
+
+padding:6px 12px;
+
+border-radius:999px;
+
+background:#eef2ff;
+
+color:#4f46e5;
+
+font-size:12px;
+
+font-weight:700;
+
+}
+
+
+.linea{
+
+height:1px;
+
+background:#e5e7eb;
+
+margin:20px 0;
+
+}
+
+.campo-menu{
+
+margin-bottom:15px;
+
+}
+
+.campo-menu label{
+
+display:block;
+
+font-size:13px;
+
+margin-bottom:6px;
+
+font-weight:600;
+
+color:#374151;
+
+}
+
+.campo-menu input{
+
+width:100%;
+
+padding:12px 14px;
+
+border:1px solid #d1d5db;
+
+border-radius:12px;
+
+font-size:14px;
+
+transition:.2s;
+
+}
+
+.campo-menu input:focus{
+
+outline:none;
+
+border-color:#667eea;
+
+box-shadow:
+0 0 0 3px rgba(102,126,234,.15);
+
+}
+
+.btn-guardar-perfil{
+
+width:100%;
+
+margin-top:10px;
+
+padding:14px;
+
+border:none;
+
+border-radius:14px;
+
+background:linear-gradient(
+135deg,
+#667eea,
+#764ba2
+);
+
+color:white;
+
+font-size:15px;
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.btn-guardar-perfil:hover{
+
+transform:translateY(-2px);
+
+box-shadow:
+0 10px 25px rgba(102,126,234,.35);
+
+}
+
+@keyframes aparecer{
+
+from{
+
+opacity:0;
+
+transform:
+translateY(-10px)
+scale(.98);
+
+}
+
+to{
+
+opacity:1;
+
+transform:
+translateY(0)
+scale(1);
+
+}
+
+}
+
+/* ===========================
+MENU USUARIO - TABLET
+=========================== */
+
+@media (max-width: 768px){
+
+.menu-usuario{
+
+    position:fixed;
+
+    top:85px;
+
+    left:50%;
+
+    right:auto;
+
+    transform:translateX(-50%);
+
+    width:92%;
+
+    max-width:420px;
+
+    border-radius:20px;
+
+    padding:22px;
+
+    z-index:1000;
+
+}
+
+.usuario{
+
+    padding:8px 12px;
+
+}
+
+.usuario-avatar{
+
+    width:40px;
+
+    height:40px;
+
+    font-size:18px;
+
+}
+
+.usuario-info span{
+
+    font-size:15px;
+
+}
+
+.usuario-info small{
+
+    font-size:11px;
+
+}
+
+}
+
+/* ===========================
+MENU USUARIO - CELULAR
+=========================== */
+
+@media (max-width: 480px){
+
+.menu-usuario{
+
+    top:75px;
+
+    left:12px;
+
+    right:12px;
+
+    transform:none;
+
+    width:auto;
+
+    max-width:none;
+
+    padding:18px;
+
+    border-radius:18px;
+
+}
+
+.avatar-grande{
+
+    width:62px;
+
+    height:62px;
+
+    font-size:28px;
+
+}
+
+.menu-header h3{
+
+    font-size:18px;
+
+}
+
+.menu-header p{
+
+    font-size:13px;
+
+}
+
+.campo-menu label{
+
+    font-size:12px;
+
+}
+
+.campo-menu input{
+
+    padding:11px 12px;
+
+    font-size:14px;
+
+}
+
+.btn-guardar-perfil{
+
+    padding:13px;
+
+    font-size:14px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.usuario-info{
+
+    display:none;
+
+}
+
+.usuario-flecha{
+
+    display:none;
+
+}
+
+.usuario{
+
+    padding:6px;
+
+    background:transparent;
+
+}
+
+}
