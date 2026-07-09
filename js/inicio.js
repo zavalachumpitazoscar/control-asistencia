@@ -398,14 +398,22 @@ if(passwordNueva !== ""){
 
 }
 
-    if(passwordNueva){
+    if(
 
-    await updatePassword(
-        usuario,
-        passwordNueva
+    (correo !== usuario.email || passwordNueva !== "") &&
+
+    passwordActual === ""
+
+){
+
+    alert(
+        "Debes ingresar tu contraseña actual."
     );
 
+    return;
+
 }
+
 
     try{
 
