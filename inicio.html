@@ -213,14 +213,34 @@ class="menu-usuario">
 
     <div class="campo-menu">
 
-        <label>Nueva contraseña</label>
+    <label>Nueva contraseña</label>
 
-        <input
+    <input
         id="perfilPassword"
         type="password"
         placeholder="••••••••">
 
+    <div class="password-reglas">
+
+        <div id="reglaLongitud" class="regla">
+            ✖ Mínimo 8 caracteres
+        </div>
+
+        <div id="reglaMayuscula" class="regla">
+            ✖ Una letra mayúscula
+        </div>
+
+        <div id="reglaMinuscula" class="regla">
+            ✖ Una letra minúscula
+        </div>
+
+        <div id="reglaEspecial" class="regla">
+            ✖ Un carácter especial (. ! @ # $ %)
+        </div>
+
     </div>
+
+</div>
 
     <small id="mensajePassword" class="password-info">
 La contraseña debe contener:
