@@ -348,7 +348,7 @@ if(listaAccesos){
 
             <p>
             <strong>Correo:</strong>
-            ${datosUsuario.correo}
+            ${datosUsuario.correo || datosUsuario.correoLogin || "No registrado"}
             </p>
 
 
