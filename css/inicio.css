@@ -312,7 +312,7 @@ padding:25px;
 
 .topbar{
 
-position:sticky;
+position:relative;
 
 top:0;
 
@@ -726,9 +726,9 @@ color:#6b7280;
 
 position:absolute;
 
-top:82px;
+top:75px;
 
-right:25px;
+right:0;
 
 width:340px;
 
