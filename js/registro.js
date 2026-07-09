@@ -289,7 +289,7 @@ await setDoc(
         nombre:
             obtenerRepresentantes()[0]?.nombre || "",
 
-        correoLogin:correo,
+        correo:correo,
 
         rol:"ADMINISTRADOR",
 
