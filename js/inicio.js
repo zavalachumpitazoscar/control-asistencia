@@ -51,30 +51,92 @@ document.getElementById("btnUsuario");
 const menuUsuario =
 document.getElementById("menuUsuario");
 
+function reiniciarValidacionPassword(){
+
+    document
+    .querySelectorAll(".regla")
+    .forEach(regla=>{
+
+        regla.classList.remove("ok","error");
+
+        regla.innerHTML =
+        "✖ " + regla.textContent.substring(2);
+
+    });
+
+    document.getElementById("perfilPassword").value="";
+
+}
+
 if(btnUsuario && menuUsuario){
 
     btnUsuario.addEventListener("click",(e)=>{
 
-        e.stopPropagation();
+    e.stopPropagation();
 
-        menuUsuario.classList.toggle("mostrar");
+    const abierto =
+    menuUsuario.classList.toggle("mostrar");
 
-    });
+    if(abierto){
 
-    document.addEventListener("click",(e)=>{
+        reiniciarValidacionPassword();
 
-        if(
-            !menuUsuario.contains(e.target) &&
-            !btnUsuario.contains(e.target)
-        ){
+    }
 
-            menuUsuario.classList.remove("mostrar");
+});
 
-        }
+document.addEventListener("click",(e)=>{
 
-    });
+    if(
+        !menuUsuario.contains(e.target) &&
+        !btnUsuario.contains(e.target)
+    ){
+
+        menuUsuario.classList.remove("mostrar");
+
+        reiniciarValidacionPassword();
+
+    }
+
+});
 
 }
+
+
+const inputPassword =
+document.getElementById("perfilPassword");
+
+if(inputPassword){
+
+inputPassword.addEventListener("input",()=>{
+
+const valor =
+inputPassword.value;
+
+actualizarRegla(
+"reglaLongitud",
+valor.length>=8
+);
+
+actualizarRegla(
+"reglaMayuscula",
+/[A-Z]/.test(valor)
+);
+
+actualizarRegla(
+"reglaMinuscula",
+/[a-z]/.test(valor)
+);
+
+actualizarRegla(
+"reglaEspecial",
+/[.!@#$%]/.test(valor)
+);
+
+});
+
+}
+
 
 
 // ============================
@@ -481,3 +543,34 @@ if(passwordNueva !== ""){
     }
 
 });
+
+
+function actualizarRegla(id,cumple){
+
+const regla =
+document.getElementById(id);
+
+if(!regla)return;
+
+if(cumple){
+
+regla.classList.remove("error");
+
+regla.classList.add("ok");
+
+regla.innerHTML =
+"✔ " + regla.textContent.substring(2);
+
+}
+else{
+
+regla.classList.remove("ok");
+
+regla.classList.add("error");
+
+regla.innerHTML =
+"✖ " + regla.textContent.substring(2);
+
+}
+
+}
