@@ -1,5 +1,20 @@
 import { auth } from "./firebase-config.js";
 
+import { db } from "./firebase-config.js";
+
+import {
+    doc,
+    getDoc,
+    updateDoc
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+import {
+    updateEmail,
+    updatePassword
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
 import {
 onAuthStateChanged,
 signOut
@@ -64,26 +79,19 @@ if(btnUsuario && menuUsuario){
 // ============================
 
 
-onAuthStateChanged(auth,(usuario)=>{
-
+onAuthStateChanged(auth, async(usuario)=>{
 
     if(!usuario){
 
-
-        window.location.href =
-        "index.html";
-
+        window.location.href="index.html";
 
         return;
 
-
     }
 
+    await cargarPerfilUsuario(usuario);
 
-    cargarVista(
-        "dashboard"
-    );
-
+    cargarVista("dashboard");
 
 });
 
@@ -226,3 +234,131 @@ async function cargarVista(vista){
 // cargar dashboard al iniciar
 
 cargarVista("dashboard");
+
+
+async function cargarPerfilUsuario(usuario){
+
+    const referencia =
+    doc(
+        db,
+        "usuarios",
+        usuario.uid
+    );
+
+    const documento =
+    await getDoc(referencia);
+
+    if(!documento.exists()) return;
+
+    const datos =
+    documento.data();
+
+    document.getElementById("nombreUsuarioTop").textContent =
+    datos.nombre || "";
+
+    document.getElementById("nombreUsuarioMenu").textContent =
+    datos.nombre || "";
+
+    document.getElementById("correoUsuarioMenu").textContent =
+    datos.correo || datos.correoLogin || usuario.email;
+
+    document.getElementById("perfilNombre").value =
+    datos.nombre || "";
+
+    document.getElementById("perfilCorreo").value =
+    datos.correo || datos.correoLogin || usuario.email;
+
+    document.querySelector(".badge-rol").textContent =
+    datos.rol || "";
+}
+
+
+document
+.getElementById("guardarPerfil")
+.addEventListener(
+"click",
+async()=>{
+
+    const usuario =
+    auth.currentUser;
+
+    if(!usuario) return;
+
+    const nombre =
+    document.getElementById("perfilNombre")
+    .value
+    .trim();
+
+    const correo =
+    document.getElementById("perfilCorreo")
+    .value
+    .trim();
+
+    const password =
+    document.getElementById("perfilPassword")
+    .value
+    .trim();
+
+    try{
+
+        const referencia =
+        doc(
+            db,
+            "usuarios",
+            usuario.uid
+        );
+
+        const datosActualizar = {
+
+            nombre,
+            correo
+
+        };
+
+        await updateDoc(
+            referencia,
+            datosActualizar
+        );
+
+        if(correo !== usuario.email){
+
+            await updateEmail(
+                usuario,
+                correo
+            );
+
+        }
+
+        if(password !== ""){
+
+            await updatePassword(
+                usuario,
+                password
+            );
+
+        }
+
+        document.getElementById("nombreUsuarioTop").textContent =
+        nombre;
+
+        document.getElementById("nombreUsuarioMenu").textContent =
+        nombre;
+
+        document.getElementById("correoUsuarioMenu").textContent =
+        correo;
+
+        alert("Perfil actualizado correctamente.");
+
+        document.getElementById("perfilPassword").value="";
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        alert(error.message);
+
+    }
+
+});
