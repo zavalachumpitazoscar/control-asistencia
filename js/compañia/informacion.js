@@ -282,7 +282,7 @@ estado:"ACTIVO",
 
 empresaId,
 
-creado:new Date()
+fechaRegistro:new Date()
 
 });
 
