@@ -267,7 +267,7 @@ sessionStorage.setItem(
 
 sessionStorage.setItem(
     "correo",
-    usuario.correoLogin || ""
+    usuario.correo || ""
 );
 
         // Validar estado
