@@ -348,9 +348,8 @@ if(listaAccesos){
 
             <p>
             <strong>Correo:</strong>
-            ${datosUsuario.correo || datosUsuario.correoLogin || "No registrado"}
+            ${datosUsuario.correo || "No registrado"}
             </p>
-
 
             <p>
             <strong>Rol:</strong>
