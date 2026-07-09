@@ -309,11 +309,41 @@ async()=>{
     .value
     .trim();
 
-    const passwordNueva =
-    document
-    .getElementById("perfilPassword")
-    .value
-    .trim();
+const passwordNueva =
+document
+.getElementById("perfilPassword")
+.value.trim();
+
+if(passwordNueva !== ""){
+
+    const regex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[.!@#$%])(?=.{8,})/;
+
+    if(!regex.test(passwordNueva)){
+
+        alert(
+`La contraseña debe contener:
+
+• Mínimo 8 caracteres
+• Una letra mayúscula
+• Una letra minúscula
+• Un carácter especial (. ! @ # $ %)`
+        );
+
+        return;
+
+    }
+
+}
+
+    if(passwordNueva){
+
+    await updatePassword(
+        usuario,
+        passwordNueva
+    );
+
+}
 
     try{
 
