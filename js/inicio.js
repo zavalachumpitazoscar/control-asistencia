@@ -144,44 +144,6 @@ window.location.href =
 
 });
 
-botones.forEach(btn=>{
-
-
-    btn.addEventListener("click",()=>{
-
-
-        botones.forEach(b=>
-            b.classList.remove("activo")
-        );
-
-
-        btn.classList.add("activo");
-
-
-
-        const vista =
-        btn.dataset.vista;
-
-
-
-        titulo.textContent =
-        btn.textContent.trim();
-
-
-
-        cargarVista(vista);
-
-
-    });
-
-
-});
-
-
-
-
-
-
 
 async function cargarVista(vista){
 
