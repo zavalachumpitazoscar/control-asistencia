@@ -325,9 +325,13 @@ try{
 
                             </h3>
 
-                            <span class="badge-estado">
+                            <span class="badge-estado ${
+                            sucursal.estado === "ACTIVA"
+                            ? "activa"
+                            : "inactiva"
+                            }">
 
-                                ${sucursal.estado}
+                            ${sucursal.estado}
 
                             </span>
 
