@@ -515,13 +515,8 @@ if(lista){
 
             <h4>${rep.nombre}</h4>
 
-            <button
-                class="btnEliminarRepresentante"
-                data-index="${indice}"
-                title="Eliminar representante">
-
-                🗑
-
+            <button class="btnEliminarRepresentante" data-index="${indice}" title="Eliminar representante">
+            <i class="bi bi-trash"></i>
             </button>
 
         </div>
