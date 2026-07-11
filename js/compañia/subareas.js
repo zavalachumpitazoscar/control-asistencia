@@ -460,13 +460,13 @@ export function iniciarSubareas(){
 
                     <div class="subarea-footer">
 
-                        <div class="total-colaboradores">
+                        <button class="btnColaboradoresSubarea" data-id="${documento.id}">
 
-                            <i class="bi bi-people"></i>
+                        <i class="bi bi-people"></i>
 
-                            0 colaboradores
+                        0 colaboradores
 
-                        </div>
+                        </button>
 
 
                         <div class="acciones-subarea">
@@ -716,7 +716,7 @@ export function iniciarSubareas(){
             //=========================
 
             document
-            .querySelectorAll(".total-colaboradores")
+            .querySelectorAll(".btnColaboradoresSubarea")
             .forEach(boton=>{
 
                 boton.onclick = ()=>{
