@@ -361,10 +361,14 @@
 
     align-items:center;
 
+    padding:20px;
+
     z-index:999;
 
 }
 
+
+/* CONTENIDO */
 
 .modal-contenido{
 
@@ -374,9 +378,15 @@
 
     max-width:560px;
 
+    max-height:90vh;
+
     border-radius:22px;
 
     overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
 
     animation:modal .25s ease;
 
@@ -384,6 +394,7 @@
     0 25px 60px rgba(15,23,42,.25);
 
 }
+
 
 
 @keyframes modal{
@@ -407,6 +418,7 @@
 }
 
 
+
 .modal-header{
 
     display:flex;
@@ -419,7 +431,10 @@
 
     border-bottom:1px solid #e2e8f0;
 
+    flex-shrink:0;
+
 }
+
 
 
 .modal-header h3{
@@ -429,6 +444,7 @@
     color:#0f172a;
 
 }
+
 
 
 .modal-header button{
@@ -454,8 +470,12 @@
 
     gap:18px;
 
+    overflow-y:auto;
+
 }
 
+
+/* CAMPOS */
 
 .campo{
 
@@ -506,6 +526,10 @@
 }
 
 
+
+
+/* FOOTER FIJO */
+
 .modal-footer{
 
     padding:22px 28px;
@@ -516,8 +540,9 @@
 
     justify-content:flex-end;
 
-}
+    flex-shrink:0;
 
+}
 
 /*======================================
     VACÍO
@@ -614,5 +639,65 @@
         width:92%;
 
     }
+
+}
+
+@media(max-width:600px){
+
+
+    .modal{
+
+        padding:12px;
+
+    }
+
+
+    .modal-contenido{
+
+        max-height:95vh;
+
+        border-radius:18px;
+
+    }
+
+
+    .modal-header{
+
+        padding:18px 20px;
+
+    }
+
+
+    .modal-header h3{
+
+        font-size:18px;
+
+    }
+
+
+    .modal-body{
+
+        padding:20px;
+
+        gap:15px;
+
+    }
+
+
+    .campo input{
+
+        padding:12px 14px;
+
+        font-size:14px;
+
+    }
+
+
+    .modal-footer{
+
+        padding:18px 20px;
+
+    }
+
 
 }
