@@ -59,9 +59,17 @@ export async function iniciarInformacion(){
 
     const datos =
         documento.data();
+renderizarRepresentantes();
 
-const usuarioActual =
-    auth.currentUser;
+const usuarioActual = auth.currentUser;
+
+if(!usuarioActual){
+
+    console.error("No hay usuario autenticado.");
+
+    return;
+
+}
 
 const documentoUsuario =
     await getDoc(
@@ -77,6 +85,143 @@ const datosUsuarioActual =
 
 const esAdministrador =
     datosUsuarioActual?.rol === "ADMINISTRADOR";
+
+const listaRepresentantes =
+document.getElementById("listaRepresentantes");
+
+function renderizarRepresentantes(){
+
+    if(!listaRepresentantes)
+        return;
+
+    listaRepresentantes.innerHTML="";
+
+    (datos.representantes || []).forEach((rep,indice)=>{
+
+        listaRepresentantes.innerHTML +=`
+
+        <div
+            class="representante-card"
+            id="representante-${indice}">
+
+            <div class="representante-header">
+
+                <h4>${rep.nombre}</h4>
+
+                <button
+                    class="btnEliminarRepresentante"
+                    data-index="${indice}"
+                    title="Eliminar representante">
+
+                    <i class="bi bi-trash"></i>
+
+                </button>
+
+            </div>
+
+            <p><strong>Cargo:</strong> ${rep.cargo}</p>
+
+            <p><strong>DNI:</strong> ${rep.dni}</p>
+
+            <p><strong>Correo:</strong> ${rep.correo}</p>
+
+            <p><strong>Teléfono:</strong> ${rep.telefono}</p>
+
+        </div>
+
+        `;
+
+    });
+
+    document
+    .querySelectorAll(".btnEliminarRepresentante")
+    .forEach(boton=>{
+
+        boton.onclick = eliminarRepresentante;
+
+    });
+
+}
+
+async function eliminarRepresentante(e){
+
+    const boton =
+    e.currentTarget;
+
+    const indice =
+    Number(
+        boton.dataset.index
+    );
+
+    const resultado =
+    await Swal.fire({
+
+        title:"¿Eliminar representante?",
+
+        text:"Esta acción no se puede deshacer.",
+
+        icon:"warning",
+
+        showCancelButton:true,
+
+        confirmButtonText:"Sí, eliminar",
+
+        cancelButtonText:"Cancelar",
+
+        confirmButtonColor:"#dc2626",
+
+        cancelButtonColor:"#64748b",
+
+        reverseButtons:true
+
+    });
+
+    if(!resultado.isConfirmed)
+        return;
+
+    try{
+
+        datos.representantes.splice(indice,1);
+
+        await updateDoc(
+            referencia,
+            {
+                representantes:
+                datos.representantes
+            }
+        );
+
+        renderizarRepresentantes();
+
+        await Swal.fire({
+
+            icon:"success",
+
+            title:"Representante eliminado",
+
+            timer:1500,
+
+            showConfirmButton:false
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        Swal.fire({
+
+            icon:"error",
+
+            title:"No fue posible eliminar."
+
+        });
+
+    }
+
+}
 
     const btnNuevoRepresentante =
 document.getElementById("btnNuevoRepresentante");
@@ -136,8 +281,34 @@ if(guardarRepresentante){
                 }
             );
 
+            datos.representantes = representantes;
 
-            alert("Representante agregado correctamente");
+renderizarRepresentantes();
+
+document.getElementById("nombreRepresentante").value = "";
+
+document.getElementById("dniRepresentante").value = "";
+
+document.getElementById("correoRepresentante").value = "";
+
+document.getElementById("telefonoRepresentante").value = "";
+
+document.getElementById("cargoRepresentante").value = "";
+
+modalRepresentante.style.display="none";
+
+
+            await Swal.fire({
+
+            icon:"success",
+
+            title:"Representante agregado",
+
+            timer:1400,
+
+            showConfirmButton:false
+
+            });
 
 
             if(modalRepresentante){
@@ -145,9 +316,6 @@ if(guardarRepresentante){
                 modalRepresentante.style.display="none";
 
             }
-
-
-            location.reload();
 
 
         }
@@ -451,9 +619,6 @@ document
                 :
                 "Usuario desactivado correctamente."
             );
-
-            location.reload();
-
         }
 
         catch(error){
@@ -497,133 +662,8 @@ if(cerrarRepresentante && modalRepresentante){
 
 }
 
-const lista =
-document.getElementById("listaRepresentantes");
 
 
-if(lista){
-
-    lista.innerHTML = "";
-
-(datos.representantes || []).forEach((rep, indice)=>{
-
-    lista.innerHTML += `
-
-    <div class="representante-card">
-
-        <div class="representante-header">
-
-            <h4>${rep.nombre}</h4>
-
-            <button class="btnEliminarRepresentante" data-index="${indice}" title="Eliminar representante">
-            <i class="bi bi-trash"></i>
-            </button>
-
-        </div>
-
-        <p><strong>Cargo:</strong> ${rep.cargo}</p>
-
-        <p><strong>DNI:</strong> ${rep.dni}</p>
-
-        <p><strong>Correo:</strong> ${rep.correo}</p>
-
-        <p><strong>Teléfono:</strong> ${rep.telefono}</p>
-
-    </div>
-
-    `;
-
-});
-
-document
-.querySelectorAll(".btnEliminarRepresentante")
-.forEach(boton=>{
-
-    boton.onclick = async()=>{
-
-        const resultado =
-        await Swal.fire({
-
-            title:"¿Eliminar representante?",
-
-            text:"Esta acción no se puede deshacer.",
-
-            icon:"warning",
-
-            showCancelButton:true,
-
-            confirmButtonText:"Sí, eliminar",
-
-            cancelButtonText:"Cancelar",
-
-            confirmButtonColor:"#dc2626",
-
-            cancelButtonColor:"#64748b",
-
-            reverseButtons:true
-
-        });
-
-        if(!resultado.isConfirmed)
-            return;
-
-        try{
-
-            const indice =
-            Number(
-                boton.dataset.index
-            );
-
-            const representantes =
-            [...(datos.representantes || [])];
-
-            representantes.splice(indice,1);
-
-            await updateDoc(
-                referencia,
-                {
-                    representantes
-                }
-            );
-
-            await Swal.fire({
-
-                icon:"success",
-
-                title:"Representante eliminado",
-
-                text:"El representante fue eliminado correctamente.",
-
-                timer:1800,
-
-                showConfirmButton:false
-
-            });
-
-            location.reload();
-
-        }
-
-        catch(error){
-
-            console.error(error);
-
-            await Swal.fire({
-
-                icon:"error",
-
-                title:"Ocurrió un error",
-
-                text:"No fue posible eliminar el representante."
-
-            });
-
-        }
-
-    };
-
-});
-}
 
 
     //=========================
