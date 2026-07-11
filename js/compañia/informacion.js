@@ -593,41 +593,131 @@ document
             ? "INACTIVO"
             : "ACTIVO";
 
-        const mensaje =
+
+        const resultado =
+        await Swal.fire({
+
+            title:
+            estadoActual === "ACTIVO"
+            ? "¿Desactivar usuario?"
+            : "¿Activar usuario?",
+
+
+            text:
             estadoActual === "ACTIVO"
             ?
-            "¿Desea desactivar este usuario?\n\nNo podrá volver a iniciar sesión hasta que sea activado nuevamente."
+            "El usuario no podrá iniciar sesión hasta que sea activado nuevamente."
             :
-            "¿Desea volver a activar este usuario?";
+            "El usuario podrá volver a ingresar al sistema.",
 
-        if(!confirm(mensaje))
+
+            icon:
+            estadoActual === "ACTIVO"
+            ? "warning"
+            : "question",
+
+
+            showCancelButton:true,
+
+
+            confirmButtonText:
+            estadoActual === "ACTIVO"
+            ?
+            "Sí, desactivar"
+            :
+            "Sí, activar",
+
+
+            cancelButtonText:"Cancelar",
+
+
+            confirmButtonColor:
+            estadoActual === "ACTIVO"
+            ?
+            "#dc2626"
+            :
+            "#16a34a",
+
+
+            cancelButtonColor:"#64748b",
+
+
+            reverseButtons:true
+
+        });
+
+
+        if(!resultado.isConfirmed)
             return;
+
 
         try{
 
+
             await updateDoc(
-                doc(db,"usuarios",uid),
+
+                doc(
+                    db,
+                    "usuarios",
+                    uid
+                ),
+
                 {
                     estado:nuevoEstado
                 }
+
             );
 
-            alert(
+
+            await Swal.fire({
+
+                icon:"success",
+
+                title:
                 nuevoEstado === "ACTIVO"
                 ?
-                "Usuario activado correctamente."
+                "Usuario activado"
                 :
-                "Usuario desactivado correctamente."
-            );
+                "Usuario desactivado",
+
+
+                text:
+                nuevoEstado === "ACTIVO"
+                ?
+                "El usuario puede ingresar nuevamente."
+                :
+                "El acceso fue bloqueado correctamente.",
+
+
+                timer:1800,
+
+                showConfirmButton:false
+
+            });
+
+
         }
+
 
         catch(error){
 
+
             console.error(error);
 
-            alert("Ocurrió un error.");
+
+            Swal.fire({
+
+                icon:"error",
+
+                title:"Ocurrió un error",
+
+                text:"No fue posible actualizar el usuario."
+
+            });
+
 
         }
+
 
     };
 
