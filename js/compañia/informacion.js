@@ -12,7 +12,8 @@ import {
     collection,
     getDocs,
     query,
-    where
+    where,
+    deleteDoc
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -58,6 +59,23 @@ export async function iniciarInformacion(){
 
     const datos =
         documento.data();
+
+const usuarioActual = auth.currentUser;
+
+const documentoUsuario =
+await getDoc(
+    doc(
+        db,
+        "usuarios",
+        usuarioActual.uid
+    )
+);
+
+const datosUsuarioActual =
+documentoUsuario.data();
+
+const esAdministrador =
+datosUsuarioActual?.rol === "ADMINISTRADOR";
 
     const btnNuevoRepresentante =
 document.getElementById("btnNuevoRepresentante");
@@ -335,40 +353,97 @@ if(listaAccesos){
 
 
 
-        listaAccesos.innerHTML +=
-        `
+listaAccesos.innerHTML +=
+`
 
-        <div class="acceso-card">
+<div class="acceso-card">
 
+    <div class="acceso-header">
 
-            <h4>
-            ${datosUsuario.nombre}
-            </h4>
+        <h4>${datosUsuario.nombre}</h4>
 
+        ${
+            esAdministrador &&
+            usuario.id !== auth.currentUser.uid
 
-            <p>
-            <strong>Correo:</strong>
-            ${datosUsuario.correo || "No registrado"}
-            </p>
+            ?
 
-            <p>
-            <strong>Rol:</strong>
-            ${datosUsuario.rol}
-            </p>
+            `<button
+                class="btnEliminarUsuario"
+                data-id="${usuario.id}">
+                🗑
+            </button>`
 
+            :
 
-            <p>
-            <strong>Estado:</strong>
-            ${datosUsuario.estado}
-            </p>
+            ""
 
+        }
 
-        </div>
+    </div>
 
-        `;
+    <p>
+        <strong>Correo:</strong>
+        ${datosUsuario.correo || "No registrado"}
+    </p>
+
+    <p>
+        <strong>Rol:</strong>
+        ${datosUsuario.rol}
+    </p>
+
+    <p>
+        <strong>Estado:</strong>
+        ${datosUsuario.estado}
+    </p>
+
+</div>
+
+`;
 
 
     });
+
+    document
+.querySelectorAll(".btnEliminarUsuario")
+.forEach(boton=>{
+
+    boton.onclick = async()=>{
+
+        const confirmar =
+        confirm(
+            "¿Está seguro de eliminar este usuario?"
+        );
+
+        if(!confirmar) return;
+
+        try{
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "usuarios",
+                    boton.dataset.id
+                )
+            );
+
+            alert("Usuario eliminado.");
+
+            location.reload();
+
+        }
+
+        catch(error){
+
+            console.error(error);
+
+            alert("No se pudo eliminar el usuario.");
+
+        }
+
+    };
+
+});
 
 
 }
