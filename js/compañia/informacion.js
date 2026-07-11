@@ -505,13 +505,26 @@ if(lista){
 
     lista.innerHTML = "";
 
-    (datos.representantes || []).forEach(rep=>{
+(datos.representantes || []).forEach((rep, indice)=>{
 
-        lista.innerHTML += `
+    lista.innerHTML += `
 
-        <div class="representante-card">
+    <div class="representante-card">
 
-        <h4>${rep.nombre}</h4>
+        <div class="representante-header">
+
+            <h4>${rep.nombre}</h4>
+
+            <button
+                class="btnEliminarRepresentante"
+                data-index="${indice}"
+                title="Eliminar representante">
+
+                🗑
+
+            </button>
+
+        </div>
 
         <p><strong>Cargo:</strong> ${rep.cargo}</p>
 
@@ -521,11 +534,67 @@ if(lista){
 
         <p><strong>Teléfono:</strong> ${rep.telefono}</p>
 
-        </div>
+    </div>
 
-        `;
+    `;
 
-    });
+});
+
+document
+.querySelectorAll(".btnEliminarRepresentante")
+.forEach(boton=>{
+
+    boton.onclick = async()=>{
+
+        const confirmar =
+        confirm(
+            "¿Desea eliminar este representante?"
+        );
+
+        if(!confirmar)
+            return;
+
+        try{
+
+            const indice =
+            Number(
+                boton.dataset.index
+            );
+
+            const representantes =
+            [...(datos.representantes || [])];
+
+            representantes.splice(indice,1);
+
+            await updateDoc(
+                referencia,
+                {
+                    representantes
+                }
+            );
+
+            alert(
+                "Representante eliminado correctamente."
+            );
+
+            location.reload();
+
+        }
+
+        catch(error){
+
+            console.error(error);
+
+            alert(
+                "No se pudo eliminar el representante."
+            );
+
+        }
+
+    };
+
+});
+    
 
 }
 
