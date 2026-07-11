@@ -173,6 +173,8 @@
 
     padding-top:15px;
 
+    flex-flow: column;
+
 }
 
 
