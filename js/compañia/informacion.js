@@ -59,7 +59,7 @@ export async function iniciarInformacion(){
 
     const datos =
         documento.data();
-renderizarRepresentantes();
+
 
 const usuarioActual = auth.currentUser;
 
