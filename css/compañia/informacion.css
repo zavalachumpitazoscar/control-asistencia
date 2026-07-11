@@ -341,6 +341,83 @@ LISTAS
 
 }
 
+/*======================================
+  HEADER REPRESENTANTE
+======================================*/
+
+.representante-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:15px;
+
+    margin-bottom:15px;
+
+}
+
+.representante-header h4{
+
+    margin:0;
+
+    flex:1;
+
+}
+
+/*======================================
+  ELIMINAR REPRESENTANTE
+======================================*/
+
+.btnEliminarRepresentante{
+
+    width:34px;
+
+    height:34px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#fef2f2;
+
+    color:#dc2626;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    font-size:15px;
+
+    flex-shrink:0;
+
+}
+
+.btnEliminarRepresentante:hover{
+
+    background:#dc2626;
+
+    color:#fff;
+
+    transform:scale(1.08);
+
+    box-shadow:0 8px 18px rgba(220,38,38,.25);
+
+}
+
+.btnEliminarRepresentante:active{
+
+    transform:scale(.95);
+
+}
 
 
 .btn-editar{
