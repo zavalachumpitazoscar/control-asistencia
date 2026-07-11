@@ -541,12 +541,30 @@ document
 
     boton.onclick = async()=>{
 
-        const confirmar =
-        confirm(
-            "¿Desea eliminar este representante?"
-        );
+        const resultado =
+        await Swal.fire({
 
-        if(!confirmar)
+            title:"¿Eliminar representante?",
+
+            text:"Esta acción no se puede deshacer.",
+
+            icon:"warning",
+
+            showCancelButton:true,
+
+            confirmButtonText:"Sí, eliminar",
+
+            cancelButtonText:"Cancelar",
+
+            confirmButtonColor:"#dc2626",
+
+            cancelButtonColor:"#64748b",
+
+            reverseButtons:true
+
+        });
+
+        if(!resultado.isConfirmed)
             return;
 
         try{
@@ -568,9 +586,19 @@ document
                 }
             );
 
-            alert(
-                "Representante eliminado correctamente."
-            );
+            await Swal.fire({
+
+                icon:"success",
+
+                title:"Representante eliminado",
+
+                text:"El representante fue eliminado correctamente.",
+
+                timer:1800,
+
+                showConfirmButton:false
+
+            });
 
             location.reload();
 
@@ -580,17 +608,21 @@ document
 
             console.error(error);
 
-            alert(
-                "No se pudo eliminar el representante."
-            );
+            await Swal.fire({
+
+                icon:"error",
+
+                title:"Ocurrió un error",
+
+                text:"No fue posible eliminar el representante."
+
+            });
 
         }
 
     };
 
 });
-    
-
 }
 
 
