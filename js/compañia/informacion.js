@@ -697,7 +697,7 @@ document
 
             });
 
-
+            location.reload();
         }
 
 
