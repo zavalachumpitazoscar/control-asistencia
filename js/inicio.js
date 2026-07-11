@@ -26,7 +26,7 @@ from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import { iniciarCompañia } from "./compañia.js";
-
+import { iniciarSucursales } from "./sucursales.js";
 
 const sidebar = document.querySelector(".sidebar");
 
