@@ -89,6 +89,7 @@ const esAdministrador =
 const listaRepresentantes =
 document.getElementById("listaRepresentantes");
 
+    
 function renderizarRepresentantes(){
 
     if(!listaRepresentantes)
@@ -142,6 +143,7 @@ function renderizarRepresentantes(){
     });
 
 }
+renderizarRepresentantes();
 
 async function eliminarRepresentante(e){
 
