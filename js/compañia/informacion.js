@@ -408,30 +408,49 @@ usuarios.forEach(usuario=>{
 
 });
 
-    document
-.querySelectorAll(".btnEliminarUsuario")
+document
+.querySelectorAll(".btnEstadoUsuario")
 .forEach(boton=>{
 
     boton.onclick = async()=>{
 
-        const confirmar =
-        confirm(
-            "¿Está seguro de eliminar este usuario?"
-        );
+        const uid =
+            boton.dataset.id;
 
-        if(!confirmar) return;
+        const estadoActual =
+            boton.dataset.estado;
+
+        const nuevoEstado =
+            estadoActual === "ACTIVO"
+            ? "INACTIVO"
+            : "ACTIVO";
+
+        const mensaje =
+            estadoActual === "ACTIVO"
+            ?
+            "¿Desea desactivar este usuario?\n\nNo podrá volver a iniciar sesión hasta que sea activado nuevamente."
+            :
+            "¿Desea volver a activar este usuario?";
+
+        if(!confirm(mensaje))
+            return;
 
         try{
 
-            await deleteDoc(
-                doc(
-                    db,
-                    "usuarios",
-                    boton.dataset.id
-                )
+            await updateDoc(
+                doc(db,"usuarios",uid),
+                {
+                    estado:nuevoEstado
+                }
             );
 
-            alert("Usuario eliminado.");
+            alert(
+                nuevoEstado === "ACTIVO"
+                ?
+                "Usuario activado correctamente."
+                :
+                "Usuario desactivado correctamente."
+            );
 
             location.reload();
 
@@ -441,7 +460,7 @@ usuarios.forEach(usuario=>{
 
             console.error(error);
 
-            alert("No se pudo eliminar el usuario.");
+            alert("Ocurrió un error.");
 
         }
 
