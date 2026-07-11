@@ -10,7 +10,8 @@ import {
     doc,
     query,
     where,
-    onSnapshot
+    onSnapshot,
+    getDoc
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -364,31 +365,246 @@ try{
                     </div>
 
 
-                    <div class="sucursal-footer">
+<div class="sucursal-footer">
 
-                        <div
-                        class="total-colaboradores">
+    <div class="total-colaboradores">
 
-                            <i class="bi bi-people"></i>
+        <i class="bi bi-people"></i>
 
-                            0 colaboradores
+        0 colaboradores
 
-                        </div>
+    </div>
 
-                        <button
-                        class="btn-ver">
+    <div class="acciones-sucursal">
 
-                            Ver
+        <button
+            class="btnEditarSucursal"
+            data-id="${documento.id}"
+            data-nombre="${sucursal.nombre}"
+            data-direccion="${sucursal.direccion}"
+            data-departamento="${sucursal.departamento}"
+            data-provincia="${sucursal.provincia}"
+            data-distrito="${sucursal.distrito}">
 
-                        </button>
+            <i class="bi bi-pencil-square"></i>
 
-                    </div>
+            Editar
+
+        </button>
+
+        <button
+            class="btnEstadoSucursal"
+            data-id="${documento.id}"
+            data-estado="${sucursal.estado}">
+
+            <i class="bi ${
+                sucursal.estado==="ACTIVA"
+                ? "bi-lock-fill"
+                : "bi-unlock-fill"
+            }"></i>
+
+            ${
+                sucursal.estado==="ACTIVA"
+                ? "Desactivar"
+                : "Activar"
+            }
+
+        </button>
+
+    </div>
+
+</div>
 
                 </div>
 
                 `;
 
             });
+
+            //=========================
+// BOTONES EDITAR
+//=========================
+
+document
+.querySelectorAll(".btnEditarSucursal")
+.forEach(boton=>{
+
+    boton.onclick = ()=>{
+
+        modoEdicion = true;
+
+        idSucursalEditando =
+        boton.dataset.id;
+
+        document.querySelector("#modalSucursal h3").textContent =
+        "Editar sucursal";
+
+        guardarSucursal.textContent =
+        "Actualizar";
+
+        document.getElementById("nombreSucursal").value =
+        boton.dataset.nombre;
+
+        document.getElementById("direccionSucursal").value =
+        boton.dataset.direccion;
+
+        document.getElementById("departamentoSucursal").value =
+        boton.dataset.departamento;
+
+        document.getElementById("provinciaSucursal").value =
+        boton.dataset.provincia;
+
+        document.getElementById("distritoSucursal").value =
+        boton.dataset.distrito;
+
+        modalSucursal.style.display="flex";
+
+    };
+
+});
+
+            //=========================
+// ACTIVAR / DESACTIVAR
+//=========================
+
+document
+.querySelectorAll(".btnEstadoSucursal")
+.forEach(boton=>{
+
+    boton.onclick = async()=>{
+
+        const id =
+        boton.dataset.id;
+
+        const estadoActual =
+        boton.dataset.estado;
+
+        const nuevoEstado =
+        estadoActual === "ACTIVA"
+        ? "INACTIVA"
+        : "ACTIVA";
+
+
+        const respuesta =
+        await Swal.fire({
+
+            title:
+            estadoActual === "ACTIVA"
+            ?
+            "¿Desactivar sucursal?"
+            :
+            "¿Activar sucursal?",
+
+            text:
+            estadoActual === "ACTIVA"
+            ?
+            "Los colaboradores ya no podrán ser asignados a esta sucursal."
+            :
+            "La sucursal volverá a estar disponible.",
+
+            icon:
+            estadoActual === "ACTIVA"
+            ?
+            "warning"
+            :
+            "question",
+
+            showCancelButton:true,
+
+            confirmButtonText:
+            estadoActual === "ACTIVA"
+            ?
+            "Sí, desactivar"
+            :
+            "Sí, activar",
+
+            cancelButtonText:"Cancelar",
+
+            confirmButtonColor:
+            estadoActual === "ACTIVA"
+            ?
+            "#dc2626"
+            :
+            "#16a34a",
+
+            cancelButtonColor:"#64748b",
+
+            reverseButtons:true
+
+        });
+
+
+        if(!respuesta.isConfirmed){
+
+            return;
+
+        }
+
+
+        try{
+
+            await updateDoc(
+
+                doc(
+                    db,
+                    "sucursales",
+                    id
+                ),
+
+                {
+
+                    estado:nuevoEstado
+
+                }
+
+            );
+
+
+            await Swal.fire({
+
+                icon:"success",
+
+                title:
+                nuevoEstado==="ACTIVA"
+                ?
+                "Sucursal activada"
+                :
+                "Sucursal desactivada",
+
+                text:
+                nuevoEstado==="ACTIVA"
+                ?
+                "La sucursal ya puede utilizarse nuevamente."
+                :
+                "La sucursal fue desactivada correctamente.",
+
+                timer:1800,
+
+                showConfirmButton:false
+
+            });
+
+        }
+
+        catch(error){
+
+            console.error(error);
+
+            Swal.fire({
+
+                icon:"error",
+
+                title:"Ocurrió un error",
+
+                text:"No fue posible actualizar la sucursal."
+
+            });
+
+        }
+
+    };
+
+});
 
         }
 
