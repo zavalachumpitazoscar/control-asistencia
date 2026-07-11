@@ -344,66 +344,69 @@ if(listaAccesos){
     const usuarios =
     await getDocs(consulta);
 
+usuarios.forEach(usuario=>{
 
-
-    usuarios.forEach(usuario=>{
-
-
-        const datosUsuario =
+    const datosUsuario =
         usuario.data();
 
+    const puedeAdministrar =
+        esAdministrador &&
+        usuario.id !== auth.currentUser.uid;
 
+    listaAccesos.innerHTML +=
+    `
 
-listaAccesos.innerHTML +=
-`
+    <div class="acceso-card">
 
-<div class="acceso-card">
+        <div class="acceso-header">
 
-    <div class="acceso-header">
+            <div>
 
-        <h4>${datosUsuario.nombre}</h4>
+                <h4>${datosUsuario.nombre}</h4>
 
-        ${
-            esAdministrador &&
-            usuario.id !== auth.currentUser.uid
+                <p>
+                    <strong>Correo:</strong>
+                    ${datosUsuario.correo || "No registrado"}
+                </p>
 
-            ?
+                <p>
+                    <strong>Rol:</strong>
+                    ${datosUsuario.rol}
+                </p>
 
-            `<button
-                class="btnEliminarUsuario"
-                data-id="${usuario.id}">
-                🗑
-            </button>`
+                <p>
+                    <strong>Estado:</strong>
+                    ${datosUsuario.estado}
+                </p>
 
-            :
+            </div>
 
-            ""
+            ${
+                puedeAdministrar
+                ?
+                `
+                <button
+                    class="btnEstadoUsuario"
+                    data-id="${usuario.id}"
+                    data-estado="${datosUsuario.estado}">
+                    ${
+                        datosUsuario.estado === "ACTIVO"
+                        ? "Desactivar"
+                        : "Activar"
+                    }
+                </button>
+                `
+                :
+                ""
+            }
 
-        }
+        </div>
 
     </div>
 
-    <p>
-        <strong>Correo:</strong>
-        ${datosUsuario.correo || "No registrado"}
-    </p>
+    `;
 
-    <p>
-        <strong>Rol:</strong>
-        ${datosUsuario.rol}
-    </p>
-
-    <p>
-        <strong>Estado:</strong>
-        ${datosUsuario.estado}
-    </p>
-
-</div>
-
-`;
-
-
-    });
+});
 
     document
 .querySelectorAll(".btnEliminarUsuario")
