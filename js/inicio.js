@@ -392,14 +392,18 @@ if(passwordNueva !== ""){
 
     if(!regex.test(passwordNueva)){
 
-        alert(
-`La contraseña debe contener:
-
-• Mínimo 8 caracteres
-• Una letra mayúscula
-• Una letra minúscula
-• Un carácter especial (. ! @ # $ %)`
-        );
+Swal.fire({
+    icon: "warning",
+    title: "Contraseña no válida",
+    html: `
+        La contraseña debe contener:<br><br>
+        • Mínimo <b>8 caracteres</b><br>
+        • Una <b>letra mayúscula</b><br>
+        • Una <b>letra minúscula</b><br>
+        • Un <b>carácter especial</b> (. ! @ # $ %)
+    `,
+    confirmButtonColor: "#f59e0b"
+});
 
         return;
 
@@ -415,10 +419,12 @@ if(passwordNueva !== ""){
 
 ){
 
-    alert(
-        "Debes ingresar tu contraseña actual."
-    );
-
+Swal.fire({
+    icon: "warning",
+    title: "Contraseña requerida",
+    text: "Debes ingresar tu contraseña actual para realizar este cambio.",
+    confirmButtonColor: "#f59e0b"
+});
     return;
 
 }
