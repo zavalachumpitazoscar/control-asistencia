@@ -1,1 +1,340 @@
+/*======================================
+    SUBAREAS
+======================================*/
 
+.subareas{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:30px;
+
+}
+
+
+/*======================================
+    LISTADO
+======================================*/
+
+.lista-subareas{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fill,minmax(320px,1fr));
+
+    gap:22px;
+
+}
+
+
+/*======================================
+    CARD
+======================================*/
+
+.subarea-card{
+
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:22px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    box-shadow:
+    0 10px 30px rgba(15,23,42,.08);
+
+    transition:.25s;
+
+}
+
+.subarea-card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:
+    0 18px 40px rgba(15,23,42,.12);
+
+}
+
+
+/*======================================
+    HEADER
+======================================*/
+
+.subarea-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+}
+
+.subarea-header h3{
+
+    margin:0;
+
+    font-size:20px;
+
+    color:#0f172a;
+
+}
+
+
+/*======================================
+    AREA
+======================================*/
+
+.area-padre{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    width:max-content;
+
+    padding:7px 12px;
+
+    border-radius:30px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+.area-padre i{
+
+    font-size:15px;
+
+}
+
+
+/*======================================
+    DESCRIPCION
+======================================*/
+
+.subarea-descripcion{
+
+    color:#64748b;
+
+    line-height:1.6;
+
+    min-height:45px;
+
+}
+
+
+/*======================================
+    ESTADO
+======================================*/
+
+.badge-estado{
+
+    padding:5px 12px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+.badge-estado.activa{
+
+    background:#dcfce7;
+
+    color:#166534;
+
+}
+
+.badge-estado.inactiva{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+}
+
+
+/*======================================
+    FOOTER
+======================================*/
+
+.subarea-footer{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    border-top:1px solid #e2e8f0;
+
+    padding-top:16px;
+
+}
+
+.total-colaboradores{
+
+    color:#64748b;
+
+    font-size:14px;
+
+}
+
+.total-colaboradores i{
+
+    margin-right:6px;
+
+}
+
+.acciones-subarea{
+
+    display:flex;
+
+    gap:8px;
+
+}
+
+.acciones-subarea button{
+
+    border:none;
+
+    cursor:pointer;
+
+    padding:8px 12px;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+}
+
+.btnEditarSubarea{
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+}
+
+.btnEstadoSubarea{
+
+    background:#fef2f2;
+
+    color:#dc2626;
+
+}
+
+
+/*======================================
+    FORMULARIO
+======================================*/
+
+.campo{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+}
+
+.campo label{
+
+    font-weight:600;
+
+    color:#334155;
+
+}
+
+.campo input,
+.campo textarea,
+.campo select{
+
+    width:100%;
+
+    padding:13px 16px;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:12px;
+
+    font-size:15px;
+
+    font-family:inherit;
+
+    transition:.2s;
+
+    background:#fff;
+
+}
+
+.campo textarea{
+
+    resize:none;
+
+    min-height:110px;
+
+}
+
+.campo input:focus,
+.campo textarea:focus,
+.campo select:focus{
+
+    outline:none;
+
+    border-color:#2563eb;
+
+    box-shadow:
+    0 0 0 4px rgba(37,99,235,.12);
+
+}
+
+
+/*======================================
+    RESPONSIVE
+======================================*/
+
+@media(max-width:600px){
+
+    .subarea-footer{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+        gap:15px;
+
+    }
+
+    .acciones-subarea{
+
+        width:100%;
+
+    }
+
+    .acciones-subarea button{
+
+        flex:1;
+
+    }
+
+}
