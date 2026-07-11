@@ -1,1 +1,162 @@
+<section class="areas">
 
+
+    <!--==================================
+        ENCABEZADO
+    ==================================-->
+
+    <div class="encabezado-seccion">
+
+        <div>
+
+            <h2>
+                Áreas
+            </h2>
+
+            <p>
+                Gestiona las áreas de tu empresa.
+            </p>
+
+        </div>
+
+
+        <button
+        id="btnNuevaArea"
+        class="btn-principal">
+
+            <i class="bi bi-plus-circle"></i>
+
+            Nueva área
+
+        </button>
+
+
+    </div>
+
+
+
+    <!--==================================
+        LISTADO
+    ==================================-->
+
+    <div
+    id="listaAreas"
+    class="lista-areas">
+
+
+        <!--
+            Aquí se generan las tarjetas
+            dinámicamente con JS
+        -->
+
+
+    </div>
+
+
+
+</section>
+
+
+
+
+
+<!--==================================
+        MODAL AREA
+===================================-->
+
+<div
+id="modalArea"
+class="modal">
+
+
+    <div
+    class="modal-contenido">
+
+
+        <div class="modal-header">
+
+
+            <h3>
+                Nueva área
+            </h3>
+
+
+            <button
+            id="cerrarArea">
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+
+        </div>
+
+
+
+
+        <div class="modal-body">
+
+
+            <div class="campo">
+
+
+                <label>
+                    Nombre del área
+                </label>
+
+
+                <input
+                id="nombreArea"
+                type="text"
+                placeholder="Ejemplo: Administración">
+
+
+            </div>
+
+
+
+
+            <div class="campo">
+
+
+                <label>
+                    Descripción
+                </label>
+
+
+                <textarea
+                id="descripcionArea"
+                placeholder="Descripción del área"></textarea>
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+
+        <div class="modal-footer">
+
+
+            <button
+            id="guardarArea"
+            class="btn-principal">
+
+                Guardar
+
+            </button>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+</div>
