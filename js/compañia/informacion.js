@@ -22,7 +22,10 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-
+import {
+    onSnapshot
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 
 export async function iniciarInformacion(){
@@ -509,12 +512,14 @@ if(listaAccesos){
         )
     );
 
+onSnapshot(
+    consulta,
+    (usuarios)=>{
+
+        listaAccesos.innerHTML="";
 
 
-    const usuarios =
-    await getDocs(consulta);
-
-usuarios.forEach(usuario=>{
+        usuarios.forEach(usuario=>{
 
     const datosUsuario =
         usuario.data();
@@ -697,7 +702,6 @@ document
 
             });
 
-            location.reload();
         }
 
 
@@ -723,7 +727,12 @@ document
 
     };
 
-});
+    });
+
+    }); 
+
+
+}); 
 
 
 }
