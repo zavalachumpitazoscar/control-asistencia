@@ -12,6 +12,49 @@
 
 }
 
+.btnColaboradoresSubarea{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    border:none;
+
+    background:#f8fafc;
+
+    color:#475569;
+
+    padding:8px 12px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+
+.btnColaboradoresSubarea:hover{
+
+    background:#e2e8f0;
+
+    color:#0f172a;
+
+}
+
+
+.btnColaboradoresSubarea i{
+
+    font-size:16px;
+
+}
 
 /*======================================
     VACÍO
@@ -369,6 +412,15 @@
         gap:15px;
 
     }
+
+
+    .btnColaboradoresSubarea{
+
+    width:100%;
+
+    justify-content:center;
+
+}
 
     .acciones-subarea{
 
