@@ -503,37 +503,161 @@ select.estado-acceso{
 }
 
 
-.acceso-header{
+/*======================================
+  USUARIOS CON ACCESO
+======================================*/
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
+.acceso-card{
+
+    background:#fff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:16px;
+
+    padding:18px 20px;
+
+    margin-bottom:15px;
+
+    transition:.25s;
 
 }
 
-.btnEliminarUsuario{
+.acceso-card:hover{
 
-    width:34px;
-    height:34px;
+    border-color:#d1d5db;
+
+    box-shadow:0 8px 24px rgba(0,0,0,.06);
+
+}
+
+
+.acceso-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:20px;
+
+}
+
+
+.acceso-header h4{
+
+    margin-bottom:10px;
+
+    font-size:17px;
+
+    font-weight:600;
+
+    color:#111827;
+
+}
+
+
+.acceso-header p{
+
+    margin:6px 0;
+
+    color:#6b7280;
+
+    font-size:14px;
+
+    line-height:1.5;
+
+}
+
+
+.btnEstadoUsuario{
 
     border:none;
-    border-radius:8px;
 
-    background:#ef4444;
-    color:#fff;
+    border-radius:999px;
+
+    padding:8px 16px;
+
+    min-width:105px;
+
+    font-size:13px;
+
+    font-weight:600;
 
     cursor:pointer;
 
     transition:.25s;
 
-    font-size:15px;
+    white-space:nowrap;
 
 }
 
-.btnEliminarUsuario:hover{
+/* Usuario ACTIVO (botón Desactivar) */
+
+.btnEstadoUsuario[data-estado="ACTIVO"]{
+
+    background:#fef2f2;
+
+    color:#dc2626;
+
+    border:1px solid #fecaca;
+
+}
+
+.btnEstadoUsuario[data-estado="ACTIVO"]:hover{
 
     background:#dc2626;
-    transform:scale(1.05);
+
+    color:#fff;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(220,38,38,.25);
+
+}
+
+
+/* Usuario INACTIVO (botón Activar) */
+
+.btnEstadoUsuario[data-estado="INACTIVO"]{
+
+    background:#ecfdf5;
+
+    color:#059669;
+
+    border:1px solid #a7f3d0;
+
+}
+
+.btnEstadoUsuario[data-estado="INACTIVO"]:hover{
+
+    background:#059669;
+
+    color:#fff;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(5,150,105,.25);
+
+}
+
+@media(max-width:700px){
+
+    .acceso-header{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+    .btnEstadoUsuario{
+
+        width:100%;
+
+        margin-top:15px;
+
+    }
 
 }
