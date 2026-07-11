@@ -205,29 +205,33 @@ try{
     document.getElementById("distritoSucursal").value="";
 
 
-    modoEdicion = false;
-
-    idSucursalEditando = null;
-
-
-    modalSucursal.style.display="none";
+const mensaje =
+modoEdicion
+? "Sucursal actualizada"
+: "Sucursal creada";
 
 
-    Swal.fire({
+modoEdicion = false;
 
-        icon:"success",
+idSucursalEditando = null;
 
-        title:
-        modoEdicion
-        ? "Sucursal actualizada"
-        : "Sucursal creada",
 
-        timer:1500,
+modalSucursal.style.display="none";
 
-        showConfirmButton:false
 
-    });
+Swal.fire({
 
+    icon:"success",
+
+    title: mensaje,
+
+    timer:1500,
+
+    showConfirmButton:false
+
+});
+
+    
 }
 
         catch(error){
