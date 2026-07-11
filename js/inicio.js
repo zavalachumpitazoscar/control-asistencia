@@ -376,6 +376,15 @@ document
 .getElementById("perfilPassword")
 .value.trim();
 
+const cambioNombre =
+nombre !== document.getElementById("nombreUsuarioTop").textContent;
+
+const cambioCorreo =
+correo !== usuario.email;
+
+const cambioPassword =
+passwordNueva !== "";
+
 if(passwordNueva !== ""){
 
     const regex =
@@ -504,9 +513,34 @@ if(passwordNueva !== ""){
         .getElementById("perfilPasswordActual")
         .value = "";
 
-        alert(
-            "Perfil actualizado correctamente."
-        );
+        let titulo = "¡Actualizado!";
+let mensaje = "Los datos fueron actualizados correctamente.";
+
+if(cambioPassword){
+
+    titulo = "¡Contraseña actualizada!";
+    mensaje = "Tu contraseña fue cambiada correctamente.";
+
+}
+else if(cambioCorreo){
+
+    titulo = "¡Correo actualizado!";
+    mensaje = "Tu correo electrónico fue actualizado correctamente.";
+
+}
+else if(cambioNombre){
+
+    titulo = "¡Datos actualizados!";
+    mensaje = "Tu información personal fue actualizada correctamente.";
+
+}
+
+Swal.fire({
+    icon: "success",
+    title: titulo,
+    text: mensaje,
+    confirmButtonColor: "#2563eb"
+});
 
     }
 
@@ -520,31 +554,45 @@ if(passwordNueva !== ""){
 
             case "auth/wrong-password":
 
-                alert(
-                    "La contraseña actual es incorrecta."
-                );
+                Swal.fire({
+    icon: "error",
+    title: "Contraseña incorrecta",
+    text: "La contraseña actual es incorrecta.",
+    confirmButtonColor: "#dc2626"
+});
 
             break;
 
             case "auth/email-already-in-use":
 
-                alert(
-                    "Ese correo ya está siendo utilizado."
-                );
+                Swal.fire({
+    icon: "error",
+    title: "Correo en uso",
+    text: "Ese correo ya está siendo utilizado.",
+    confirmButtonColor: "#dc2626"
+});
 
             break;
 
             case "auth/requires-recent-login":
 
-                alert(
-                    "Debes volver a iniciar sesión para realizar este cambio."
-                );
+                Swal.fire({
+    icon: "warning",
+    title: "Vuelve a iniciar sesión",
+    text: "Debes volver a iniciar sesión para realizar este cambio.",
+    confirmButtonColor: "#f59e0b"
+});
 
             break;
 
             default:
 
-                alert(error.message);
+                Swal.fire({
+    icon: "error",
+    title: "Ocurrió un error",
+    text: error.message,
+    confirmButtonColor: "#dc2626"
+});
 
         }
 
