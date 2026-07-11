@@ -6,6 +6,8 @@ from "../firebase-config.js";
 import {
     collection,
     addDoc,
+    updateDoc,
+    doc,
     query,
     where,
     onSnapshot
@@ -42,20 +44,44 @@ export function iniciarSucursales(){
     const listaSucursales =
     document.getElementById("listaSucursales");
 
+    let modoEdicion = false;
+
+    let idSucursalEditando = null;
+
 
     //=========================
     // ABRIR MODAL
     //=========================
 
-    if(btnNuevaSucursal){
+if(btnNuevaSucursal){
 
-        btnNuevaSucursal.onclick = ()=>{
+    btnNuevaSucursal.onclick = ()=>{
 
-            modalSucursal.style.display="flex";
+        modoEdicion = false;
 
-        };
+        idSucursalEditando = null;
 
-    }
+        document.getElementById("nombreSucursal").value="";
+
+        document.getElementById("direccionSucursal").value="";
+
+        document.getElementById("departamentoSucursal").value="";
+
+        document.getElementById("provinciaSucursal").value="";
+
+        document.getElementById("distritoSucursal").value="";
+
+        document.querySelector("#modalSucursal h3").textContent =
+        "Nueva sucursal";
+
+        guardarSucursal.textContent =
+        "Guardar";
+
+        modalSucursal.style.display="flex";
+
+    };
+
+}
 
 
     if(cerrarSucursal){
@@ -106,62 +132,102 @@ export function iniciarSucursales(){
         }
 
 
-        try{
+try{
 
-            await addDoc(
+    if(!modoEdicion){
 
-                collection(db,"sucursales"),
+        await addDoc(
 
-                {
+            collection(db,"sucursales"),
 
-                    empresaId,
+            {
 
-                    nombre,
+                empresaId,
 
-                    direccion,
+                nombre,
 
-                    departamento,
+                direccion,
 
-                    provincia,
+                departamento,
 
-                    distrito,
+                provincia,
 
-                    estado:"ACTIVA",
+                distrito,
 
-                    fechaRegistro:new Date()
+                estado:"ACTIVA",
 
-                }
+                fechaRegistro:new Date()
 
-            );
+            }
+
+        );
+
+    }
+
+    else{
+
+        await updateDoc(
+
+            doc(
+                db,
+                "sucursales",
+                idSucursalEditando
+            ),
+
+            {
+
+                nombre,
+
+                direccion,
+
+                departamento,
+
+                provincia,
+
+                distrito
+
+            }
+
+        );
+
+    }
 
 
-            document.getElementById("nombreSucursal").value="";
+    document.getElementById("nombreSucursal").value="";
 
-            document.getElementById("direccionSucursal").value="";
+    document.getElementById("direccionSucursal").value="";
 
-            document.getElementById("departamentoSucursal").value="";
+    document.getElementById("departamentoSucursal").value="";
 
-            document.getElementById("provinciaSucursal").value="";
+    document.getElementById("provinciaSucursal").value="";
 
-            document.getElementById("distritoSucursal").value="";
-
-
-            modalSucursal.style.display="none";
+    document.getElementById("distritoSucursal").value="";
 
 
-            Swal.fire({
+    modoEdicion = false;
 
-                icon:"success",
+    idSucursalEditando = null;
 
-                title:"Sucursal creada",
 
-                timer:1500,
+    modalSucursal.style.display="none";
 
-                showConfirmButton:false
 
-            });
+    Swal.fire({
 
-        }
+        icon:"success",
+
+        title:
+        modoEdicion
+        ? "Sucursal actualizada"
+        : "Sucursal creada",
+
+        timer:1500,
+
+        showConfirmButton:false
+
+    });
+
+}
 
         catch(error){
 
