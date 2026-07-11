@@ -60,22 +60,23 @@ export async function iniciarInformacion(){
     const datos =
         documento.data();
 
-const usuarioActual = auth.currentUser;
+const usuarioActual =
+    auth.currentUser;
 
 const documentoUsuario =
-await getDoc(
-    doc(
-        db,
-        "usuarios",
-        usuarioActual.uid
-    )
-);
+    await getDoc(
+        doc(
+            db,
+            "usuarios",
+            usuarioActual.uid
+        )
+    );
 
 const datosUsuarioActual =
-documentoUsuario.data();
+    documentoUsuario.data();
 
 const esAdministrador =
-datosUsuarioActual?.rol === "ADMINISTRADOR";
+    datosUsuarioActual?.rol === "ADMINISTRADOR";
 
     const btnNuevoRepresentante =
 document.getElementById("btnNuevoRepresentante");
