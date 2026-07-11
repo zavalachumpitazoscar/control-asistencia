@@ -761,67 +761,75 @@ if(cerrarRepresentante && modalRepresentante){
 
 
 
-    //=========================
-    // GUARDAR
-    //=========================
+//=========================
+// GUARDAR
+//=========================
 
-    document
-        .getElementById("btnGuardarEmpresa")
-        .onclick = async()=>{
+document
+    .getElementById("btnGuardarEmpresa")
+    .onclick = async()=>{
 
-        try{
+    try{
 
-            await updateDoc(referencia,{
+        await updateDoc(referencia,{
 
-                empresa:{
+            empresa:{
 
-                    ruc:
-                        document.getElementById("ruc").value.trim(),
+                ruc:
+                    document.getElementById("ruc").value.trim(),
 
-                    razonSocial:
-                        document.getElementById("razonSocial").value.trim(),
+                razonSocial:
+                    document.getElementById("razonSocial").value.trim(),
 
-                    giro:
-                        document.getElementById("giro").value.trim()
+                giro:
+                    document.getElementById("giro").value.trim()
 
-                },
+            },
 
-                ubicacion:{
+            ubicacion:{
 
-                    direccion:
-                        document.getElementById("direccion").value.trim(),
+                direccion:
+                    document.getElementById("direccion").value.trim(),
 
-                    departamento:
-                        document.getElementById("departamento").value.trim(),
+                departamento:
+                    document.getElementById("departamento").value.trim(),
 
-                    provincia:
-                        document.getElementById("provincia").value.trim(),
+                provincia:
+                    document.getElementById("provincia").value.trim(),
 
-                    distrito:
-                        document.getElementById("distrito").value.trim(),
+                distrito:
+                    document.getElementById("distrito").value.trim(),
 
-                    pais:
-                        document.getElementById("pais").value.trim(),
+                pais:
+                    document.getElementById("pais").value.trim(),
 
-                    codigoPostal:
-                        document.getElementById("codigoPostal").value.trim()
+                codigoPostal:
+                    document.getElementById("codigoPostal").value.trim()
 
-                }
+            }
 
-            });
+        });
 
-            alert("Información actualizada correctamente.");
+        Swal.fire({
+            icon: "success",
+            title: "¡Guardado!",
+            text: "La información de la empresa se actualizó correctamente.",
+            confirmButtonColor: "#2563eb"
+        });
 
-        }
+    }
 
-        catch(error){
+    catch(error){
 
-            console.error(error);
+        console.error(error);
 
-            alert("Ocurrió un error al guardar.");
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Ocurrió un error al guardar la información.",
+            confirmButtonColor: "#dc2626"
+        });
 
-        }
+    }
 
-    };
-
-}
+};
