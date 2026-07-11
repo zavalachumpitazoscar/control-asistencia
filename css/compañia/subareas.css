@@ -12,6 +12,50 @@
 
 }
 
+/*======================================
+    VACÍO
+======================================*/
+
+.sin-subareas{
+
+    background:#fff;
+
+    border:2px dashed #cbd5e1;
+
+    border-radius:18px;
+
+    padding:60px 30px;
+
+    text-align:center;
+
+}
+
+.sin-subareas i{
+
+    font-size:60px;
+
+    color:#94a3b8;
+
+    margin-bottom:20px;
+
+}
+
+.sin-subareas h3{
+
+    color:#1e293b;
+
+    margin-bottom:10px;
+
+}
+
+.sin-subareas p{
+
+    color:#64748b;
+
+    margin-bottom:25px;
+
+}
+
 
 /*======================================
     LISTADO
