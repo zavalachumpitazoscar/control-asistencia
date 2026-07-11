@@ -206,57 +206,71 @@ class="menu-usuario">
 
     </div>
 
-    <div class="campo-menu">
+<form id="formPassword">
 
-    <label>Contraseña actual</label>
 
-    <input
-        id="perfilPasswordActual"
-        type="password"
-        placeholder="••••••••">
+<div class="campo-menu">
 
+<label>Contraseña actual</label>
+
+<input
+    id="perfilPasswordActual"
+    name="passwordActual"
+    type="password"
+    autocomplete="current-password"
+    placeholder="••••••••">
+
+</div>
+
+
+<div class="campo-menu">
+
+<label>Nueva contraseña</label>
+
+<input
+    id="perfilPassword"
+    name="passwordNueva"
+    type="password"
+    autocomplete="new-password"
+    placeholder="••••••••">
+
+
+<div class="password-reglas">
+
+    <div id="reglaLongitud" class="regla">
+        Mínimo 8 caracteres
     </div>
 
-    <div class="campo-menu">
+    <div id="reglaMayuscula" class="regla">
+        Una letra mayúscula
+    </div>
 
-    <label>Nueva contraseña</label>
+    <div id="reglaMinuscula" class="regla">
+        Una letra minúscula
+    </div>
 
-    <input
-        id="perfilPassword"
-        type="password"
-        placeholder="••••••••">
-
-    <div class="password-reglas">
-
-        <div id="reglaLongitud" class="regla">
-            Mínimo 8 caracteres
-        </div>
-
-        <div id="reglaMayuscula" class="regla">
-            Una letra mayúscula
-        </div>
-
-        <div id="reglaMinuscula" class="regla">
-            Una letra minúscula
-        </div>
-
-        <div id="reglaEspecial" class="regla">
-            Un carácter especial (. ! @ # $ %)
-        </div>
-
+    <div id="reglaEspecial" class="regla">
+        Un carácter especial (. ! @ # $ %)
     </div>
 
 </div>
 
-    <button
+
+</div>
+
+
+</form>
+
+        <button
     id="guardarPerfil"
     class="btn-guardar-perfil">
 
         Guardar cambios
 
     </button>
-
+    
 </div>
+
 
  
 
