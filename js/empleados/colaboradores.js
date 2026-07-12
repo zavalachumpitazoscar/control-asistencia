@@ -450,7 +450,7 @@ async function cargarSucursales(){
             .toUpperCase();
 
 
-            if(estado === "ACTIVO"){
+            if(estado === "ACTIVA"){
 
                 sucursales.push({
 
@@ -655,7 +655,7 @@ async function cargarAreas(){
             .toUpperCase();
 
 
-            if(estado === "ACTIVO"){
+            if(estado === "ACTIVA"){
 
                 areas.push({
 
@@ -853,7 +853,7 @@ async function cargarSubareasPorArea(
 
                 (
                     !datos.estado ||
-                    datos.estado === "ACTIVO"
+                    datos.estado === "ACTIVA"
                 )
 
             ){
