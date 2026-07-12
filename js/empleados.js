@@ -71,13 +71,6 @@ async function cargarTab(tab){
             break;
 
 
-            case "cargos":
-
-                iniciarCargos();
-
-            break;
-
-
             case "horarios":
 
                 iniciarHorarios();
