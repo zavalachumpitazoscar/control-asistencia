@@ -25,6 +25,11 @@ export function iniciarColaboradores(){
     const empresaId =
     sessionStorage.getItem("empresaId");
 
+    console.log(
+    "empresaId usado en colaboradores:",
+    empresaId
+    );
+
 
     if(!empresaId){
 
@@ -309,16 +314,29 @@ async function abrirModalColaborador(){
     }
 
 
-    modal.style.display =
-    "flex";
+modal.style.display =
+"flex";
 
-await Promise.all([
 
-    cargarSucursales(),
+try{
 
-    cargarAreas()
+    await Promise.all([
 
-]);
+        cargarSucursales(),
+
+        cargarAreas()
+
+    ]);
+
+}
+catch(error){
+
+    console.error(
+        "Error al cargar organización:",
+        error
+    );
+
+}
 
 }
 
@@ -345,7 +363,19 @@ function cerrarModalColaborador(){
 
 async function cargarSucursales(){
 
-    if(!sucursalColaborador) return;
+    if(!sucursalColaborador){
+
+        console.error(
+            "No existe el select sucursalColaborador"
+        );
+
+        return;
+
+    }
+
+
+    sucursalColaborador.disabled =
+    true;
 
 
     sucursalColaborador.innerHTML = `
@@ -358,6 +388,12 @@ async function cargarSucursales(){
 
 
     try{
+
+
+        console.log(
+            "Buscando sucursales para:",
+            empresaId
+        );
 
 
         const consultaSucursales =
@@ -383,6 +419,12 @@ async function cargarSucursales(){
         );
 
 
+        console.log(
+            "Sucursales encontradas:",
+            resultado.size
+        );
+
+
         sucursales = [];
 
 
@@ -392,10 +434,23 @@ async function cargarSucursales(){
             documento.data();
 
 
-            if(
-                !datos.estado ||
-                datos.estado === "ACTIVO"
-            ){
+            console.log(
+                "Sucursal Firestore:",
+                documento.id,
+                datos
+            );
+
+
+            const estado =
+            String(
+                datos.estado ||
+                "ACTIVO"
+            )
+            .trim()
+            .toUpperCase();
+
+
+            if(estado === "ACTIVO"){
 
                 sucursales.push({
 
@@ -411,6 +466,31 @@ async function cargarSucursales(){
         });
 
 
+        if(sucursales.length === 0){
+
+            sucursalColaborador.innerHTML = `
+
+                <option value="">
+                    No hay sucursales activas
+                </option>
+
+            `;
+
+
+            sucursalColaborador.disabled =
+            true;
+
+
+            console.warn(
+                "No se encontraron sucursales activas para empresaId:",
+                empresaId
+            );
+
+            return;
+
+        }
+
+
         sucursalColaborador.innerHTML = `
 
             <option value="">
@@ -422,21 +502,42 @@ async function cargarSucursales(){
 
         sucursales.forEach(sucursal=>{
 
-            sucursalColaborador.innerHTML += `
+            const nombreSucursal =
 
-                <option value="${sucursal.id}">
+                sucursal.nombre ||
 
-                    ${
-                        sucursal.nombre ||
-                        sucursal.nombreSucursal ||
-                        "Sucursal sin nombre"
-                    }
+                sucursal.nombreSucursal ||
 
-                </option>
+                sucursal.descripcion ||
 
-            `;
+                sucursal.sucursal ||
+
+                "Sucursal sin nombre";
+
+
+            const opcion =
+            document.createElement(
+                "option"
+            );
+
+
+            opcion.value =
+            sucursal.id;
+
+
+            opcion.textContent =
+            nombreSucursal;
+
+
+            sucursalColaborador.appendChild(
+                opcion
+            );
 
         });
+
+
+        sucursalColaborador.disabled =
+        false;
 
 
     }
@@ -444,7 +545,7 @@ async function cargarSucursales(){
 
 
         console.error(
-            "Error al cargar sucursales:",
+            "Error completo al cargar sucursales:",
             error
         );
 
@@ -452,10 +553,14 @@ async function cargarSucursales(){
         sucursalColaborador.innerHTML = `
 
             <option value="">
-                No se pudieron cargar
+                Error al cargar sucursales
             </option>
 
         `;
+
+
+        sucursalColaborador.disabled =
+        true;
 
     }
 
@@ -463,7 +568,19 @@ async function cargarSucursales(){
 
 async function cargarAreas(){
 
-    if(!areaColaborador) return;
+    if(!areaColaborador){
+
+        console.error(
+            "No existe el select areaColaborador"
+        );
+
+        return;
+
+    }
+
+
+    areaColaborador.disabled =
+    true;
 
 
     areaColaborador.innerHTML = `
@@ -476,6 +593,12 @@ async function cargarAreas(){
 
 
     try{
+
+
+        console.log(
+            "Buscando áreas para:",
+            empresaId
+        );
 
 
         const consultaAreas =
@@ -501,6 +624,12 @@ async function cargarAreas(){
         );
 
 
+        console.log(
+            "Áreas encontradas:",
+            resultado.size
+        );
+
+
         areas = [];
 
 
@@ -510,10 +639,23 @@ async function cargarAreas(){
             documento.data();
 
 
-            if(
-                !datos.estado ||
-                datos.estado === "ACTIVO"
-            ){
+            console.log(
+                "Área Firestore:",
+                documento.id,
+                datos
+            );
+
+
+            const estado =
+            String(
+                datos.estado ||
+                "ACTIVO"
+            )
+            .trim()
+            .toUpperCase();
+
+
+            if(estado === "ACTIVO"){
 
                 areas.push({
 
@@ -529,6 +671,31 @@ async function cargarAreas(){
         });
 
 
+        if(areas.length === 0){
+
+            areaColaborador.innerHTML = `
+
+                <option value="">
+                    No hay áreas activas
+                </option>
+
+            `;
+
+
+            areaColaborador.disabled =
+            true;
+
+
+            console.warn(
+                "No se encontraron áreas activas para empresaId:",
+                empresaId
+            );
+
+            return;
+
+        }
+
+
         areaColaborador.innerHTML = `
 
             <option value="">
@@ -540,21 +707,42 @@ async function cargarAreas(){
 
         areas.forEach(area=>{
 
-            areaColaborador.innerHTML += `
+            const nombreArea =
 
-                <option value="${area.id}">
+                area.nombre ||
 
-                    ${
-                        area.nombre ||
-                        area.nombreArea ||
-                        "Área sin nombre"
-                    }
+                area.nombreArea ||
 
-                </option>
+                area.descripcion ||
 
-            `;
+                area.area ||
+
+                "Área sin nombre";
+
+
+            const opcion =
+            document.createElement(
+                "option"
+            );
+
+
+            opcion.value =
+            area.id;
+
+
+            opcion.textContent =
+            nombreArea;
+
+
+            areaColaborador.appendChild(
+                opcion
+            );
 
         });
+
+
+        areaColaborador.disabled =
+        false;
 
 
     }
@@ -562,7 +750,7 @@ async function cargarAreas(){
 
 
         console.error(
-            "Error al cargar áreas:",
+            "Error completo al cargar áreas:",
             error
         );
 
@@ -570,10 +758,14 @@ async function cargarAreas(){
         areaColaborador.innerHTML = `
 
             <option value="">
-                No se pudieron cargar
+                Error al cargar áreas
             </option>
 
         `;
+
+
+        areaColaborador.disabled =
+        true;
 
     }
 
