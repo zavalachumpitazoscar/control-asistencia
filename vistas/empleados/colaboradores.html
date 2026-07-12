@@ -38,48 +38,48 @@
 
 <div class="barra-herramientas">
 
-    <div class="acciones-masivas">
+<div class="acciones-masivas">
 
-        <button
-        id="btnCargaMasiva">
+    <button
+    id="btnCargaMasiva">
 
-            <i class="bi bi-file-earmark-arrow-up"></i>
+        <i class="bi bi-upload"></i>
 
-            Carga masiva
+        Carga masiva
 
-        </button>
+    </button>
 
-        <button
-        id="btnActivarSeleccion"
-        disabled>
+    <button
+    id="btnActivarSeleccion"
+    disabled>
 
-            <i class="bi bi-check-circle"></i>
+        <i class="bi bi-check-circle"></i>
 
-            Activar
+        Activar
 
-        </button>
+    </button>
 
-        <button
-        id="btnDesactivarSeleccion"
-        disabled>
+    <button
+    id="btnDesactivarSeleccion"
+    disabled>
 
-            <i class="bi bi-lock"></i>
+        <i class="bi bi-lock"></i>
 
-            Desactivar
+        Desactivar
 
-        </button>
+    </button>
 
-        <button
-        id="btnEliminarSeleccion"
-        disabled>
+    <button
+    id="btnEliminarSeleccion"
+    disabled>
 
-            <i class="bi bi-trash"></i>
+        <i class="bi bi-trash"></i>
 
-            Eliminar
+        Eliminar
 
-        </button>
+    </button>
 
-    </div>
+</div>
 
 
     <div class="busqueda">
@@ -95,14 +95,109 @@
 
 </div>
 
+<!--======================================
+    PAGINACIÓN
+=======================================-->
+
+<div class="paginacion">
+
+    <div class="paginacion-info">
+
+        Mostrando
+
+        <span id="inicioPagina">
+
+            0
+
+        </span>
+
+        -
+
+        <span id="finPagina">
+
+            0
+
+        </span>
+
+        de
+
+        <span id="totalRegistros">
+
+            0
+
+        </span>
+
+        colaboradores
+
+    </div>
 
 
-    <!--======================================
-        LISTADO
-    =======================================-->
+    <div class="paginacion-controles">
+
+        <label>
+
+            Mostrar
+
+            <select id="registrosPagina">
+
+                <option value="10">
+
+                    10
+
+                </option>
+
+                <option value="20" selected>
+
+                    20
+
+                </option>
+
+                <option value="50">
+
+                    50
+
+                </option>
+
+                <option value="100">
+
+                    100
+
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <button id="paginaAnterior">
+
+            <i class="bi bi-chevron-left"></i>
+
+        </button>
+
+        <span id="numeroPagina">
+
+            1
+
+        </span>
+
+        <button id="paginaSiguiente">
+
+            <i class="bi bi-chevron-right"></i>
+
+        </button>
+
+    </div>
+
+</div>
+
+<!--======================================
+    LISTADO
+=======================================-->
+
+<div class="tabla-wrapper">
 
     <div class="tabla-colaboradores">
-
 
         <!-- CABECERA -->
 
@@ -132,7 +227,7 @@
 
             <div>Estado</div>
 
-            <div class="centrado">
+            <div class="columna-acciones">
 
                 Acciones
 
@@ -148,31 +243,11 @@
         id="listaColaboradores"
         class="tabla-body">
 
-
-            <div class="sin-registros">
-
-                <i class="bi bi-people"></i>
-
-                <h3>
-
-                    No existen colaboradores
-
-                </h3>
-
-                <p>
-
-                    Crea el primer colaborador de la empresa.
-
-                </p>
-
-            </div>
-
         </div>
 
     </div>
 
-</section>
-
+</div>
 
 
 <!--======================================
