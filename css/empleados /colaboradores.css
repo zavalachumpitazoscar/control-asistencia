@@ -228,17 +228,27 @@
 
     display:grid;
 
-    grid-template-columns:
+grid-template-columns:
 
-    45px
-    120px
-    2fr
-    130px
-    150px
-    150px
-    150px
-    100px
-    90px;
+45px      /* check */
+
+110px     /* dni */
+
+180px     /* apellidos */
+
+180px     /* nombres */
+
+140px     /* sucursal */
+
+140px     /* area */
+
+140px     /* subarea */
+
+140px     /* horario */
+
+110px     /* estado */
+
+90px;     /* acciones */
 
 
     align-items:center;
