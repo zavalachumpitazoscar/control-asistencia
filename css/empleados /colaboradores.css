@@ -255,49 +255,38 @@
 
 .tabla-colaboradores{
 
-    min-width:1450px;
+    min-width:1515px;
 
-    background:#fff;
+    background:#ffffff;
 
     border-radius:18px;
 
     overflow:hidden;
 
     box-shadow:
-
-    0 12px 35px rgba(15,23,42,.08);
+        0 12px 35px rgba(15,23,42,.08);
 
 }
 
+.tabla-header{
+
+    background:#f8fafc;
+
+    color:#475569;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
 
 
 .tabla-header,
 .tabla-fila{
 
     display:grid;
-
-grid-template-columns:
-
-45px      /* check */
-
-110px     /* dni */
-
-180px     /* apellidos */
-
-180px     /* nombres */
-
-140px     /* sucursal */
-
-140px     /* area */
-
-140px     /* subarea */
-
-140px     /* horario */
-
-110px     /* estado */
-
-90px;     /* acciones */
-
 
     align-items:center;
 
@@ -308,8 +297,8 @@ grid-template-columns:
 }
 
 
-
-.tabla-header{
+.tabla-header,
+.tabla-fila{
 
     display:grid;
 
@@ -364,6 +353,10 @@ grid-template-columns:
     120px
 
     90px;
+
+    border-bottom:1px solid #e2e8f0;
+
+    transition:.2s;
 
 }
 
@@ -637,6 +630,736 @@ grid-template-columns:
 
 }
 
+/*=====================================================
+    MODAL GENERAL
+=====================================================*/
+
+.modal{
+
+    display:none;
+
+    position:fixed;
+
+    inset:0;
+
+    width:100%;
+
+    height:100%;
+
+    background:rgba(15,23,42,.60);
+
+    backdrop-filter:blur(5px);
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:20px;
+
+    z-index:9999;
+
+}
+
+
+/*=====================================================
+    CONTENEDOR DEL MODAL
+=====================================================*/
+
+.modal-contenido{
+
+    width:100%;
+
+    background:#ffffff;
+
+    border-radius:20px;
+
+    box-shadow:
+        0 30px 80px rgba(15,23,42,.28);
+
+    overflow:hidden;
+
+    animation:aparecerModal .25s ease;
+
+}
+
+
+.modal-colaborador{
+
+    width:min(950px,100%);
+
+    max-width:950px;
+
+    max-height:92vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+@keyframes aparecerModal{
+
+    from{
+
+        opacity:0;
+
+        transform:
+        translateY(20px)
+        scale(.98);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+        translateY(0)
+        scale(1);
+
+    }
+
+}
+
+
+/*=====================================================
+    ENCABEZADO DEL MODAL
+=====================================================*/
+
+.modal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:20px;
+
+    padding:22px 26px;
+
+    border-bottom:1px solid #e2e8f0;
+
+    background:#ffffff;
+
+    flex-shrink:0;
+
+}
+
+
+.modal-header h3{
+
+    margin:0;
+
+    color:#0f172a;
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+
+.modal-header p{
+
+    margin:6px 0 0;
+
+    color:#64748b;
+
+    font-size:14px;
+
+}
+
+
+#cerrarColaborador{
+
+    width:38px;
+
+    height:38px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#f1f5f9;
+
+    color:#475569;
+
+    font-size:25px;
+
+    line-height:1;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    flex-shrink:0;
+
+}
+
+
+#cerrarColaborador:hover{
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+}
+
+
+/*=====================================================
+    FORMULARIO DEL MODAL
+=====================================================*/
+
+#formColaborador{
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-height:0;
+
+    flex:1;
+
+}
+
+
+/*=====================================================
+    PESTAÑAS
+=====================================================*/
+
+.tabs-modal-colaborador{
+
+    display:flex;
+
+    gap:8px;
+
+    padding:14px 26px 0;
+
+    background:#ffffff;
+
+    border-bottom:1px solid #e2e8f0;
+
+    overflow-x:auto;
+
+    flex-shrink:0;
+
+}
+
+
+.tab-modal{
+
+    position:relative;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    min-width:max-content;
+
+    padding:13px 18px;
+
+    border:none;
+
+    background:transparent;
+
+    color:#64748b;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+.tab-modal::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    right:0;
+
+    bottom:-1px;
+
+    height:3px;
+
+    background:transparent;
+
+    border-radius:4px 4px 0 0;
+
+}
+
+
+.tab-modal:hover{
+
+    color:#2563eb;
+
+    background:#f8fafc;
+
+}
+
+
+.tab-modal.activo{
+
+    color:#2563eb;
+
+}
+
+
+.tab-modal.activo::after{
+
+    background:#2563eb;
+
+}
+
+
+/*=====================================================
+    CONTENIDO DE LAS PESTAÑAS
+=====================================================*/
+
+.modal-body{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow-y:auto;
+
+    padding:24px 26px;
+
+    background:#f8fafc;
+
+}
+
+
+.contenido-tab-modal{
+
+    display:none;
+
+}
+
+
+.contenido-tab-modal.activo{
+
+    display:block;
+
+    animation:mostrarTab .2s ease;
+
+}
+
+
+@keyframes mostrarTab{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(5px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+/*=====================================================
+    SECCIONES DEL FORMULARIO
+=====================================================*/
+
+.seccion-formulario{
+
+    background:#ffffff;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:16px;
+
+    padding:22px;
+
+    margin-bottom:20px;
+
+    box-shadow:
+        0 4px 15px rgba(15,23,42,.04);
+
+}
+
+
+.seccion-formulario:last-child{
+
+    margin-bottom:0;
+
+}
+
+
+.titulo-seccion-formulario{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding-bottom:18px;
+
+    margin-bottom:20px;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+.icono-seccion{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:19px;
+
+    flex-shrink:0;
+
+}
+
+
+.titulo-seccion-formulario h4{
+
+    margin:0;
+
+    color:#1e293b;
+
+    font-size:16px;
+
+    font-weight:700;
+
+}
+
+
+.titulo-seccion-formulario p{
+
+    margin:4px 0 0;
+
+    color:#64748b;
+
+    font-size:13px;
+
+}
+
+
+/*=====================================================
+    GRID DEL FORMULARIO
+=====================================================*/
+
+.form-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:18px;
+
+}
+
+
+.form-grid-tres{
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+}
+
+
+.campo-completo{
+
+    grid-column:1 / -1;
+
+}
+
+
+/*=====================================================
+    CAMPOS
+=====================================================*/
+
+.campo-formulario{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:7px;
+
+    min-width:0;
+
+}
+
+
+.campo-formulario label{
+
+    color:#334155;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+
+.campo-formulario label span{
+
+    color:#dc2626;
+
+}
+
+
+.campo-formulario input,
+.campo-formulario select,
+.campo-formulario textarea{
+
+    width:100%;
+
+    border:1px solid #cbd5e1;
+
+    background:#ffffff;
+
+    color:#0f172a;
+
+    border-radius:11px;
+
+    padding:11px 13px;
+
+    font-size:14px;
+
+    font-family:inherit;
+
+    outline:none;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s,
+        background .2s;
+
+}
+
+
+.campo-formulario input,
+.campo-formulario select{
+
+    min-height:44px;
+
+}
+
+
+.campo-formulario textarea{
+
+    min-height:110px;
+
+    resize:vertical;
+
+}
+
+
+.campo-formulario input::placeholder,
+.campo-formulario textarea::placeholder{
+
+    color:#94a3b8;
+
+}
+
+
+.campo-formulario input:focus,
+.campo-formulario select:focus,
+.campo-formulario textarea:focus{
+
+    border-color:#2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.12);
+
+}
+
+
+.campo-formulario select:disabled{
+
+    background:#f1f5f9;
+
+    color:#94a3b8;
+
+    cursor:not-allowed;
+
+}
+
+
+/*=====================================================
+    PIE DEL MODAL
+=====================================================*/
+
+.modal-footer{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:18px 26px;
+
+    border-top:1px solid #e2e8f0;
+
+    background:#ffffff;
+
+    flex-shrink:0;
+
+}
+
+
+.btn-secundario{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:1px solid #cbd5e1;
+
+    background:#ffffff;
+
+    color:#475569;
+
+    padding:11px 20px;
+
+    border-radius:11px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+
+.btn-secundario:hover{
+
+    background:#f1f5f9;
+
+    border-color:#94a3b8;
+
+}
+
+
+#guardarColaborador:disabled{
+
+    opacity:.65;
+
+    cursor:not-allowed;
+
+}
+
+
+/*=====================================================
+    SPINNER DEL BOTÓN
+=====================================================*/
+
+.spinner-boton{
+
+    width:17px;
+
+    height:17px;
+
+    border:2px solid rgba(255,255,255,.45);
+
+    border-top-color:#ffffff;
+
+    border-radius:50%;
+
+    animation:girarSpinner .7s linear infinite;
+
+}
+
+
+@keyframes girarSpinner{
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+
+/*=====================================================
+    SCROLL PERSONALIZADO
+=====================================================*/
+
+.modal-body::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+
+.modal-body::-webkit-scrollbar-track{
+
+    background:#f1f5f9;
+
+}
+
+
+.modal-body::-webkit-scrollbar-thumb{
+
+    background:#cbd5e1;
+
+    border-radius:20px;
+
+}
+
+
+.modal-body::-webkit-scrollbar-thumb:hover{
+
+    background:#94a3b8;
+
+}
 
 /*======================================
     RESPONSIVE
@@ -706,5 +1429,1152 @@ grid-template-columns:
 
     }
 
+
+}
+
+
+/*=====================================================
+    MODAL GENERAL
+=====================================================*/
+
+.modal{
+
+    display:none;
+
+    position:fixed;
+
+    inset:0;
+
+    width:100%;
+
+    height:100%;
+
+    background:rgba(15,23,42,.60);
+
+    backdrop-filter:blur(5px);
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:20px;
+
+    z-index:9999;
+
+}
+
+
+/*=====================================================
+    CONTENEDOR DEL MODAL
+=====================================================*/
+
+.modal-contenido{
+
+    width:100%;
+
+    background:#ffffff;
+
+    border-radius:20px;
+
+    box-shadow:
+        0 30px 80px rgba(15,23,42,.28);
+
+    overflow:hidden;
+
+    animation:aparecerModal .25s ease;
+
+}
+
+
+.modal-colaborador{
+
+    width:min(950px,100%);
+
+    max-width:950px;
+
+    max-height:92vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+@keyframes aparecerModal{
+
+    from{
+
+        opacity:0;
+
+        transform:
+        translateY(20px)
+        scale(.98);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+        translateY(0)
+        scale(1);
+
+    }
+
+}
+
+
+/*=====================================================
+    ENCABEZADO DEL MODAL
+=====================================================*/
+
+.modal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:20px;
+
+    padding:22px 26px;
+
+    border-bottom:1px solid #e2e8f0;
+
+    background:#ffffff;
+
+    flex-shrink:0;
+
+}
+
+
+.modal-header h3{
+
+    margin:0;
+
+    color:#0f172a;
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+
+.modal-header p{
+
+    margin:6px 0 0;
+
+    color:#64748b;
+
+    font-size:14px;
+
+}
+
+
+#cerrarColaborador{
+
+    width:38px;
+
+    height:38px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#f1f5f9;
+
+    color:#475569;
+
+    font-size:25px;
+
+    line-height:1;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    flex-shrink:0;
+
+}
+
+
+#cerrarColaborador:hover{
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+}
+
+
+/*=====================================================
+    FORMULARIO DEL MODAL
+=====================================================*/
+
+#formColaborador{
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-height:0;
+
+    flex:1;
+
+}
+
+
+/*=====================================================
+    PESTAÑAS
+=====================================================*/
+
+.tabs-modal-colaborador{
+
+    display:flex;
+
+    gap:8px;
+
+    padding:14px 26px 0;
+
+    background:#ffffff;
+
+    border-bottom:1px solid #e2e8f0;
+
+    overflow-x:auto;
+
+    flex-shrink:0;
+
+}
+
+
+.tab-modal{
+
+    position:relative;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    min-width:max-content;
+
+    padding:13px 18px;
+
+    border:none;
+
+    background:transparent;
+
+    color:#64748b;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+.tab-modal::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    right:0;
+
+    bottom:-1px;
+
+    height:3px;
+
+    background:transparent;
+
+    border-radius:4px 4px 0 0;
+
+}
+
+
+.tab-modal:hover{
+
+    color:#2563eb;
+
+    background:#f8fafc;
+
+}
+
+
+.tab-modal.activo{
+
+    color:#2563eb;
+
+}
+
+
+.tab-modal.activo::after{
+
+    background:#2563eb;
+
+}
+
+
+/*=====================================================
+    CONTENIDO DE LAS PESTAÑAS
+=====================================================*/
+
+.modal-body{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow-y:auto;
+
+    padding:24px 26px;
+
+    background:#f8fafc;
+
+}
+
+
+.contenido-tab-modal{
+
+    display:none;
+
+}
+
+
+.contenido-tab-modal.activo{
+
+    display:block;
+
+    animation:mostrarTab .2s ease;
+
+}
+
+
+@keyframes mostrarTab{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(5px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+/*=====================================================
+    SECCIONES DEL FORMULARIO
+=====================================================*/
+
+.seccion-formulario{
+
+    background:#ffffff;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:16px;
+
+    padding:22px;
+
+    margin-bottom:20px;
+
+    box-shadow:
+        0 4px 15px rgba(15,23,42,.04);
+
+}
+
+
+.seccion-formulario:last-child{
+
+    margin-bottom:0;
+
+}
+
+
+.titulo-seccion-formulario{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding-bottom:18px;
+
+    margin-bottom:20px;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+.icono-seccion{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:19px;
+
+    flex-shrink:0;
+
+}
+
+
+.titulo-seccion-formulario h4{
+
+    margin:0;
+
+    color:#1e293b;
+
+    font-size:16px;
+
+    font-weight:700;
+
+}
+
+
+.titulo-seccion-formulario p{
+
+    margin:4px 0 0;
+
+    color:#64748b;
+
+    font-size:13px;
+
+}
+
+
+/*=====================================================
+    GRID DEL FORMULARIO
+=====================================================*/
+
+.form-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:18px;
+
+}
+
+
+.form-grid-tres{
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+}
+
+
+.campo-completo{
+
+    grid-column:1 / -1;
+
+}
+
+
+/*=====================================================
+    CAMPOS
+=====================================================*/
+
+.campo-formulario{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:7px;
+
+    min-width:0;
+
+}
+
+
+.campo-formulario label{
+
+    color:#334155;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+
+.campo-formulario label span{
+
+    color:#dc2626;
+
+}
+
+
+.campo-formulario input,
+.campo-formulario select,
+.campo-formulario textarea{
+
+    width:100%;
+
+    border:1px solid #cbd5e1;
+
+    background:#ffffff;
+
+    color:#0f172a;
+
+    border-radius:11px;
+
+    padding:11px 13px;
+
+    font-size:14px;
+
+    font-family:inherit;
+
+    outline:none;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s,
+        background .2s;
+
+}
+
+
+.campo-formulario input,
+.campo-formulario select{
+
+    min-height:44px;
+
+}
+
+
+.campo-formulario textarea{
+
+    min-height:110px;
+
+    resize:vertical;
+
+}
+
+
+.campo-formulario input::placeholder,
+.campo-formulario textarea::placeholder{
+
+    color:#94a3b8;
+
+}
+
+
+.campo-formulario input:focus,
+.campo-formulario select:focus,
+.campo-formulario textarea:focus{
+
+    border-color:#2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.12);
+
+}
+
+
+.campo-formulario select:disabled{
+
+    background:#f1f5f9;
+
+    color:#94a3b8;
+
+    cursor:not-allowed;
+
+}
+
+
+/*=====================================================
+    PIE DEL MODAL
+=====================================================*/
+
+.modal-footer{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:18px 26px;
+
+    border-top:1px solid #e2e8f0;
+
+    background:#ffffff;
+
+    flex-shrink:0;
+
+}
+
+
+.btn-secundario{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:1px solid #cbd5e1;
+
+    background:#ffffff;
+
+    color:#475569;
+
+    padding:11px 20px;
+
+    border-radius:11px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+
+.btn-secundario:hover{
+
+    background:#f1f5f9;
+
+    border-color:#94a3b8;
+
+}
+
+
+#guardarColaborador:disabled{
+
+    opacity:.65;
+
+    cursor:not-allowed;
+
+}
+
+
+/*=====================================================
+    SPINNER DEL BOTÓN
+=====================================================*/
+
+.spinner-boton{
+
+    width:17px;
+
+    height:17px;
+
+    border:2px solid rgba(255,255,255,.45);
+
+    border-top-color:#ffffff;
+
+    border-radius:50%;
+
+    animation:girarSpinner .7s linear infinite;
+
+}
+
+
+@keyframes girarSpinner{
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+
+/*=====================================================
+    SCROLL PERSONALIZADO
+=====================================================*/
+
+.modal-body::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+
+.modal-body::-webkit-scrollbar-track{
+
+    background:#f1f5f9;
+
+}
+
+
+.modal-body::-webkit-scrollbar-thumb{
+
+    background:#cbd5e1;
+
+    border-radius:20px;
+
+}
+
+
+.modal-body::-webkit-scrollbar-thumb:hover{
+
+    background:#94a3b8;
+
+}
+
+
+/*=====================================================
+    RESPONSIVE TABLET
+=====================================================*/
+
+@media(max-width:900px){
+
+    .modal{
+
+        padding:12px;
+
+    }
+
+
+    .modal-colaborador{
+
+        max-height:95vh;
+
+        border-radius:16px;
+
+    }
+
+
+    .form-grid,
+    .form-grid-tres{
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+
+    }
+
+
+    .modal-header{
+
+        padding:18px 20px;
+
+    }
+
+
+    .tabs-modal-colaborador{
+
+        padding-left:20px;
+
+        padding-right:20px;
+
+    }
+
+
+    .modal-body{
+
+        padding:20px;
+
+    }
+
+
+    .modal-footer{
+
+        padding:16px 20px;
+
+    }
+
+}
+
+
+/*=====================================================
+    RESPONSIVE CELULAR
+=====================================================*/
+
+@media(max-width:600px){
+
+    .colaboradores{
+
+        gap:18px;
+
+    }
+
+
+    .encabezado-seccion{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+
+    .encabezado-seccion h2{
+
+        font-size:23px;
+
+    }
+
+
+    .encabezado-seccion .btn-principal{
+
+        width:100%;
+
+        justify-content:center;
+
+    }
+
+
+    .barra-herramientas{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+
+    .busqueda{
+
+        width:100%;
+
+        order:-1;
+
+    }
+
+
+    .acciones-masivas{
+
+        width:100%;
+
+        display:grid;
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+
+        gap:10px;
+
+    }
+
+
+    .acciones-masivas button{
+
+        width:100%;
+
+        justify-content:center;
+
+        padding:10px 8px;
+
+        font-size:12px;
+
+    }
+
+
+    .paginacion{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+        margin-top:10px;
+
+    }
+
+
+    .paginacion-info{
+
+        text-align:center;
+
+    }
+
+
+    .paginacion-controles{
+
+        justify-content:center;
+
+        flex-wrap:wrap;
+
+    }
+
+
+    /* MODAL PANTALLA COMPLETA */
+
+    .modal{
+
+        padding:0;
+
+        align-items:stretch;
+
+    }
+
+
+    .modal-contenido.modal-colaborador{
+
+        width:100%;
+
+        max-width:none;
+
+        height:100%;
+
+        max-height:none;
+
+        border-radius:0;
+
+    }
+
+
+    .modal-header{
+
+        padding:15px 16px;
+
+        align-items:center;
+
+    }
+
+
+    .modal-header h3{
+
+        font-size:19px;
+
+    }
+
+
+    .modal-header p{
+
+        font-size:12px;
+
+    }
+
+
+    #cerrarColaborador{
+
+        width:36px;
+
+        height:36px;
+
+    }
+
+
+    .tabs-modal-colaborador{
+
+        padding:8px 10px 0;
+
+        gap:4px;
+
+    }
+
+
+    .tab-modal{
+
+        flex:1;
+
+        padding:12px 10px;
+
+        font-size:12px;
+
+    }
+
+
+    .modal-body{
+
+        padding:14px;
+
+    }
+
+
+    .seccion-formulario{
+
+        padding:16px;
+
+        border-radius:14px;
+
+        margin-bottom:14px;
+
+    }
+
+
+    .titulo-seccion-formulario{
+
+        align-items:flex-start;
+
+        margin-bottom:16px;
+
+        padding-bottom:14px;
+
+    }
+
+
+    .icono-seccion{
+
+        width:38px;
+
+        height:38px;
+
+        font-size:17px;
+
+    }
+
+
+    .titulo-seccion-formulario h4{
+
+        font-size:15px;
+
+    }
+
+
+    .titulo-seccion-formulario p{
+
+        font-size:12px;
+
+    }
+
+
+    .form-grid,
+    .form-grid-tres{
+
+        grid-template-columns:1fr;
+
+        gap:14px;
+
+    }
+
+
+    .campo-completo{
+
+        grid-column:auto;
+
+    }
+
+
+    .campo-formulario input,
+    .campo-formulario select,
+    .campo-formulario textarea{
+
+        font-size:16px;
+
+    }
+
+
+    .modal-footer{
+
+        padding:12px 14px;
+
+        display:grid;
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+
+        gap:10px;
+
+        box-shadow:
+            0 -8px 20px rgba(15,23,42,.08);
+
+    }
+
+
+    .modal-footer button{
+
+        width:100%;
+
+        justify-content:center;
+
+        padding:12px 8px;
+
+        font-size:13px;
+
+    }
+
+
+    .tabla-wrapper{
+
+        border-radius:12px;
+
+    }
+
+}
+
+
+/*=====================================================
+    CELULARES PEQUEÑOS
+=====================================================*/
+
+@media(max-width:380px){
+
+    .acciones-masivas{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .modal-header p{
+
+        display:none;
+
+    }
+
+
+    .tab-modal{
+
+        font-size:11px;
+
+        padding:11px 6px;
+
+    }
+
+
+    .tab-modal i{
+
+        display:none;
+
+    }
+
+
+    .modal-footer{
+
+        grid-template-columns:1fr;
+
+    }
 
 }
