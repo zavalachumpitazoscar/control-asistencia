@@ -1,5 +1,5 @@
 import { iniciarColaboradores } from "./empleados/colaboradores.js";
-
+import { iniciarColaboradores } from "./empleados/horarios.js";
 
 export function iniciarEmpleados(){
 
