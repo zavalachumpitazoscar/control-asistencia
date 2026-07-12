@@ -1838,31 +1838,29 @@ document
             "";
 
 
-            if(
-                !tipoDocumento ||
-                !numeroDocumento ||
-                !nombres ||
-                !apellidos ||
-                !sucursalId ||
-                !areaId
-            ){
+if(
+    !tipoDocumento ||
+    !numeroDocumento ||
+    !nombres ||
+    !apellidos
+){
 
-                Swal.fire({
+    Swal.fire({
 
-                    icon:
-                    "warning",
+        icon:"warning",
 
-                    title:
-                    "Campos incompletos",
+        title:"Campos incompletos",
 
-                    text:
-                    "Completa el tipo y número de documento, nombres, apellidos, sucursal y área."
+        text:
+        "Completa el tipo de documento, número de documento, nombres y apellidos.",
 
-                });
+        confirmButtonText:"Aceptar"
 
-                return;
+    });
 
-            }
+    return;
+
+}
 
 
             if(
@@ -2027,25 +2025,27 @@ colaboradores.some(
 
                         },
 
-                        organizacion:{
+organizacion:{
 
-                            sucursalId,
+    sucursalId:
+    sucursalId || null,
 
-                            sucursal:
-                            nombreSucursal,
+    sucursal:
+    nombreSucursal || "",
 
-                            areaId,
+    areaId:
+    areaId || null,
 
-                            area:
-                            nombreArea,
+    area:
+    nombreArea || "",
 
-                            subareaId:
-                            subareaId || null,
+    subareaId:
+    subareaId || null,
 
-                            subarea:
-                            nombreSubarea
+    subarea:
+    nombreSubarea || ""
 
-                        },
+},
 
                         informacionAdicional:{
 
