@@ -279,11 +279,673 @@ class="modal">
 
         <div class="modal-body">
 
-            <!--
-                Aquí construiremos posteriormente
-                el asistente (Wizard)
-                para registrar colaboradores.
-            -->
+            <!--======================================
+    MODAL COLABORADOR
+=======================================-->
+
+<div
+id="modalColaborador"
+class="modal">
+
+    <div class="modal-contenido modal-colaborador">
+
+        <!-- ENCABEZADO -->
+
+        <div class="modal-header">
+
+            <div>
+
+                <h3 id="tituloModalColaborador">
+
+                    Nuevo colaborador
+
+                </h3>
+
+                <p>
+
+                    Registra la información del colaborador.
+
+                </p>
+
+            </div>
+
+
+            <button
+            id="cerrarColaborador"
+            type="button"
+            aria-label="Cerrar">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <!-- FORMULARIO -->
+
+        <form id="formColaborador">
+
+
+            <!--======================================
+                PESTAÑAS SUPERIORES
+            =======================================-->
+
+            <div class="tabs-modal-colaborador">
+
+                <button
+                type="button"
+                class="tab-modal activo"
+                data-tab="informacionGeneral">
+
+                    <i class="bi bi-person-vcard"></i>
+
+                    Información general
+
+                </button>
+
+
+                <button
+                type="button"
+                class="tab-modal"
+                data-tab="informacionAdicional">
+
+                    <i class="bi bi-file-earmark-text"></i>
+
+                    Información adicional
+
+                </button>
+
+            </div>
+
+
+
+            <div class="modal-body">
+
+
+                <!--======================================
+                    INFORMACIÓN GENERAL
+                =======================================-->
+
+                <div
+                id="informacionGeneral"
+                class="contenido-tab-modal activo">
+
+
+                    <!-- DATOS PERSONALES -->
+
+                    <div class="seccion-formulario">
+
+                        <div class="titulo-seccion-formulario">
+
+                            <div class="icono-seccion">
+
+                                <i class="bi bi-person"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Datos personales
+                                </h4>
+
+                                <p>
+                                    Información principal del colaborador.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-grid">
+
+
+                            <div class="campo-formulario">
+
+                                <label for="tipoDocumentoColaborador">
+
+                                    Tipo de documento
+                                    <span>*</span>
+
+                                </label>
+
+                                <select
+                                id="tipoDocumentoColaborador"
+                                required>
+
+                                    <option value="">
+                                        Seleccionar
+                                    </option>
+
+                                    <option value="DNI">
+                                        DNI
+                                    </option>
+
+                                    <option value="CARNET_EXTRANJERIA">
+                                        Carné de extranjería
+                                    </option>
+
+                                    <option value="PASAPORTE">
+                                        Pasaporte
+                                    </option>
+
+                                    <option value="OTRO">
+                                        Otro
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="numeroDocumentoColaborador">
+
+                                    Número de documento
+                                    <span>*</span>
+
+                                </label>
+
+                                <input
+                                id="numeroDocumentoColaborador"
+                                type="text"
+                                maxlength="20"
+                                placeholder="Ingrese el número"
+                                required>
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="nombresColaborador">
+
+                                    Nombres
+                                    <span>*</span>
+
+                                </label>
+
+                                <input
+                                id="nombresColaborador"
+                                type="text"
+                                placeholder="Ingrese los nombres"
+                                required>
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="apellidosColaborador">
+
+                                    Apellidos
+                                    <span>*</span>
+
+                                </label>
+
+                                <input
+                                id="apellidosColaborador"
+                                type="text"
+                                placeholder="Ingrese los apellidos"
+                                required>
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="fechaNacimientoColaborador">
+
+                                    Fecha de nacimiento
+
+                                </label>
+
+                                <input
+                                id="fechaNacimientoColaborador"
+                                type="date">
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="generoColaborador">
+
+                                    Género
+
+                                </label>
+
+                                <select id="generoColaborador">
+
+                                    <option value="SIN_ESPECIFICAR">
+                                        Sin especificar
+                                    </option>
+
+                                    <option value="MASCULINO">
+                                        Masculino
+                                    </option>
+
+                                    <option value="FEMENINO">
+                                        Femenino
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- DATOS DE CONTACTO -->
+
+                    <div class="seccion-formulario">
+
+                        <div class="titulo-seccion-formulario">
+
+                            <div class="icono-seccion">
+
+                                <i class="bi bi-telephone"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Datos de contacto
+                                </h4>
+
+                                <p>
+                                    Información para comunicarse con el colaborador.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-grid">
+
+
+                            <div class="campo-formulario">
+
+                                <label for="correoColaborador">
+
+                                    Correo electrónico
+
+                                </label>
+
+                                <input
+                                id="correoColaborador"
+                                type="email"
+                                placeholder="correo@empresa.com">
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="telefonoColaborador">
+
+                                    Teléfono
+
+                                </label>
+
+                                <input
+                                id="telefonoColaborador"
+                                type="text"
+                                maxlength="15"
+                                inputmode="numeric"
+                                placeholder="Ingrese el teléfono">
+
+                            </div>
+
+
+                            <div class="campo-formulario campo-completo">
+
+                                <label for="direccionColaborador">
+
+                                    Dirección
+
+                                </label>
+
+                                <input
+                                id="direccionColaborador"
+                                type="text"
+                                placeholder="Ingrese la dirección">
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ORGANIZACIÓN -->
+
+                    <div class="seccion-formulario">
+
+                        <div class="titulo-seccion-formulario">
+
+                            <div class="icono-seccion">
+
+                                <i class="bi bi-diagram-3"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Organización
+                                </h4>
+
+                                <p>
+                                    Asigna la ubicación organizacional del colaborador.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-grid form-grid-tres">
+
+
+                            <div class="campo-formulario">
+
+                                <label for="sucursalColaborador">
+
+                                    Sucursal
+                                    <span>*</span>
+
+                                </label>
+
+                                <select
+                                id="sucursalColaborador"
+                                required>
+
+                                    <option value="">
+                                        Seleccionar sucursal
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="areaColaborador">
+
+                                    Área
+                                    <span>*</span>
+
+                                </label>
+
+                                <select
+                                id="areaColaborador"
+                                required>
+
+                                    <option value="">
+                                        Seleccionar área
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="subareaColaborador">
+
+                                    Subárea
+
+                                </label>
+
+                                <select id="subareaColaborador">
+
+                                    <option value="">
+                                        Seleccionar subárea
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!--======================================
+                    INFORMACIÓN ADICIONAL
+                =======================================-->
+
+                <div
+                id="informacionAdicional"
+                class="contenido-tab-modal">
+
+
+                    <div class="seccion-formulario">
+
+                        <div class="titulo-seccion-formulario">
+
+                            <div class="icono-seccion">
+
+                                <i class="bi bi-briefcase"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Información laboral
+                                </h4>
+
+                                <p>
+                                    Datos adicionales del vínculo laboral.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-grid">
+
+
+                            <div class="campo-formulario">
+
+                                <label for="cargoProfesionColaborador">
+
+                                    Cargo o profesión
+
+                                </label>
+
+                                <input
+                                id="cargoProfesionColaborador"
+                                type="text"
+                                placeholder="Ejemplo: Analista de sistemas">
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="inicioContratoColaborador">
+
+                                    Inicio de contrato
+
+                                </label>
+
+                                <input
+                                id="inicioContratoColaborador"
+                                type="date">
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="terminoContratoColaborador">
+
+                                    Término de contrato
+
+                                </label>
+
+                                <input
+                                id="terminoContratoColaborador"
+                                type="date">
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="nacionalidadColaborador">
+
+                                    Nacionalidad
+
+                                </label>
+
+                                <input
+                                id="nacionalidadColaborador"
+                                type="text"
+                                placeholder="Ejemplo: Peruana">
+
+                            </div>
+
+
+                            <div class="campo-formulario">
+
+                                <label for="paisNacionalidadColaborador">
+
+                                    País de nacionalidad
+
+                                </label>
+
+                                <select id="paisNacionalidadColaborador">
+
+                                    <option value="">
+                                        Seleccionar país
+                                    </option>
+
+                                    <option value="PERU">
+                                        Perú
+                                    </option>
+
+                                    <option value="ARGENTINA">
+                                        Argentina
+                                    </option>
+
+                                    <option value="BOLIVIA">
+                                        Bolivia
+                                    </option>
+
+                                    <option value="BRASIL">
+                                        Brasil
+                                    </option>
+
+                                    <option value="CHILE">
+                                        Chile
+                                    </option>
+
+                                    <option value="COLOMBIA">
+                                        Colombia
+                                    </option>
+
+                                    <option value="ECUADOR">
+                                        Ecuador
+                                    </option>
+
+                                    <option value="VENEZUELA">
+                                        Venezuela
+                                    </option>
+
+                                    <option value="OTRO">
+                                        Otro
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="campo-formulario campo-completo">
+
+                                <label for="comentariosColaborador">
+
+                                    Comentarios
+
+                                </label>
+
+                                <textarea
+                                id="comentariosColaborador"
+                                rows="5"
+                                maxlength="1000"
+                                placeholder="Ingrese alguna observación adicional"></textarea>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!--======================================
+                BOTONES
+            =======================================-->
+
+            <div class="modal-footer">
+
+                <button
+                id="cancelarColaborador"
+                type="button"
+                class="btn-secundario">
+
+                    Cancelar
+
+                </button>
+
+
+                <button
+                id="guardarColaborador"
+                type="submit"
+                class="btn-principal">
+
+                    <i class="bi bi-floppy"></i>
+
+                    Guardar colaborador
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>
 
         </div>
 
