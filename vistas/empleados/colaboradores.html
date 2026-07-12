@@ -1,1 +1,209 @@
+<section class="colaboradores">
 
+    <!--======================================
+        ENCABEZADO
+    =======================================-->
+
+    <div class="encabezado-seccion">
+
+        <div>
+
+            <h2>
+                Colaboradores
+            </h2>
+
+            <p>
+                Administra los colaboradores de la empresa.
+            </p>
+
+        </div>
+
+        <button
+        id="btnNuevoColaborador"
+        class="btn-principal">
+
+            <i class="bi bi-plus-circle"></i>
+
+            Nuevo colaborador
+
+        </button>
+
+    </div>
+
+
+
+    <!--======================================
+        BARRA DE HERRAMIENTAS
+    =======================================-->
+
+    <div class="barra-herramientas">
+
+        <div class="busqueda">
+
+            <i class="bi bi-search"></i>
+
+            <input
+            id="buscarColaborador"
+            type="text"
+            placeholder="Buscar por nombre o DNI">
+
+        </div>
+
+
+        <div class="acciones-masivas">
+
+            <button
+            id="btnActivarSeleccion"
+            disabled>
+
+                <i class="bi bi-check-circle"></i>
+
+                Activar
+
+            </button>
+
+            <button
+            id="btnDesactivarSeleccion"
+            disabled>
+
+                <i class="bi bi-lock"></i>
+
+                Desactivar
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!--======================================
+        LISTADO
+    =======================================-->
+
+    <div class="tabla-colaboradores">
+
+
+        <!-- CABECERA -->
+
+        <div class="tabla-header">
+
+            <div>
+
+                <input
+                id="seleccionarTodos"
+                type="checkbox">
+
+            </div>
+
+            <div>DNI</div>
+
+            <div>Apellidos y nombres</div>
+
+            <div>Sucursal</div>
+
+            <div>Área</div>
+
+            <div>Subárea</div>
+
+            <div>Horario</div>
+
+            <div>Estado</div>
+
+            <div class="centrado">
+
+                Acciones
+
+            </div>
+
+        </div>
+
+
+
+        <!-- FILAS -->
+
+        <div
+        id="listaColaboradores"
+        class="tabla-body">
+
+
+            <div class="sin-registros">
+
+                <i class="bi bi-people"></i>
+
+                <h3>
+
+                    No existen colaboradores
+
+                </h3>
+
+                <p>
+
+                    Crea el primer colaborador de la empresa.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!--======================================
+    MODAL
+=======================================-->
+
+<div
+id="modalColaborador"
+class="modal">
+
+    <div class="modal-contenido modal-colaborador">
+
+        <div class="modal-header">
+
+            <h3>
+
+                Nuevo colaborador
+
+            </h3>
+
+            <button id="cerrarColaborador">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+            <!--
+                Aquí construiremos posteriormente
+                el asistente (Wizard)
+                para registrar colaboradores.
+            -->
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <button
+            id="guardarColaborador"
+            class="btn-principal">
+
+                Guardar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
