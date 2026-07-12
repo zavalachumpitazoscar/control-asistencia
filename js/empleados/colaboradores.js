@@ -1837,13 +1837,48 @@ document
             subareaSeleccionada?.nombreSubarea ||
             "";
 
-
 if(
     !tipoDocumento ||
     !numeroDocumento ||
     !nombres ||
     !apellidos
 ){
+
+    tabsModal.forEach(tab=>{
+
+        tab.classList.remove(
+            "activo"
+        );
+
+    });
+
+
+    contenidosModal.forEach(contenido=>{
+
+        contenido.classList.remove(
+            "activo"
+        );
+
+    });
+
+
+    document
+    .querySelector(
+        '.tab-modal[data-tab="informacionGeneral"]'
+    )
+    ?.classList.add(
+        "activo"
+    );
+
+
+    document
+    .getElementById(
+        "informacionGeneral"
+    )
+    ?.classList.add(
+        "activo"
+    );
+
 
     Swal.fire({
 
