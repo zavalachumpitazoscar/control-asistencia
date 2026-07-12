@@ -10,7 +10,19 @@
 
 }  
 
+/*======================================
+    SCROLL TABLA
+======================================*/
 
+.tabla-wrapper{
+
+    width:100%;
+
+    overflow-x:auto;
+
+    border-radius:18px;
+
+}
 /*======================================
     ENCABEZADO
 ======================================*/
@@ -161,7 +173,9 @@
 
     display:flex;
 
-    gap:10px;
+    gap:12px;
+
+    flex-wrap:wrap;
 
 }
 
@@ -169,33 +183,65 @@
 
 .acciones-masivas button{
 
+    padding:11px 18px;
+
     border:none;
 
-    padding:10px 15px;
-
-    border-radius:10px;
-
-    background:#f1f5f9;
-
-    color:#475569;
+    border-radius:12px;
 
     cursor:pointer;
-
-    font-weight:600;
 
     display:flex;
 
     align-items:center;
 
-    gap:6px;
+    gap:8px;
+
+    font-weight:600;
+
+}
+
+#btnCargaMasiva{
+
+    background:#2563eb;
+
+    color:white;
 
 }
 
 
 
+#btnActivarSeleccion{
+
+    background:#16a34a;
+
+    color:white;
+
+}
+
+
+
+#btnDesactivarSeleccion{
+
+    background:#f59e0b;
+
+    color:white;
+
+}
+
+
+
+#btnEliminarSeleccion{
+
+    background:#dc2626;
+
+    color:white;
+
+}
+
 .acciones-masivas button:disabled{
 
-    opacity:.5;
+    opacity:.45;
 
     cursor:not-allowed;
 
@@ -207,17 +253,19 @@
     TABLA
 ======================================*/
 
-
 .tabla-colaboradores{
 
-    background:white;
+    min-width:1450px;
+
+    background:#fff;
 
     border-radius:18px;
 
     overflow:hidden;
 
     box-shadow:
-    0 10px 35px rgba(0,0,0,.08);
+
+    0 12px 35px rgba(15,23,42,.08);
 
 }
 
@@ -263,15 +311,29 @@ grid-template-columns:
 
 .tabla-header{
 
-    background:#f8fafc;
+    display:grid;
 
-    font-size:13px;
+    grid-template-columns:
 
-    font-weight:700;
+    55px
 
-    color:#475569;
+    120px
 
-    border-bottom:1px solid #e2e8f0;
+    220px
+
+    220px
+
+    170px
+
+    170px
+
+    170px
+
+    170px
+
+    120px
+
+    90px;
 
 }
 
@@ -279,17 +341,55 @@ grid-template-columns:
 
 .tabla-fila{
 
-    border-bottom:1px solid #f1f5f9;
+    display:grid;
 
-    font-size:14px;
+    grid-template-columns:
 
-    color:#334155;
+    55px
 
-    transition:.2s;
+    120px
+
+    220px
+
+    220px
+
+    170px
+
+    170px
+
+    170px
+
+    170px
+
+    120px
+
+    90px;
 
 }
 
+.columna-acciones{
 
+    position:sticky;
+
+    right:0;
+
+    background:#f8fafc;
+
+    z-index:30;
+
+}
+
+.tabla-fila .centrado{
+
+    position:sticky;
+
+    right:0;
+
+    background:white;
+
+    z-index:20;
+
+}
 
 .tabla-fila:hover{
 
@@ -453,6 +553,89 @@ grid-template-columns:
 
 }
 
+/*======================================
+    PAGINACIÓN
+======================================*/
+
+.paginacion{
+
+    margin-top:22px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:15px;
+
+}
+
+
+
+.paginacion-info{
+
+    color:#64748b;
+
+    font-size:14px;
+
+}
+
+
+
+.paginacion-controles{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+
+
+.paginacion select{
+
+    padding:8px 12px;
+
+    border-radius:10px;
+
+    border:1px solid #cbd5e1;
+
+}
+
+
+
+.paginacion button{
+
+    width:36px;
+
+    height:36px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:white;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+
+.paginacion button:hover{
+
+    background:#1d4ed8;
+
+}
 
 
 /*======================================
