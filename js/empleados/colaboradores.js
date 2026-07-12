@@ -9,7 +9,10 @@ import {
     collection,
     query,
     where,
-    onSnapshot
+    onSnapshot,
+    addDoc,
+    serverTimestamp,
+    getDocs
 
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
@@ -72,6 +75,16 @@ export function iniciarColaboradores(){
 
     let paginaActual = 1;
 
+    let sucursales = [];
+
+let areas = [];
+
+let subareas = [];
+
+let colaboradorEditandoId = null;
+
+    
+
 const registrosPorPagina = 20;
 
 
@@ -104,9 +117,636 @@ document.getElementById(
     "cerrarColaborador"
 );
 
+const formColaborador =
+document.getElementById(
+    "formColaborador"
+);
 
 
+const cancelarColaborador =
+document.getElementById(
+    "cancelarColaborador"
+);
 
+
+const guardarColaborador =
+document.getElementById(
+    "guardarColaborador"
+);
+
+
+const sucursalColaborador =
+document.getElementById(
+    "sucursalColaborador"
+);
+
+
+const areaColaborador =
+document.getElementById(
+    "areaColaborador"
+);
+
+
+const subareaColaborador =
+document.getElementById(
+    "subareaColaborador"
+);
+
+const tabsModal =
+document.querySelectorAll(
+    ".tab-modal"
+);
+
+const contenidosModal =
+document.querySelectorAll(
+    ".contenido-tab-modal"
+);
+
+tabsModal.forEach(tab=>{
+
+    tab.onclick = ()=>{
+
+        const tabSeleccionado =
+        tab.dataset.tab;
+
+
+        tabsModal.forEach(item=>{
+
+            item.classList.remove(
+                "activo"
+            );
+
+        });
+
+
+        contenidosModal.forEach(
+            contenido=>{
+
+                contenido.classList.remove(
+                    "activo"
+                );
+
+            }
+        );
+
+
+        tab.classList.add(
+            "activo"
+        );
+
+
+        const contenidoActivo =
+        document.getElementById(
+            tabSeleccionado
+        );
+
+
+        if(contenidoActivo){
+
+            contenidoActivo.classList.add(
+                "activo"
+            );
+
+        }
+
+    };
+
+});
+
+async function abrirModalColaborador(){
+
+    if(!modal) return;
+
+
+    colaboradorEditandoId = null;
+
+    subareas = [];
+
+
+    if(formColaborador){
+
+        formColaborador.reset();
+
+    }
+
+
+    const titulo =
+    document.getElementById(
+        "tituloModalColaborador"
+    );
+
+
+    if(titulo){
+
+        titulo.textContent =
+        "Nuevo colaborador";
+
+    }
+
+
+    tabsModal.forEach(tab=>{
+
+        tab.classList.remove(
+            "activo"
+        );
+
+    });
+
+
+    contenidosModal.forEach(contenido=>{
+
+        contenido.classList.remove(
+            "activo"
+        );
+
+    });
+
+
+    const primeraTab =
+    document.querySelector(
+        '.tab-modal[data-tab="informacionGeneral"]'
+    );
+
+
+    const informacionGeneral =
+    document.getElementById(
+        "informacionGeneral"
+    );
+
+
+    primeraTab?.classList.add(
+        "activo"
+    );
+
+
+    informacionGeneral?.classList.add(
+        "activo"
+    );
+
+    
+    if(subareaColaborador){
+
+        subareaColaborador.innerHTML = `
+
+            <option value="">
+                Seleccionar subárea
+            </option>
+
+        `;
+
+        subareaColaborador.disabled = true;
+
+    }
+
+
+    modal.style.display =
+    "flex";
+
+await Promise.all([
+
+    cargarSucursales(),
+
+    cargarAreas()
+
+]);
+
+}
+
+function cerrarModalColaborador(){
+
+    if(!modal) return;
+
+
+    modal.style.display =
+    "none";
+
+
+    colaboradorEditandoId =
+    null;
+
+
+    if(formColaborador){
+
+        formColaborador.reset();
+
+    }
+
+}
+
+async function cargarSucursales(){
+
+    if(!sucursalColaborador) return;
+
+
+    sucursalColaborador.innerHTML = `
+
+        <option value="">
+            Cargando sucursales...
+        </option>
+
+    `;
+
+
+    try{
+
+
+        const consultaSucursales =
+        query(
+
+            collection(
+                db,
+                "sucursales"
+            ),
+
+            where(
+                "empresaId",
+                "==",
+                empresaId
+            )
+
+        );
+
+
+        const resultado =
+        await getDocs(
+            consultaSucursales
+        );
+
+
+        sucursales = [];
+
+
+        resultado.forEach(documento=>{
+
+            const datos =
+            documento.data();
+
+
+            if(
+                !datos.estado ||
+                datos.estado === "ACTIVO"
+            ){
+
+                sucursales.push({
+
+                    id:
+                    documento.id,
+
+                    ...datos
+
+                });
+
+            }
+
+        });
+
+
+        sucursalColaborador.innerHTML = `
+
+            <option value="">
+                Seleccionar sucursal
+            </option>
+
+        `;
+
+
+        sucursales.forEach(sucursal=>{
+
+            sucursalColaborador.innerHTML += `
+
+                <option value="${sucursal.id}">
+
+                    ${
+                        sucursal.nombre ||
+                        sucursal.nombreSucursal ||
+                        "Sucursal sin nombre"
+                    }
+
+                </option>
+
+            `;
+
+        });
+
+
+    }
+    catch(error){
+
+
+        console.error(
+            "Error al cargar sucursales:",
+            error
+        );
+
+
+        sucursalColaborador.innerHTML = `
+
+            <option value="">
+                No se pudieron cargar
+            </option>
+
+        `;
+
+    }
+
+}
+
+async function cargarAreas(){
+
+    if(!areaColaborador) return;
+
+
+    areaColaborador.innerHTML = `
+
+        <option value="">
+            Cargando áreas...
+        </option>
+
+    `;
+
+
+    try{
+
+
+        const consultaAreas =
+        query(
+
+            collection(
+                db,
+                "areas"
+            ),
+
+            where(
+                "empresaId",
+                "==",
+                empresaId
+            )
+
+        );
+
+
+        const resultado =
+        await getDocs(
+            consultaAreas
+        );
+
+
+        areas = [];
+
+
+        resultado.forEach(documento=>{
+
+            const datos =
+            documento.data();
+
+
+            if(
+                !datos.estado ||
+                datos.estado === "ACTIVO"
+            ){
+
+                areas.push({
+
+                    id:
+                    documento.id,
+
+                    ...datos
+
+                });
+
+            }
+
+        });
+
+
+        areaColaborador.innerHTML = `
+
+            <option value="">
+                Seleccionar área
+            </option>
+
+        `;
+
+
+        areas.forEach(area=>{
+
+            areaColaborador.innerHTML += `
+
+                <option value="${area.id}">
+
+                    ${
+                        area.nombre ||
+                        area.nombreArea ||
+                        "Área sin nombre"
+                    }
+
+                </option>
+
+            `;
+
+        });
+
+
+    }
+    catch(error){
+
+
+        console.error(
+            "Error al cargar áreas:",
+            error
+        );
+
+
+        areaColaborador.innerHTML = `
+
+            <option value="">
+                No se pudieron cargar
+            </option>
+
+        `;
+
+    }
+
+}
+
+async function cargarSubareasPorArea(
+    areaId
+){
+
+    if(!subareaColaborador) return;
+
+
+    subareaColaborador.innerHTML = `
+
+        <option value="">
+            Seleccionar subárea
+        </option>
+
+    `;
+
+    if(subareas.length === 0){
+
+    subareaColaborador.innerHTML = `
+
+        <option value="">
+            Esta área no tiene subáreas
+        </option>
+
+    `;
+
+}
+
+
+    if(!areaId){
+
+        subareaColaborador.disabled =
+        true;
+
+        return;
+
+    }
+
+
+    subareaColaborador.disabled =
+    true;
+
+
+    subareaColaborador.innerHTML = `
+
+        <option value="">
+            Cargando subáreas...
+        </option>
+
+    `;
+
+
+    try{
+
+
+const consultaSubareas =
+query(
+
+    collection(
+        db,
+        "subareas"
+    ),
+
+    where(
+        "empresaId",
+        "==",
+        empresaId
+    )
+
+);
+
+
+        const resultado =
+        await getDocs(
+            consultaSubareas
+        );
+
+
+        subareas = [];
+
+
+        resultado.forEach(documento=>{
+
+            const datos =
+            documento.data();
+
+if(
+
+    datos.areaId === areaId
+
+    &&
+
+    (
+        !datos.estado ||
+        datos.estado === "ACTIVO"
+    )
+
+){
+
+    subareas.push({
+
+        id:
+        documento.id,
+
+        ...datos
+
+    });
+
+}
+
+        });
+
+
+        subareaColaborador.innerHTML = `
+
+            <option value="">
+                Seleccionar subárea
+            </option>
+
+        `;
+
+
+        subareas.forEach(subarea=>{
+
+            subareaColaborador.innerHTML += `
+
+                <option value="${subarea.id}">
+
+                    ${
+                        subarea.nombre ||
+                        subarea.nombreSubarea ||
+                        "Subárea sin nombre"
+                    }
+
+                </option>
+
+            `;
+
+        });
+
+
+        subareaColaborador.disabled =
+        false;
+
+
+    }
+    catch(error){
+
+
+        console.error(
+            "Error al cargar subáreas:",
+            error
+        );
+
+
+        subareaColaborador.innerHTML = `
+
+            <option value="">
+                No se pudieron cargar
+            </option>
+
+        `;
+
+    }
+
+}
+
+
+    if(areaColaborador){
+
+    areaColaborador.onchange = ()=>{
+
+        cargarSubareasPorArea(
+            areaColaborador.value
+        );
+
+    };
+
+}
     //=================================
     // LISTAR COLABORADORES
     //=================================
@@ -191,34 +831,51 @@ document.getElementById(
 
 
 
-        const filtrados =
-        colaboradores.filter(col=>{
+const filtrados =
+colaboradores.filter(col=>{
 
 
-            const nombre =
-            `${col.nombres || ""}
-            ${col.apellidos || ""}`
-            .toLowerCase();
+    const nombres =
+    col.datosPersonales?.nombres ||
+    col.nombres ||
+    "";
 
 
-            const dni =
-            (col.dni || "")
-            .toLowerCase();
+    const apellidos =
+    col.datosPersonales?.apellidos ||
+    col.apellidos ||
+    "";
 
 
-
-            return (
-
-                nombre.includes(texto)
-
-                ||
-
-                dni.includes(texto)
-
-            );
+    const nombreCompleto =
+    `${nombres} ${apellidos}`
+    .toLowerCase();
 
 
-        });
+    const numeroDocumento =
+    (
+        col.documento?.numero ||
+        col.dni ||
+        ""
+    )
+    .toLowerCase();
+
+
+    return (
+
+        nombreCompleto.includes(
+            texto
+        )
+
+        ||
+
+        numeroDocumento.includes(
+            texto
+        )
+
+    );
+
+});
 
         const inicio =
 (paginaActual-1) *
@@ -267,6 +924,47 @@ fin
 
         pagina.forEach(col=>{
 
+            const numeroDocumento =
+col.documento?.numero ||
+col.dni ||
+"-";
+
+
+const apellidos =
+col.datosPersonales?.apellidos ||
+col.apellidos ||
+"-";
+
+
+const nombres =
+col.datosPersonales?.nombres ||
+col.nombres ||
+"-";
+
+
+const sucursal =
+col.organizacion?.sucursal ||
+col.sucursal ||
+"-";
+
+
+const area =
+col.organizacion?.area ||
+col.area ||
+"-";
+
+
+const subarea =
+col.organizacion?.subarea ||
+col.subarea ||
+"-";
+
+
+const horario =
+col.organizacion?.horario ||
+col.horario ||
+"-";
+
 
             lista.innerHTML +=`
 
@@ -296,34 +994,26 @@ fin
 
                 <div>
 
-                    ${col.dni || "-"}
+                ${numeroDocumento}
 
                 </div>
 
                 <div>
 
-                ${col.apellidos || "-"}
+                ${apellidos}
 
                 </div>
 
                 <div>
 
-                ${col.nombres || "-"}
+                ${nombres}
 
                 </div>
 
 
                 <div>
 
-                    ${col.sucursal || "-"}
-
-                </div>
-
-
-
-                <div>
-
-                    ${col.area || "-"}
+                ${sucursal}
 
                 </div>
 
@@ -331,7 +1021,7 @@ fin
 
                 <div>
 
-                    ${col.subarea || "-"}
+                ${area}
 
                 </div>
 
@@ -339,11 +1029,9 @@ fin
 
                 <div>
 
-                    ${col.horario || "-"}
+                ${subarea}
 
                 </div>
-
-
 
                 <div>
 
@@ -366,6 +1054,12 @@ fin
 
                     </span>
 
+
+                </div>
+
+                <div>
+
+                ${horario}
 
                 </div>
 
@@ -546,29 +1240,36 @@ function renderizarPaginacion(total){
 
 
 
+function actualizarAcciones(){
+
+    const activo =
+    seleccionados.length > 0;
 
 
-    function actualizarAcciones(){
+    if(btnActivar){
 
-
-        const activo =
-        seleccionados.length>0;
-
-
-
-        if(btnActivar)
         btnActivar.disabled =
         !activo;
 
+    }
 
 
-        if(btnDesactivar)
+    if(btnDesactivar){
+
         btnDesactivar.disabled =
         !activo;
 
+    }
 
+
+    if(btnEliminar){
+
+        btnEliminar.disabled =
+        !activo;
 
     }
+
+}
 
 
 
@@ -672,35 +1373,565 @@ buscar.addEventListener(
     }
 
 
-        // ==========================
-    // BOTÓN NUEVO
-    // ==========================
+// ==========================
+// BOTÓN NUEVO
+// ==========================
 
-    if(btnNuevo){
+if(btnNuevo){
 
-        btnNuevo.onclick=()=>{
+    btnNuevo.onclick = ()=>{
 
-            modal.style.display="flex";
+        abrirModalColaborador();
 
-        };
+    };
+
+}
+
+// ==========================
+// CERRAR MODAL
+// ==========================
+
+if(cerrar){
+
+    cerrar.onclick = ()=>{
+
+        cerrarModalColaborador();
+
+    };
+
+}
+
+
+if(cancelarColaborador){
+
+    cancelarColaborador.onclick = ()=>{
+
+        cerrarModalColaborador();
+
+    };
+
+}
+
+if(modal){
+
+    modal.addEventListener(
+        "click",
+        evento=>{
+
+            if(evento.target === modal){
+
+                cerrarModalColaborador();
+
+            }
+
+        }
+    );
+
+}
+
+
+if(formColaborador){
+
+    formColaborador.addEventListener(
+        "submit",
+        async evento=>{
+
+            evento.preventDefault();
+
+
+            const tipoDocumento =
+            document
+            .getElementById(
+                "tipoDocumentoColaborador"
+            )
+            ?.value || "";
+
+
+const numeroDocumento =
+document
+.getElementById(
+    "numeroDocumentoColaborador"
+)
+?.value
+.trim()
+.toUpperCase() || "";
+
+
+            const nombres =
+            document
+            .getElementById(
+                "nombresColaborador"
+            )
+            ?.value
+            .trim() || "";
+
+
+            const apellidos =
+            document
+            .getElementById(
+                "apellidosColaborador"
+            )
+            ?.value
+            .trim() || "";
+
+
+            const fechaNacimiento =
+            document
+            .getElementById(
+                "fechaNacimientoColaborador"
+            )
+            ?.value || "";
+
+
+            const genero =
+            document
+            .getElementById(
+                "generoColaborador"
+            )
+            ?.value ||
+            "SIN_ESPECIFICAR";
+
+
+            const correo =
+            document
+            .getElementById(
+                "correoColaborador"
+            )
+            ?.value
+            .trim()
+            .toLowerCase() || "";
+
+
+            const telefono =
+            document
+            .getElementById(
+                "telefonoColaborador"
+            )
+            ?.value
+            .trim() || "";
+
+
+            const direccion =
+            document
+            .getElementById(
+                "direccionColaborador"
+            )
+            ?.value
+            .trim() || "";
+
+
+            const cargoProfesion =
+            document
+            .getElementById(
+                "cargoProfesionColaborador"
+            )
+            ?.value
+            .trim() || "";
+
+
+            const inicioContrato =
+            document
+            .getElementById(
+                "inicioContratoColaborador"
+            )
+            ?.value || "";
+
+
+            const terminoContrato =
+            document
+            .getElementById(
+                "terminoContratoColaborador"
+            )
+            ?.value || "";
+
+
+            const nacionalidad =
+            document
+            .getElementById(
+                "nacionalidadColaborador"
+            )
+            ?.value
+            .trim() || "";
+
+
+            const paisNacionalidad =
+            document
+            .getElementById(
+                "paisNacionalidadColaborador"
+            )
+            ?.value || "";
+
+
+            const comentarios =
+            document
+            .getElementById(
+                "comentariosColaborador"
+            )
+            ?.value
+            .trim() || "";
+
+
+            const sucursalId =
+            sucursalColaborador?.value ||
+            "";
+
+
+            const areaId =
+            areaColaborador?.value ||
+            "";
+
+
+            const subareaId =
+            subareaColaborador?.value ||
+            "";
+
+
+            const sucursalSeleccionada =
+            sucursales.find(
+                sucursal=>
+                sucursal.id === sucursalId
+            );
+
+
+            const areaSeleccionada =
+            areas.find(
+                area=>
+                area.id === areaId
+            );
+
+
+            const subareaSeleccionada =
+            subareas.find(
+                subarea=>
+                subarea.id === subareaId
+            );
+
+
+            const nombreSucursal =
+            sucursalSeleccionada?.nombre ||
+            sucursalSeleccionada?.nombreSucursal ||
+            "";
+
+
+            const nombreArea =
+            areaSeleccionada?.nombre ||
+            areaSeleccionada?.nombreArea ||
+            "";
+
+
+            const nombreSubarea =
+            subareaSeleccionada?.nombre ||
+            subareaSeleccionada?.nombreSubarea ||
+            "";
+
+
+            if(
+                !tipoDocumento ||
+                !numeroDocumento ||
+                !nombres ||
+                !apellidos ||
+                !sucursalId ||
+                !areaId
+            ){
+
+                Swal.fire({
+
+                    icon:
+                    "warning",
+
+                    title:
+                    "Campos incompletos",
+
+                    text:
+                    "Completa el tipo y número de documento, nombres, apellidos, sucursal y área."
+
+                });
+
+                return;
+
+            }
+
+
+            if(
+                tipoDocumento === "DNI" &&
+                !/^\d{8}$/.test(
+                    numeroDocumento
+                )
+            ){
+
+                Swal.fire({
+
+                    icon:
+                    "warning",
+
+                    title:
+                    "DNI incorrecto",
+
+                    text:
+                    "El DNI debe contener exactamente 8 números."
+
+                });
+
+                return;
+
+            }
+
+
+const documentoExistente =
+colaboradores.some(
+    colaborador=>{
+
+        const documentoGuardado =
+        (
+            colaborador.documento?.numero ||
+            colaborador.dni ||
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+        return documentoGuardado ===
+        numeroDocumento;
 
     }
+);
+
+            if(documentoExistente){
+
+                Swal.fire({
+
+                    icon:
+                    "warning",
+
+                    title:
+                    "Documento registrado",
+
+                    text:
+                    "Ya existe un colaborador con este número de documento."
+
+                });
+
+                return;
+
+            }
 
 
-    // ==========================
-    // CERRAR MODAL
-    // ==========================
+            if(
+                inicioContrato &&
+                terminoContrato &&
+                terminoContrato <
+                inicioContrato
+            ){
 
-    if(cerrar){
+                Swal.fire({
 
-        cerrar.onclick=()=>{
+                    icon:
+                    "warning",
 
-            modal.style.display="none";
+                    title:
+                    "Fechas incorrectas",
 
-        };
+                    text:
+                    "El término del contrato no puede ser anterior al inicio del contrato."
 
-    }
+                });
 
+                return;
+
+            }
+
+            if(!guardarColaborador){
+
+    console.error(
+        "No se encontró guardarColaborador"
+    );
+
+    return;
+
+}
+
+
+            try{
+
+
+                guardarColaborador.disabled =
+                true;
+
+
+                guardarColaborador.innerHTML = `
+
+                    <span class="spinner-boton">
+                    </span>
+
+                    Guardando...
+
+                `;
+
+
+                await addDoc(
+
+                    collection(
+                        db,
+                        "colaboradores"
+                    ),
+
+                    {
+
+                        empresaId,
+
+                        documento:{
+
+                            tipo:
+                            tipoDocumento,
+
+                            numero:
+                            numeroDocumento
+
+                        },
+
+                        datosPersonales:{
+
+                            nombres,
+
+                            apellidos,
+
+                            fechaNacimiento:
+                            fechaNacimiento ||
+                            null,
+
+                            genero
+
+                        },
+
+                        contacto:{
+
+                            correo,
+
+                            telefono,
+
+                            direccion
+
+                        },
+
+                        organizacion:{
+
+                            sucursalId,
+
+                            sucursal:
+                            nombreSucursal,
+
+                            areaId,
+
+                            area:
+                            nombreArea,
+
+                            subareaId:
+                            subareaId || null,
+
+                            subarea:
+                            nombreSubarea
+
+                        },
+
+                        informacionAdicional:{
+
+                            cargoProfesion,
+
+                            inicioContrato:
+                            inicioContrato ||
+                            null,
+
+                            terminoContrato:
+                            terminoContrato ||
+                            null,
+
+                            nacionalidad,
+
+                            paisNacionalidad,
+
+                            comentarios
+
+                        },
+
+                        estado:
+                        "ACTIVO",
+
+                        fechaRegistro:
+                        serverTimestamp()
+
+                    }
+
+                );
+
+
+                cerrarModalColaborador();
+
+
+                await Swal.fire({
+
+                    icon:
+                    "success",
+
+                    title:
+                    "Colaborador registrado",
+
+                    text:
+                    "El colaborador se registró correctamente.",
+
+                    confirmButtonText:
+                    "Aceptar"
+
+                });
+
+
+            }
+            catch(error){
+
+
+                console.error(
+                    "Error al registrar colaborador:",
+                    error
+                );
+
+
+                Swal.fire({
+
+                    icon:
+                    "error",
+
+                    title:
+                    "No se pudo registrar",
+
+                    text:
+                    "Ocurrió un error al guardar el colaborador."
+
+                });
+
+
+            }
+            finally{
+
+
+                guardarColaborador.disabled =
+                false;
+
+
+                guardarColaborador.innerHTML = `
+
+                    <i class="bi bi-floppy"></i>
+
+                    Guardar colaborador
+
+                `;
+
+            }
+
+        }
+
+    );
+
+}    
 
     // ==========================
     // ACTIVAR
