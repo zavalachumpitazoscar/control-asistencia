@@ -375,7 +375,7 @@ Swal.fire({
 
 <div class="sucursal-footer">
 
-    <button class="btnColaboradoresArea" data-id="${documento.id}">
+    <button class="btnColaboradoresSucursales" data-id="${documento.id}">
 
     <i class="bi bi-people"></i>
 
