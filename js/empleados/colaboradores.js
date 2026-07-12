@@ -584,18 +584,6 @@ async function cargarSubareasPorArea(
 
     `;
 
-    if(subareas.length === 0){
-
-    subareaColaborador.innerHTML = `
-
-        <option value="">
-            Esta área no tiene subáreas
-        </option>
-
-    `;
-
-}
-
 
     if(!areaId){
 
