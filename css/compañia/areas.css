@@ -280,6 +280,14 @@
 
 }
 
+.btnEditarArea:hover{
+
+    background:#2563eb;
+
+    color:#fff;
+
+}
+
 
 
 .btnEstadoArea{
@@ -287,6 +295,14 @@
     background:#fef2f2;
 
     color:#dc2626;
+
+}
+
+.btnEstadoArea:hover{
+
+    background:#dc2626;
+
+    color:#fff;
 
 }
 
