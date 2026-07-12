@@ -316,6 +316,7 @@
 
 }
 
+
 .btnEditarSubarea{
 
     background:#eff6ff;
@@ -323,6 +324,16 @@
     color:#2563eb;
 
 }
+
+.btnEditarSubarea:hover{
+
+    background:#2563eb;
+
+    color:#fff;
+
+}
+
+
 
 .btnEstadoSubarea{
 
@@ -332,6 +343,13 @@
 
 }
 
+.btnEstadoSubarea:hover{
+
+    background:#dc2626;
+
+    color:#fff;
+
+}
 
 /*======================================
     FORMULARIO
