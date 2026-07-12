@@ -32,49 +32,68 @@
 
 
 
-    <!--======================================
-        BARRA DE HERRAMIENTAS
-    =======================================-->
+<!--======================================
+    BARRA DE HERRAMIENTAS
+=======================================-->
 
-    <div class="barra-herramientas">
+<div class="barra-herramientas">
 
-        <div class="busqueda">
+    <div class="acciones-masivas">
 
-            <i class="bi bi-search"></i>
+        <button
+        id="btnCargaMasiva">
 
-            <input
-            id="buscarColaborador"
-            type="text"
-            placeholder="Buscar por nombre o DNI">
+            <i class="bi bi-file-earmark-arrow-up"></i>
 
-        </div>
+            Carga masiva
 
+        </button>
 
-        <div class="acciones-masivas">
+        <button
+        id="btnActivarSeleccion"
+        disabled>
 
-            <button
-            id="btnActivarSeleccion"
-            disabled>
+            <i class="bi bi-check-circle"></i>
 
-                <i class="bi bi-check-circle"></i>
+            Activar
 
-                Activar
+        </button>
 
-            </button>
+        <button
+        id="btnDesactivarSeleccion"
+        disabled>
 
-            <button
-            id="btnDesactivarSeleccion"
-            disabled>
+            <i class="bi bi-lock"></i>
 
-                <i class="bi bi-lock"></i>
+            Desactivar
 
-                Desactivar
+        </button>
 
-            </button>
+        <button
+        id="btnEliminarSeleccion"
+        disabled>
 
-        </div>
+            <i class="bi bi-trash"></i>
+
+            Eliminar
+
+        </button>
 
     </div>
+
+
+    <div class="busqueda">
+
+        <i class="bi bi-search"></i>
+
+        <input
+        id="buscarColaborador"
+        type="text"
+        placeholder="Buscar por nombre o DNI">
+
+    </div>
+
+</div>
 
 
 
@@ -99,7 +118,9 @@
 
             <div>DNI</div>
 
-            <div>Apellidos y nombres</div>
+            <div>Apellidos</div>
+
+            <div>Nombres</div>
 
             <div>Sucursal</div>
 
