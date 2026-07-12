@@ -254,15 +254,17 @@ export function iniciarColaboradores(){
 
                 </div>
 
-
-
                 <div>
 
-                    ${col.apellidos || ""}
-                    ${col.nombres || ""}
+                ${col.apellidos || "-"}
 
                 </div>
 
+                <div>
+
+                ${col.nombres || "-"}
+
+                </div>
 
 
                 <div>
