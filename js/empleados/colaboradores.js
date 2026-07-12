@@ -70,6 +70,40 @@ export function iniciarColaboradores(){
 
     let seleccionados = [];
 
+    let paginaActual = 1;
+
+const registrosPorPagina = 20;
+
+
+const btnEliminar =
+document.getElementById(
+    "btnEliminarSeleccion"
+);
+
+
+const btnCargaMasiva =
+document.getElementById(
+    "btnCargaMasiva"
+);
+
+
+const btnNuevo =
+document.getElementById(
+    "btnNuevoColaborador"
+);
+
+
+const modal =
+document.getElementById(
+    "modalColaborador"
+);
+
+
+const cerrar =
+document.getElementById(
+    "cerrarColaborador"
+);
+
 
 
 
@@ -186,7 +220,19 @@ export function iniciarColaboradores(){
 
         });
 
+        const inicio =
+(paginaActual-1) *
+registrosPorPagina;
 
+const fin =
+inicio +
+registrosPorPagina;
+
+const pagina =
+filtrados.slice(
+inicio,
+fin
+);
 
 
         if(filtrados.length===0){
@@ -219,7 +265,7 @@ export function iniciarColaboradores(){
 
 
 
-        filtrados.forEach(col=>{
+        pagina.forEach(col=>{
 
 
             lista.innerHTML +=`
@@ -328,8 +374,7 @@ export function iniciarColaboradores(){
                 <div class="centrado">
 
 
-                    <button
-                    class="btn-editar-colaborador">
+                    <button class="btn-editar-colaborador" data-id="${col.id}">
 
                         <i class="bi bi-pencil"></i>
 
@@ -352,10 +397,89 @@ export function iniciarColaboradores(){
 
         activarChecks();
 
+activarEditar();
+
+renderizarPaginacion(
+    filtrados.length
+);
+
 
     }
 
+function activarEditar(){
 
+    document
+    .querySelectorAll(
+    ".btn-editar-colaborador")
+    .forEach(btn=>{
+
+        btn.onclick=()=>{
+
+            console.log(
+                "Editar",
+                btn.dataset.id
+            );
+
+        };
+
+    });
+
+}
+
+function renderizarPaginacion(total){
+
+    const contenedor =
+    document.getElementById(
+        "paginacionColaboradores"
+    );
+
+    if(!contenedor) return;
+
+    contenedor.innerHTML="";
+
+    const paginas =
+    Math.ceil(
+        total /
+        registrosPorPagina
+    );
+
+    for(let i=1;i<=paginas;i++){
+
+        contenedor.innerHTML += `
+
+        <button
+        class="btn-pagina ${
+        i===paginaActual
+        ?"activa":""
+        }"
+        data-pagina="${i}">
+
+            ${i}
+
+        </button>
+
+        `;
+
+    }
+
+    document
+    .querySelectorAll(".btn-pagina")
+    .forEach(btn=>{
+
+        btn.onclick=()=>{
+
+            paginaActual =
+            Number(
+                btn.dataset.pagina
+            );
+
+            renderizar();
+
+        };
+
+    });
+
+}
 
 
 
@@ -534,19 +658,118 @@ export function iniciarColaboradores(){
     if(buscar){
 
 
-        buscar.addEventListener(
-            "input",
-            ()=>{
+buscar.addEventListener(
+"input",
+()=>{
 
-                renderizar();
+    paginaActual = 1;
 
-            }
+    renderizar();
 
-        );
-
+}
+);
 
     }
 
+
+        // ==========================
+    // BOTÓN NUEVO
+    // ==========================
+
+    if(btnNuevo){
+
+        btnNuevo.onclick=()=>{
+
+            modal.style.display="flex";
+
+        };
+
+    }
+
+
+    // ==========================
+    // CERRAR MODAL
+    // ==========================
+
+    if(cerrar){
+
+        cerrar.onclick=()=>{
+
+            modal.style.display="none";
+
+        };
+
+    }
+
+
+    // ==========================
+    // ACTIVAR
+    // ==========================
+
+    if(btnActivar){
+
+        btnActivar.onclick=()=>{
+
+            console.log(seleccionados);
+
+        };
+
+    }
+
+
+    // ==========================
+    // DESACTIVAR
+    // ==========================
+
+    if(btnDesactivar){
+
+        btnDesactivar.onclick=()=>{
+
+            console.log(seleccionados);
+
+        };
+
+    }
+
+
+    // ==========================
+    // ELIMINAR
+    // ==========================
+
+    if(btnEliminar){
+
+        btnEliminar.onclick=()=>{
+
+            console.log(seleccionados);
+
+        };
+
+    }
+
+
+    // ==========================
+    // CARGA MASIVA
+    // ==========================
+
+    if(btnCargaMasiva){
+
+        btnCargaMasiva.onclick=()=>{
+
+            Swal.fire({
+
+                icon:"info",
+
+                title:"Carga masiva",
+
+                text:"Aquí se importará un archivo Excel."
+
+            });
+
+        };
+
+    }
+
+}
 
 
 }
