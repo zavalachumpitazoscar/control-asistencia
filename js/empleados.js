@@ -1,6 +1,4 @@
 import { iniciarColaboradores } from "./empleados/colaboradores.js";
-import { iniciarCargos } from "./empleados/cargos.js";
-import { iniciarHorarios } from "./empleados/horarios.js";
 
 
 export function iniciarEmpleados(){
