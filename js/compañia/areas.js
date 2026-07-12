@@ -524,16 +524,13 @@ ${area.descripcion || "Sin descripción"}
 
 
 
-<div class="colaboradores-area">
+    <button class="btnColaboradoresAreas" data-id="${documento.id}">
 
+    <i class="bi bi-people"></i>
 
-<i class="bi bi-people"></i>
+    0 colaboradores
 
-
-0 colaboradores
-
-
-</div>
+    </button>
 
 
 
