@@ -441,27 +441,43 @@ async function cargarSucursales(){
             );
 
 
-            const estado =
-            String(
-                datos.estado ||
-                "ACTIVO"
-            )
-            .trim()
-            .toUpperCase();
+const estado =
+String(
+    datos.estado ?? "ACTIVO"
+)
+.trim()
+.toUpperCase();
 
 
-            if(estado === "ACTIVA"){
+const estaActiva =
 
-                sucursales.push({
+    estado === "ACTIVO"
 
-                    id:
-                    documento.id,
+    ||
 
-                    ...datos
+    estado === "ACTIVA"
 
-                });
+    ||
 
-            }
+    estado === "TRUE"
+
+    ||
+
+    estado === "1";
+
+
+if(estaActiva){
+
+    sucursales.push({
+
+        id:
+        documento.id,
+
+        ...datos
+
+    });
+
+}
 
         });
 
@@ -646,27 +662,43 @@ async function cargarAreas(){
             );
 
 
-            const estado =
-            String(
-                datos.estado ||
-                "ACTIVO"
-            )
-            .trim()
-            .toUpperCase();
+const estado =
+String(
+    datos.estado ?? "ACTIVO"
+)
+.trim()
+.toUpperCase();
 
 
-            if(estado === "ACTIVA"){
+const estaActiva =
 
-                areas.push({
+    estado === "ACTIVO"
 
-                    id:
-                    documento.id,
+    ||
 
-                    ...datos
+    estado === "ACTIVA"
 
-                });
+    ||
 
-            }
+    estado === "TRUE"
+
+    ||
+
+    estado === "1";
+
+
+if(estaActiva){
+
+    areas.push({
+
+        id:
+        documento.id,
+
+        ...datos
+
+    });
+
+}
 
         });
 
@@ -1252,17 +1284,17 @@ col.horario ||
                     <span class="badge-estado
 
                     ${
-                    col.estado==="ACTIVO"
+                    col.estado==="ACTIVA"
                     ?
-                    "activo"
+                    "activa"
                     :
-                    "inactivo"
+                    "inactiva"
                     }
 
                     ">
 
                     ${
-                    col.estado || "ACTIVO"
+                    col.estado || "ACTIVA"
                     }
 
                     </span>
