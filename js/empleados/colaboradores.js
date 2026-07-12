@@ -43,6 +43,16 @@ export function iniciarColaboradores(){
         "listaColaboradores"
     );
 
+    if(!lista){
+
+    console.error(
+        "No se encontró listaColaboradores"
+    );
+
+    return;
+
+}
+
 
     const buscar =
     document.getElementById(
@@ -576,6 +586,9 @@ async function cargarSubareasPorArea(
     if(!subareaColaborador) return;
 
 
+    subareas = [];
+
+
     subareaColaborador.innerHTML = `
 
         <option value="">
@@ -611,21 +624,21 @@ async function cargarSubareasPorArea(
     try{
 
 
-const consultaSubareas =
-query(
+        const consultaSubareas =
+        query(
 
-    collection(
-        db,
-        "subareas"
-    ),
+            collection(
+                db,
+                "subareas"
+            ),
 
-    where(
-        "empresaId",
-        "==",
-        empresaId
-    )
+            where(
+                "empresaId",
+                "==",
+                empresaId
+            )
 
-);
+        );
 
 
         const resultado =
@@ -634,39 +647,55 @@ query(
         );
 
 
-        subareas = [];
-
-
         resultado.forEach(documento=>{
 
             const datos =
             documento.data();
 
-if(
 
-    datos.areaId === areaId
+            if(
 
-    &&
+                datos.areaId === areaId
 
-    (
-        !datos.estado ||
-        datos.estado === "ACTIVO"
-    )
+                &&
 
-){
+                (
+                    !datos.estado ||
+                    datos.estado === "ACTIVO"
+                )
 
-    subareas.push({
+            ){
 
-        id:
-        documento.id,
+                subareas.push({
 
-        ...datos
+                    id:
+                    documento.id,
 
-    });
+                    ...datos
 
-}
+                });
+
+            }
 
         });
+
+
+        if(subareas.length === 0){
+
+            subareaColaborador.innerHTML = `
+
+                <option value="">
+                    Esta área no tiene subáreas
+                </option>
+
+            `;
+
+            subareaColaborador.disabled =
+            true;
+
+            return;
+
+        }
 
 
         subareaColaborador.innerHTML = `
@@ -719,16 +748,20 @@ if(
 
         `;
 
+
+        subareaColaborador.disabled =
+        true;
+
     }
 
 }
 
+if(areaColaborador){
 
-    if(areaColaborador){
+    areaColaborador.onchange =
+    async ()=>{
 
-    areaColaborador.onchange = ()=>{
-
-        cargarSubareasPorArea(
+        await cargarSubareasPorArea(
             areaColaborador.value
         );
 
