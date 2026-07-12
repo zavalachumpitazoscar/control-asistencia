@@ -1,1 +1,517 @@
+/*======================================
+    COLABORADORES
+======================================*/
 
+.colaboradores{
+
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+
+}
+
+
+/*======================================
+    ENCABEZADO
+======================================*/
+
+
+.encabezado-seccion{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+}
+
+
+.encabezado-seccion h2{
+
+    font-size:28px;
+
+    color:#203864;
+
+}
+
+
+.encabezado-seccion p{
+
+    margin-top:6px;
+
+    color:#64748b;
+
+}
+
+
+
+/*======================================
+    BOTON PRINCIPAL
+======================================*/
+
+
+.btn-principal{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    border:none;
+
+    background:#2563eb;
+
+    color:white;
+
+    padding:12px 20px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+
+.btn-principal:hover{
+
+    background:#1d4ed8;
+
+}
+
+
+
+/*======================================
+    BARRA HERRAMIENTAS
+======================================*/
+
+
+.barra-herramientas{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+}
+
+
+
+.busqueda{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    background:white;
+
+    border:1px solid #e2e8f0;
+
+    padding:0 15px;
+
+    border-radius:12px;
+
+    width:350px;
+
+}
+
+
+
+.busqueda i{
+
+    color:#64748b;
+
+}
+
+
+
+.busqueda input{
+
+    border:none;
+
+    outline:none;
+
+    padding:12px 0;
+
+    width:100%;
+
+    font-size:14px;
+
+}
+
+
+
+.acciones-masivas{
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+
+
+.acciones-masivas button{
+
+    border:none;
+
+    padding:10px 15px;
+
+    border-radius:10px;
+
+    background:#f1f5f9;
+
+    color:#475569;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+}
+
+
+
+.acciones-masivas button:disabled{
+
+    opacity:.5;
+
+    cursor:not-allowed;
+
+}
+
+
+
+/*======================================
+    TABLA
+======================================*/
+
+
+.tabla-colaboradores{
+
+    background:white;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    box-shadow:
+    0 10px 35px rgba(0,0,0,.08);
+
+}
+
+
+
+.tabla-header,
+.tabla-fila{
+
+    display:grid;
+
+    grid-template-columns:
+
+    45px
+    120px
+    2fr
+    130px
+    150px
+    150px
+    150px
+    100px
+    90px;
+
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:16px 20px;
+
+}
+
+
+
+.tabla-header{
+
+    background:#f8fafc;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    color:#475569;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+
+.tabla-fila{
+
+    border-bottom:1px solid #f1f5f9;
+
+    font-size:14px;
+
+    color:#334155;
+
+    transition:.2s;
+
+}
+
+
+
+.tabla-fila:hover{
+
+    background:#f8fafc;
+
+}
+
+
+
+.tabla-fila:last-child{
+
+    border-bottom:none;
+
+}
+
+
+
+.centrado{
+
+    text-align:center;
+
+}
+
+
+
+/*======================================
+    ESTADO
+======================================*/
+
+
+.badge-estado{
+
+    display:inline-flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:5px 12px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+
+
+.badge-estado.activo{
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+}
+
+
+
+.badge-estado.inactivo{
+
+    background:#fee2e2;
+
+    color:#b91c1c;
+
+}
+
+
+
+/*======================================
+    ACCIONES
+======================================*/
+
+
+.btn-editar-colaborador{
+
+    border:none;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    width:34px;
+
+    height:34px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+
+.btn-editar-colaborador:hover{
+
+    background:#dbeafe;
+
+}
+
+
+
+/*======================================
+    SIN REGISTROS
+======================================*/
+
+
+.sin-registros{
+
+    padding:60px 20px;
+
+    text-align:center;
+
+    color:#64748b;
+
+}
+
+
+
+.sin-registros i{
+
+    font-size:45px;
+
+    color:#94a3b8;
+
+}
+
+
+
+.sin-registros h3{
+
+    margin-top:15px;
+
+    color:#334155;
+
+}
+
+
+
+/*======================================
+    MODAL
+======================================*/
+
+
+.modal-colaborador{
+
+    max-width:700px;
+
+    max-height:90vh;
+
+}
+
+
+
+.modal-body{
+
+    overflow-y:auto;
+
+}
+
+
+
+/*======================================
+    RESPONSIVE
+======================================*/
+
+
+@media(max-width:900px){
+
+
+    .tabla-colaboradores{
+
+        overflow-x:auto;
+
+    }
+
+
+    .tabla-header,
+    .tabla-fila{
+
+        min-width:1200px;
+
+    }
+
+
+}
+
+
+
+@media(max-width:600px){
+
+
+    .encabezado-seccion{
+
+        align-items:stretch;
+
+    }
+
+
+    .btn-principal{
+
+        justify-content:center;
+
+        width:100%;
+
+    }
+
+
+    .busqueda{
+
+        width:100%;
+
+    }
+
+
+    .acciones-masivas{
+
+        width:100%;
+
+    }
+
+
+    .acciones-masivas button{
+
+        flex:1;
+
+        justify-content:center;
+
+    }
+
+
+}
