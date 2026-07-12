@@ -277,6 +277,12 @@ async function cargarVista(vista){
 
             break;
 
+            case "empleados":
+
+            iniciarEmpleados();
+
+            break;
+
         }
 
     }
