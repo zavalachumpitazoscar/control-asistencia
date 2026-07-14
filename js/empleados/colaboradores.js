@@ -14,7 +14,8 @@ import {
     serverTimestamp,
     getDocs,
     doc,
-    updateDoc
+    updateDoc,
+    getDoc,
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -98,107 +99,6 @@ let areas = [];
 let subareas = [];
 
 let colaboradorEditandoId = null;
-
-const datosColaborador = {
-
-    empresaId,
-
-    documento:{
-
-        tipo:
-            tipoDocumentoColaborador.value,
-
-        numero:
-            numeroDocumentoColaborador.value.trim()
-
-    },
-
-    datosPersonales:{
-
-        nombres:
-            nombresColaborador.value.trim(),
-
-        apellidos:
-            apellidosColaborador.value.trim(),
-
-        fechaNacimiento:
-            fechaNacimientoColaborador.value,
-
-        genero:
-            generoColaborador.value
-
-    },
-
-    contacto:{
-
-        correo:
-            correoColaborador.value.trim(),
-
-        telefono:
-            telefonoColaborador.value.trim(),
-
-        direccion:
-            direccionColaborador.value.trim()
-
-    },
-
-    organizacion:{
-
-        sucursalId:
-            sucursalColaborador.value,
-
-        sucursal:
-            sucursalColaborador.options[
-                sucursalColaborador.selectedIndex
-            ]?.text || "",
-
-        areaId:
-            areaColaborador.value,
-
-        area:
-            areaColaborador.options[
-                areaColaborador.selectedIndex
-            ]?.text || "",
-
-        subareaId:
-            subareaColaborador.value,
-
-        subarea:
-            subareaColaborador.options[
-                subareaColaborador.selectedIndex
-            ]?.text || "",
-
-        horarioId:
-            "",
-
-        horario:
-            ""
-
-    },
-
-    informacionLaboral:{
-
-        cargoProfesion:
-            cargoProfesionColaborador.value.trim(),
-
-        inicioContrato:
-            inicioContratoColaborador.value,
-
-        terminoContrato:
-            terminoContratoColaborador.value,
-
-        nacionalidad:
-            nacionalidadColaborador.value.trim(),
-
-        paisNacionalidad:
-            paisNacionalidadColaborador.value,
-
-        comentarios:
-            comentariosColaborador.value.trim()
-
-    }
-
-}; 
 
 const registrosPorPagina = 20;
 
@@ -1467,7 +1367,15 @@ async function abrirModalEditarColaborador(idColaborador){
         // Guardamos el ID para saber que estamos editando
 
         colaboradorEditandoId =
-            idColaborador;
+        idColaborador;
+
+        await Promise.all([
+
+        cargarSucursales(),
+
+        cargarAreas()
+
+        ]);
 
 
         // =========================
@@ -1588,53 +1496,48 @@ async function abrirModalEditarColaborador(idColaborador){
             "";
 
 
-        selectSucursal.value =
-            sucursalId;
+if(selectSucursal){
+
+    selectSucursal.value =
+    sucursalId;
+
+}
 
 
-        selectArea.value =
-            areaId;
+if(selectArea){
+
+    selectArea.value =
+    areaId;
+
+}
 
 
-        /*
-        Si tus subáreas se cargan dependiendo del área,
-        primero ejecutamos el cambio del área.
-        */
-
-        selectArea.dispatchEvent(
-            new Event("change")
-        );
+await cargarSubareasPorArea(
+    areaId
+);
 
 
-        /*
-        Esperamos brevemente a que se carguen
-        las opciones de subáreas.
-        */
+if(selectSubarea){
 
-        setTimeout(()=>{
+    selectSubarea.value =
+    subareaId;
 
-            selectSubarea.value =
-                subareaId;
-
-        },300);
+}
 
 
         // =========================
         // INFORMACIÓN LABORAL
         // =========================
 
-        document.getElementById(
-            "cargoProfesionColaborador"
-        ).value =
-            colaborador.informacionLaboral?.cargoProfesion ||
-            colaborador.cargoProfesion ||
-            "";
+        document.getElementById("cargoProfesionColaborador").value =
+        colaborador.informacionAdicional?.cargoProfesion ||
+         colaborador.cargoProfesion || "";
 
 
         document.getElementById(
             "inicioContratoColaborador"
         ).value =
-            colaborador.informacionLaboral?.inicioContrato ||
+            colaborador.informacionAdicional?.inicioContrato ||
             colaborador.inicioContrato ||
             "";
 
@@ -1642,7 +1545,7 @@ async function abrirModalEditarColaborador(idColaborador){
         document.getElementById(
             "terminoContratoColaborador"
         ).value =
-            colaborador.informacionLaboral?.terminoContrato ||
+            colaborador.informacionAdicional?.terminoContrato ||
             colaborador.terminoContrato ||
             "";
 
@@ -1650,7 +1553,7 @@ async function abrirModalEditarColaborador(idColaborador){
         document.getElementById(
             "nacionalidadColaborador"
         ).value =
-            colaborador.informacionLaboral?.nacionalidad ||
+            colaborador.informacionAdicional?.nacionalidad ||
             colaborador.nacionalidad ||
             "";
 
@@ -1658,7 +1561,7 @@ async function abrirModalEditarColaborador(idColaborador){
         document.getElementById(
             "paisNacionalidadColaborador"
         ).value =
-            colaborador.informacionLaboral?.paisNacionalidad ||
+            colaborador.informacionAdicional?.paisNacionalidad ||
             colaborador.paisNacionalidad ||
             "";
 
@@ -1666,7 +1569,7 @@ async function abrirModalEditarColaborador(idColaborador){
         document.getElementById(
             "comentariosColaborador"
         ).value =
-            colaborador.informacionLaboral?.comentarios ||
+            colaborador.informacionAdicional?.comentarios ||
             colaborador.comentarios ||
             "";
 
@@ -2064,16 +1967,6 @@ if(btnNuevo){
 // CERRAR MODAL
 // ==========================
 
-if(cerrar){
-
-    cerrar.onclick = ()=>{
-
-        cerrarModalColaborador();
-
-    };
-
-}
-
 
 if(cancelarColaborador){
 
@@ -2397,8 +2290,17 @@ colaboradores.some(
         .toUpperCase();
 
 
-        return documentoGuardado ===
-        numeroDocumento;
+        return (
+
+            colaborador.id !==
+            colaboradorEditandoId
+
+            &&
+
+            documentoGuardado ===
+            numeroDocumento
+
+        );
 
     }
 );
@@ -2475,102 +2377,169 @@ colaboradores.some(
                 `;
 
 
-                await addDoc(
+const datosColaborador = {
 
-                    collection(
-                        db,
-                        "colaboradores"
-                    ),
+    empresaId,
 
-                    {
+    documento:{
 
-                        empresaId,
+        tipo:
+        tipoDocumento,
 
-                        documento:{
+        numero:
+        numeroDocumento
 
-                            tipo:
-                            tipoDocumento,
+    },
 
-                            numero:
-                            numeroDocumento
+    datosPersonales:{
 
-                        },
+        nombres,
 
-                        datosPersonales:{
+        apellidos,
 
-                            nombres,
+        fechaNacimiento:
+        fechaNacimiento || null,
 
-                            apellidos,
+        genero
 
-                            fechaNacimiento:
-                            fechaNacimiento ||
-                            null,
+    },
 
-                            genero
+    contacto:{
 
-                        },
+        correo,
 
-                        contacto:{
+        telefono,
 
-                            correo,
+        direccion
 
-                            telefono,
+    },
 
-                            direccion
+    organizacion:{
 
-                        },
+        sucursalId:
+        sucursalId || null,
 
-organizacion:{
+        sucursal:
+        nombreSucursal || "",
 
-    sucursalId:
-    sucursalId || null,
+        areaId:
+        areaId || null,
 
-    sucursal:
-    nombreSucursal || "",
+        area:
+        nombreArea || "",
 
-    areaId:
-    areaId || null,
+        subareaId:
+        subareaId || null,
 
-    area:
-    nombreArea || "",
+        subarea:
+        nombreSubarea || ""
 
-    subareaId:
-    subareaId || null,
+    },
 
-    subarea:
-    nombreSubarea || ""
+    informacionAdicional:{
 
-},
+        cargoProfesion,
 
-                        informacionAdicional:{
+        inicioContrato:
+        inicioContrato || null,
 
-                            cargoProfesion,
+        terminoContrato:
+        terminoContrato || null,
 
-                            inicioContrato:
-                            inicioContrato ||
-                            null,
+        nacionalidad,
 
-                            terminoContrato:
-                            terminoContrato ||
-                            null,
+        paisNacionalidad,
 
-                            nacionalidad,
+        comentarios
 
-                            paisNacionalidad,
+    }
 
-                            comentarios
+};
 
-                        },
 
-                        estado:
-                        "ACTIVO",
+if(colaboradorEditandoId){
 
-                        fechaRegistro:
-                        serverTimestamp()
+    const referenciaColaborador =
+    doc(
+        db,
+        "colaboradores",
+        colaboradorEditandoId
+    );
 
-                    }
 
-                );
+    await updateDoc(
+        referenciaColaborador,
+        {
+
+            ...datosColaborador,
+
+            fechaModificacion:
+            serverTimestamp()
+
+        }
+    );
+
+
+    cerrarModalColaborador();
+
+
+    await Swal.fire({
+
+        icon:"success",
+
+        title:"Colaborador actualizado",
+
+        text:
+        "Los datos del colaborador se actualizaron correctamente.",
+
+        confirmButtonText:
+        "Aceptar"
+
+    });
+
+}
+else{
+
+    await addDoc(
+
+        collection(
+            db,
+            "colaboradores"
+        ),
+
+        {
+
+            ...datosColaborador,
+
+            estado:
+            "ACTIVO",
+
+            fechaRegistro:
+            serverTimestamp()
+
+        }
+
+    );
+
+
+    cerrarModalColaborador();
+
+
+    await Swal.fire({
+
+        icon:"success",
+
+        title:"Colaborador registrado",
+
+        text:
+        "El colaborador se registró correctamente.",
+
+        confirmButtonText:
+        "Aceptar"
+
+    });
+
+}
 
 
                 cerrarModalColaborador();
@@ -2618,22 +2587,32 @@ organizacion:{
 
 
             }
-            finally{
+finally{
+
+    guardarColaborador.disabled =
+    false;
 
 
-                guardarColaborador.disabled =
-                false;
+    guardarColaborador.innerHTML =
+    colaboradorEditandoId
+    ?
+    `
 
+        <i class="bi bi-floppy"></i>
 
-                guardarColaborador.innerHTML = `
+        Guardar cambios
 
-                    <i class="bi bi-floppy"></i>
+    `
+    :
+    `
 
-                    Guardar colaborador
+        <i class="bi bi-floppy"></i>
 
-                `;
+        Guardar colaborador
 
-            }
+    `;
+
+}
 
         }
 
@@ -2641,18 +2620,9 @@ organizacion:{
 
 }
 
-    formColaborador.reset();
-
-colaboradorEditandoId =
-    null;
 
 
-document.getElementById(
-    "tituloModalColaborador"
-).textContent =
-    "Nuevo colaborador";
-
-
+    
 document.getElementById(
     "guardarColaborador"
 ).innerHTML = `
@@ -2664,8 +2634,7 @@ document.getElementById(
 `;
 
 
-modalColaborador.style.display =
-    "none";
+
 
     // ==========================
     // ACTIVAR
@@ -2804,65 +2773,10 @@ else{
 
 }
 
-    if(btnNuevo){
-
-    btnNuevo.addEventListener(
-        "click",
-        ()=>{
-
-            colaboradorEditandoId =
-                null;
-
-            formColaborador.reset();
-
-            document.getElementById(
-                "generoColaborador"
-            ).value =
-                "SIN_ESPECIFICAR";
-
-            document.getElementById(
-                "tituloModalColaborador"
-            ).textContent =
-                "Nuevo colaborador";
-
-            document.getElementById(
-                "guardarColaborador"
-            ).innerHTML = `
-
-                <i class="bi bi-floppy"></i>
-
-                Guardar colaborador
-
-            `;
-
-            mostrarPrimeraPestanaColaborador();
-
-            modal.style.display = "flex";
-
-        }
-    );
-
-}
-
+    
     if(cerrar){
 
     cerrar.addEventListener(
-        "click",
-        ()=>{
-
-            modal.style.display = "none";
-
-            formColaborador.reset();
-
-            colaboradorEditandoId = null;
-
-        }
-    );
-
-}
-    if(cancelar){
-
-    cancelar.addEventListener(
         "click",
         ()=>{
 
