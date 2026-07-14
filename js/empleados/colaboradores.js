@@ -29,6 +29,11 @@ import {
 }
 from "./desactivar-colaboradores.js";
 
+import {
+    iniciarActivacionMasiva
+}
+from "./activar-colaboradores.js";
+
 export function iniciarColaboradores(){
 
 
@@ -2822,22 +2827,6 @@ finally{
 
 
 // ==========================
-// ACTIVAR
-// ==========================
-
-if(btnActivar){
-
-    btnActivar.onclick = ()=>{
-
-        console.log(seleccionados);
-
-    };
-
-}
-
-
-
-// ==========================
 // ELIMINAR
 // ==========================
 
@@ -2870,13 +2859,22 @@ iniciarDesactivacionMasiva({
     btnDesactivar,
 
 
-    obtenerSeleccionados:()=>{
+obtenerSeleccionados:()=>{
 
-        return [
-            ...seleccionados
-        ];
+    return seleccionados.filter(id=>{
 
-    },
+        const colaborador =
+        colaboradores.find(
+            item=>item.id === id
+        );
+
+
+        return colaborador?.estado ===
+        "ACTIVO";
+
+    });
+
+},
 
 
     limpiarSeleccion:()=>{
@@ -2909,6 +2907,62 @@ iniciarDesactivacionMasiva({
     }
 
 });
+
+iniciarActivacionMasiva({
+
+    botonActivar:
+    btnActivar,
+
+
+    obtenerSeleccionados:()=>{
+
+    return seleccionados.filter(id=>{
+
+        const colaborador =
+        colaboradores.find(
+            item=>item.id === id
+        );
+
+
+        return colaborador?.estado !==
+        "ACTIVO";
+
+    });
+
+},
+
+
+    limpiarSeleccion:()=>{
+
+        seleccionados = [];
+
+
+        document
+        .querySelectorAll(
+            ".check-colaborador"
+        )
+        .forEach(check=>{
+
+            check.checked =
+            false;
+
+        });
+
+
+        if(seleccionarTodos){
+
+            seleccionarTodos.checked =
+            false;
+
+        }
+
+
+        actualizarAcciones();
+
+    }
+
+});
+    
     
 }
 
