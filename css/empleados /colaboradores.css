@@ -2618,3 +2618,317 @@
     z-index:999999 !important;
 
 }
+
+
+/*=====================================================
+    CARGA MASIVA DE COLABORADORES
+=====================================================*/
+
+.carga-masiva-contenido{
+
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:16px;
+
+    text-align:left;
+
+    padding:5px 10px 10px;
+
+}
+
+
+.carga-masiva-icono{
+
+    width:65px;
+    height:65px;
+
+    margin:0 auto;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:18px;
+
+    background:#dcfce7;
+    color:#16a34a;
+
+    font-size:32px;
+
+}
+
+
+.carga-masiva-descripcion{
+
+    margin:0;
+
+    color:#64748b;
+
+    text-align:center;
+
+    font-size:14px;
+    line-height:1.6;
+
+}
+
+
+.carga-masiva-pasos{
+
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+
+    padding:15px;
+
+    background:#f8fafc;
+
+    border:1px solid #e2e8f0;
+    border-radius:14px;
+
+}
+
+
+.carga-paso{
+
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+
+}
+
+
+.carga-paso > span{
+
+    width:30px;
+    height:30px;
+
+    flex-shrink:0;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:50%;
+
+    background:#2563eb;
+    color:#ffffff;
+
+    font-size:13px;
+    font-weight:700;
+
+}
+
+
+.carga-paso strong{
+
+    color:#1e293b;
+    font-size:14px;
+
+}
+
+
+.carga-paso p{
+
+    margin:3px 0 0;
+
+    color:#64748b;
+    font-size:12px;
+
+}
+
+
+.btn-carga-excel{
+
+    width:100%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:9px;
+
+    padding:13px 18px;
+
+    border:none;
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:14px;
+    font-weight:700;
+
+    transition:.2s;
+
+}
+
+
+.btn-descargar-excel{
+
+    background:#16a34a;
+    color:#ffffff;
+
+}
+
+
+.btn-descargar-excel:hover{
+
+    background:#15803d;
+
+}
+
+
+.btn-seleccionar-excel{
+
+    background:#2563eb;
+    color:#ffffff;
+
+}
+
+
+.btn-seleccionar-excel:hover{
+
+    background:#1d4ed8;
+
+}
+
+
+.resultado-archivo-excel{
+
+    min-height:5px;
+
+}
+
+
+.archivo-correcto,
+.archivo-error,
+.archivo-cargando{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:13px 15px;
+
+    border-radius:12px;
+
+    font-size:13px;
+
+}
+
+
+.archivo-correcto{
+
+    background:#dcfce7;
+    color:#15803d;
+
+}
+
+
+.archivo-correcto i{
+
+    font-size:22px;
+
+}
+
+
+.archivo-correcto p{
+
+    margin:3px 0 0;
+
+}
+
+
+.archivo-error{
+
+    background:#fee2e2;
+    color:#b91c1c;
+
+}
+
+
+.archivo-error i{
+
+    font-size:20px;
+
+}
+
+
+.archivo-cargando{
+
+    justify-content:center;
+
+    background:#eff6ff;
+    color:#2563eb;
+
+}
+
+
+.spinner-archivo{
+
+    width:18px;
+    height:18px;
+
+    border:2px solid rgba(37,99,235,.25);
+    border-top-color:#2563eb;
+
+    border-radius:50%;
+
+    animation:girarArchivo .7s linear infinite;
+
+}
+
+
+@keyframes girarArchivo{
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+
+.empresa-carga-masiva{
+
+    margin:0;
+
+    text-align:center;
+
+    color:#94a3b8;
+
+    font-size:11px;
+
+    overflow-wrap:anywhere;
+
+}
+
+
+@media(max-width:600px){
+
+    .carga-masiva-contenido{
+
+        padding:0;
+
+    }
+
+
+    .carga-masiva-icono{
+
+        width:55px;
+        height:55px;
+
+        font-size:27px;
+
+    }
+
+
+    .btn-carga-excel{
+
+        padding:12px 10px;
+
+        font-size:13px;
+
+    }
+
+}
