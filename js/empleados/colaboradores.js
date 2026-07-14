@@ -2864,7 +2864,14 @@ if(btnEliminar){
 // ==========================
 // CARGA MASIVA
 // ==========================
+iniciarCargaMasivaColaboradores({
 
+    empresaId,
+
+    botonCargaMasiva:
+    btnCargaMasiva
+
+});
 
 }
 
