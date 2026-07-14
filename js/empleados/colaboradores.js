@@ -100,7 +100,7 @@ let subareas = [];
 
 let colaboradorEditandoId = null;
 
-const registrosPorPagina = 20;
+let registrosPorPagina = 20;
 
 
 const btnEliminar =
@@ -149,7 +149,47 @@ document.getElementById(
     "guardarColaborador"
 );
 
+const inicioPagina =
+document.getElementById(
+    "inicioPagina"
+);
 
+
+const finPagina =
+document.getElementById(
+    "finPagina"
+);
+
+
+const totalRegistros =
+document.getElementById(
+    "totalRegistros"
+);
+
+
+const registrosPagina =
+document.getElementById(
+    "registrosPagina"
+);
+
+
+const paginaAnterior =
+document.getElementById(
+    "paginaAnterior"
+);
+
+
+const paginaSiguiente =
+document.getElementById(
+    "paginaSiguiente"
+);
+
+
+const numeroPagina =
+document.getElementById(
+    "numeroPagina"
+);
+    
 const sucursalColaborador =
 document.getElementById(
     "sucursalColaborador"
@@ -1171,7 +1211,7 @@ fin
 
             `;
 
-
+            renderizarPaginacion(0);
             return;
 
         }
@@ -1711,56 +1751,190 @@ function activarEditar(){
 
 function renderizarPaginacion(total){
 
-    const contenedor =
-    document.getElementById(
-        "paginacionColaboradores"
+    const totalPaginas =
+    Math.max(
+        1,
+        Math.ceil(
+            total /
+            registrosPorPagina
+        )
     );
 
-    if(!contenedor) return;
 
-    contenedor.innerHTML="";
+    /*
+    Si se eliminan registros o cambia
+    la cantidad por página, evita quedar
+    en una página inexistente.
+    */
 
-    const paginas =
-    Math.ceil(
-        total /
-        registrosPorPagina
-    );
+    if(paginaActual > totalPaginas){
 
-    for(let i=1;i<=paginas;i++){
-
-        contenedor.innerHTML += `
-
-        <button
-        class="btn-pagina ${
-        i===paginaActual
-        ?"activa":""
-        }"
-        data-pagina="${i}">
-
-            ${i}
-
-        </button>
-
-        `;
+        paginaActual =
+        totalPaginas;
 
     }
 
-    document
-    .querySelectorAll(".btn-pagina")
-    .forEach(btn=>{
 
-        btn.onclick=()=>{
+    const inicio =
+    total === 0
+    ?
+    0
+    :
+    (
+        paginaActual - 1
+    ) * registrosPorPagina + 1;
 
-            paginaActual =
-            Number(
-                btn.dataset.pagina
+
+    const fin =
+    total === 0
+    ?
+    0
+    :
+    Math.min(
+        paginaActual *
+        registrosPorPagina,
+
+        total
+    );
+
+
+    if(inicioPagina){
+
+        inicioPagina.textContent =
+        inicio;
+
+    }
+
+
+    if(finPagina){
+
+        finPagina.textContent =
+        fin;
+
+    }
+
+
+    if(totalRegistros){
+
+        totalRegistros.textContent =
+        total;
+
+    }
+
+
+    if(numeroPagina){
+
+        numeroPagina.textContent =
+        paginaActual;
+
+    }
+
+
+    if(paginaAnterior){
+
+    paginaAnterior.addEventListener(
+        "click",
+        ()=>{
+
+            if(paginaActual > 1){
+
+                paginaActual--;
+
+                renderizar();
+
+            }
+
+        }
+    );
+
+}
+
+        paginaAnterior.disabled =
+        paginaActual <= 1;
+
+    }
+
+
+if(paginaSiguiente){
+
+    paginaSiguiente.addEventListener(
+        "click",
+        ()=>{
+
+            const texto =
+            buscar?.value
+            .toLowerCase()
+            .trim() || "";
+
+
+            const filtrados =
+            colaboradores.filter(col=>{
+
+                const nombres =
+                col.datosPersonales?.nombres ||
+                col.nombres ||
+                "";
+
+
+                const apellidos =
+                col.datosPersonales?.apellidos ||
+                col.apellidos ||
+                "";
+
+
+                const nombreCompleto =
+                `${nombres} ${apellidos}`
+                .toLowerCase();
+
+
+                const numeroDocumento =
+                (
+                    col.documento?.numero ||
+                    col.dni ||
+                    ""
+                )
+                .toLowerCase();
+
+
+                return (
+
+                    nombreCompleto.includes(
+                        texto
+                    )
+
+                    ||
+
+                    numeroDocumento.includes(
+                        texto
+                    )
+
+                );
+
+            });
+
+
+            const totalPaginas =
+            Math.ceil(
+                filtrados.length /
+                registrosPorPagina
             );
 
-            renderizar();
 
-        };
+            if(
+                paginaActual <
+                totalPaginas
+            ){
 
-    });
+                paginaActual++;
+
+                renderizar();
+
+            }
+
+        }
+    );
+
+}
 
 }
 
@@ -1960,6 +2134,28 @@ buscar.addEventListener(
 );
 
     }
+
+    if(registrosPagina){
+
+    registrosPagina.addEventListener(
+        "change",
+        ()=>{
+
+            registrosPorPagina =
+            Number(
+                registrosPagina.value
+            );
+
+
+            paginaActual = 1;
+
+
+            renderizar();
+
+        }
+    );
+
+}
 
 
 // ==========================
