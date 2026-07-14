@@ -4,6 +4,7 @@ import { iniciarAreas } from "./compañia/areas.js";
 import { iniciarSubareas } from "./compañia/subareas.js";
 
 
+
 export function iniciarCompañia() {
 
     const botones =
