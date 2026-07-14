@@ -1309,18 +1309,17 @@ col.horario ||
                 </div>
 
 
+<div class="centrado columna-acciones">
 
-                <div class="centrado">
+    <button
+    class="btn-editar-colaborador"
+    data-id="${documento.id}">
 
+        <i class="bi bi-pencil"></i>
 
-                    <button class="btn-editar-colaborador" data-id="${col.id}">
+    </button>
 
-                        <i class="bi bi-pencil"></i>
-
-                    </button>
-
-
-                </div>
+</div>
 
 
 
