@@ -2634,74 +2634,75 @@ finally{
 
 }
 
-    // ==========================
-    // ACTIVAR
-    // ==========================
 
-    if(btnActivar){
+// ==========================
+// ACTIVAR
+// ==========================
 
-        btnActivar.onclick=()=>{
+if(btnActivar){
 
-            console.log(seleccionados);
+    btnActivar.onclick = ()=>{
 
-        };
+        console.log(seleccionados);
 
-    }
-
-
-    // ==========================
-    // DESACTIVAR
-    // ==========================
-
-    if(btnDesactivar){
-
-        btnDesactivar.onclick=()=>{
-
-            console.log(seleccionados);
-
-        };
-
-    }
-
-
-    // ==========================
-    // ELIMINAR
-    // ==========================
-
-    if(btnEliminar){
-
-        btnEliminar.onclick=()=>{
-
-            console.log(seleccionados);
-
-        };
-
-    }
-
-
-    // ==========================
-    // CARGA MASIVA
-    // ==========================
-
-    if(btnCargaMasiva){
-
-        btnCargaMasiva.onclick=()=>{
-
-            Swal.fire({
-
-                icon:"info",
-
-                title:"Carga masiva",
-
-                text:"Aquí se importará un archivo Excel."
-
-            });
-
-        };
-
-    }
+    };
 
 }
 
+
+// ==========================
+// DESACTIVAR
+// ==========================
+
+if(btnDesactivar){
+
+    btnDesactivar.onclick = ()=>{
+
+        console.log(seleccionados);
+
+    };
+
+}
+
+
+// ==========================
+// ELIMINAR
+// ==========================
+
+if(btnEliminar){
+
+    btnEliminar.onclick = ()=>{
+
+        console.log(seleccionados);
+
+    };
+
+}
+
+
+// ==========================
+// CARGA MASIVA
+// ==========================
+
+if(btnCargaMasiva){
+
+    btnCargaMasiva.onclick = ()=>{
+
+        Swal.fire({
+
+            icon:"info",
+
+            title:"Carga masiva",
+
+            text:
+            "Aquí se importará un archivo Excel."
+
+        });
+
+    };
+
+}
+
+}
 
 
