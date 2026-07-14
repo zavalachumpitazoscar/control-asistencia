@@ -251,12 +251,25 @@ async function abrirModalColaborador(){
     );
 
 
-    if(titulo){
+if(titulo){
 
-        titulo.textContent =
-        "Nuevo colaborador";
+    titulo.textContent =
+    "Nuevo colaborador";
 
-    }
+}
+
+
+if(guardarColaborador){
+
+    guardarColaborador.innerHTML = `
+
+        <i class="bi bi-floppy"></i>
+
+        Guardar colaborador
+
+    `;
+
+}
 
 
     tabsModal.forEach(tab=>{
@@ -1967,6 +1980,16 @@ if(btnNuevo){
 // CERRAR MODAL
 // ==========================
 
+        
+if(cerrar){
+
+    cerrar.onclick = ()=>{
+
+        cerrarModalColaborador();
+
+    };
+
+}
 
 if(cancelarColaborador){
 
@@ -2511,8 +2534,7 @@ else{
 
             ...datosColaborador,
 
-            estado:
-            "ACTIVO",
+            estado:"ACTIVO",
 
             fechaRegistro:
             serverTimestamp()
@@ -2540,50 +2562,36 @@ else{
     });
 
 }
-
-
-                cerrarModalColaborador();
-
-
-                await Swal.fire({
-
-                    icon:
-                    "success",
-
-                    title:
-                    "Colaborador registrado",
-
-                    text:
-                    "El colaborador se registró correctamente.",
-
-                    confirmButtonText:
-                    "Aceptar"
-
-                });
-
-
-            }
             catch(error){
 
 
                 console.error(
-                    "Error al registrar colaborador:",
-                    error
+                colaboradorEditandoId? "Error al actualizar colaborador:" 
+                :
+                "Error al registrar colaborador:",
+                error
                 );
 
 
                 Swal.fire({
 
-                    icon:
-                    "error",
+    icon:"error",
 
-                    title:
-                    "No se pudo registrar",
+    title:
+    colaboradorEditandoId
+    ?
+    "No se pudo actualizar"
+    :
+    "No se pudo registrar",
 
-                    text:
-                    "Ocurrió un error al guardar el colaborador."
+    text:
+    colaboradorEditandoId
+    ?
+    "Ocurrió un error al actualizar el colaborador."
+    :
+    "Ocurrió un error al guardar el colaborador."
 
-                });
+});
 
 
             }
@@ -2619,22 +2627,6 @@ finally{
     );
 
 }
-
-
-
-    
-document.getElementById(
-    "guardarColaborador"
-).innerHTML = `
-
-    <i class="bi bi-floppy"></i>
-
-    Guardar colaborador
-
-`;
-
-
-
 
     // ==========================
     // ACTIVAR
@@ -2702,95 +2694,6 @@ document.getElementById(
         };
 
     }
-
-    if(colaboradorEditandoId){
-
-    // =========================
-    // EDITAR COLABORADOR
-    // =========================
-
-    const referenciaColaborador =
-        doc(
-            db,
-            "colaboradores",
-            colaboradorEditandoId
-        );
-
-
-    await updateDoc(
-        referenciaColaborador,
-        {
-
-            ...datosColaborador,
-
-            fechaModificacion:
-                new Date()
-
-        }
-    );
-
-
-    await Swal.fire({
-        icon:"success",
-        title:"Colaborador actualizado",
-        text:"La información fue actualizada correctamente.",
-        timer:1800,
-        showConfirmButton:false
-    });
-
-}
-else{
-
-    // =========================
-    // NUEVO COLABORADOR
-    // =========================
-
-    await addDoc(
-        collection(
-            db,
-            "colaboradores"
-        ),
-        {
-
-            ...datosColaborador,
-
-            estado:"ACTIVA",
-
-            fechaRegistro:
-                new Date()
-
-        }
-    );
-
-
-    await Swal.fire({
-        icon:"success",
-        title:"Colaborador registrado",
-        text:"El colaborador fue registrado correctamente.",
-        timer:1800,
-        showConfirmButton:false
-    });
-
-}
-
-    
-    if(cerrar){
-
-    cerrar.addEventListener(
-        "click",
-        ()=>{
-
-            modal.style.display = "none";
-
-            formColaborador.reset();
-
-            colaboradorEditandoId = null;
-
-        }
-    );
-
-}
-
 
 }
 
