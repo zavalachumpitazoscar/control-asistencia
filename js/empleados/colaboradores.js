@@ -1761,12 +1761,6 @@ function renderizarPaginacion(total){
     );
 
 
-    /*
-    Si se eliminan registros o cambia
-    la cantidad por página, evita quedar
-    en una página inexistente.
-    */
-
     if(paginaActual > totalPaginas){
 
         paginaActual =
@@ -1830,114 +1824,102 @@ function renderizarPaginacion(total){
     }
 
 
-    if(paginaAnterior){
+if(paginaAnterior){
 
-    paginaAnterior.addEventListener(
-        "click",
-        ()=>{
+    paginaAnterior.onclick = ()=>{
 
-            if(paginaActual > 1){
+        if(paginaActual > 1){
 
-                paginaActual--;
+            paginaActual--;
 
-                renderizar();
-
-            }
+            renderizar();
 
         }
-    );
+
+    };
 
 }
-
-        paginaAnterior.disabled =
-        paginaActual <= 1;
-
-    }
 
 
 if(paginaSiguiente){
 
-    paginaSiguiente.addEventListener(
-        "click",
-        ()=>{
+    paginaSiguiente.onclick = ()=>{
 
-            const texto =
-            buscar?.value
-            .toLowerCase()
-            .trim() || "";
+        const texto =
+        buscar?.value
+        .toLowerCase()
+        .trim() || "";
 
 
-            const filtrados =
-            colaboradores.filter(col=>{
+        const filtrados =
+        colaboradores.filter(col=>{
 
-                const nombres =
-                col.datosPersonales?.nombres ||
-                col.nombres ||
-                "";
-
-
-                const apellidos =
-                col.datosPersonales?.apellidos ||
-                col.apellidos ||
-                "";
+            const nombres =
+            col.datosPersonales?.nombres ||
+            col.nombres ||
+            "";
 
 
-                const nombreCompleto =
-                `${nombres} ${apellidos}`
-                .toLowerCase();
+            const apellidos =
+            col.datosPersonales?.apellidos ||
+            col.apellidos ||
+            "";
 
 
-                const numeroDocumento =
-                (
-                    col.documento?.numero ||
-                    col.dni ||
-                    ""
+            const nombreCompleto =
+            `${nombres} ${apellidos}`
+            .toLowerCase();
+
+
+            const numeroDocumento =
+            (
+                col.documento?.numero ||
+                col.dni ||
+                ""
+            )
+            .toLowerCase();
+
+
+            return (
+
+                nombreCompleto.includes(
+                    texto
                 )
-                .toLowerCase();
+
+                ||
+
+                numeroDocumento.includes(
+                    texto
+                )
+
+            );
+
+        });
 
 
-                return (
-
-                    nombreCompleto.includes(
-                        texto
-                    )
-
-                    ||
-
-                    numeroDocumento.includes(
-                        texto
-                    )
-
-                );
-
-            });
-
-
-            const totalPaginas =
+        const totalPaginas =
+        Math.max(
+            1,
             Math.ceil(
                 filtrados.length /
                 registrosPorPagina
-            );
+            )
+        );
 
 
-            if(
-                paginaActual <
-                totalPaginas
-            ){
+        if(paginaActual < totalPaginas){
 
-                paginaActual++;
+            paginaActual++;
 
-                renderizar();
-
-            }
+            renderizar();
 
         }
-    );
+
+    };
 
 }
 
 }
-
 
 
 
