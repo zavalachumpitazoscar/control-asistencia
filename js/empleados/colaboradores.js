@@ -2913,29 +2913,25 @@ iniciarActivacionMasiva({
     botonActivar:
     btnActivar,
 
-
     obtenerSeleccionados:()=>{
 
-    return seleccionados.filter(id=>{
+        return seleccionados.filter(id=>{
 
-        const colaborador =
-        colaboradores.find(
-            item=>item.id === id
-        );
+            const colaborador =
+            colaboradores.find(
+                item=>item.id === id
+            );
 
+            return colaborador?.estado ===
+            "INACTIVO";
 
-        return colaborador?.estado !==
-        "ACTIVO";
+        });
 
-    });
-
-},
-
+    },
 
     limpiarSeleccion:()=>{
 
         seleccionados = [];
-
 
         document
         .querySelectorAll(
@@ -2943,19 +2939,15 @@ iniciarActivacionMasiva({
         )
         .forEach(check=>{
 
-            check.checked =
-            false;
+            check.checked = false;
 
         });
 
-
         if(seleccionarTodos){
 
-            seleccionarTodos.checked =
-            false;
+            seleccionarTodos.checked = false;
 
         }
-
 
         actualizarAcciones();
 
