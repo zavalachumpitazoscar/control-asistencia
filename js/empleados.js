@@ -1,6 +1,7 @@
 import { iniciarColaboradores } from "./empleados/colaboradores.js";
 import { iniciarHorarios } from "./empleados/horarios.js";
 
+
 export function iniciarEmpleados(){
 
     const botones =
