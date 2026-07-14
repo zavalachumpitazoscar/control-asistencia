@@ -1345,7 +1345,7 @@ colaboradores.filter(col=>{
 
 });
 
-        
+colaboradoresFiltradosActuales = filtrados;        
 
 const inicio = (paginaActual-1) * registrosPorPagina;
 
@@ -1545,6 +1545,46 @@ col.horario ||
 activarChecks();
 
 activarEditar();
+
+if(seleccionarTodos){
+
+    const idsFiltrados =
+    filtrados.map(
+        colaborador=>
+        colaborador.id
+    );
+
+
+    const todosSeleccionados =
+
+        idsFiltrados.length > 0
+
+        &&
+
+        idsFiltrados.every(id=>
+            seleccionados.includes(id)
+        );
+
+
+    const algunosSeleccionados =
+    idsFiltrados.some(id=>
+        seleccionados.includes(id)
+    );
+
+
+    seleccionarTodos.checked =
+    todosSeleccionados;
+
+
+    seleccionarTodos.indeterminate =
+
+        algunosSeleccionados
+
+        &&
+
+        !todosSeleccionados;
+
+}
 
 renderizarPaginacion(
     filtrados.length
@@ -2209,69 +2249,56 @@ function actualizarAcciones(){
     //=================================
 
 
-    if(seleccionarTodos){
+if(seleccionarTodos){
+
+    seleccionarTodos.onchange = ()=>{
+
+        const idsFiltrados =
+        colaboradoresFiltradosActuales.map(
+            colaborador=>
+            colaborador.id
+        );
 
 
-        seleccionarTodos.onchange = ()=>{
+        if(seleccionarTodos.checked){
+
+            /*
+            Selecciona todos los resultados
+            del filtro, incluso si hay varias páginas.
+            */
+
+            seleccionados =
+            [
+                ...idsFiltrados
+            ];
+
+        }
+        else{
+
+            seleccionados = [];
+
+        }
 
 
-            const checks =
-            document.querySelectorAll(
-                ".check-colaborador"
+        document
+        .querySelectorAll(
+            ".check-colaborador"
+        )
+        .forEach(check=>{
+
+            check.checked =
+            seleccionados.includes(
+                check.dataset.id
             );
 
+        });
 
 
-            checks.forEach(check=>{
+        actualizarAcciones();
 
+    };
 
-                check.checked =
-                seleccionarTodos.checked;
-
-
-
-                const id =
-                check.dataset.id;
-
-
-
-                if(
-                    seleccionarTodos.checked
-                ){
-
-
-                    if(
-                    !seleccionados.includes(id)
-                    ){
-
-                        seleccionados.push(id);
-
-                    }
-
-
-                }
-
-                else{
-
-
-                    seleccionados =
-                    [];
-
-
-                }
-
-
-            });
-
-
-
-            actualizarAcciones();
-
-
-        };
-
-
-    }
+}
 
 
 
