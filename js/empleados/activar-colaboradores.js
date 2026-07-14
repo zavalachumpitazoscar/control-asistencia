@@ -51,7 +51,7 @@ export function iniciarActivacionMasiva({
                 title:"Sin colaboradores seleccionados",
 
                 text:
-                "Selecciona al menos un colaborador para activar.",
+                "Todos los colaboradores seleccionados ya se encuentran activos.",
 
                 confirmButtonText:
                 "Aceptar"
