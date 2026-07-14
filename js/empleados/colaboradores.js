@@ -1309,31 +1309,20 @@ col.horario ||
                 </div>
 
 
-<div class="centrado columna-acciones">
+                <div class="centrado columna-acciones">
 
-    <button
-    class="btn-editar-colaborador"
-    data-id="${col.id}">
+                <button class="btn-editar-colaborador" data-id="${col.id}">
 
-        <i class="bi bi-pencil"></i>
+                <i class="bi bi-pencil"></i>
 
-    </button>
+                </button>
 
-</div>
-
-
-
+                </div>
             </div>
-
-
             `;
-
-
         });
 
-
-
-        activarChecks();
+activarChecks();
 
 activarEditar();
 
