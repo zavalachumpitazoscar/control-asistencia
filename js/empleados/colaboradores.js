@@ -2562,39 +2562,45 @@ else{
     });
 
 }
-            catch(error){
+
+/* Esta llave cierra el try */
+}
+catch(error){
+
+    console.error(
+
+        colaboradorEditandoId
+        ?
+        "Error al actualizar colaborador:"
+        :
+        "Error al registrar colaborador:",
+
+        error
+
+    );
 
 
-                console.error(
-                colaboradorEditandoId? "Error al actualizar colaborador:" 
-                :
-                "Error al registrar colaborador:",
-                error
-                );
+    Swal.fire({
 
+        icon:"error",
 
-                Swal.fire({
+        title:
+        colaboradorEditandoId
+        ?
+        "No se pudo actualizar"
+        :
+        "No se pudo registrar",
 
-    icon:"error",
+        text:
+        colaboradorEditandoId
+        ?
+        "Ocurrió un error al actualizar el colaborador."
+        :
+        "Ocurrió un error al guardar el colaborador."
 
-    title:
-    colaboradorEditandoId
-    ?
-    "No se pudo actualizar"
-    :
-    "No se pudo registrar",
+    });
 
-    text:
-    colaboradorEditandoId
-    ?
-    "Ocurrió un error al actualizar el colaborador."
-    :
-    "Ocurrió un error al guardar el colaborador."
-
-});
-
-
-            }
+}
 finally{
 
     guardarColaborador.disabled =
@@ -2619,12 +2625,6 @@ finally{
         Guardar colaborador
 
     `;
-
-}
-
-        }
-
-    );
 
 }
 
