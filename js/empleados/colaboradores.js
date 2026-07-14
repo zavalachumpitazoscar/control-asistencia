@@ -39,6 +39,11 @@ import {
 }
 from "./eliminar-colaboradores.js";
 
+import {
+    iniciarFiltrosColaboradores
+}
+from "./filtros-colaboradores.js";
+
 export function iniciarColaboradores(){
 
 
@@ -104,13 +109,17 @@ export function iniciarColaboradores(){
 
 
 
-    let colaboradores = [];
+let colaboradores = [];
 
-    let seleccionados = [];
+let seleccionados = [];
 
-    let paginaActual = 1;
+let colaboradoresFiltradosActuales = [];
 
-    let sucursales = [];
+let moduloFiltros = null;
+
+let paginaActual = 1;
+
+let sucursales = [];
 
 let areas = [];
 
@@ -1083,7 +1092,38 @@ if(areaColaborador){
 
     );
 
+moduloFiltros =
+iniciarFiltrosColaboradores({
 
+    obtenerColaboradores:()=>{
+
+        return colaboradores;
+
+    },
+
+
+    alCambiarFiltros:()=>{
+
+        paginaActual = 1;
+
+        seleccionados = [];
+
+
+        if(seleccionarTodos){
+
+            seleccionarTodos.checked =
+            false;
+
+        }
+
+
+        actualizarAcciones();
+
+        renderizar();
+
+    }
+
+});
 
     onSnapshot(
 
@@ -1109,7 +1149,7 @@ if(areaColaborador){
 
             });
 
-
+            moduloFiltros?.cargarOpciones();
             renderizar();
 
 
@@ -1147,9 +1187,32 @@ if(areaColaborador){
 
 
 
+const filtros =
+moduloFiltros?.obtenerFiltros() || {
+
+    sucursal:"",
+    area:"",
+    subarea:"",
+    estado:""
+
+};
+
+
+const normalizar = valor=>
+String(
+    valor || ""
+)
+.normalize("NFD")
+.replace(
+    /[\u0300-\u036f]/g,
+    ""
+)
+.trim()
+.toLowerCase();
+
+
 const filtrados =
 colaboradores.filter(col=>{
-
 
     const nombres =
     col.datosPersonales?.nombres ||
@@ -1164,45 +1227,131 @@ colaboradores.filter(col=>{
 
 
     const nombreCompleto =
-    `${nombres} ${apellidos}`
-    .toLowerCase();
+    normalizar(
+        `${nombres} ${apellidos}`
+    );
 
 
     const numeroDocumento =
-    (
+    normalizar(
+
         col.documento?.numero ||
         col.dni ||
         ""
+
+    );
+
+
+    const sucursal =
+    col.organizacion?.sucursal ||
+    col.sucursal ||
+    "";
+
+
+    const area =
+    col.organizacion?.area ||
+    col.area ||
+    "";
+
+
+    const subarea =
+    col.organizacion?.subarea ||
+    col.subarea ||
+    "";
+
+
+    const estado =
+    String(
+        col.estado || "ACTIVO"
     )
-    .toLowerCase();
+    .trim()
+    .toUpperCase();
 
 
-    return (
+    const coincideBusqueda =
 
         nombreCompleto.includes(
-            texto
+            normalizar(texto)
         )
 
         ||
 
         numeroDocumento.includes(
-            texto
-        )
+            normalizar(texto)
+        );
+
+
+    const coincideSucursal =
+
+        !filtros.sucursal
+
+        ||
+
+        normalizar(sucursal) ===
+        normalizar(filtros.sucursal);
+
+
+    const coincideArea =
+
+        !filtros.area
+
+        ||
+
+        normalizar(area) ===
+        normalizar(filtros.area);
+
+
+    const coincideSubarea =
+
+        !filtros.subarea
+
+        ||
+
+        normalizar(subarea) ===
+        normalizar(filtros.subarea);
+
+
+    const coincideEstado =
+
+        !filtros.estado
+
+        ||
+
+        estado ===
+        filtros.estado;
+
+
+    return (
+
+        coincideBusqueda
+
+        &&
+
+        coincideSucursal
+
+        &&
+
+        coincideArea
+
+        &&
+
+        coincideSubarea
+
+        &&
+
+        coincideEstado
 
     );
 
 });
 
-        const inicio =
-(paginaActual-1) *
-registrosPorPagina;
+        
 
-const fin =
-inicio +
-registrosPorPagina;
+const inicio = (paginaActual-1) * registrosPorPagina;
 
-const pagina =
-filtrados.slice(
+const fin = inicio + registrosPorPagina;
+
+const pagina = filtrados.slice(
 inicio,
 fin
 );
