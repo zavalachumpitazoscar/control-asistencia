@@ -16,9 +16,15 @@
 
 .tabla-wrapper{
 
+    position:relative;
+
     width:100%;
 
+    max-width:100%;
+
     overflow-x:auto;
+
+    overflow-y:visible;
 
     border-radius:18px;
 
@@ -257,11 +263,11 @@
 
     min-width:1515px;
 
+    width:max-content;
+
     background:#ffffff;
 
     border-radius:18px;
-
-    overflow:hidden;
 
     box-shadow:
         0 12px 35px rgba(15,23,42,.08);
@@ -288,6 +294,18 @@
 
     display:grid;
 
+    grid-template-columns:
+        55px
+        120px
+        220px
+        220px
+        170px
+        170px
+        170px
+        170px
+        120px
+        90px;
+
     align-items:center;
 
     gap:10px;
@@ -295,37 +313,6 @@
     padding:16px 20px;
 
 }
-
-
-.tabla-header,
-.tabla-fila{
-
-    display:grid;
-
-    grid-template-columns:
-
-    55px
-
-    120px
-
-    220px
-
-    220px
-
-    170px
-
-    170px
-
-    170px
-
-    170px
-
-    120px
-
-    90px;
-
-}
-
 
 
 .tabla-fila{
