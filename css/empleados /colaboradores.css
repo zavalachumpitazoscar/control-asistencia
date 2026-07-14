@@ -2932,3 +2932,238 @@
     }
 
 }
+
+
+/*=====================================================
+    VISTA PREVIA EXCEL
+=====================================================*/
+
+.resumen-carga-excel{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+    gap:10px;
+
+}
+
+
+.resumen-excel{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:3px;
+
+    padding:13px 8px;
+
+    border-radius:12px;
+
+    text-align:center;
+
+}
+
+
+.resumen-excel strong{
+
+    font-size:22px;
+
+}
+
+
+.resumen-excel span{
+
+    font-size:11px;
+
+    font-weight:600;
+
+}
+
+
+.resumen-excel.total{
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+}
+
+
+.resumen-excel.validas{
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+}
+
+
+.resumen-excel.errores{
+
+    background:#fee2e2;
+
+    color:#b91c1c;
+
+}
+
+
+.tabla-previa-excel-wrapper{
+
+    width:100%;
+
+    max-height:280px;
+
+    overflow:auto;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:12px;
+
+}
+
+
+.tabla-previa-excel{
+
+    width:100%;
+
+    min-width:800px;
+
+    border-collapse:collapse;
+
+    background:#ffffff;
+
+    font-size:12px;
+
+}
+
+
+.tabla-previa-excel th{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:2;
+
+    padding:11px 12px;
+
+    background:#f8fafc;
+
+    color:#475569;
+
+    text-align:left;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+.tabla-previa-excel td{
+
+    padding:11px 12px;
+
+    color:#334155;
+
+    border-bottom:1px solid #e2e8f0;
+
+    vertical-align:top;
+
+}
+
+
+.tabla-previa-excel tr:last-child td{
+
+    border-bottom:none;
+
+}
+
+
+.estado-fila-excel{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:5px;
+
+    padding:5px 9px;
+
+    border-radius:20px;
+
+    white-space:nowrap;
+
+    font-size:11px;
+
+    font-weight:700;
+
+}
+
+
+.estado-fila-excel.correcta{
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+}
+
+
+.estado-fila-excel.incorrecta{
+
+    background:#fee2e2;
+
+    color:#b91c1c;
+
+}
+
+
+.btn-importar-excel{
+
+    background:#7c3aed;
+
+    color:#ffffff;
+
+}
+
+
+.btn-importar-excel:hover{
+
+    background:#6d28d9;
+
+}
+
+
+.btn-importar-excel:disabled{
+
+    opacity:.5;
+
+    cursor:not-allowed;
+
+}
+
+
+@media(max-width:600px){
+
+    .resumen-carga-excel{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .resumen-excel{
+
+        flex-direction:row;
+
+        justify-content:space-between;
+
+    }
+
+}
