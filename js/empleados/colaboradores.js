@@ -2865,24 +2865,6 @@ if(btnEliminar){
 // CARGA MASIVA
 // ==========================
 
-if(btnCargaMasiva){
-
-    btnCargaMasiva.onclick = ()=>{
-
-        Swal.fire({
-
-            icon:"info",
-
-            title:"Carga masiva",
-
-            text:
-            "Aquí se importará un archivo Excel."
-
-        });
-
-    };
-
-}
 
 }
 
