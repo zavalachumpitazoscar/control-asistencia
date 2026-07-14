@@ -34,6 +34,11 @@ import {
 }
 from "./activar-colaboradores.js";
 
+import {
+    iniciarEliminacionMasiva
+}
+from "./eliminar-colaboradores.js";
+
 export function iniciarColaboradores(){
 
 
@@ -115,7 +120,7 @@ let colaboradorEditandoId = null;
 
 let registrosPorPagina = 20;
 
-
+    
 const btnEliminar =
 document.getElementById(
     "btnEliminarSeleccion"
@@ -2000,14 +2005,30 @@ if(paginaSiguiente){
 
 function actualizarAcciones(){
 
-    const activo =
+    const haySeleccionados =
     seleccionados.length > 0;
+
+
+    const todosInactivos =
+    haySeleccionados &&
+    seleccionados.every(id=>{
+
+        const colaborador =
+        colaboradores.find(
+            item=>item.id === id
+        );
+
+
+        return colaborador?.estado ===
+        "INACTIVO";
+
+    });
 
 
     if(btnActivar){
 
         btnActivar.disabled =
-        !activo;
+        !haySeleccionados;
 
     }
 
@@ -2015,15 +2036,15 @@ function actualizarAcciones(){
     if(btnDesactivar){
 
         btnDesactivar.disabled =
-        !activo;
+        !haySeleccionados;
 
     }
 
 
     if(btnEliminar){
-
+        
         btnEliminar.disabled =
-        !activo;
+        !todosInactivos;
 
     }
 
@@ -2827,21 +2848,6 @@ finally{
 
 
 // ==========================
-// ELIMINAR
-// ==========================
-
-if(btnEliminar){
-
-    btnEliminar.onclick = ()=>{
-
-        console.log(seleccionados);
-
-    };
-
-}
-
-
-// ==========================
 // CARGA MASIVA
 // ==========================
 iniciarCargaMasivaColaboradores({
@@ -2948,6 +2954,67 @@ iniciarActivacionMasiva({
             seleccionarTodos.checked = false;
 
         }
+
+        actualizarAcciones();
+
+    }
+
+});
+
+iniciarEliminacionMasiva({
+
+    botonEliminar:
+    btnEliminar,
+
+
+    obtenerSeleccionados:()=>{
+
+        /*
+        Medida adicional de seguridad:
+        solamente devuelve colaboradores
+        actualmente inactivos.
+        */
+
+        return seleccionados.filter(id=>{
+
+            const colaborador =
+            colaboradores.find(
+                item=>item.id === id
+            );
+
+
+            return colaborador?.estado ===
+            "INACTIVO";
+
+        });
+
+    },
+
+
+    limpiarSeleccion:()=>{
+
+        seleccionados = [];
+
+
+        document
+        .querySelectorAll(
+            ".check-colaborador"
+        )
+        .forEach(check=>{
+
+            check.checked =
+            false;
+
+        });
+
+
+        if(seleccionarTodos){
+
+            seleccionarTodos.checked =
+            false;
+
+        }
+
 
         actualizarAcciones();
 
