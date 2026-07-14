@@ -2,6 +2,26 @@ import * as XLSX
 from "https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs";
 
 
+import {
+    db
+}
+from "../firebase-config.js";
+
+
+import {
+    collection,
+    query,
+    where,
+    getDocs,
+    doc,
+    writeBatch,
+    serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+let empresaIdActual = null;
+
+
 export function iniciarCargaMasivaColaboradores({
 
     empresaId,
@@ -9,6 +29,8 @@ export function iniciarCargaMasivaColaboradores({
     botonCargaMasiva
 
 }){
+
+    empresaIdActual = empresaId;
 
     if(!empresaId){
 
@@ -1253,35 +1275,828 @@ function mostrarVistaPreviaExcel(
     );
 
 
-    if(btnContinuar){
+if(btnContinuar){
 
-        btnContinuar.onclick = ()=>{
+    btnContinuar.onclick = async()=>{
 
-            console.log(
-                "Colaboradores válidos:",
-                filasValidas
+        await confirmarImportacion(
+            filasValidas
+        );
+
+    };
+
+}
+
+}
+
+
+async function confirmarImportacion(
+    filasValidas
+){
+
+    if(filasValidas.length === 0){
+
+        return;
+
+    }
+
+
+    const respuesta =
+    await Swal.fire({
+
+        icon:"question",
+
+        title:"Confirmar importación",
+
+        html:`
+
+            <p>
+
+                Se registrarán
+
+                <strong>
+                    ${filasValidas.length}
+                </strong>
+
+                colaboradores en la empresa.
+
+            </p>
+
+            <p style="
+                margin-top:10px;
+                color:#64748b;
+                font-size:13px;
+            ">
+
+                Los documentos duplicados no serán registrados.
+
+            </p>
+
+        `,
+
+        showCancelButton:true,
+
+        confirmButtonText:
+        "Sí, importar",
+
+        cancelButtonText:
+        "Cancelar",
+
+        confirmButtonColor:
+        "#7c3aed"
+
+    });
+
+
+    if(!respuesta.isConfirmed){
+
+        return;
+
+    }
+
+
+    await importarColaboradores(
+        filasValidas
+    );
+
+}
+
+async function importarColaboradores(
+    filasValidas
+){
+
+    if(!empresaIdActual){
+
+        Swal.fire({
+
+            icon:"error",
+
+            title:"Empresa no identificada",
+
+            text:
+            "No se pudo determinar la empresa de los colaboradores."
+
+        });
+
+        return;
+
+    }
+
+
+    try{
+
+        Swal.fire({
+
+            title:"Importando colaboradores",
+
+            html:`
+
+                <p>
+                    Procesando la información del archivo...
+                </p>
+
+            `,
+
+            allowOutsideClick:false,
+
+            allowEscapeKey:false,
+
+            showConfirmButton:false,
+
+            didOpen:()=>{
+
+                Swal.showLoading();
+
+            }
+
+        });
+
+
+        /*
+        Obtener colaboradores existentes
+        para evitar documentos duplicados.
+        */
+
+        const consultaColaboradores =
+        query(
+
+            collection(
+                db,
+                "colaboradores"
+            ),
+
+            where(
+                "empresaId",
+                "==",
+                empresaIdActual
+            )
+
+        );
+
+
+        const resultadoColaboradores =
+        await getDocs(
+            consultaColaboradores
+        );
+
+
+        const documentosExistentes =
+        new Set();
+
+
+        resultadoColaboradores.forEach(
+            documento=>{
+
+                const datos =
+                documento.data();
+
+
+                const numeroDocumento =
+                String(
+
+                    datos.documento?.numero ||
+
+                    datos.dni ||
+
+                    ""
+
+                )
+                .trim()
+                .toUpperCase();
+
+
+                if(numeroDocumento){
+
+                    documentosExistentes.add(
+                        numeroDocumento
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+        Cargar estructura organizacional.
+        */
+
+        const [
+
+            resultadoSucursales,
+
+            resultadoAreas,
+
+            resultadoSubareas
+
+        ] =
+        await Promise.all([
+
+            getDocs(
+                query(
+                    collection(
+                        db,
+                        "sucursales"
+                    ),
+                    where(
+                        "empresaId",
+                        "==",
+                        empresaIdActual
+                    )
+                )
+            ),
+
+            getDocs(
+                query(
+                    collection(
+                        db,
+                        "areas"
+                    ),
+                    where(
+                        "empresaId",
+                        "==",
+                        empresaIdActual
+                    )
+                )
+            ),
+
+            getDocs(
+                query(
+                    collection(
+                        db,
+                        "subareas"
+                    ),
+                    where(
+                        "empresaId",
+                        "==",
+                        empresaIdActual
+                    )
+                )
+            )
+
+        ]);
+
+
+        const sucursales =
+        convertirSnapshotEnLista(
+            resultadoSucursales
+        );
+
+
+        const areas =
+        convertirSnapshotEnLista(
+            resultadoAreas
+        );
+
+
+        const subareas =
+        convertirSnapshotEnLista(
+            resultadoSubareas
+        );
+
+
+        const colaboradoresImportar = [];
+
+        const omitidos = [];
+
+        const documentosArchivo =
+        new Set();
+
+
+        filasValidas.forEach(fila=>{
+
+            const datos =
+            fila.datos;
+
+
+            const numeroDocumento =
+            String(
+                datos.numeroDocumento
+            )
+            .trim()
+            .toUpperCase();
+
+
+            /*
+            Duplicado en Firestore.
+            */
+
+            if(
+                documentosExistentes.has(
+                    numeroDocumento
+                )
+            ){
+
+                omitidos.push({
+
+                    fila:
+                    fila.numeroFila,
+
+                    documento:
+                    numeroDocumento,
+
+                    motivo:
+                    "El documento ya existe en el sistema"
+
+                });
+
+                return;
+
+            }
+
+
+            /*
+            Duplicado dentro del mismo Excel.
+            */
+
+            if(
+                documentosArchivo.has(
+                    numeroDocumento
+                )
+            ){
+
+                omitidos.push({
+
+                    fila:
+                    fila.numeroFila,
+
+                    documento:
+                    numeroDocumento,
+
+                    motivo:
+                    "Documento repetido dentro del archivo"
+
+                });
+
+                return;
+
+            }
+
+
+            documentosArchivo.add(
+                numeroDocumento
             );
 
 
-            Swal.fire({
+            const sucursalEncontrada =
+            buscarPorNombre(
 
-                icon:"info",
+                sucursales,
 
-                title:"Archivo validado",
+                datos.sucursal
 
-                text:
-                `${filasValidas.length} colaboradores están listos para importar.`,
+            );
 
-                confirmButtonText:
-                "Aceptar"
+
+            const areaEncontrada =
+            buscarPorNombre(
+
+                areas,
+
+                datos.area
+
+            );
+
+
+            const subareaEncontrada =
+            buscarPorNombre(
+
+                subareas,
+
+                datos.subarea
+
+            );
+
+
+            colaboradoresImportar.push({
+
+                empresaId:
+                empresaIdActual,
+
+                documento:{
+
+                    tipo:
+                    datos.tipoDocumento,
+
+                    numero:
+                    numeroDocumento
+
+                },
+
+                datosPersonales:{
+
+                    nombres:
+                    datos.nombres,
+
+                    apellidos:
+                    datos.apellidos,
+
+                    fechaNacimiento:
+                    datos.fechaNacimiento || null,
+
+                    genero:
+                    datos.genero ||
+                    "SIN_ESPECIFICAR"
+
+                },
+
+                contacto:{
+
+                    correo:
+                    datos.correo,
+
+                    telefono:
+                    datos.telefono,
+
+                    direccion:
+                    datos.direccion
+
+                },
+
+                organizacion:{
+
+                    sucursalId:
+                    sucursalEncontrada?.id ||
+                    null,
+
+                    sucursal:
+                    sucursalEncontrada
+                    ?
+                    obtenerNombre(
+                        sucursalEncontrada
+                    )
+                    :
+                    datos.sucursal,
+
+                    areaId:
+                    areaEncontrada?.id ||
+                    null,
+
+                    area:
+                    areaEncontrada
+                    ?
+                    obtenerNombre(
+                        areaEncontrada
+                    )
+                    :
+                    datos.area,
+
+                    subareaId:
+                    subareaEncontrada?.id ||
+                    null,
+
+                    subarea:
+                    subareaEncontrada
+                    ?
+                    obtenerNombre(
+                        subareaEncontrada
+                    )
+                    :
+                    datos.subarea
+
+                },
+
+                informacionAdicional:{
+
+                    cargoProfesion:
+                    datos.cargoProfesion,
+
+                    inicioContrato:
+                    datos.inicioContrato || null,
+
+                    terminoContrato:
+                    datos.terminoContrato || null,
+
+                    nacionalidad:
+                    datos.nacionalidad,
+
+                    paisNacionalidad:
+                    datos.paisNacionalidad,
+
+                    comentarios:
+                    datos.comentarios
+
+                },
+
+                estado:"ACTIVO",
+
+                fechaRegistro:
+                serverTimestamp(),
+
+                origenRegistro:
+                "CARGA_MASIVA"
 
             });
 
-        };
+        });
+
+
+        if(
+            colaboradoresImportar.length === 0
+        ){
+
+            await Swal.fire({
+
+                icon:"warning",
+
+                title:"Nada para importar",
+
+                text:
+                "Todos los documentos del archivo ya existen o están duplicados."
+
+            });
+
+            return;
+
+        }
+
+
+        /*
+        Firestore permite hasta 500 operaciones
+        por lote. Se procesan en bloques.
+        */
+
+        const tamañoLote = 450;
+
+
+        for(
+            let inicio = 0;
+
+            inicio <
+            colaboradoresImportar.length;
+
+            inicio += tamañoLote
+        ){
+
+            const grupo =
+            colaboradoresImportar.slice(
+
+                inicio,
+
+                inicio + tamañoLote
+
+            );
+
+
+            const lote =
+            writeBatch(
+                db
+            );
+
+
+            grupo.forEach(
+                colaborador=>{
+
+                    const referencia =
+                    doc(
+                        collection(
+                            db,
+                            "colaboradores"
+                        )
+                    );
+
+
+                    lote.set(
+
+                        referencia,
+
+                        colaborador
+
+                    );
+
+                }
+            );
+
+
+            await lote.commit();
+
+        }
+
+
+        await mostrarResultadoImportacion({
+
+            importados:
+            colaboradoresImportar.length,
+
+            omitidos
+
+        });
+
+    }
+    catch(error){
+
+        console.error(
+            "Error en carga masiva:",
+            error
+        );
+
+
+        await Swal.fire({
+
+            icon:"error",
+
+            title:"No se pudo importar",
+
+            text:
+            "Ocurrió un error al registrar los colaboradores."
+
+        });
 
     }
 
 }
+
+function convertirSnapshotEnLista(
+    snapshot
+){
+
+    const lista = [];
+
+
+    snapshot.forEach(documento=>{
+
+        lista.push({
+
+            id:
+            documento.id,
+
+            ...documento.data()
+
+        });
+
+    });
+
+
+    return lista;
+
+}
+
+
+function normalizarTexto(
+    valor
+){
+
+    return String(
+        valor || ""
+    )
+    .normalize("NFD")
+    .replace(
+        /[\u0300-\u036f]/g,
+        ""
+    )
+    .trim()
+    .toUpperCase();
+
+}
+
+
+function obtenerNombre(
+    elemento
+){
+
+    return (
+
+        elemento.nombre ||
+
+        elemento.nombreSucursal ||
+
+        elemento.nombreArea ||
+
+        elemento.nombreSubarea ||
+
+        elemento.descripcion ||
+
+        ""
+
+    );
+
+}
+
+
+function buscarPorNombre(
+    lista,
+    nombreBuscado
+){
+
+    const nombreNormalizado =
+    normalizarTexto(
+        nombreBuscado
+    );
+
+
+    if(!nombreNormalizado){
+
+        return null;
+
+    }
+
+
+    return lista.find(elemento=>{
+
+        return normalizarTexto(
+            obtenerNombre(
+                elemento
+            )
+        ) === nombreNormalizado;
+
+    }) || null;
+
+}
+
+
+
+async function mostrarResultadoImportacion({
+
+    importados,
+
+    omitidos
+
+}){
+
+    const detalleOmitidos =
+    omitidos.length > 0
+    ?
+    `
+
+        <div style="
+            margin-top:15px;
+            padding:12px;
+            background:#fff7ed;
+            border-radius:10px;
+            color:#9a3412;
+            text-align:left;
+            font-size:13px;
+        ">
+
+            <strong>
+                ${omitidos.length}
+                registros omitidos
+            </strong>
+
+            <ul style="
+                margin:8px 0 0;
+                padding-left:20px;
+                max-height:150px;
+                overflow:auto;
+            ">
+
+                ${omitidos.map(item=>`
+
+                    <li>
+
+                        Fila ${item.fila} ·
+                        ${escaparHTML(
+                            item.documento
+                        )}:
+
+                        ${escaparHTML(
+                            item.motivo
+                        )}
+
+                    </li>
+
+                `).join("")}
+
+            </ul>
+
+        </div>
+
+    `
+    :
+    "";
+
+
+    await Swal.fire({
+
+        icon:"success",
+
+        title:"Importación completada",
+
+        html:`
+
+            <p>
+
+                Se registraron correctamente
+
+                <strong>
+                    ${importados}
+                </strong>
+
+                colaboradores.
+
+            </p>
+
+            ${detalleOmitidos}
+
+        `,
+
+        confirmButtonText:
+        "Aceptar"
+
+    });
+
+}
+
 
 
 function escaparHTML(
