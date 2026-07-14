@@ -1313,7 +1313,7 @@ col.horario ||
 
     <button
     class="btn-editar-colaborador"
-    data-id="${documento.id}">
+    data-id="${col.id}">
 
         <i class="bi bi-pencil"></i>
 
