@@ -13,14 +13,28 @@ from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 
 export function iniciarCargaMasivaColaboradores({
+
     empresaId,
+
     botonCargaMasiva
+
 }){
+
+    if(!empresaId){
+
+        console.error(
+            "No se recibió empresaId para la carga masiva."
+        );
+
+        return;
+
+    }
+
 
     if(!botonCargaMasiva){
 
-        console.warn(
-            "No se encontró el botón de carga masiva."
+        console.error(
+            "No se recibió el botón de carga masiva."
         );
 
         return;
@@ -34,12 +48,26 @@ export function iniciarCargaMasivaColaboradores({
 
             icon:"info",
 
-            title:"Carga masiva de colaboradores",
+            title:
+            "Carga masiva de colaboradores",
 
-            text:
-            "Aquí se implementará la selección e importación del archivo Excel.",
+            html:`
 
-            confirmButtonText:"Aceptar"
+                <p>
+                    Próximamente podrás importar colaboradores mediante un archivo Excel.
+                </p>
+
+                <p style="margin-top:10px;color:#64748b;font-size:13px;">
+
+                    Empresa vinculada:
+                    <strong>${empresaId}</strong>
+
+                </p>
+
+            `,
+
+            confirmButtonText:
+            "Aceptar"
 
         });
 
