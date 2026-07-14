@@ -1284,7 +1284,7 @@ col.horario ||
                     <span class="badge-estado
 
                     ${
-                    col.estado==="ACTIVA"
+                    col.estado==="ACTIVO"
                     ?
                     "activa"
                     :
@@ -1294,7 +1294,7 @@ col.horario ||
                     ">
 
                     ${
-                    col.estado || "ACTIVA"
+                    col.estado || "ACTIVO"
                     }
 
                     </span>
