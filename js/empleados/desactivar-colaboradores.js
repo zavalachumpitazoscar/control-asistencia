@@ -51,7 +51,7 @@ export function iniciarDesactivacionMasiva({
                 title:"Sin colaboradores seleccionados",
 
                 text:
-                "Selecciona al menos un colaborador para desactivar.",
+                "Todos los colaboradores seleccionados ya se encuentran inactivos.",
 
                 confirmButtonText:
                 "Aceptar"
