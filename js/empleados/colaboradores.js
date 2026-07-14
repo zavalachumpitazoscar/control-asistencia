@@ -24,6 +24,11 @@ import {
 }
 from "./carga-masiva-colaboradores.js";
 
+import {
+    iniciarDesactivacionMasiva
+}
+from "./desactivar-colaboradores.js";
+
 export function iniciarColaboradores(){
 
 
@@ -1342,9 +1347,9 @@ col.horario ||
                     ${
                     col.estado==="ACTIVO"
                     ?
-                    "activa"
+                    "activo"
                     :
-                    "inactiva"
+                    "inactivo"
                     }
 
                     ">
@@ -2831,20 +2836,6 @@ if(btnActivar){
 }
 
 
-// ==========================
-// DESACTIVAR
-// ==========================
-
-if(btnDesactivar){
-
-    btnDesactivar.onclick = ()=>{
-
-        console.log(seleccionados);
-
-    };
-
-}
-
 
 // ==========================
 // ELIMINAR
@@ -2873,6 +2864,52 @@ iniciarCargaMasivaColaboradores({
 
 });
 
+iniciarDesactivacionMasiva({
+
+    botonDesactivar:
+    btnDesactivar,
+
+
+    obtenerSeleccionados:()=>{
+
+        return [
+            ...seleccionados
+        ];
+
+    },
+
+
+    limpiarSeleccion:()=>{
+
+        seleccionados = [];
+
+
+        document
+        .querySelectorAll(
+            ".check-colaborador"
+        )
+        .forEach(check=>{
+
+            check.checked =
+            false;
+
+        });
+
+
+        if(seleccionarTodos){
+
+            seleccionarTodos.checked =
+            false;
+
+        }
+
+
+        actualizarAcciones();
+
+    }
+
+});
+    
 }
 
 
