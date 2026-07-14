@@ -1829,3 +1829,212 @@
     z-index:999999 !important;
 
 }
+
+
+/*=====================================================
+    SUBSECCIONES DE JORNADA
+=====================================================*/
+
+.subseccion-horario{
+
+    padding:17px;
+
+    margin-top:16px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:14px;
+
+    background:#f8fafc;
+
+}
+
+
+.subseccion-horario-titulo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:11px;
+
+    margin-bottom:16px;
+
+}
+
+
+.subseccion-horario-titulo > i{
+
+    width:36px;
+
+    height:36px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:10px;
+
+    background:#ffffff;
+
+    color:#2563eb;
+
+    font-size:17px;
+
+    border:1px solid #dbeafe;
+
+}
+
+
+.subseccion-horario-titulo h5{
+
+    margin:0;
+
+    color:#1e293b;
+
+    font-size:14px;
+
+}
+
+
+.subseccion-horario-titulo p{
+
+    margin:3px 0 0;
+
+    color:#64748b;
+
+    font-size:12px;
+
+}
+
+
+.form-grid-tres{
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+}
+
+
+.form-grid-dos-secundario{
+
+    grid-template-columns:
+        minmax(220px,330px);
+
+    margin-top:16px;
+
+}
+
+
+.campo-con-unidad{
+
+    display:flex;
+
+    align-items:center;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:11px;
+
+    background:#ffffff;
+
+    overflow:hidden;
+
+}
+
+
+.campo-con-unidad input{
+
+    flex:1;
+
+    border:none;
+
+    border-radius:0;
+
+    box-shadow:none !important;
+
+}
+
+
+.campo-con-unidad span{
+
+    padding:0 13px;
+
+    color:#64748b;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    white-space:nowrap;
+
+}
+
+
+.campo-formulario small{
+
+    color:#64748b;
+
+    font-size:11px;
+
+    line-height:1.4;
+
+}
+
+
+.campos-refrigerio{
+
+    margin-top:17px;
+
+}
+
+
+.mensaje-refrigerio{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:9px;
+
+    margin-top:14px;
+
+    padding:12px 13px;
+
+    border-radius:10px;
+
+    background:#ecfdf5;
+
+    color:#047857;
+
+    font-size:12px;
+
+    line-height:1.5;
+
+}
+
+
+@media(max-width:900px){
+
+    .form-grid-tres{
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+
+    }
+
+}
+
+
+@media(max-width:600px){
+
+    .form-grid-tres,
+    .form-grid-dos-secundario{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
