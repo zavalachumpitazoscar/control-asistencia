@@ -633,149 +633,291 @@
 
 
 
-                    <!--======================================
-                        JORNADA
-                    =======================================-->
+<!--======================================
+    JORNADA LABORAL
+=======================================-->
 
-                    <div class="seccion-formulario">
+<div class="seccion-formulario">
 
-                        <div class="titulo-seccion-formulario">
+    <div class="titulo-seccion-formulario">
 
-                            <div class="icono-seccion">
+        <div class="icono-seccion">
 
-                                <i class="bi bi-clock-history"></i>
+            <i class="bi bi-clock-history"></i>
 
-                            </div>
+        </div>
 
-                            <div>
+        <div>
 
-                                <h4>
-                                    Jornada laboral
-                                </h4>
+            <h4>
+                Jornada laboral
+            </h4>
 
-                                <p>
-                                    Define las horas programadas de trabajo.
-                                </p>
+            <p>
+                Define las horas programadas y los rangos permitidos de marcación.
+            </p>
 
-                            </div>
+        </div>
 
-                        </div>
-
-
-                        <div class="switch-horario">
-
-                            <div>
-
-                                <strong>
-                                    Horario de amanecida
-                                </strong>
-
-                                <p>
-                                    Actívalo cuando la salida sea al día siguiente.
-                                </p>
-
-                            </div>
+    </div>
 
 
-                            <label class="switch">
+    <div class="switch-horario">
 
-                                <input
-                                id="cruzaMedianocheHorario"
-                                type="checkbox">
+        <div>
 
-                                <span class="slider"></span>
+            <strong>
+                Horario de amanecida
+            </strong>
 
-                            </label>
+            <p>
+                Actívalo cuando la salida sea al día siguiente.
+            </p>
 
-                        </div>
-
-
-                        <div class="form-grid form-grid-cuatro">
-
-
-                            <div class="campo-formulario">
-
-                                <label for="permitirEntradaDesdeHorario">
-
-                                    Permitir entrada desde
-                                    <span>*</span>
-
-                                </label>
-
-                                <input
-                                id="permitirEntradaDesdeHorario"
-                                type="time"
-                                required>
-
-                            </div>
+        </div>
 
 
-                            <div class="campo-formulario">
+        <label class="switch">
 
-                                <label for="horaEntradaHorario">
+            <input
+            id="cruzaMedianocheHorario"
+            type="checkbox">
 
-                                    Entrada programada
-                                    <span>*</span>
+            <span class="slider"></span>
 
-                                </label>
+        </label>
 
-                                <input
-                                id="horaEntradaHorario"
-                                type="time"
-                                required>
-
-                            </div>
+    </div>
 
 
-                            <div class="campo-formulario">
+    <!-- ENTRADA -->
 
-                                <label for="horaSalidaHorario">
+    <div class="subseccion-horario">
 
-                                    Salida programada
-                                    <span>*</span>
+        <div class="subseccion-horario-titulo">
 
-                                </label>
+            <i class="bi bi-box-arrow-in-right"></i>
 
-                                <input
-                                id="horaSalidaHorario"
-                                type="time"
-                                required>
+            <div>
 
-                            </div>
+                <h5>
+                    Entrada
+                </h5>
 
+                <p>
+                    Configura la ventana permitida para registrar la entrada.
+                </p>
 
-                            <div class="campo-formulario">
+            </div>
 
-                                <label for="horasExtraDesdeHorario">
-
-                                    Horas extra desde
-                                    <span>*</span>
-
-                                </label>
-
-                                <input
-                                id="horasExtraDesdeHorario"
-                                type="time"
-                                required>
-
-                            </div>
-
-                        </div>
+        </div>
 
 
-                        <div
-                        id="mensajeAmanecidaHorario"
-                        class="mensaje-jornada">
+        <div class="form-grid form-grid-tres">
 
-                            <i class="bi bi-info-circle"></i>
 
-                            <span>
-                                La entrada y salida corresponden al mismo día.
-                            </span>
+            <div class="campo-formulario">
 
-                        </div>
+                <label for="permitirEntradaDesdeHorario">
 
-                    </div>
+                    Permitir entrada desde
+                    <span>*</span>
+
+                </label>
+
+                <input
+                id="permitirEntradaDesdeHorario"
+                type="time"
+                required>
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="horaEntradaHorario">
+
+                    Entrada programada
+                    <span>*</span>
+
+                </label>
+
+                <input
+                id="horaEntradaHorario"
+                type="time"
+                required>
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="permitirEntradaHastaHorario">
+
+                    Permitir entrada hasta
+                    <span>*</span>
+
+                </label>
+
+                <input
+                id="permitirEntradaHastaHorario"
+                type="time"
+                required>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-grid form-grid-dos-secundario">
+
+            <div class="campo-formulario">
+
+                <label for="toleranciaEntradaHorario">
+
+                    Tolerancia de entrada
+                    <span>*</span>
+
+                </label>
+
+                <div class="campo-con-unidad">
+
+                    <input
+                    id="toleranciaEntradaHorario"
+                    type="number"
+                    min="0"
+                    max="180"
+                    value="5"
+                    required>
+
+                    <span>
+                        minutos
+                    </span>
+
+                </div>
+
+                <small>
+                    Después de esta tolerancia la entrada se considera tardanza.
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SALIDA -->
+
+    <div class="subseccion-horario">
+
+        <div class="subseccion-horario-titulo">
+
+            <i class="bi bi-box-arrow-right"></i>
+
+            <div>
+
+                <h5>
+                    Salida
+                </h5>
+
+                <p>
+                    Configura la ventana permitida para registrar la salida.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-grid form-grid-cuatro">
+
+
+            <div class="campo-formulario">
+
+                <label for="permitirSalidaDesdeHorario">
+
+                    Permitir salida desde
+                    <span>*</span>
+
+                </label>
+
+                <input
+                id="permitirSalidaDesdeHorario"
+                type="time"
+                required>
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="horaSalidaHorario">
+
+                    Salida programada
+                    <span>*</span>
+
+                </label>
+
+                <input
+                id="horaSalidaHorario"
+                type="time"
+                required>
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="permitirSalidaHastaHorario">
+
+                    Permitir salida hasta
+                    <span>*</span>
+
+                </label>
+
+                <input
+                id="permitirSalidaHastaHorario"
+                type="time"
+                required>
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="horasExtraDesdeHorario">
+
+                    Horas extra desde
+                    <span>*</span>
+
+                </label>
+
+                <input
+                id="horasExtraDesdeHorario"
+                type="time"
+                required>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+    id="mensajeAmanecidaHorario"
+    class="mensaje-jornada">
+
+        <i class="bi bi-info-circle"></i>
+
+        <span>
+            La entrada y salida corresponden al mismo día.
+        </span>
+
+    </div>
+
+</div>
 
 
 
@@ -1022,103 +1164,149 @@
 
 
                     <!--======================================
-                        REFRIGERIO
-                    =======================================-->
+    REFRIGERIO
+=======================================-->
 
-                    <div class="seccion-formulario">
+<div class="seccion-formulario">
 
-                        <div class="titulo-seccion-formulario">
+    <div class="titulo-seccion-formulario">
 
-                            <div class="icono-seccion">
+        <div class="icono-seccion">
 
-                                <i class="bi bi-cup-hot"></i>
+            <i class="bi bi-cup-hot"></i>
 
-                            </div>
+        </div>
 
-                            <div>
+        <div>
 
-                                <h4>
-                                    Refrigerio
-                                </h4>
+            <h4>
+                Refrigerio
+            </h4>
 
-                                <p>
-                                    Configura el tiempo de almuerzo si corresponde.
-                                </p>
+            <p>
+                Define el rango permitido y la duración máxima del descanso.
+            </p>
 
-                            </div>
+        </div>
 
-                        </div>
-
-
-                        <div class="switch-horario">
-
-                            <div>
-
-                                <strong>
-                                    Incluir refrigerio
-                                </strong>
-
-                                <p>
-                                    Activa los campos de inicio y fin.
-                                </p>
-
-                            </div>
+    </div>
 
 
-                            <label class="switch">
+    <div class="switch-horario">
 
-                                <input
-                                id="refrigerioHabilitadoHorario"
-                                type="checkbox">
+        <div>
 
-                                <span class="slider"></span>
+            <strong>
+                Incluir refrigerio
+            </strong>
 
-                            </label>
+            <p>
+                Activa el rango permitido para tomar el descanso.
+            </p>
 
-                        </div>
-
-
-                        <div
-                        id="camposRefrigerioHorario"
-                        class="form-grid campos-refrigerio"
-                        hidden>
+        </div>
 
 
-                            <div class="campo-formulario">
+        <label class="switch">
 
-                                <label for="inicioRefrigerioHorario">
+            <input
+            id="refrigerioHabilitadoHorario"
+            type="checkbox">
 
-                                    Inicio del refrigerio
+            <span class="slider"></span>
 
-                                </label>
+        </label>
 
-                                <input
-                                id="inicioRefrigerioHorario"
-                                type="time">
-
-                            </div>
+    </div>
 
 
-                            <div class="campo-formulario">
+    <div
+    id="camposRefrigerioHorario"
+    class="campos-refrigerio"
+    hidden>
 
-                                <label for="finRefrigerioHorario">
 
-                                    Fin del refrigerio
+        <div class="form-grid form-grid-tres">
 
-                                </label>
 
-                                <input
-                                id="finRefrigerioHorario"
-                                type="time">
+            <div class="campo-formulario">
 
-                            </div>
+                <label for="inicioRefrigerioHorario">
 
-                        </div>
+                    Puede iniciar desde
+                    <span>*</span>
 
-                    </div>
+                </label>
+
+                <input
+                id="inicioRefrigerioHorario"
+                type="time">
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="finRefrigerioHorario">
+
+                    Puede iniciar hasta
+                    <span>*</span>
+
+                </label>
+
+                <input
+                id="finRefrigerioHorario"
+                type="time">
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="duracionRefrigerioHorario">
+
+                    Duración permitida
+                    <span>*</span>
+
+                </label>
+
+                <div class="campo-con-unidad">
+
+                    <input
+                    id="duracionRefrigerioHorario"
+                    type="number"
+                    min="1"
+                    max="480"
+                    value="60">
+
+                    <span>
+                        minutos
+                    </span>
 
                 </div>
 
+            </div>
+
+        </div>
+
+
+        <div class="mensaje-refrigerio">
+
+            <i class="bi bi-info-circle"></i>
+
+            <span>
+
+                Ejemplo: entre 12:00 p. m. y 4:00 p. m.,
+                el colaborador puede iniciar un refrigerio
+                de hasta 60 minutos.
+
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
 
 
                 <!-- BOTONES -->
