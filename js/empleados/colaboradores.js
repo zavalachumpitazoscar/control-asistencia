@@ -12,8 +12,9 @@ import {
     onSnapshot,
     addDoc,
     serverTimestamp,
-    getDocs
-
+    getDocs,
+    doc,
+    updateDoc
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -98,7 +99,106 @@ let subareas = [];
 
 let colaboradorEditandoId = null;
 
-    
+const datosColaborador = {
+
+    empresaId,
+
+    documento:{
+
+        tipo:
+            tipoDocumentoColaborador.value,
+
+        numero:
+            numeroDocumentoColaborador.value.trim()
+
+    },
+
+    datosPersonales:{
+
+        nombres:
+            nombresColaborador.value.trim(),
+
+        apellidos:
+            apellidosColaborador.value.trim(),
+
+        fechaNacimiento:
+            fechaNacimientoColaborador.value,
+
+        genero:
+            generoColaborador.value
+
+    },
+
+    contacto:{
+
+        correo:
+            correoColaborador.value.trim(),
+
+        telefono:
+            telefonoColaborador.value.trim(),
+
+        direccion:
+            direccionColaborador.value.trim()
+
+    },
+
+    organizacion:{
+
+        sucursalId:
+            sucursalColaborador.value,
+
+        sucursal:
+            sucursalColaborador.options[
+                sucursalColaborador.selectedIndex
+            ]?.text || "",
+
+        areaId:
+            areaColaborador.value,
+
+        area:
+            areaColaborador.options[
+                areaColaborador.selectedIndex
+            ]?.text || "",
+
+        subareaId:
+            subareaColaborador.value,
+
+        subarea:
+            subareaColaborador.options[
+                subareaColaborador.selectedIndex
+            ]?.text || "",
+
+        horarioId:
+            "",
+
+        horario:
+            ""
+
+    },
+
+    informacionLaboral:{
+
+        cargoProfesion:
+            cargoProfesionColaborador.value.trim(),
+
+        inicioContrato:
+            inicioContratoColaborador.value,
+
+        terminoContrato:
+            terminoContratoColaborador.value,
+
+        nacionalidad:
+            nacionalidadColaborador.value.trim(),
+
+        paisNacionalidad:
+            paisNacionalidadColaborador.value,
+
+        comentarios:
+            comentariosColaborador.value.trim()
+
+    }
+
+}; 
 
 const registrosPorPagina = 20;
 
@@ -1329,25 +1429,365 @@ activarEditar();
 renderizarPaginacion(
     filtrados.length
 );
+}
 
+
+
+async function abrirModalEditarColaborador(idColaborador){
+
+    try{
+
+        const referencia =
+            doc(
+                db,
+                "colaboradores",
+                idColaborador
+            );
+
+        const documento =
+            await getDoc(referencia);
+
+        if(!documento.exists()){
+
+            Swal.fire({
+                icon:"error",
+                title:"Colaborador no encontrado",
+                text:"No se pudo encontrar la información del colaborador."
+            });
+
+            return;
+
+        }
+
+
+        const colaborador =
+            documento.data();
+
+
+        // Guardamos el ID para saber que estamos editando
+
+        colaboradorEditandoId =
+            idColaborador;
+
+
+        // =========================
+        // DATOS PERSONALES
+        // =========================
+
+        document.getElementById(
+            "tipoDocumentoColaborador"
+        ).value =
+            colaborador.documento?.tipo ||
+            colaborador.tipoDocumento ||
+            "";
+
+
+        document.getElementById(
+            "numeroDocumentoColaborador"
+        ).value =
+            colaborador.documento?.numero ||
+            colaborador.dni ||
+            "";
+
+
+        document.getElementById(
+            "nombresColaborador"
+        ).value =
+            colaborador.datosPersonales?.nombres ||
+            colaborador.nombres ||
+            "";
+
+
+        document.getElementById(
+            "apellidosColaborador"
+        ).value =
+            colaborador.datosPersonales?.apellidos ||
+            colaborador.apellidos ||
+            "";
+
+
+        document.getElementById(
+            "fechaNacimientoColaborador"
+        ).value =
+            colaborador.datosPersonales?.fechaNacimiento ||
+            colaborador.fechaNacimiento ||
+            "";
+
+
+        document.getElementById(
+            "generoColaborador"
+        ).value =
+            colaborador.datosPersonales?.genero ||
+            colaborador.genero ||
+            "SIN_ESPECIFICAR";
+
+
+        // =========================
+        // CONTACTO
+        // =========================
+
+        document.getElementById(
+            "correoColaborador"
+        ).value =
+            colaborador.contacto?.correo ||
+            colaborador.correo ||
+            "";
+
+
+        document.getElementById(
+            "telefonoColaborador"
+        ).value =
+            colaborador.contacto?.telefono ||
+            colaborador.telefono ||
+            "";
+
+
+        document.getElementById(
+            "direccionColaborador"
+        ).value =
+            colaborador.contacto?.direccion ||
+            colaborador.direccion ||
+            "";
+
+
+        // =========================
+        // ORGANIZACIÓN
+        // =========================
+
+        const selectSucursal =
+            document.getElementById(
+                "sucursalColaborador"
+            );
+
+        const selectArea =
+            document.getElementById(
+                "areaColaborador"
+            );
+
+        const selectSubarea =
+            document.getElementById(
+                "subareaColaborador"
+            );
+
+
+        const sucursalId =
+            colaborador.organizacion?.sucursalId ||
+            colaborador.sucursalId ||
+            "";
+
+
+        const areaId =
+            colaborador.organizacion?.areaId ||
+            colaborador.areaId ||
+            "";
+
+
+        const subareaId =
+            colaborador.organizacion?.subareaId ||
+            colaborador.subareaId ||
+            "";
+
+
+        selectSucursal.value =
+            sucursalId;
+
+
+        selectArea.value =
+            areaId;
+
+
+        /*
+        Si tus subáreas se cargan dependiendo del área,
+        primero ejecutamos el cambio del área.
+        */
+
+        selectArea.dispatchEvent(
+            new Event("change")
+        );
+
+
+        /*
+        Esperamos brevemente a que se carguen
+        las opciones de subáreas.
+        */
+
+        setTimeout(()=>{
+
+            selectSubarea.value =
+                subareaId;
+
+        },300);
+
+
+        // =========================
+        // INFORMACIÓN LABORAL
+        // =========================
+
+        document.getElementById(
+            "cargoProfesionColaborador"
+        ).value =
+            colaborador.informacionLaboral?.cargoProfesion ||
+            colaborador.cargoProfesion ||
+            "";
+
+
+        document.getElementById(
+            "inicioContratoColaborador"
+        ).value =
+            colaborador.informacionLaboral?.inicioContrato ||
+            colaborador.inicioContrato ||
+            "";
+
+
+        document.getElementById(
+            "terminoContratoColaborador"
+        ).value =
+            colaborador.informacionLaboral?.terminoContrato ||
+            colaborador.terminoContrato ||
+            "";
+
+
+        document.getElementById(
+            "nacionalidadColaborador"
+        ).value =
+            colaborador.informacionLaboral?.nacionalidad ||
+            colaborador.nacionalidad ||
+            "";
+
+
+        document.getElementById(
+            "paisNacionalidadColaborador"
+        ).value =
+            colaborador.informacionLaboral?.paisNacionalidad ||
+            colaborador.paisNacionalidad ||
+            "";
+
+
+        document.getElementById(
+            "comentariosColaborador"
+        ).value =
+            colaborador.informacionLaboral?.comentarios ||
+            colaborador.comentarios ||
+            "";
+
+
+        // =========================
+        // CAMBIAR TEXTOS DEL MODAL
+        // =========================
+
+        document.getElementById(
+            "tituloModalColaborador"
+        ).textContent =
+            "Editar colaborador";
+
+
+        document.getElementById(
+            "guardarColaborador"
+        ).innerHTML = `
+
+            <i class="bi bi-floppy"></i>
+
+            Guardar cambios
+
+        `;
+
+
+        // Mostrar primera pestaña
+
+        mostrarPrimeraPestanaColaborador();
+
+
+        // Abrir modal
+
+        document.getElementById(
+            "modalColaborador"
+        ).style.display =
+            "flex";
+
+    }
+    catch(error){
+
+        console.error(
+            "Error al cargar colaborador:",
+            error
+        );
+
+        Swal.fire({
+            icon:"error",
+            title:"No se pudo editar",
+            text:"Ocurrió un error al cargar la información del colaborador."
+        });
 
     }
 
-function activarEditar(){
+}
+
+
+
+
+function mostrarPrimeraPestanaColaborador(){
 
     document
-    .querySelectorAll(
-    ".btn-editar-colaborador")
-    .forEach(btn=>{
+    .querySelectorAll(".tab-modal")
+    .forEach(tab=>{
 
-        btn.onclick=()=>{
+        tab.classList.remove("activo");
 
-            console.log(
-                "Editar",
-                btn.dataset.id
-            );
+    });
 
-        };
+
+    document
+    .querySelectorAll(".contenido-tab-modal")
+    .forEach(contenido=>{
+
+        contenido.classList.remove("activo");
+
+    });
+
+
+    const primeraPestana =
+        document.querySelector(
+            '.tab-modal[data-tab="informacionGeneral"]'
+        );
+
+    const contenidoGeneral =
+        document.getElementById(
+            "informacionGeneral"
+        );
+
+
+    primeraPestana?.classList.add("activo");
+
+    contenidoGeneral?.classList.add("activo");
+
+}
+    
+    
+
+function activarEditar(){
+
+    const botonesEditar =
+        document.querySelectorAll(
+            ".btn-editar-colaborador"
+        );
+
+
+    botonesEditar.forEach(boton=>{
+
+        boton.addEventListener(
+            "click",
+            async()=>{
+
+                const idColaborador =
+                    boton.dataset.id;
+
+
+                await abrirModalEditarColaborador(
+                    idColaborador
+                );
+
+            }
+        );
 
     });
 
@@ -2199,7 +2639,33 @@ organizacion:{
 
     );
 
-}    
+}
+
+    formColaborador.reset();
+
+colaboradorEditandoId =
+    null;
+
+
+document.getElementById(
+    "tituloModalColaborador"
+).textContent =
+    "Nuevo colaborador";
+
+
+document.getElementById(
+    "guardarColaborador"
+).innerHTML = `
+
+    <i class="bi bi-floppy"></i>
+
+    Guardar colaborador
+
+`;
+
+
+modalColaborador.style.display =
+    "none";
 
     // ==========================
     // ACTIVAR
@@ -2267,6 +2733,150 @@ organizacion:{
         };
 
     }
+
+    if(colaboradorEditandoId){
+
+    // =========================
+    // EDITAR COLABORADOR
+    // =========================
+
+    const referenciaColaborador =
+        doc(
+            db,
+            "colaboradores",
+            colaboradorEditandoId
+        );
+
+
+    await updateDoc(
+        referenciaColaborador,
+        {
+
+            ...datosColaborador,
+
+            fechaModificacion:
+                new Date()
+
+        }
+    );
+
+
+    await Swal.fire({
+        icon:"success",
+        title:"Colaborador actualizado",
+        text:"La información fue actualizada correctamente.",
+        timer:1800,
+        showConfirmButton:false
+    });
+
+}
+else{
+
+    // =========================
+    // NUEVO COLABORADOR
+    // =========================
+
+    await addDoc(
+        collection(
+            db,
+            "colaboradores"
+        ),
+        {
+
+            ...datosColaborador,
+
+            estado:"ACTIVA",
+
+            fechaRegistro:
+                new Date()
+
+        }
+    );
+
+
+    await Swal.fire({
+        icon:"success",
+        title:"Colaborador registrado",
+        text:"El colaborador fue registrado correctamente.",
+        timer:1800,
+        showConfirmButton:false
+    });
+
+}
+
+    if(btnNuevo){
+
+    btnNuevo.addEventListener(
+        "click",
+        ()=>{
+
+            colaboradorEditandoId =
+                null;
+
+            formColaborador.reset();
+
+            document.getElementById(
+                "generoColaborador"
+            ).value =
+                "SIN_ESPECIFICAR";
+
+            document.getElementById(
+                "tituloModalColaborador"
+            ).textContent =
+                "Nuevo colaborador";
+
+            document.getElementById(
+                "guardarColaborador"
+            ).innerHTML = `
+
+                <i class="bi bi-floppy"></i>
+
+                Guardar colaborador
+
+            `;
+
+            mostrarPrimeraPestanaColaborador();
+
+            modal.style.display = "flex";
+
+        }
+    );
+
+}
+
+    if(cerrar){
+
+    cerrar.addEventListener(
+        "click",
+        ()=>{
+
+            modal.style.display = "none";
+
+            formColaborador.reset();
+
+            colaboradorEditandoId = null;
+
+        }
+    );
+
+}
+    if(cancelar){
+
+    cancelar.addEventListener(
+        "click",
+        ()=>{
+
+            modal.style.display = "none";
+
+            formColaborador.reset();
+
+            colaboradorEditandoId = null;
+
+        }
+    );
+
+}
+
 
 }
 
