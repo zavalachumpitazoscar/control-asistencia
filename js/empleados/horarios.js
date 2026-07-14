@@ -936,7 +936,7 @@ export function iniciarHorarios(){
         horarioEditandoId =
         horario.id;
 
-
+        
         document.getElementById(
             "tituloModalHorario"
         ).textContent =
@@ -952,6 +952,29 @@ export function iniciarHorarios(){
         `;
 
 
+        document.getElementById(
+    "permitirEntradaHastaHorario"
+).value =
+horario.entrada?.permitirHasta || "";
+
+
+document.getElementById(
+    "toleranciaEntradaHorario"
+).value =
+horario.entrada?.toleranciaMinutos ?? 5;
+
+
+document.getElementById(
+    "permitirSalidaDesdeHorario"
+).value =
+horario.salida?.permitirDesde || "";
+
+
+document.getElementById(
+    "permitirSalidaHastaHorario"
+).value =
+horario.salida?.permitirHasta || "";
+        
         document.getElementById(
             "nombreHorario"
         ).value =
@@ -1048,18 +1071,25 @@ export function iniciarHorarios(){
         );
 
 
-        document.getElementById(
-            "inicioRefrigerioHorario"
-        ).value =
-        horario.refrigerio
-        ?.inicio || "";
+document.getElementById(
+    "inicioRefrigerioHorario"
+).value =
+horario.refrigerio
+?.permitirInicioDesde || "";
 
 
-        document.getElementById(
-            "finRefrigerioHorario"
-        ).value =
-        horario.refrigerio
-        ?.fin || "";
+document.getElementById(
+    "finRefrigerioHorario"
+).value =
+horario.refrigerio
+?.permitirInicioHasta || "";
+
+
+document.getElementById(
+    "duracionRefrigerioHorario"
+).value =
+horario.refrigerio
+?.duracionMinutos ?? 60;
 
 
         actualizarMensajeAmanecida();
@@ -1107,6 +1137,19 @@ export function iniciarHorarios(){
                 evento.preventDefault();
 
 
+                const permitirEntradaHasta =
+document.getElementById(
+    "permitirEntradaHastaHorario"
+).value;
+
+
+const toleranciaEntradaMinutos =
+Number(
+    document.getElementById(
+        "toleranciaEntradaHorario"
+    ).value
+);
+                
                 const nombre =
                 document.getElementById(
                     "nombreHorario"
@@ -1149,6 +1192,17 @@ export function iniciarHorarios(){
                     "horaSalidaHorario"
                 )
                 .value;
+
+                const permitirSalidaDesde =
+document.getElementById(
+    "permitirSalidaDesdeHorario"
+).value;
+
+
+const permitirSalidaHasta =
+document.getElementById(
+    "permitirSalidaHastaHorario"
+).value;
 
 
                 const horasExtraDesde =
@@ -1230,15 +1284,25 @@ export function iniciarHorarios(){
                 )
                 .value;
 
+                const duracionRefrigerioMinutos =
+Number(
+    document.getElementById(
+        "duracionRefrigerioHorario"
+    ).value
+);
 
-                if(
-                    !nombre ||
-                    !permitirEntradaDesde ||
-                    !horaEntrada ||
-                    !horaSalida ||
-                    !horasExtraDesde ||
-                    !fechaInicio
-                ){
+
+if(
+    !nombre ||
+    !permitirEntradaDesde ||
+    !horaEntrada ||
+    !permitirEntradaHasta ||
+    !permitirSalidaDesde ||
+    !horaSalida ||
+    !permitirSalidaHasta ||
+    !horasExtraDesde ||
+    !fechaInicio
+){
 
                     await Swal.fire({
 
@@ -1301,8 +1365,89 @@ export function iniciarHorarios(){
 
                 }
 
+                if(
+    permitirEntradaHasta <
+    horaEntrada
+){
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Rango de entrada incorrecto",
+
+        text:
+        "La hora límite de entrada no puede ser anterior a la entrada programada."
+
+    });
+
+    return;
+
+}
+
+
+if(
+    toleranciaEntradaMinutos < 0
+){
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Tolerancia incorrecta",
+
+        text:
+        "La tolerancia de entrada no puede ser negativa."
+
+    });
+
+    return;
+
+}
+
 
                 if(!cruzaMedianoche){
+
+                    if(
+    permitirSalidaDesde >
+    horaSalida
+){
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Rango de salida incorrecto",
+
+        text:
+        "La hora permitida de salida debe ser anterior o igual a la salida programada."
+
+    });
+
+    return;
+
+}
+
+
+if(
+    permitirSalidaHasta <
+    horaSalida
+){
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Rango de salida incorrecto",
+
+        text:
+        "La hora límite de salida debe ser posterior o igual a la salida programada."
+
+    });
+
+    return;
+
+}
 
                     if(
                         horaSalida <=
@@ -1394,25 +1539,83 @@ export function iniciarHorarios(){
                     }
 
 
-                    if(
-                        finRefrigerio <=
-                        inicioRefrigerio
-                    ){
+if(
+    finRefrigerio <
+    inicioRefrigerio
+){
 
-                        await Swal.fire({
+    await Swal.fire({
 
-                            icon:"warning",
+        icon:"warning",
 
-                            title:"Refrigerio incorrecto",
+        title:"Rango de refrigerio incorrecto",
 
-                            text:
-                            "La hora de fin del refrigerio debe ser posterior a la hora de inicio."
+        text:
+        "La hora final del rango debe ser posterior a la hora inicial."
 
-                        });
+    });
 
-                        return;
+    return;
 
-                    }
+}
+
+
+if(
+    !duracionRefrigerioMinutos ||
+    duracionRefrigerioMinutos <= 0
+){
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Duración incorrecta",
+
+        text:
+        "Indica cuántos minutos puede durar el refrigerio."
+
+    });
+
+    return;
+
+}
+
+                    const minutosInicioRefrigerio =
+convertirHoraAMinutos(
+    inicioRefrigerio
+);
+
+
+const minutosFinRefrigerio =
+convertirHoraAMinutos(
+    finRefrigerio
+);
+
+
+const amplitudRangoRefrigerio =
+minutosFinRefrigerio -
+minutosInicioRefrigerio;
+
+
+if(
+    duracionRefrigerioMinutos >
+    amplitudRangoRefrigerio
+){
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Duración fuera del rango",
+
+        text:
+        "La duración del refrigerio no puede ser mayor que el rango permitido."
+
+    });
+
+    return;
+
+}
 
                 }
 
@@ -1460,62 +1663,98 @@ export function iniciarHorarios(){
 
                 const datosHorario = {
 
-                    empresaId,
+    empresaId,
 
-                    nombre,
+    nombre,
 
-                    descripcion,
+    descripcion,
 
-                    estado,
+    estado,
 
-                    tipoJornada:
-                    "FIJO",
+    tipoJornada:"FIJO",
 
-                    cruzaMedianoche,
+    cruzaMedianoche,
 
-                    permitirEntradaDesde,
+    permitirEntradaDesde,
 
-                    horaEntrada,
+    horaEntrada,
 
-                    horaSalida,
+    horaSalida,
 
-                    horasExtraDesde,
+    horasExtraDesde,
 
-                    diasSemana,
+    entrada:{
 
-                    recurrencia:{
+        permitirDesde:
+        permitirEntradaDesde,
 
-                        tipo:
-                        "SEMANAL",
+        programada:
+        horaEntrada,
 
-                        intervaloSemanas,
+        permitirHasta:
+        permitirEntradaHasta,
 
-                        fechaInicio
+        toleranciaMinutos:
+        toleranciaEntradaMinutos
 
-                    },
+    },
 
-                    refrigerio:{
+    salida:{
 
-                        habilitado:
-                        incluirRefrigerio,
+        permitirDesde:
+        permitirSalidaDesde,
 
-                        inicio:
-                        incluirRefrigerio
-                        ?
-                        inicioRefrigerio
-                        :
-                        null,
+        programada:
+        horaSalida,
 
-                        fin:
-                        incluirRefrigerio
-                        ?
-                        finRefrigerio
-                        :
-                        null
+        permitirHasta:
+        permitirSalidaHasta,
 
-                    }
+        horasExtraDesde
 
-                };
+    },
+
+    diasSemana,
+
+    recurrencia:{
+
+        tipo:"SEMANAL",
+
+        intervaloSemanas,
+
+        fechaInicio
+
+    },
+
+    refrigerio:{
+
+        habilitado:
+        incluirRefrigerio,
+
+        permitirInicioDesde:
+        incluirRefrigerio
+        ?
+        inicioRefrigerio
+        :
+        null,
+
+        permitirInicioHasta:
+        incluirRefrigerio
+        ?
+        finRefrigerio
+        :
+        null,
+
+        duracionMinutos:
+        incluirRefrigerio
+        ?
+        duracionRefrigerioMinutos
+        :
+        null
+
+    }
+
+};
 
 
                 try{
@@ -2290,6 +2529,35 @@ function escaparHTML(
     .replaceAll(
         "'",
         "&#039;"
+    );
+
+}
+
+
+
+function convertirHoraAMinutos(
+    hora
+){
+
+    if(!hora){
+
+        return 0;
+
+    }
+
+
+    const [
+        horas,
+        minutos
+    ] =
+    hora.split(":")
+    .map(Number);
+
+
+    return (
+        horas * 60
+        +
+        minutos
     );
 
 }
