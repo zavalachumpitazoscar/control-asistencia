@@ -4497,3 +4497,185 @@ span > i{
     }
 
 }
+
+
+/*=====================================================
+    COLABORADORES ASIGNADOS AL HORARIO
+=====================================================*/
+
+.lista-colaboradores-horario{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:12px;
+
+}
+
+
+.colaborador-horario-card{
+
+    padding:15px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:13px;
+
+    background:#f8fafc;
+
+}
+
+
+.colaborador-horario-cabecera{
+
+    display:flex;
+    align-items:center;
+
+    gap:11px;
+
+    padding-bottom:12px;
+    margin-bottom:12px;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+.colaborador-horario-avatar{
+
+    width:40px;
+    height:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex:0 0 40px;
+
+    border-radius:11px;
+
+    background:#dbeafe;
+    color:#2563eb;
+
+    font-size:13px;
+    font-weight:800;
+
+}
+
+
+.colaborador-horario-identidad{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:3px;
+
+    min-width:0;
+
+}
+
+
+.colaborador-horario-identidad strong{
+
+    color:#1e293b;
+
+    font-size:13px;
+
+}
+
+
+.colaborador-horario-identidad span{
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+
+.colaborador-horario-programaciones{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:8px;
+
+}
+
+
+.programacion-colaborador-item{
+
+    display:flex;
+    align-items:flex-start;
+
+    gap:10px;
+
+    padding:10px 11px;
+
+    border-radius:10px;
+
+    background:#ffffff;
+
+}
+
+
+.programacion-colaborador-item > i{
+
+    width:31px;
+    height:31px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex:0 0 31px;
+
+    border-radius:9px;
+
+    background:#eff6ff;
+    color:#2563eb;
+
+}
+
+
+.programacion-colaborador-item > div{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:3px;
+
+    min-width:0;
+
+}
+
+
+.programacion-colaborador-item strong{
+
+    color:#334155;
+
+    font-size:12px;
+
+}
+
+
+.programacion-colaborador-item span{
+
+    color:#475569;
+
+    font-size:11px;
+
+    line-height:1.45;
+
+}
+
+
+.programacion-colaborador-item small{
+
+    color:#64748b;
+
+    font-size:10px;
+
+    line-height:1.45;
+
+}
