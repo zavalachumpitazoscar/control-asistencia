@@ -43,6 +43,11 @@ import {
 }
 from "./filtros-colaboradores.js";
 
+import {
+    iniciarAsignacionesHorarios
+}
+from "./horarios-asignaciones.js";
+
 export function iniciarColaboradores(){
 
 
