@@ -568,14 +568,14 @@ tarjeta.onclick =
     horario.id;
 
 
-    renderizarHorarios();
-
-
     try{
 
         mostrarDetalleHorario(
             horario
         );
+
+
+        renderizarHorarios();
 
     }
     catch(error){
@@ -588,7 +588,6 @@ tarjeta.onclick =
     }
 
 };
-
 
             listaHorarios.appendChild(
                 tarjeta
@@ -943,13 +942,6 @@ function limpiarDetalleHorario(){
         detalleVacio.hidden =
         false;
 
-        detalleVacio.removeAttribute(
-            "hidden"
-        );
-
-        detalleVacio.style.display =
-        "flex";
-
     }
 
 
@@ -957,14 +949,6 @@ function limpiarDetalleHorario(){
 
         detalleHorario.hidden =
         true;
-
-        detalleHorario.setAttribute(
-            "hidden",
-            ""
-        );
-
-        detalleHorario.style.display =
-        "none";
 
     }
 
