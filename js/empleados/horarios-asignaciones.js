@@ -227,6 +227,47 @@ document.getElementById(
 );
 
 
+const modalEditarDiaColaborador =
+document.getElementById(
+    "modalEditarDiaColaborador"
+);
+
+
+const cerrarEditarDiaColaborador =
+document.getElementById(
+    "cerrarEditarDiaColaborador"
+);
+
+
+const cancelarEditarDiaColaborador =
+document.getElementById(
+    "cancelarEditarDiaColaborador"
+);
+
+
+const guardarEditarDiaColaborador =
+document.getElementById(
+    "guardarEditarDiaColaborador"
+);
+
+
+const buscarHorarioEditarDia =
+document.getElementById(
+    "buscarHorarioEditarDia"
+);
+
+
+const listaHorariosEditarDia =
+document.getElementById(
+    "listaHorariosEditarDia"
+);
+
+
+const seccionHorariosEditarDia =
+document.getElementById(
+    "seccionHorariosEditarDia"
+);
+
     let asignaciones = [];
 
     let colaboradores = [];
@@ -281,6 +322,17 @@ let vistaCalendarioActual =
 let fechaCalendarioColaborador =
 new Date();
 
+let excepcionesHorarios = [];
+
+
+let fechaEditarDiaSeleccionada =
+null;
+
+
+let horariosEditarDiaSeleccionados =
+new Set();
+
+    
 
     const consulta =
     query(
@@ -444,6 +496,71 @@ onSnapshot(
             `;
 
         }
+
+    }
+
+);
+
+const consultaExcepciones =
+query(
+
+    collection(
+        db,
+        "excepcionesHorarios"
+    ),
+
+    where(
+        "empresaId",
+        "==",
+        empresaId
+    )
+
+);
+
+
+onSnapshot(
+
+    consultaExcepciones,
+
+    snapshot=>{
+
+        excepcionesHorarios = [];
+
+
+        snapshot.forEach(documento=>{
+
+            excepcionesHorarios.push({
+
+                id:
+                documento.id,
+
+                ...documento.data()
+
+            });
+
+        });
+
+
+        if(
+            colaboradorCalendarioId
+            &&
+            modalCalendarioColaborador
+            ?.style.display ===
+            "flex"
+        ){
+
+            renderizarCalendarioColaborador();
+
+        }
+
+    },
+
+    error=>{
+
+        console.error(
+            "Error al cargar excepciones:",
+            error
+        );
 
     }
 
@@ -3279,7 +3396,7 @@ function actualizarBotonesVistaCalendario(){
 }
 
 
-    function obtenerProgramacionColaborador(){
+function obtenerProgramacionBaseColaborador(){
 
     if(!colaboradorCalendarioId){
 
@@ -3293,6 +3410,16 @@ function actualizarBotonesVistaCalendario(){
 
     asignaciones.forEach(
         asignacion=>{
+
+            if(
+                asignacion.estado ===
+                "INACTIVO"
+            ){
+
+                return;
+
+            }
+
 
             const colaboradorIds =
             Array.isArray(
@@ -3331,7 +3458,7 @@ function actualizarBotonesVistaCalendario(){
                     asignacionId:
                     asignacion.id,
 
-                    tipo:
+                    origen:
                     "DIARIA"
 
                 });
@@ -3364,7 +3491,7 @@ function actualizarBotonesVistaCalendario(){
                         asignacionId:
                         asignacion.id,
 
-                        tipo:
+                        origen:
                         "MENSUAL"
 
                     });
@@ -3386,9 +3513,14 @@ function actualizarBotonesVistaCalendario(){
                 )
                 .forEach(item=>{
 
-                    resultado.push(
-                        item
-                    );
+                    resultado.push({
+
+                        ...item,
+
+                        origen:
+                        "SEMANAL"
+
+                    });
 
                 });
 
@@ -3399,6 +3531,202 @@ function actualizarBotonesVistaCalendario(){
 
 
     return resultado;
+
+}
+
+
+
+function obtenerProgramacionColaborador(){
+
+    const base =
+    obtenerProgramacionBaseColaborador();
+
+
+    const programacionPorFecha =
+    new Map();
+
+
+    base.forEach(item=>{
+
+        if(
+            !programacionPorFecha.has(
+                item.fecha
+            )
+        ){
+
+            programacionPorFecha.set(
+                item.fecha,
+                []
+            );
+
+        }
+
+
+        programacionPorFecha
+        .get(
+            item.fecha
+        )
+        .push(
+            item
+        );
+
+    });
+
+
+    const excepcionesColaborador =
+    excepcionesHorarios.filter(
+        excepcion=>
+
+            excepcion.colaboradorId ===
+            colaboradorCalendarioId
+
+            &&
+
+            excepcion.estado !==
+            "INACTIVO"
+
+    );
+
+
+    excepcionesColaborador.forEach(
+        excepcion=>{
+
+            if(
+                excepcion.tipo ===
+                "SIN_HORARIO"
+            ){
+
+                programacionPorFecha.delete(
+                    excepcion.fecha
+                );
+
+                return;
+
+            }
+
+
+            if(
+                excepcion.tipo ===
+                "REEMPLAZAR"
+            ){
+
+                const horarios =
+                (
+                    excepcion.horarioIds
+                    ||
+                    []
+                )
+                .map(horarioId=>({
+
+                    fecha:
+                    excepcion.fecha,
+
+                    horarioId,
+
+                    excepcionId:
+                    excepcion.id,
+
+                    origen:
+                    "EXCEPCION_REEMPLAZAR"
+
+                }));
+
+
+                programacionPorFecha.set(
+                    excepcion.fecha,
+                    horarios
+                );
+
+                return;
+
+            }
+
+
+            if(
+                excepcion.tipo ===
+                "AGREGAR"
+            ){
+
+                const existentes =
+                programacionPorFecha.get(
+                    excepcion.fecha
+                )
+                ||
+                [];
+
+
+                const idsExistentes =
+                new Set(
+                    existentes.map(item=>
+
+                        item.horarioId
+
+                    )
+                );
+
+
+                (
+                    excepcion.horarioIds
+                    ||
+                    []
+                )
+                .forEach(horarioId=>{
+
+                    if(
+                        idsExistentes.has(
+                            horarioId
+                        )
+                    ){
+
+                        return;
+
+                    }
+
+
+                    existentes.push({
+
+                        fecha:
+                        excepcion.fecha,
+
+                        horarioId,
+
+                        excepcionId:
+                        excepcion.id,
+
+                        origen:
+                        "EXCEPCION_AGREGAR"
+
+                    });
+
+                });
+
+
+                programacionPorFecha.set(
+                    excepcion.fecha,
+                    existentes
+                );
+
+            }
+
+        }
+    );
+
+
+    return [
+        ...programacionPorFecha.values()
+    ]
+    .flat()
+    .sort(
+        (
+            primero,
+            segundo
+        )=>
+
+            primero.fecha.localeCompare(
+                segundo.fecha
+            )
+
+    );
 
 }
 
@@ -3803,6 +4131,8 @@ function expandirAsignacionSemanal(
     vistaCalendarioColaborador.innerHTML =
     html;
 
+    conectarEventosDiasCalendario();
+
 }
 
 
@@ -3887,7 +4217,7 @@ function expandirAsignacionSemanal(
 
         html += `
 
-            <div class="dia-semana-colaborador">
+            <div class="dia-semana-colaborador" data-fecha="${fechaISO}">
 
                 <div class="dia-semana-colaborador-header">
 
@@ -3962,6 +4292,8 @@ function expandirAsignacionSemanal(
 
     vistaCalendarioColaborador.innerHTML =
     html;
+
+    conectarEventosDiasCalendario();
 
 }
 
@@ -5825,6 +6157,1075 @@ function renderizarProgramacionSemanal(){
 
 }
 
+function obtenerHorariosBaseDeFecha(
+    fecha
+){
+
+    return obtenerProgramacionBaseColaborador()
+    .filter(item=>
+
+        item.fecha ===
+        fecha
+
+    )
+    .map(item=>
+
+        item.horarioId
+
+    );
+
+}
+
+
+
+function obtenerHorariosEfectivosDeFecha(
+    fecha
+){
+
+    return obtenerProgramacionColaborador()
+    .filter(item=>
+
+        item.fecha ===
+        fecha
+
+    )
+    .map(item=>
+
+        item.horarioId
+
+    );
+
+}
+
+
+
+function obtenerExcepcionFechaActual(){
+
+    return excepcionesHorarios.find(
+        excepcion=>
+
+            excepcion.colaboradorId ===
+            colaboradorCalendarioId
+
+            &&
+
+            excepcion.fecha ===
+            fechaEditarDiaSeleccionada
+
+            &&
+
+            excepcion.estado !==
+            "INACTIVO"
+
+    )
+    ||
+    null;
+
+}
+
+
+
+function obtenerIdExcepcion(
+    colaboradorId,
+    fecha
+){
+
+    return `${empresaId}_${colaboradorId}_${fecha}`;
+
+}
+
+
+
+function abrirEditarDiaColaborador(
+    fecha
+){
+
+    if(
+        !colaboradorCalendarioId
+        ||
+        !fecha
+        ||
+        !modalEditarDiaColaborador
+    ){
+
+        return;
+
+    }
+
+
+    fechaEditarDiaSeleccionada =
+    fecha;
+
+
+    horariosEditarDiaSeleccionados.clear();
+
+
+    const colaborador =
+    colaboradores.find(
+        item=>
+
+            item.id ===
+            colaboradorCalendarioId
+
+    );
+
+
+    const excepcion =
+    obtenerExcepcionFechaActual();
+
+
+    const horariosEfectivos =
+    obtenerHorariosEfectivosDeFecha(
+        fecha
+    );
+
+
+    if(
+        excepcion
+        &&
+        Array.isArray(
+            excepcion.horarioIds
+        )
+    ){
+
+        excepcion.horarioIds.forEach(
+            horarioId=>
+
+                horariosEditarDiaSeleccionados.add(
+                    horarioId
+                )
+
+        );
+
+    }
+    else{
+
+        horariosEfectivos.forEach(
+            horarioId=>
+
+                horariosEditarDiaSeleccionados.add(
+                    horarioId
+                )
+
+        );
+
+    }
+
+
+    const accionInicial =
+    excepcion?.tipo
+    ||
+    "REEMPLAZAR";
+
+
+    const inputAccion =
+    document.querySelector(
+        `input[name="accionEditarDia"][value="${accionInicial}"]`
+    );
+
+
+    if(inputAccion){
+
+        inputAccion.checked =
+        true;
+
+    }
+
+
+    document.getElementById(
+        "fechaEditarDiaColaborador"
+    ).textContent =
+    formatearFechaVisible(
+        fecha
+    );
+
+
+    document.getElementById(
+        "nombreEditarDiaColaborador"
+    ).textContent =
+    colaborador
+    ?
+    obtenerNombreColaborador(
+        colaborador
+    )
+    :
+    "Colaborador";
+
+
+    renderizarHorariosActualesEditarDia();
+
+    renderizarHorariosEditarDia();
+
+    actualizarSeccionAccionEditarDia();
+
+
+    modalEditarDiaColaborador.style.display =
+    "flex";
+
+}
+
+
+
+function cerrarModalEditarDiaColaborador(){
+
+    if(modalEditarDiaColaborador){
+
+        modalEditarDiaColaborador.style.display =
+        "none";
+
+    }
+
+
+    fechaEditarDiaSeleccionada =
+    null;
+
+
+    horariosEditarDiaSeleccionados.clear();
+
+
+    if(buscarHorarioEditarDia){
+
+        buscarHorarioEditarDia.value =
+        "";
+
+    }
+
+}
+
+
+
+function renderizarHorariosActualesEditarDia(){
+
+    const contenedor =
+    document.getElementById(
+        "horariosActualesEditarDia"
+    );
+
+
+    if(!contenedor){
+
+        return;
+
+    }
+
+
+    const horarioIds =
+    obtenerHorariosEfectivosDeFecha(
+        fechaEditarDiaSeleccionada
+    );
+
+
+    if(
+        horarioIds.length ===
+        0
+    ){
+
+        contenedor.innerHTML = `
+
+            <div class="sin-horarios-actuales">
+
+                El colaborador no tiene horarios en esta fecha.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    contenedor.innerHTML =
+    horarioIds.map(horarioId=>{
+
+        const horario =
+        obtenerHorarios()
+        .find(item=>
+
+            item.id ===
+            horarioId
+
+        );
+
+
+        const entrada =
+        horario
+        ?
+        obtenerDatosEntrada(
+            horario
+        )
+        :
+        {};
+
+
+        const salida =
+        horario
+        ?
+        obtenerDatosSalida(
+            horario
+        )
+        :
+        {};
+
+
+        return `
+
+            <div class="horario-actual-editar-dia">
+
+                <div>
+
+                    <strong>
+
+                        ${escaparHTML(
+                            horario?.nombre
+                            ||
+                            "Horario"
+                        )}
+
+                    </strong>
+
+                    <span>
+
+                        ${formatearHora(
+                            entrada.programada
+                        )}
+
+                        -
+
+                        ${formatearHora(
+                            salida.programada
+                        )}
+
+                    </span>
+
+                </div>
+
+                <i class="bi bi-clock"></i>
+
+            </div>
+
+        `;
+
+    })
+    .join("");
+
+}
+
+
+
+function obtenerAccionEditarDia(){
+
+    return document.querySelector(
+        'input[name="accionEditarDia"]:checked'
+    )
+    ?.value
+    ||
+    "REEMPLAZAR";
+
+}
+
+
+
+function actualizarSeccionAccionEditarDia(){
+
+    const accion =
+    obtenerAccionEditarDia();
+
+
+    if(seccionHorariosEditarDia){
+
+        seccionHorariosEditarDia.hidden =
+        (
+            accion ===
+            "SIN_HORARIO"
+
+            ||
+
+            accion ===
+            "RESTAURAR"
+        );
+
+    }
+
+}
+
+
+
+function renderizarHorariosEditarDia(){
+
+    if(!listaHorariosEditarDia){
+
+        return;
+
+    }
+
+
+    const texto =
+    String(
+        buscarHorarioEditarDia
+        ?.value
+        ||
+        ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+    const horarios =
+    obtenerHorarios()
+    .filter(horario=>
+
+        horario.estado ===
+        "ACTIVO"
+
+        &&
+
+        String(
+            horario.nombre || ""
+        )
+        .toLowerCase()
+        .includes(
+            texto
+        )
+
+    );
+
+
+    if(
+        horarios.length ===
+        0
+    ){
+
+        listaHorariosEditarDia.innerHTML = `
+
+            <div class="estado-sin-colaboradores">
+
+                No se encontraron horarios activos.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    listaHorariosEditarDia.innerHTML =
+    horarios.map(horario=>{
+
+        const seleccionado =
+        horariosEditarDiaSeleccionados.has(
+            horario.id
+        );
+
+
+        const entrada =
+        obtenerDatosEntrada(
+            horario
+        );
+
+
+        const salida =
+        obtenerDatosSalida(
+            horario
+        );
+
+
+        return `
+
+            <label
+                class="horario-editar-dia-item ${
+                    seleccionado
+                    ?
+                    "seleccionado"
+                    :
+                    ""
+                }"
+            >
+
+                <input
+                    type="checkbox"
+                    class="check-horario-editar-dia"
+                    value="${horario.id}"
+                    ${
+                        seleccionado
+                        ?
+                        "checked"
+                        :
+                        ""
+                    }
+                >
+
+
+                <div class="horario-editar-dia-datos">
+
+                    <strong>
+
+                        ${escaparHTML(
+                            horario.nombre
+                            ||
+                            "Horario"
+                        )}
+
+                    </strong>
+
+                    <span>
+
+                        ${formatearHora(
+                            entrada.programada
+                        )}
+
+                        -
+
+                        ${formatearHora(
+                            salida.programada
+                        )}
+
+                    </span>
+
+                </div>
+
+            </label>
+
+        `;
+
+    })
+    .join("");
+
+
+    listaHorariosEditarDia
+    .querySelectorAll(
+        ".check-horario-editar-dia"
+    )
+    .forEach(check=>{
+
+        check.addEventListener(
+            "change",
+            ()=>{
+
+                if(check.checked){
+
+                    horariosEditarDiaSeleccionados.add(
+                        check.value
+                    );
+
+                }
+                else{
+
+                    horariosEditarDiaSeleccionados.delete(
+                        check.value
+                    );
+
+                }
+
+
+                check
+                .closest(
+                    ".horario-editar-dia-item"
+                )
+                ?.classList.toggle(
+                    "seleccionado",
+                    check.checked
+                );
+
+            }
+        );
+
+    });
+
+}
+
+
+
+function validarHorariosSeleccionadosSinCruce(
+    horarioIds
+){
+
+    for(
+        let primero = 0;
+        primero < horarioIds.length;
+        primero++
+    ){
+
+        for(
+            let segundo = primero + 1;
+            segundo < horarioIds.length;
+            segundo++
+        ){
+
+            const horarioA =
+            obtenerHorarios()
+            .find(item=>
+
+                item.id ===
+                horarioIds[primero]
+
+            );
+
+
+            const horarioB =
+            obtenerHorarios()
+            .find(item=>
+
+                item.id ===
+                horarioIds[segundo]
+
+            );
+
+
+            if(
+                horarioA
+                &&
+                horarioB
+                &&
+                horariosSeSuperponen(
+                    horarioA,
+                    horarioB
+                )
+            ){
+
+                return {
+
+                    valido:false,
+
+                    horarioA,
+
+                    horarioB
+
+                };
+
+            }
+
+        }
+
+    }
+
+
+    return {
+
+        valido:true
+
+    };
+
+}
+
+
+
+async function guardarCambioDiaColaborador(){
+
+    if(
+        !colaboradorCalendarioId
+        ||
+        !fechaEditarDiaSeleccionada
+    ){
+
+        return;
+
+    }
+
+
+    const accion =
+    obtenerAccionEditarDia();
+
+
+    const excepcionId =
+    obtenerIdExcepcion(
+        colaboradorCalendarioId,
+        fechaEditarDiaSeleccionada
+    );
+
+
+    if(
+        accion ===
+        "RESTAURAR"
+    ){
+
+        try{
+
+            await deleteDoc(
+
+                doc(
+                    db,
+                    "excepcionesHorarios",
+                    excepcionId
+                )
+
+            );
+
+
+            cerrarModalEditarDiaColaborador();
+
+
+            await Swal.fire({
+
+                icon:"success",
+
+                title:"Programación restaurada",
+
+                text:
+                "El día vuelve a utilizar su programación original.",
+
+                timer:1700,
+
+                showConfirmButton:false
+
+            });
+
+        }
+        catch(error){
+
+            console.error(
+                "Error restaurando programación:",
+                error
+            );
+
+
+            Swal.fire({
+
+                icon:"error",
+
+                title:"No se pudo restaurar",
+
+                text:
+                "Ocurrió un error al restaurar la programación."
+
+            });
+
+        }
+
+
+        return;
+
+    }
+
+
+    let horarioIds =
+    [
+        ...horariosEditarDiaSeleccionados
+    ];
+
+
+    if(
+        accion ===
+        "SIN_HORARIO"
+    ){
+
+        horarioIds = [];
+
+    }
+
+
+    if(
+        (
+            accion ===
+            "REEMPLAZAR"
+
+            ||
+
+            accion ===
+            "AGREGAR"
+        )
+        &&
+        horarioIds.length ===
+        0
+    ){
+
+        Swal.fire({
+
+            icon:"warning",
+
+            title:"Selecciona horarios",
+
+            text:
+            "Selecciona al menos un horario para aplicar este cambio."
+
+        });
+
+        return;
+
+    }
+
+
+    let horariosFinales =
+    horarioIds;
+
+
+    if(
+        accion ===
+        "AGREGAR"
+    ){
+
+        horariosFinales =
+        [
+            ...new Set([
+
+                ...obtenerHorariosBaseDeFecha(
+                    fechaEditarDiaSeleccionada
+                ),
+
+                ...horarioIds
+
+            ])
+        ];
+
+    }
+
+
+    const validacion =
+    validarHorariosSeleccionadosSinCruce(
+        horariosFinales
+    );
+
+
+    if(!validacion.valido){
+
+        const entradaA =
+        obtenerDatosEntrada(
+            validacion.horarioA
+        );
+
+
+        const salidaA =
+        obtenerDatosSalida(
+            validacion.horarioA
+        );
+
+
+        const entradaB =
+        obtenerDatosEntrada(
+            validacion.horarioB
+        );
+
+
+        const salidaB =
+        obtenerDatosSalida(
+            validacion.horarioB
+        );
+
+
+        await Swal.fire({
+
+            icon:"warning",
+
+            title:"Horarios superpuestos",
+
+            html:`
+
+                <p>
+                    Los horarios seleccionados se intersectan.
+                </p>
+
+                <div style="
+                    text-align:left;
+                    padding:12px;
+                    margin-top:12px;
+                    border:1px solid #e2e8f0;
+                    border-radius:10px;
+                ">
+
+                    <strong>
+                        ${escaparHTML(
+                            validacion.horarioA.nombre
+                        )}
+                    </strong>
+
+                    <div>
+
+                        ${formatearHora(
+                            entradaA.programada
+                        )}
+
+                        -
+
+                        ${formatearHora(
+                            salidaA.programada
+                        )}
+
+                    </div>
+
+                    <br>
+
+                    <strong>
+                        ${escaparHTML(
+                            validacion.horarioB.nombre
+                        )}
+                    </strong>
+
+                    <div>
+
+                        ${formatearHora(
+                            entradaB.programada
+                        )}
+
+                        -
+
+                        ${formatearHora(
+                            salidaB.programada
+                        )}
+
+                    </div>
+
+                </div>
+
+            `,
+
+            confirmButtonText:
+            "Entendido"
+
+        });
+
+
+        return;
+
+    }
+
+
+    try{
+
+        guardarEditarDiaColaborador.disabled =
+        true;
+
+
+        guardarEditarDiaColaborador.innerHTML = `
+
+            <span class="spinner-boton"></span>
+
+            Guardando...
+
+        `;
+
+
+        await setDoc(
+
+            doc(
+                db,
+                "excepcionesHorarios",
+                excepcionId
+            ),
+
+            {
+
+                empresaId,
+
+                colaboradorId:
+                colaboradorCalendarioId,
+
+                fecha:
+                fechaEditarDiaSeleccionada,
+
+                tipo:
+                accion,
+
+                horarioIds,
+
+                estado:
+                "ACTIVO",
+
+                fechaModificacion:
+                serverTimestamp(),
+
+                fechaRegistro:
+                serverTimestamp()
+
+            },
+
+            {
+                merge:true
+            }
+
+        );
+
+
+        cerrarModalEditarDiaColaborador();
+
+
+        await Swal.fire({
+
+            icon:"success",
+
+            title:"Día actualizado",
+
+            text:
+            accion ===
+            "SIN_HORARIO"
+            ?
+            "El colaborador no tendrá horario en esta fecha."
+            :
+            "La programación del día fue actualizada correctamente.",
+
+            timer:1800,
+
+            showConfirmButton:false
+
+        });
+
+    }
+    catch(error){
+
+        console.error(
+            "Error guardando excepción:",
+            error
+        );
+
+
+        await Swal.fire({
+
+            icon:"error",
+
+            title:"No se pudo guardar",
+
+            text:
+            "Ocurrió un error al modificar el día."
+
+        });
+
+    }
+    finally{
+
+        guardarEditarDiaColaborador.disabled =
+        false;
+
+
+        guardarEditarDiaColaborador.innerHTML = `
+
+            <i class="bi bi-check-circle"></i>
+
+            Aplicar cambio
+
+        `;
+
+    }
+
+}
+
+
+
+function conectarEventosDiasCalendario(){
+
+    vistaCalendarioColaborador
+    ?.querySelectorAll(
+        "[data-fecha]"
+    )
+    .forEach(elemento=>{
+
+        elemento.addEventListener(
+            "click",
+            ()=>{
+
+                abrirEditarDiaColaborador(
+                    elemento.dataset.fecha
+                );
+
+            }
+        );
+
+    });
+
+}
+
+
+
 
     function formatearNombreDia(
     dia
@@ -6470,9 +7871,68 @@ btnPeriodoSiguienteColaborador
     }
 );
 
+document
+.querySelectorAll(
+    'input[name="accionEditarDia"]'
+)
+.forEach(input=>{
 
+    input.addEventListener(
+        "change",
+        actualizarSeccionAccionEditarDia
+    );
+
+});
+
+
+buscarHorarioEditarDia
+?.addEventListener(
+    "input",
+    renderizarHorariosEditarDia
+);
+
+
+cerrarEditarDiaColaborador
+?.addEventListener(
+    "click",
+    cerrarModalEditarDiaColaborador
+);
+
+
+cancelarEditarDiaColaborador
+?.addEventListener(
+    "click",
+    cerrarModalEditarDiaColaborador
+);
+
+
+guardarEditarDiaColaborador
+?.addEventListener(
+    "click",
+    guardarCambioDiaColaborador
+);
+
+
+modalEditarDiaColaborador
+?.addEventListener(
+    "click",
+    evento=>{
+
+        if(
+            evento.target ===
+            modalEditarDiaColaborador
+        ){
+
+            cerrarModalEditarDiaColaborador();
+
+        }
+
+    }
+);
+
+    
 /*=====================================================
-    RETORNO DEL MÓDULO
+    FIN DEL MÓDULO
 =====================================================*/
 
 return {
