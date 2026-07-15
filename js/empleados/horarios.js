@@ -36,7 +36,7 @@ import {
 }
 from "./horarios-utilidades.js";
 
-
+let detenerEscuchaHorarios = null;
 
 export function iniciarHorarios(){
 
@@ -208,56 +208,66 @@ export function iniciarHorarios(){
     );
 
 
-    onSnapshot(
+if(detenerEscuchaHorarios){
 
-        consultaHorarios,
+    detenerEscuchaHorarios();
 
-        snapshot=>{
-
-            horarios = [];
+}
 
 
-            snapshot.forEach(documento=>{
+detenerEscuchaHorarios =
+onSnapshot(
 
-                horarios.push({
+    consultaHorarios,
 
-                    id:
-                    documento.id,
+    snapshot=>{
 
-                    ...documento.data()
+        horarios = [];
 
-                });
+
+        snapshot.forEach(documento=>{
+
+            horarios.push({
+
+                id:
+                documento.id,
+
+                ...documento.data()
 
             });
 
+        });
 
-            horarios.sort(
-                (
-                    primero,
-                    segundo
-                )=>
+
+        horarios.sort(
+            (
+                primero,
+                segundo
+            )=>
+
+                String(
+                    primero.nombre || ""
+                )
+                .localeCompare(
 
                     String(
-                        primero.nombre || ""
-                    )
-                    .localeCompare(
+                        segundo.nombre || ""
+                    ),
 
-                        String(
-                            segundo.nombre || ""
-                        ),
+                    "es",
 
-                        "es",
+                    {
+                        sensitivity:"base"
+                    }
 
-                        {
-                            sensitivity:"base"
-                        }
-
-                    )
-            );
+                )
+        );
 
 
-            renderizarHorarios();
+        renderizarHorarios();
 
+
+        if(horarioSeleccionadoId){
 
             const horarioActual =
             obtenerHorarioSeleccionado();
@@ -272,22 +282,32 @@ export function iniciarHorarios(){
             }
             else{
 
+                horarioSeleccionadoId =
+                null;
+
                 limpiarDetalleHorario();
 
             }
 
-        },
+        }
+        else{
 
-        error=>{
-
-            console.error(
-                "Error al listar horarios:",
-                error
-            );
+            limpiarDetalleHorario();
 
         }
 
-    );
+    },
+
+    error=>{
+
+        console.error(
+            "Error al listar horarios:",
+            error
+        );
+
+    }
+
+);
 
 
 
@@ -608,18 +628,16 @@ function mostrarDetalleHorario(
 
 if(detalleVacio){
 
-    detalleVacio.hidden = true;
-
-    detalleVacio.style.display = "none";
+    detalleVacio.hidden =
+    true;
 
 }
 
 
 if(detalleHorario){
 
-    detalleHorario.hidden = false;
-
-    detalleHorario.style.display = "flex";
+    detalleHorario.hidden =
+    false;
 
 }
 
