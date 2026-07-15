@@ -3326,3 +3326,592 @@
     }
 
 }
+
+
+/*=====================================================
+    LISTADO SIMPLE DE COLABORADORES
+=====================================================*/
+
+.colaborador-horario-fila{
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:16px;
+
+    padding:13px 14px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+}
+
+
+.colaborador-horario-resumen{
+
+    display:flex;
+    align-items:center;
+
+    gap:11px;
+
+    min-width:0;
+
+}
+
+
+.colaborador-horario-identidad small{
+
+    color:#2563eb;
+
+    font-size:10px;
+
+    font-weight:700;
+
+}
+
+
+.btn-ver-calendario-colaborador{
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    gap:7px;
+
+    flex-shrink:0;
+
+    padding:9px 12px;
+
+    border:1px solid #bfdbfe;
+
+    border-radius:10px;
+
+    background:#eff6ff;
+    color:#2563eb;
+
+    cursor:pointer;
+
+    font-size:12px;
+    font-weight:700;
+
+}
+
+
+/*=====================================================
+    MODAL CALENDARIO DEL COLABORADOR
+=====================================================*/
+
+.modal-calendario-colaborador{
+
+    width:min(1180px,96vw);
+
+    max-height:94vh;
+
+    display:flex;
+    flex-direction:column;
+
+}
+
+
+.calendario-colaborador-toolbar{
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:16px;
+
+    padding:15px 20px;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+.selector-vista-calendario{
+
+    display:flex;
+
+    padding:4px;
+
+    border-radius:11px;
+
+    background:#f1f5f9;
+
+}
+
+
+.selector-vista-calendario button{
+
+    display:flex;
+    align-items:center;
+
+    gap:7px;
+
+    padding:9px 13px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:transparent;
+    color:#64748b;
+
+    cursor:pointer;
+
+    font-weight:700;
+
+}
+
+
+.selector-vista-calendario button.activo{
+
+    background:#ffffff;
+    color:#2563eb;
+
+    box-shadow:
+        0 2px 8px rgba(15,23,42,.08);
+
+}
+
+
+.navegacion-calendario-colaborador{
+
+    display:flex;
+    align-items:center;
+
+    gap:12px;
+
+}
+
+
+.navegacion-calendario-colaborador button{
+
+    width:38px;
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:10px;
+
+    background:#ffffff;
+    color:#475569;
+
+    cursor:pointer;
+
+}
+
+
+.navegacion-calendario-colaborador strong{
+
+    min-width:190px;
+
+    color:#1e293b;
+
+    text-align:center;
+
+}
+
+
+.leyenda-horarios-colaborador{
+
+    display:flex;
+    flex-wrap:wrap;
+
+    gap:9px 16px;
+
+    padding:12px 20px;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+.leyenda-horario-item{
+
+    display:flex;
+    align-items:center;
+
+    gap:7px;
+
+    color:#475569;
+
+    font-size:11px;
+    font-weight:700;
+
+}
+
+
+.leyenda-horario-item i{
+
+    width:11px;
+    height:11px;
+
+    border-radius:50%;
+
+}
+
+
+.vista-calendario-colaborador{
+
+    flex:1;
+
+    overflow:auto;
+
+    padding:18px 20px;
+
+    background:#f8fafc;
+
+}
+
+
+.calendario-colaborador-cabecera,
+.calendario-colaborador-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(7,minmax(0,1fr));
+
+}
+
+
+.calendario-colaborador-cabecera{
+
+    border:1px solid #e2e8f0;
+
+    border-bottom:none;
+
+    border-radius:13px 13px 0 0;
+
+    background:#ffffff;
+
+}
+
+
+.calendario-colaborador-cabecera span{
+
+    padding:10px;
+
+    color:#64748b;
+
+    text-align:center;
+
+    font-size:11px;
+    font-weight:800;
+
+}
+
+
+.calendario-colaborador-grid{
+
+    overflow:hidden;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:0 0 13px 13px;
+
+    background:#ffffff;
+
+}
+
+
+.dia-colaborador{
+
+    min-height:115px;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:8px;
+
+    padding:8px;
+
+    border:none;
+
+    border-right:1px solid #e2e8f0;
+
+    border-bottom:1px solid #e2e8f0;
+
+    background:#ffffff;
+
+    text-align:left;
+
+}
+
+
+.dia-colaborador.vacio{
+
+    background:#f8fafc;
+
+}
+
+
+.numero-dia-colaborador{
+
+    color:#334155;
+
+    font-size:12px;
+    font-weight:800;
+
+}
+
+
+.horarios-dia-colaborador{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:5px;
+
+}
+
+
+.etiqueta-horario{
+
+    display:block;
+
+    padding:5px 7px;
+
+    border-radius:7px;
+
+    overflow:hidden;
+
+    font-size:9px;
+    font-weight:800;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
+
+}
+
+
+.dia-sin-horario{
+
+    color:#94a3b8;
+
+    font-size:9px;
+
+}
+
+
+.calendario-colaborador-semanal{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(7,minmax(150px,1fr));
+
+    gap:10px;
+
+    min-width:1050px;
+
+}
+
+
+.dia-semana-colaborador{
+
+    min-height:260px;
+
+    padding:12px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:12px;
+
+    background:#ffffff;
+
+}
+
+
+.dia-semana-colaborador-header{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:3px;
+
+    padding-bottom:10px;
+    margin-bottom:10px;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+.dia-semana-colaborador-header strong{
+
+    color:#1e293b;
+
+    font-size:12px;
+
+}
+
+
+.dia-semana-colaborador-header span{
+
+    color:#64748b;
+
+    font-size:10px;
+
+}
+
+
+.dia-semana-colaborador-horarios{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:8px;
+
+}
+
+
+.horario-semana-item{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:4px;
+
+    padding:10px;
+
+    border-radius:9px;
+
+}
+
+
+.horario-semana-item strong{
+
+    font-size:11px;
+
+}
+
+
+.horario-semana-item span{
+
+    font-size:10px;
+
+}
+
+
+.descanso-colaborador{
+
+    display:flex;
+    align-items:center;
+
+    gap:7px;
+
+    padding:10px;
+
+    border-radius:9px;
+
+    background:#f1f5f9;
+    color:#64748b;
+
+    font-size:10px;
+
+}
+
+
+/* Colores de horarios */
+
+.color-0{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+.color-1{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.color-2{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.color-3{
+    background:#fce7f3;
+    color:#be185d;
+}
+
+.color-4{
+    background:#ede9fe;
+    color:#6d28d9;
+}
+
+.color-5{
+    background:#cffafe;
+    color:#0e7490;
+}
+
+.color-6{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.color-7{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+
+@media(max-width:700px){
+
+    .colaborador-horario-fila{
+
+        align-items:stretch;
+
+        flex-direction:column;
+
+    }
+
+
+    .btn-ver-calendario-colaborador{
+
+        width:100%;
+
+    }
+
+
+    .calendario-colaborador-toolbar{
+
+        align-items:stretch;
+
+        flex-direction:column;
+
+    }
+
+
+    .selector-vista-calendario{
+
+        width:100%;
+
+    }
+
+
+    .selector-vista-calendario button{
+
+        flex:1;
+
+        justify-content:center;
+
+    }
+
+
+    .navegacion-calendario-colaborador{
+
+        justify-content:space-between;
+
+    }
+
+}
