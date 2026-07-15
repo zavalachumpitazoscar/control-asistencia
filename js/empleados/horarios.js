@@ -608,16 +608,18 @@ function mostrarDetalleHorario(
 
 if(detalleVacio){
 
-    detalleVacio.hidden =
-    true;
+    detalleVacio.hidden = true;
+
+    detalleVacio.style.display = "none";
 
 }
 
 
 if(detalleHorario){
 
-    detalleHorario.hidden =
-    false;
+    detalleHorario.hidden = false;
+
+    detalleHorario.style.display = "flex";
 
 }
 
