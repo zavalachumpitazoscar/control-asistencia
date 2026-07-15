@@ -2486,19 +2486,41 @@ if(
     );
 
 
-    if(
-        !fechaInicio
-        ||
-        !fechaFin
-    ){
+if(
+    !fechaInicio
+    &&
+    !fechaFin
+){
 
-        mostrarCamposIncompletos(
-            "Selecciona la fecha inicial y final."
-        );
+    mostrarCamposIncompletos(
+        "Selecciona la fecha de inicio y la fecha de término."
+    );
 
-        return null;
+    return null;
 
-    }
+}
+
+
+if(!fechaInicio){
+
+    mostrarCamposIncompletos(
+        "Selecciona la fecha de inicio."
+    );
+
+    return null;
+
+}
+
+
+if(!fechaFin){
+
+    mostrarCamposIncompletos(
+        "Selecciona la fecha de término."
+    );
+
+    return null;
+
+}
 
 
     if(
@@ -6500,18 +6522,23 @@ function asignarValor(
 }
 
 
-
 function mostrarCamposIncompletos(
     texto
 ){
 
-    Swal.fire({
+    return Swal.fire({
 
         icon:"warning",
 
-        title:"Campos incompletos",
+        title:"Falta información requerida",
 
-        text
+        text:
+        texto
+        ||
+        "Completa todos los campos obligatorios antes de continuar.",
+
+        confirmButtonText:
+        "Entendido"
 
     });
 
