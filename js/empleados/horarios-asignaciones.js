@@ -2597,6 +2597,25 @@ colaboradoresSeleccionados.size;
     )
     .join("");
 
+    contenedor
+.querySelectorAll(
+    ".btn-ver-calendario-colaborador"
+)
+.forEach(boton=>{
+
+    boton.addEventListener(
+        "click",
+        ()=>{
+
+            abrirCalendarioColaborador(
+                boton.dataset.colaboradorId
+            );
+
+        }
+    );
+
+});
+
 }
 
 
@@ -2636,24 +2655,21 @@ function crearHTMLColaboradorAsignado(
     "CL";
 
 
-    const programaciones =
-    asignacionesColaborador
-    .map(asignacion=>
+    const colaboradorId =
+    colaborador?.id
+    ||
+    "";
 
-        crearResumenAsignacionColaborador(
-            asignacion,
-            horarioId
-        )
 
-    )
-    .join("");
+    const cantidadAsignaciones =
+    asignacionesColaborador.length;
 
 
     return `
 
-        <div class="colaborador-horario-card">
+        <div class="colaborador-horario-fila">
 
-            <div class="colaborador-horario-cabecera">
+            <div class="colaborador-horario-resumen">
 
                 <div class="colaborador-horario-avatar">
 
@@ -2688,16 +2704,46 @@ function crearHTMLColaboradorAsignado(
 
                     </span>
 
+                    <small>
+
+                        ${cantidadAsignaciones}
+
+                        asignación${
+                            cantidadAsignaciones === 1
+                            ?
+                            ""
+                            :
+                            "es"
+                        }
+
+                        relacionada${
+                            cantidadAsignaciones === 1
+                            ?
+                            ""
+                            :
+                            "s"
+                        }
+
+                    </small>
+
                 </div>
 
             </div>
 
 
-            <div class="colaborador-horario-programaciones">
+            <button
+                type="button"
+                class="btn-ver-calendario-colaborador"
+                data-colaborador-id="${escaparHTML(
+                    colaboradorId
+                )}"
+            >
 
-                ${programaciones}
+                <i class="bi bi-calendar3"></i>
 
-            </div>
+                Ver calendario
+
+            </button>
 
         </div>
 
