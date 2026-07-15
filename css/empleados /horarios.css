@@ -591,18 +591,6 @@
 }
 
 
-.detalle-horario{
-
-    display:flex;
-    flex-direction:column;
-
-    gap:20px;
-
-    padding:24px;
-
-}
-
-
 .detalle-horario-header{
 
     display:flex;
