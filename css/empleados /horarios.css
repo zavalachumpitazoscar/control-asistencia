@@ -5166,3 +5166,455 @@ span > i{
     }
 
 }
+
+
+
+/*=====================================================
+    EDITAR DÍA DEL COLABORADOR
+=====================================================*/
+
+.modal-editar-dia-colaborador{
+
+    width:min(820px,96vw);
+
+    max-height:94vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+.editar-dia-body{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow-y:auto;
+
+    padding:20px;
+
+    background:#f8fafc;
+
+}
+
+
+.resumen-dia-seleccionado{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:15px 17px;
+
+    margin-bottom:17px;
+
+    border:1px solid #bfdbfe;
+
+    border-radius:14px;
+
+    background:#eff6ff;
+
+}
+
+
+.resumen-dia-icono{
+
+    width:46px;
+
+    height:46px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 46px;
+
+    border-radius:13px;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    font-size:20px;
+
+}
+
+
+.resumen-dia-seleccionado > div:last-child{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+
+}
+
+
+.resumen-dia-seleccionado span{
+
+    color:#64748b;
+
+    font-size:10px;
+
+    font-weight:800;
+
+    text-transform:uppercase;
+
+}
+
+
+.resumen-dia-seleccionado strong{
+
+    color:#1e293b;
+
+    font-size:16px;
+
+}
+
+
+.resumen-dia-seleccionado p{
+
+    margin:0;
+
+    color:#2563eb;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+
+.horarios-actuales-editar-dia{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:9px;
+
+}
+
+
+.horario-actual-editar-dia{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:12px;
+
+    padding:11px 13px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:11px;
+
+    background:#f8fafc;
+
+}
+
+
+.horario-actual-editar-dia > div{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+
+}
+
+
+.horario-actual-editar-dia strong{
+
+    color:#334155;
+
+    font-size:13px;
+
+}
+
+
+.horario-actual-editar-dia span{
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+
+.sin-horarios-actuales{
+
+    padding:15px;
+
+    border:1px dashed #cbd5e1;
+
+    border-radius:11px;
+
+    color:#64748b;
+
+    text-align:center;
+
+    font-size:12px;
+
+}
+
+
+.acciones-editar-dia-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:11px;
+
+}
+
+
+.accion-editar-dia{
+
+    cursor:pointer;
+
+}
+
+
+.accion-editar-dia input{
+
+    position:absolute;
+
+    opacity:0;
+
+    pointer-events:none;
+
+}
+
+
+.accion-editar-dia > span{
+
+    min-height:116px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:6px;
+
+    padding:14px;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:13px;
+
+    background:#ffffff;
+
+    transition:.2s;
+
+}
+
+
+.accion-editar-dia > span > i{
+
+    width:34px;
+
+    height:34px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:10px;
+
+    background:#f1f5f9;
+
+    color:#64748b;
+
+}
+
+
+.accion-editar-dia strong{
+
+    color:#334155;
+
+    font-size:13px;
+
+}
+
+
+.accion-editar-dia small{
+
+    color:#64748b;
+
+    font-size:10px;
+
+    line-height:1.45;
+
+}
+
+
+.accion-editar-dia input:checked + span{
+
+    border-color:#2563eb;
+
+    background:#eff6ff;
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.09);
+
+}
+
+
+.accion-editar-dia input:checked + span > i{
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+}
+
+
+.lista-horarios-editar-dia{
+
+    max-height:280px;
+
+    overflow-y:auto;
+
+    margin-top:13px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:12px;
+
+    background:#ffffff;
+
+}
+
+
+.horario-editar-dia-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:12px 13px;
+
+    border-bottom:1px solid #f1f5f9;
+
+    cursor:pointer;
+
+}
+
+
+.horario-editar-dia-item:last-child{
+
+    border-bottom:none;
+
+}
+
+
+.horario-editar-dia-item:hover{
+
+    background:#f8fafc;
+
+}
+
+
+.horario-editar-dia-item.seleccionado{
+
+    background:#eff6ff;
+
+}
+
+
+.horario-editar-dia-item input{
+
+    width:18px;
+
+    height:18px;
+
+    flex:0 0 18px;
+
+    accent-color:#2563eb;
+
+}
+
+
+.horario-editar-dia-datos{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+
+}
+
+
+.horario-editar-dia-datos strong{
+
+    color:#1e293b;
+
+    font-size:13px;
+
+}
+
+
+.horario-editar-dia-datos span{
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+
+.estado-error-calendario{
+
+    padding:35px;
+
+    text-align:center;
+
+    color:#64748b;
+
+}
+
+
+@media(max-width:600px){
+
+    .acciones-editar-dia-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .modal-editar-dia-colaborador{
+
+        width:100%;
+
+        height:100%;
+
+        max-height:none;
+
+        border-radius:0;
+
+    }
+
+}
