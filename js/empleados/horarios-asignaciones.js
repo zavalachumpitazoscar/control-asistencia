@@ -1928,6 +1928,159 @@ actualizarContadorColaboradores();
 
     if(form){
 
+        function convertirHoraAMinutos(
+    hora
+){
+
+    if(!hora){
+
+        return null;
+
+    }
+
+
+    const partes =
+    String(
+        hora
+    )
+    .split(":")
+    .map(Number);
+
+
+    if(
+        partes.length < 2
+        ||
+        Number.isNaN(
+            partes[0]
+        )
+        ||
+        Number.isNaN(
+            partes[1]
+        )
+    ){
+
+        return null;
+
+    }
+
+
+    return (
+        partes[0] * 60
+        +
+        partes[1]
+    );
+
+}
+
+
+
+function obtenerRangoHorario(
+    horario
+){
+
+    const entrada =
+    obtenerDatosEntrada(
+        horario
+    );
+
+
+    const salida =
+    obtenerDatosSalida(
+        horario
+    );
+
+
+    const inicio =
+    convertirHoraAMinutos(
+        entrada.programada
+    );
+
+
+    let fin =
+    convertirHoraAMinutos(
+        salida.programada
+    );
+
+
+    if(
+        inicio === null
+        ||
+        fin === null
+    ){
+
+        return null;
+
+    }
+
+
+    /*
+     * Si cruza medianoche, la salida pertenece
+     * al día siguiente.
+     */
+    if(
+        horario.cruzaMedianoche
+        ||
+        fin <= inicio
+    ){
+
+        fin +=
+        24 * 60;
+
+    }
+
+
+    return {
+
+        inicio,
+
+        fin
+
+    };
+
+}
+
+
+
+function horariosSeSuperponen(
+    horarioA,
+    horarioB
+){
+
+    const rangoA =
+    obtenerRangoHorario(
+        horarioA
+    );
+
+
+    const rangoB =
+    obtenerRangoHorario(
+        horarioB
+    );
+
+
+    if(
+        !rangoA
+        ||
+        !rangoB
+    ){
+
+        return false;
+
+    }
+
+
+    return (
+        rangoA.inicio <
+        rangoB.fin
+
+        &&
+
+        rangoA.fin >
+        rangoB.inicio
+    );
+
+}
+
         form.addEventListener(
             "submit",
             async evento=>{
@@ -1992,6 +2145,168 @@ actualizarContadorColaboradores();
 
 resultado.cantidadColaboradores =
 colaboradoresSeleccionados.size;
+
+                const conflictos =
+validarConflictosAsignacion(
+
+    resultado,
+
+    resultado.colaboradorIds
+
+);
+
+
+if(
+    conflictos.length > 0
+){
+
+    const primerosConflictos =
+    conflictos
+    .slice(
+        0,
+        5
+    )
+    .map(conflicto=>{
+
+        const entradaNueva =
+        obtenerDatosEntrada(
+            conflicto.horarioNuevo
+        );
+
+
+        const salidaNueva =
+        obtenerDatosSalida(
+            conflicto.horarioNuevo
+        );
+
+
+        const entradaExistente =
+        obtenerDatosEntrada(
+            conflicto.horarioExistente
+        );
+
+
+        const salidaExistente =
+        obtenerDatosSalida(
+            conflicto.horarioExistente
+        );
+
+
+        return `
+
+            <div style="
+                text-align:left;
+                margin-bottom:12px;
+                padding:10px;
+                border:1px solid #e2e8f0;
+                border-radius:10px;
+            ">
+
+                <strong>
+                    ${escaparHTML(
+                        conflicto.nombreColaborador
+                    )}
+                </strong>
+
+                <div>
+                    ${formatearFechaVisible(
+                        conflicto.fecha
+                    )}
+                </div>
+
+                <div style="margin-top:5px;">
+
+                    Ya tiene:
+
+                    <strong>
+                        ${escaparHTML(
+                            conflicto.horarioExistente.nombre
+                            ||
+                            "Horario"
+                        )}
+                    </strong>
+
+                    (${formatearHora(
+                        entradaExistente.programada
+                    )}
+
+                    -
+
+                    ${formatearHora(
+                        salidaExistente.programada
+                    )})
+
+                </div>
+
+                <div>
+
+                    Nuevo:
+
+                    <strong>
+                        ${escaparHTML(
+                            conflicto.horarioNuevo.nombre
+                            ||
+                            "Horario"
+                        )}
+                    </strong>
+
+                    (${formatearHora(
+                        entradaNueva.programada
+                    )}
+
+                    -
+
+                    ${formatearHora(
+                        salidaNueva.programada
+                    )})
+
+                </div>
+
+            </div>
+
+        `;
+
+    })
+    .join("");
+
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Horarios superpuestos",
+
+        html:`
+
+            <p>
+                No se puede guardar porque existen horarios
+                que se cruzan para el mismo colaborador.
+            </p>
+
+            ${primerosConflictos}
+
+            ${
+                conflictos.length > 5
+                ?
+                `<p>
+                    Y ${conflictos.length - 5}
+                    conflicto(s) adicional(es).
+                </p>`
+                :
+                ""
+            }
+
+        `,
+
+        confirmButtonText:
+        "Entendido"
+
+    });
+
+
+    return;
+
+}
 
                 try{
 
@@ -3781,7 +4096,346 @@ function actualizarBotonesVistaCalendario(){
 
 }
 
+function obtenerProgramacionResultado(
+    resultado
+){
 
+    const programacion = [];
+
+
+    if(
+        resultado.tipoAsignacion ===
+        "DIARIA"
+    ){
+
+        programacion.push({
+
+            fecha:
+            resultado.fechaInicio,
+
+            horarioId:
+            resultado.horarioId
+
+        });
+
+
+        return programacion;
+
+    }
+
+
+    if(
+        resultado.tipoAsignacion ===
+        "MENSUAL"
+    ){
+
+        return Array.isArray(
+            resultado.programacion
+        )
+        ?
+        resultado.programacion
+        :
+        [];
+
+    }
+
+
+    if(
+        resultado.tipoAsignacion ===
+        "SEMANAL"
+    ){
+
+        const asignacionTemporal = {
+
+            ...resultado,
+
+            id:
+            "TEMPORAL"
+
+        };
+
+
+        return expandirAsignacionSemanal(
+            asignacionTemporal
+        )
+        .map(item=>({
+
+            fecha:
+            item.fecha,
+
+            horarioId:
+            item.horarioId
+
+        }));
+
+    }
+
+
+    return programacion;
+
+}
+
+
+    function obtenerProgramacionExistenteColaborador(
+    colaboradorId
+){
+
+    const resultado = [];
+
+
+    asignaciones.forEach(
+        asignacion=>{
+
+            const colaboradorIds =
+            Array.isArray(
+                asignacion.colaboradorIds
+            )
+            ?
+            asignacion.colaboradorIds
+            :
+            [];
+
+
+            if(
+                !colaboradorIds.includes(
+                    colaboradorId
+                )
+            ){
+
+                return;
+
+            }
+
+
+            if(
+                asignacion.estado ===
+                "INACTIVO"
+            ){
+
+                return;
+
+            }
+
+
+            if(
+                asignacion.tipoAsignacion ===
+                "DIARIA"
+            ){
+
+                resultado.push({
+
+                    fecha:
+                    asignacion.fechaInicio,
+
+                    horarioId:
+                    asignacion.horarioId,
+
+                    asignacionId:
+                    asignacion.id
+
+                });
+
+
+                return;
+
+            }
+
+
+            if(
+                asignacion.tipoAsignacion ===
+                "MENSUAL"
+            ){
+
+                (
+                    asignacion.programacion
+                    ||
+                    []
+                )
+                .forEach(item=>{
+
+                    resultado.push({
+
+                        fecha:
+                        item.fecha,
+
+                        horarioId:
+                        item.horarioId,
+
+                        asignacionId:
+                        asignacion.id
+
+                    });
+
+                });
+
+
+                return;
+
+            }
+
+
+            if(
+                asignacion.tipoAsignacion ===
+                "SEMANAL"
+            ){
+
+                expandirAsignacionSemanal(
+                    asignacion
+                )
+                .forEach(item=>{
+
+                    resultado.push({
+
+                        fecha:
+                        item.fecha,
+
+                        horarioId:
+                        item.horarioId,
+
+                        asignacionId:
+                        asignacion.id
+
+                    });
+
+                });
+
+            }
+
+        }
+    );
+
+
+    return resultado;
+
+}
+
+    function validarConflictosAsignacion(
+    resultado,
+    colaboradorIds
+){
+
+    const programacionNueva =
+    obtenerProgramacionResultado(
+        resultado
+    );
+
+
+    const conflictos = [];
+
+
+    colaboradorIds.forEach(
+        colaboradorId=>{
+
+            const colaborador =
+            colaboradores.find(
+                item=>
+
+                    item.id ===
+                    colaboradorId
+
+            );
+
+
+            const nombreColaborador =
+            colaborador
+            ?
+            obtenerNombreColaborador(
+                colaborador
+            )
+            :
+            "Colaborador";
+
+
+            const programacionExistente =
+            obtenerProgramacionExistenteColaborador(
+                colaboradorId
+            );
+
+
+            programacionNueva.forEach(
+                nuevo=>{
+
+                    const horarioNuevo =
+                    obtenerHorarios()
+                    .find(item=>
+
+                        item.id ===
+                        nuevo.horarioId
+
+                    );
+
+
+                    if(!horarioNuevo){
+
+                        return;
+
+                    }
+
+
+                    programacionExistente
+                    .filter(existente=>
+
+                        existente.fecha ===
+                        nuevo.fecha
+
+                    )
+                    .forEach(existente=>{
+
+                        const horarioExistente =
+                        obtenerHorarios()
+                        .find(item=>
+
+                            item.id ===
+                            existente.horarioId
+
+                        );
+
+
+                        if(
+                            !horarioExistente
+                        ){
+
+                            return;
+
+                        }
+
+
+                        if(
+                            horariosSeSuperponen(
+                                horarioNuevo,
+                                horarioExistente
+                            )
+                        ){
+
+                            conflictos.push({
+
+                                colaboradorId,
+
+                                nombreColaborador,
+
+                                fecha:
+                                nuevo.fecha,
+
+                                horarioNuevo,
+
+                                horarioExistente
+
+                            });
+
+                        }
+
+                    });
+
+                }
+            );
+
+        }
+    );
+
+
+    return conflictos;
+
+}
     function actualizarLeyendaHorariosColaborador(){
 
     if(!leyendaHorariosColaborador){
