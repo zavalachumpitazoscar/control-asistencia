@@ -4451,46 +4451,181 @@ buscarColaboradorAsignacion
 
 
     cerrarAsignarHorario
-    ?.addEventListener(
-        "click",
-        cerrar
-    );
+?.addEventListener(
+    "click",
+    cerrar
+);
 
 
-    cancelarAsignarHorario
-    ?.addEventListener(
-        "click",
-        cerrar
-    );
+cancelarAsignarHorario
+?.addEventListener(
+    "click",
+    cerrar
+);
 
 
-    modal
-    ?.addEventListener(
-        "click",
-        evento=>{
+modal
+?.addEventListener(
+    "click",
+    evento=>{
 
-            if(
-                evento.target ===
-                modal
-            ){
+        if(
+            evento.target ===
+            modal
+        ){
 
-                cerrar();
-
-            }
+            cerrar();
 
         }
-    );
+
+    }
+);
 
 
-    return {
+/*=====================================================
+    EVENTOS DEL CALENDARIO DEL COLABORADOR
+=====================================================*/
 
-        abrir,
+cerrarCalendarioColaborador
+?.addEventListener(
+    "click",
+    cerrarModalCalendarioColaborador
+);
 
-        cerrar,
 
-        actualizarDetalle
+modalCalendarioColaborador
+?.addEventListener(
+    "click",
+    evento=>{
 
-    };
+        if(
+            evento.target ===
+            modalCalendarioColaborador
+        ){
+
+            cerrarModalCalendarioColaborador();
+
+        }
+
+    }
+);
+
+
+btnVistaMensualColaborador
+?.addEventListener(
+    "click",
+    ()=>{
+
+        vistaCalendarioActual =
+        "MENSUAL";
+
+
+        actualizarBotonesVistaCalendario();
+
+        renderizarCalendarioColaborador();
+
+    }
+);
+
+
+btnVistaSemanalColaborador
+?.addEventListener(
+    "click",
+    ()=>{
+
+        vistaCalendarioActual =
+        "SEMANAL";
+
+
+        actualizarBotonesVistaCalendario();
+
+        renderizarCalendarioColaborador();
+
+    }
+);
+
+
+btnPeriodoAnteriorColaborador
+?.addEventListener(
+    "click",
+    ()=>{
+
+        if(
+            vistaCalendarioActual ===
+            "MENSUAL"
+        ){
+
+            fechaCalendarioColaborador
+            .setMonth(
+                fechaCalendarioColaborador
+                .getMonth() - 1
+            );
+
+        }
+        else{
+
+            fechaCalendarioColaborador
+            .setDate(
+                fechaCalendarioColaborador
+                .getDate() - 7
+            );
+
+        }
+
+
+        renderizarCalendarioColaborador();
+
+    }
+);
+
+
+btnPeriodoSiguienteColaborador
+?.addEventListener(
+    "click",
+    ()=>{
+
+        if(
+            vistaCalendarioActual ===
+            "MENSUAL"
+        ){
+
+            fechaCalendarioColaborador
+            .setMonth(
+                fechaCalendarioColaborador
+                .getMonth() + 1
+            );
+
+        }
+        else{
+
+            fechaCalendarioColaborador
+            .setDate(
+                fechaCalendarioColaborador
+                .getDate() + 7
+            );
+
+        }
+
+
+        renderizarCalendarioColaborador();
+
+    }
+);
+
+
+/*=====================================================
+    RETORNO DEL MÓDULO
+=====================================================*/
+
+return {
+
+    abrir,
+
+    cerrar,
+
+    actualizarDetalle
+
+};
 
 }
 
