@@ -1511,162 +1511,309 @@
 
                         <!-- DÍAS -->
 
-                        <div class="subseccion-horario">
+<!-- PROGRAMACIÓN SEMANAL -->
 
-                            <div class="subseccion-horario-titulo">
+<div class="subseccion-horario">
 
-                                <i class="bi bi-calendar-check"></i>
+    <div class="subseccion-horario-titulo">
 
-                                <div>
+        <i class="bi bi-calendar-check"></i>
 
-                                    <h5>
-                                        Días de la semana
-                                    </h5>
+        <div>
 
-                                    <p>
-                                        Puedes utilizar una selección rápida o personalizada.
-                                    </p>
+            <h5>
+                Programación de la semana
+            </h5>
 
-                                </div>
+            <p>
+                Selecciona un horario y agrégalo a uno o varios días.
+            </p>
 
-                            </div>
+        </div>
 
-
-                            <div class="acciones-dias-horario">
-
-                                <button
-                                id="btnAsignacionLunesViernes"
-                                type="button">
-
-                                    Lunes a viernes
-
-                                </button>
+    </div>
 
 
-                                <button
-                                id="btnAsignacionTodosDias"
-                                type="button">
+    <!-- BUSCADOR DE HORARIO -->
 
-                                    Todos los días
+    <div class="selector-horario-semanal">
 
-                                </button>
+        <div class="campo-formulario">
 
+            <label for="buscarHorarioSemanal">
+                Buscar horario
+            </label>
 
-                                <button
-                                id="btnAsignacionLimpiarDias"
-                                type="button">
+            <div class="combobox-horario-semanal">
 
-                                    Limpiar
+                <i class="bi bi-search"></i>
 
-                                </button>
+                <input
+                    id="buscarHorarioSemanal"
+                    type="search"
+                    placeholder="Escribe el nombre del horario"
+                    autocomplete="off"
+                >
 
-                            </div>
+                <button
+                    id="limpiarHorarioSemanal"
+                    type="button"
+                    aria-label="Limpiar horario"
+                    hidden
+                >
+                    <i class="bi bi-x"></i>
+                </button>
 
-
-                            <div class="dias-semana-grid">
-
-
-                                <label class="dia-semana">
-
-                                    <input
-                                    id="asignacionDiaLunes"
-                                    type="checkbox"
-                                    value="lunes">
-
-                                    <span>
-                                        Lun
-                                    </span>
-
-                                </label>
+            </div>
 
 
-                                <label class="dia-semana">
+            <div
+                id="opcionesHorarioSemanal"
+                class="opciones-horario-semanal"
+                hidden
+            ></div>
 
-                                    <input
-                                    id="asignacionDiaMartes"
-                                    type="checkbox"
-                                    value="martes">
-
-                                    <span>
-                                        Mar
-                                    </span>
-
-                                </label>
+        </div>
 
 
-                                <label class="dia-semana">
+        <div
+            id="horarioSemanalSeleccionado"
+            class="horario-semanal-seleccionado"
+            hidden
+        ></div>
 
-                                    <input
-                                    id="asignacionDiaMiercoles"
-                                    type="checkbox"
-                                    value="miercoles">
-
-                                    <span>
-                                        Mié
-                                    </span>
-
-                                </label>
+    </div>
 
 
-                                <label class="dia-semana">
+    <!-- DÍAS A LOS QUE SE AGREGARÁ -->
 
-                                    <input
-                                    id="asignacionDiaJueves"
-                                    type="checkbox"
-                                    value="jueves">
+    <div class="dias-destino-semanal">
 
-                                    <span>
-                                        Jue
-                                    </span>
-
-                                </label>
+        <span class="etiqueta-dias-destino">
+            Agregar a:
+        </span>
 
 
-                                <label class="dia-semana">
+        <label class="dia-destino-semanal">
 
-                                    <input
-                                    id="asignacionDiaViernes"
-                                    type="checkbox"
-                                    value="viernes">
+            <input
+                type="checkbox"
+                name="diaDestinoSemanal"
+                value="lunes"
+            >
 
-                                    <span>
-                                        Vie
-                                    </span>
+            <span>Lun</span>
 
-                                </label>
-
-
-                                <label class="dia-semana">
-
-                                    <input
-                                    id="asignacionDiaSabado"
-                                    type="checkbox"
-                                    value="sabado">
-
-                                    <span>
-                                        Sáb
-                                    </span>
-
-                                </label>
+        </label>
 
 
-                                <label class="dia-semana">
+        <label class="dia-destino-semanal">
 
-                                    <input
-                                    id="asignacionDiaDomingo"
-                                    type="checkbox"
-                                    value="domingo">
+            <input
+                type="checkbox"
+                name="diaDestinoSemanal"
+                value="martes"
+            >
 
-                                    <span>
-                                        Dom
-                                    </span>
+            <span>Mar</span>
 
-                                </label>
+        </label>
 
-                            </div>
 
-                        </div>
+        <label class="dia-destino-semanal">
 
+            <input
+                type="checkbox"
+                name="diaDestinoSemanal"
+                value="miercoles"
+            >
+
+            <span>Mié</span>
+
+        </label>
+
+
+        <label class="dia-destino-semanal">
+
+            <input
+                type="checkbox"
+                name="diaDestinoSemanal"
+                value="jueves"
+            >
+
+            <span>Jue</span>
+
+        </label>
+
+
+        <label class="dia-destino-semanal">
+
+            <input
+                type="checkbox"
+                name="diaDestinoSemanal"
+                value="viernes"
+            >
+
+            <span>Vie</span>
+
+        </label>
+
+
+        <label class="dia-destino-semanal">
+
+            <input
+                type="checkbox"
+                name="diaDestinoSemanal"
+                value="sabado"
+            >
+
+            <span>Sáb</span>
+
+        </label>
+
+
+        <label class="dia-destino-semanal">
+
+            <input
+                type="checkbox"
+                name="diaDestinoSemanal"
+                value="domingo"
+            >
+
+            <span>Dom</span>
+
+        </label>
+
+
+        <button
+            id="btnAgregarHorarioSemanal"
+            type="button"
+            class="btn-principal"
+        >
+
+            <i class="bi bi-plus-circle"></i>
+
+            Agregar
+
+        </button>
+
+    </div>
+
+
+    <!-- RESUMEN POR DÍA -->
+
+    <div
+        id="programacionSemanalGrid"
+        class="programacion-semanal-grid"
+    >
+
+        <div class="dia-programacion-semanal" data-dia="lunes">
+
+            <div class="dia-programacion-header">
+                <strong>Lunes</strong>
+                <span id="contadorSemanalLunes">0 horarios</span>
+            </div>
+
+            <div
+                id="programacionSemanalLunes"
+                class="horarios-dia-semanal"
+            ></div>
+
+        </div>
+
+
+        <div class="dia-programacion-semanal" data-dia="martes">
+
+            <div class="dia-programacion-header">
+                <strong>Martes</strong>
+                <span id="contadorSemanalMartes">0 horarios</span>
+            </div>
+
+            <div
+                id="programacionSemanalMartes"
+                class="horarios-dia-semanal"
+            ></div>
+
+        </div>
+
+
+        <div class="dia-programacion-semanal" data-dia="miercoles">
+
+            <div class="dia-programacion-header">
+                <strong>Miércoles</strong>
+                <span id="contadorSemanalMiercoles">0 horarios</span>
+            </div>
+
+            <div
+                id="programacionSemanalMiercoles"
+                class="horarios-dia-semanal"
+            ></div>
+
+        </div>
+
+
+        <div class="dia-programacion-semanal" data-dia="jueves">
+
+            <div class="dia-programacion-header">
+                <strong>Jueves</strong>
+                <span id="contadorSemanalJueves">0 horarios</span>
+            </div>
+
+            <div
+                id="programacionSemanalJueves"
+                class="horarios-dia-semanal"
+            ></div>
+
+        </div>
+
+
+        <div class="dia-programacion-semanal" data-dia="viernes">
+
+            <div class="dia-programacion-header">
+                <strong>Viernes</strong>
+                <span id="contadorSemanalViernes">0 horarios</span>
+            </div>
+
+            <div
+                id="programacionSemanalViernes"
+                class="horarios-dia-semanal"
+            ></div>
+
+        </div>
+
+
+        <div class="dia-programacion-semanal" data-dia="sabado">
+
+            <div class="dia-programacion-header">
+                <strong>Sábado</strong>
+                <span id="contadorSemanalSabado">0 horarios</span>
+            </div>
+
+            <div
+                id="programacionSemanalSabado"
+                class="horarios-dia-semanal"
+            ></div>
+
+        </div>
+
+
+        <div class="dia-programacion-semanal" data-dia="domingo">
+
+            <div class="dia-programacion-header">
+                <strong>Domingo</strong>
+                <span id="contadorSemanalDomingo">0 horarios</span>
+            </div>
+
+            <div
+                id="programacionSemanalDomingo"
+                class="horarios-dia-semanal"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
                         <!-- PERIODO -->
