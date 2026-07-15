@@ -2366,6 +2366,11 @@ colaboradoresSeleccionados.size;
             }
         );
 
+        actualizarColaboradoresDetalle(
+    asignacionesHorario,
+    horario
+);
+
 
         if(contador){
 
@@ -2448,6 +2453,495 @@ colaboradoresSeleccionados.size;
     }
 
 
+    function actualizarColaboradoresDetalle(
+    asignacionesHorario,
+    horario
+){
+
+    const contenedor =
+    document.getElementById(
+        "listaColaboradoresHorario"
+    );
+
+
+    if(!contenedor){
+
+        return;
+
+    }
+
+
+    const relaciones = [];
+
+
+    asignacionesHorario.forEach(
+        asignacion=>{
+
+            const colaboradorIds =
+            Array.isArray(
+                asignacion.colaboradorIds
+            )
+            ?
+            asignacion.colaboradorIds
+            :
+            [];
+
+
+            colaboradorIds.forEach(
+                colaboradorId=>{
+
+                    const colaborador =
+                    colaboradores.find(
+                        item=>
+
+                            item.id ===
+                            colaboradorId
+
+                    );
+
+
+                    relaciones.push({
+
+                        colaboradorId,
+
+                        colaborador,
+
+                        asignacion
+
+                    });
+
+                }
+            );
+
+        }
+    );
+
+
+    if(
+        relaciones.length === 0
+    ){
+
+        contenedor.innerHTML = `
+
+            <div class="sin-colaboradores-horario">
+
+                <i class="bi bi-person-x"></i>
+
+                <h4>
+                    No hay colaboradores asignados
+                </h4>
+
+                <p>
+                    Las personas incluidas en las asignaciones
+                    de este horario aparecerán aquí.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const colaboradoresAgrupados =
+    new Map();
+
+
+    relaciones.forEach(relacion=>{
+
+        if(
+            !colaboradoresAgrupados.has(
+                relacion.colaboradorId
+            )
+        ){
+
+            colaboradoresAgrupados.set(
+                relacion.colaboradorId,
+                {
+                    colaborador:
+                    relacion.colaborador,
+
+                    asignaciones:[]
+                }
+            );
+
+        }
+
+
+        colaboradoresAgrupados
+        .get(
+            relacion.colaboradorId
+        )
+        .asignaciones
+        .push(
+            relacion.asignacion
+        );
+
+    });
+
+
+    contenedor.innerHTML =
+    [
+        ...colaboradoresAgrupados.values()
+    ]
+    .map(item=>
+
+        crearHTMLColaboradorAsignado(
+            item.colaborador,
+            item.asignaciones,
+            horario.id
+        )
+
+    )
+    .join("");
+
+}
+
+
+function crearHTMLColaboradorAsignado(
+    colaborador,
+    asignacionesColaborador,
+    horarioId
+){
+
+    const nombre =
+    colaborador
+    ?
+    obtenerNombreColaborador(
+        colaborador
+    )
+    :
+    "Colaborador no encontrado";
+
+
+    const documento =
+    colaborador
+    ?
+    obtenerDocumentoColaborador(
+        colaborador
+    )
+    :
+    "";
+
+
+    const iniciales =
+    colaborador
+    ?
+    obtenerInicialesColaborador(
+        colaborador
+    )
+    :
+    "CL";
+
+
+    const programaciones =
+    asignacionesColaborador
+    .map(asignacion=>
+
+        crearResumenAsignacionColaborador(
+            asignacion,
+            horarioId
+        )
+
+    )
+    .join("");
+
+
+    return `
+
+        <div class="colaborador-horario-card">
+
+            <div class="colaborador-horario-cabecera">
+
+                <div class="colaborador-horario-avatar">
+
+                    ${escaparHTML(
+                        iniciales
+                    )}
+
+                </div>
+
+
+                <div class="colaborador-horario-identidad">
+
+                    <strong>
+
+                        ${escaparHTML(
+                            nombre
+                        )}
+
+                    </strong>
+
+                    <span>
+
+                        ${
+                            documento
+                            ?
+                            `Documento: ${escaparHTML(
+                                documento
+                            )}`
+                            :
+                            "Sin documento registrado"
+                        }
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="colaborador-horario-programaciones">
+
+                ${programaciones}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+    function crearResumenAsignacionColaborador(
+    asignacion,
+    horarioId
+){
+
+    if(
+        asignacion.tipoAsignacion ===
+        "DIARIA"
+    ){
+
+        return `
+
+            <div class="programacion-colaborador-item">
+
+                <i class="bi bi-calendar-day"></i>
+
+                <div>
+
+                    <strong>
+                        Asignación diaria
+                    </strong>
+
+                    <span>
+
+                        ${formatearFechaVisible(
+                            asignacion.fechaInicio
+                        )}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    if(
+        asignacion.tipoAsignacion ===
+        "SEMANAL"
+    ){
+
+        const dias =
+        Object.entries(
+            asignacion.diasSemana ||
+            {}
+        )
+        .filter(
+            (
+                [
+                    ,
+                    activo
+                ]
+            )=>
+            activo
+        )
+        .map(
+            (
+                [
+                    dia
+                ]
+            )=>
+
+                formatearNombreDia(
+                    dia
+                )
+
+        )
+        .join(", ");
+
+
+        return `
+
+            <div class="programacion-colaborador-item">
+
+                <i class="bi bi-calendar-week"></i>
+
+                <div>
+
+                    <strong>
+                        Programación semanal
+                    </strong>
+
+                    <span>
+
+                        ${escaparHTML(
+                            dias ||
+                            "Sin días configurados"
+                        )}
+
+                    </span>
+
+                    <small>
+
+                        ${formatearFechaVisible(
+                            asignacion.fechaInicio
+                        )}
+
+                        hasta
+
+                        ${formatearFechaVisible(
+                            asignacion.fechaFin
+                        )}
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    const fechas =
+    Array.isArray(
+        asignacion.programacion
+    )
+    ?
+    asignacion.programacion
+    .filter(item=>
+
+        item.horarioId ===
+        horarioId
+
+    )
+    .map(item=>
+
+        item.fecha
+
+    )
+    :
+    [];
+
+
+    const fechasVisibles =
+    fechas
+    .slice(
+        0,
+        5
+    )
+    .map(fecha=>
+
+        formatearFechaVisible(
+            fecha
+        )
+
+    )
+    .join(", ");
+
+
+    const restantes =
+    fechas.length - 5;
+
+
+    return `
+
+        <div class="programacion-colaborador-item">
+
+            <i class="bi bi-calendar3"></i>
+
+            <div>
+
+                <strong>
+                    Planificación mensual
+                </strong>
+
+                <span>
+
+                    ${
+                        fechas.length
+                    }
+
+                    día${
+                        fechas.length === 1
+                        ?
+                        ""
+                        :
+                        "s"
+                    }
+
+                    con este horario
+
+                </span>
+
+                <small>
+
+                    ${escaparHTML(
+                        fechasVisibles ||
+                        "Sin fechas para este horario"
+                    )}
+
+                    ${
+                        restantes > 0
+                        ?
+                        ` y ${restantes} más`
+                        :
+                        ""
+                    }
+
+                </small>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+    function formatearNombreDia(
+    dia
+){
+
+    const nombres = {
+
+        lunes:"Lunes",
+        martes:"Martes",
+        miercoles:"Miércoles",
+        jueves:"Jueves",
+        viernes:"Viernes",
+        sabado:"Sábado",
+        domingo:"Domingo"
+
+    };
+
+
+    return nombres[dia]
+    ||
+    dia;
+
+}
 
     function crearHTMLAsignacion(
         asignacion,
