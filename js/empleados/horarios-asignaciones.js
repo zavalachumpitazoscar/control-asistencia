@@ -5130,33 +5130,138 @@ async function agregarHorarioAProgramacionSemanal(){
         );
 
 
-        if(horarioConflictoId){
+if(horarioConflictoId){
 
-            const conflicto =
-            obtenerHorarios()
-            .find(item=>
+    const conflicto =
+    obtenerHorarios()
+    .find(item=>
 
-                item.id ===
-                horarioConflictoId
+        item.id ===
+        horarioConflictoId
 
-            );
-
-
-            await Swal.fire({
-
-                icon:"warning",
-
-                title:"Horarios superpuestos",
-
-                text:
-                `${horarioNuevo.nombre} se cruza con ${conflicto.nombre} en ${formatearNombreDia(dia)}.`
-
-            });
+    );
 
 
-            continue;
+    const entradaNuevo =
+    obtenerDatosEntrada(
+        horarioNuevo
+    );
 
-        }
+
+    const salidaNuevo =
+    obtenerDatosSalida(
+        horarioNuevo
+    );
+
+
+    const entradaExistente =
+    obtenerDatosEntrada(
+        conflicto
+    );
+
+
+    const salidaExistente =
+    obtenerDatosSalida(
+        conflicto
+    );
+
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Conflicto de horario",
+
+        html:`
+
+            <div style="text-align:left;line-height:1.6;">
+
+                <p>
+                    <strong>
+                        No es posible agregar este horario.
+                    </strong>
+                </p>
+
+                <p>
+
+                    El día
+                    <strong>${formatearNombreDia(dia)}</strong>
+                    ya tiene un horario que se superpone.
+
+                </p>
+
+                <hr style="margin:12px 0;">
+
+
+                <strong>
+                    Horario existente
+                </strong>
+
+                <br>
+
+                ${escaparHTML(
+                    conflicto.nombre
+                )}
+
+                <br>
+
+                <small>
+
+                    ${formatearHora(
+                        entradaExistente.programada
+                    )}
+
+                    -
+
+                    ${formatearHora(
+                        salidaExistente.programada
+                    )}
+
+                </small>
+
+
+                <br><br>
+
+
+                <strong>
+                    Horario que intentas agregar
+                </strong>
+
+                <br>
+
+                ${escaparHTML(
+                    horarioNuevo.nombre
+                )}
+
+                <br>
+
+                <small>
+
+                    ${formatearHora(
+                        entradaNuevo.programada
+                    )}
+
+                    -
+
+                    ${formatearHora(
+                        salidaNuevo.programada
+                    )}
+
+                </small>
+
+            </div>
+
+        `,
+
+        confirmButtonText:
+        "Entendido"
+
+    });
+
+
+    continue;
+
+}
 
 
         programacionSemanal[dia]
