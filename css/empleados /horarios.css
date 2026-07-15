@@ -1023,7 +1023,7 @@
 
 .modal-contenido{
 
-    width:100%;
+    min-width: max-content;
 
     background:#ffffff;
 
