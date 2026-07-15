@@ -194,6 +194,35 @@ document.getElementById(
     "leyendaHorariosColaborador"
 );
 
+const buscarHorarioSemanal =
+document.getElementById(
+    "buscarHorarioSemanal"
+);
+
+
+const opcionesHorarioSemanal =
+document.getElementById(
+    "opcionesHorarioSemanal"
+);
+
+
+const limpiarHorarioSemanal =
+document.getElementById(
+    "limpiarHorarioSemanal"
+);
+
+
+const horarioSemanalSeleccionado =
+document.getElementById(
+    "horarioSemanalSeleccionado"
+);
+
+
+const btnAgregarHorarioSemanal =
+document.getElementById(
+    "btnAgregarHorarioSemanal"
+);
+
 
     let asignaciones = [];
 
@@ -214,6 +243,29 @@ document.getElementById(
 
 
     let programacionMensual = {};
+
+
+    let horarioSemanalSeleccionadoId =
+null;
+
+
+let programacionSemanal = {
+
+    lunes:[],
+
+    martes:[],
+
+    miercoles:[],
+
+    jueves:[],
+
+    viernes:[],
+
+    sabado:[],
+
+    domingo:[]
+
+};
 
     let colaboradorCalendarioId =
 null;
@@ -1047,8 +1099,53 @@ actualizarContadorColaboradores();
         );
 
 
-        marcarLunesViernes();
+        horarioSemanalSeleccionadoId =
+null;
 
+
+programacionSemanal = {
+
+    lunes:[],
+
+    martes:[],
+
+    miercoles:[],
+
+    jueves:[],
+
+    viernes:[],
+
+    sabado:[],
+
+    domingo:[]
+
+};
+
+
+if(buscarHorarioSemanal){
+
+    buscarHorarioSemanal.value =
+    "";
+
+}
+
+
+document
+.querySelectorAll(
+    'input[name="diaDestinoSemanal"]'
+)
+.forEach(input=>{
+
+    input.checked =
+    false;
+
+});
+
+
+renderizarProgramacionSemanal();
+
+actualizarHorarioSemanalSeleccionado();
+        
 
         añoCalendario =
         new Date()
@@ -2457,131 +2554,137 @@ if(
         }
 
 
-        if(
-            tipo ===
-            "SEMANAL"
-        ){
+if(
+    tipo ===
+    "SEMANAL"
+){
 
-            const fechaInicio =
-            obtenerValor(
-                "fechaInicioAsignacionSemanal"
-            );
-
-
-            const fechaFin =
-            obtenerValor(
-                "fechaFinAsignacionSemanal"
-            );
+    const fechaInicio =
+    obtenerValor(
+        "fechaInicioAsignacionSemanal"
+    );
 
 
-            if(
-                !fechaInicio
-                ||
-                !fechaFin
-            ){
-
-                mostrarCamposIncompletos(
-                    "Selecciona la fecha inicial y final."
-                );
-
-                return null;
-
-            }
+    const fechaFin =
+    obtenerValor(
+        "fechaFinAsignacionSemanal"
+    );
 
 
-            if(
-                fechaFin <
-                fechaInicio
-            ){
+    if(
+        !fechaInicio
+        ||
+        !fechaFin
+    ){
 
-                Swal.fire({
+        mostrarCamposIncompletos(
+            "Selecciona la fecha inicial y final."
+        );
 
-                    icon:"warning",
+        return null;
 
-                    title:"Periodo incorrecto",
-
-                    text:
-                    "La fecha final no puede ser anterior a la fecha inicial."
-
-                });
-
-                return null;
-
-            }
+    }
 
 
-            const diasSemana = {};
+    if(
+        fechaFin <
+        fechaInicio
+    ){
+
+        Swal.fire({
+
+            icon:"warning",
+
+            title:"Periodo incorrecto",
+
+            text:
+            "La fecha final no puede ser anterior a la fecha inicial."
+
+        });
+
+        return null;
+
+    }
 
 
-            Object.entries(
-                diasSemanal
-            )
-            .forEach(
-                (
-                    [
-                        dia,
-                        input
-                    ]
-                )=>{
+    const tieneProgramacion =
+    Object.values(
+        programacionSemanal
+    )
+    .some(horarioIds=>
 
-                    diasSemana[dia] =
-                    Boolean(
-                        input?.checked
-                    );
+        Array.isArray(
+            horarioIds
+        )
+        &&
+        horarioIds.length > 0
 
-                }
-            );
+    );
 
 
-            const tieneDias =
+    if(!tieneProgramacion){
+
+        Swal.fire({
+
+            icon:"warning",
+
+            title:"Programación vacía",
+
+            text:
+            "Agrega al menos un horario a un día de la semana."
+
+        });
+
+        return null;
+
+    }
+
+
+    const horarioIds =
+    [
+        ...new Set(
             Object.values(
-                diasSemana
+                programacionSemanal
             )
-            .some(Boolean);
+            .filter(Array.isArray)
+            .flat()
+        )
+    ];
 
 
-            if(!tieneDias){
+    return {
 
-                Swal.fire({
+        tipoAsignacion:
+        "SEMANAL",
 
-                    icon:"warning",
+        horarioIdPrincipal:
+        horario.id,
 
-                    title:"Selecciona los días",
+        horarioIds,
 
-                    text:
-                    "Selecciona al menos un día de la semana."
+        fechaInicio,
 
-                });
+        fechaFin,
 
-                return null;
+        intervaloSemanas:
+        Number(
+            obtenerValor(
+                "intervaloAsignacionSemanal"
+            )
+            ||
+            1
+        ),
 
-            }
+        programacionSemanal:
+        JSON.parse(
+            JSON.stringify(
+                programacionSemanal
+            )
+        )
 
+    };
 
-            return {
-
-                horarioId:
-                horario.id,
-
-                tipoAsignacion:
-                "SEMANAL",
-
-                fechaInicio,
-
-                fechaFin,
-
-                intervaloSemanas:
-                Number(
-                    obtenerValor(
-                        "intervaloAsignacionSemanal"
-                    )
-                ),
-
-                diasSemana
-
-            };
-
-        }
+}
 
 
         const programacion =
@@ -2709,7 +2812,7 @@ if(
             asignacion=>{
 
                 if(
-                    asignacion.horarioId ===
+                    
                     horario.id
                 ){
 
@@ -3360,7 +3463,7 @@ function actualizarBotonesVistaCalendario(){
 }
 
 
-    function expandirAsignacionSemanal(
+function expandirAsignacionSemanal(
     asignacion
 ){
 
@@ -3378,56 +3481,6 @@ function actualizarBotonesVistaCalendario(){
     }
 
 
-    const mapaDias = {
-
-        domingo:
-        0,
-
-        lunes:
-        1,
-
-        martes:
-        2,
-
-        miercoles:
-        3,
-
-        jueves:
-        4,
-
-        viernes:
-        5,
-
-        sabado:
-        6
-
-    };
-
-
-    const diasPermitidos =
-    Object.entries(
-        asignacion.diasSemana ||
-        {}
-    )
-    .filter(
-        (
-            [
-                ,
-                activo
-            ]
-        )=>
-        activo
-    )
-    .map(
-        (
-            [
-                dia
-            ]
-        )=>
-        mapaDias[dia]
-    );
-
-
     const fechaInicio =
     new Date(
         `${asignacion.fechaInicio}T00:00:00`
@@ -3440,12 +3493,46 @@ function actualizarBotonesVistaCalendario(){
     );
 
 
+    if(
+        Number.isNaN(
+            fechaInicio.getTime()
+        )
+        ||
+        Number.isNaN(
+            fechaFin.getTime()
+        )
+    ){
+
+        return resultado;
+
+    }
+
+
     const intervalo =
     Number(
         asignacion.intervaloSemanas
         ||
         1
     );
+
+
+    const nombresDia = {
+
+        0:"domingo",
+
+        1:"lunes",
+
+        2:"martes",
+
+        3:"miercoles",
+
+        4:"jueves",
+
+        5:"viernes",
+
+        6:"sabado"
+
+    };
 
 
     const cursor =
@@ -3483,31 +3570,55 @@ function actualizarBotonesVistaCalendario(){
         0;
 
 
+        const nombreDia =
+        nombresDia[
+            cursor.getDay()
+        ];
+
+
+        const horarioIdsDia =
+        Array.isArray(
+            asignacion.programacionSemanal
+            ?.[nombreDia]
+        )
+        ?
+        asignacion.programacionSemanal[
+            nombreDia
+        ]
+        :
+        [];
+
+
         if(
             semanaValida
             &&
-            diasPermitidos.includes(
-                cursor.getDay()
-            )
+            horarioIdsDia.length > 0
         ){
 
-            resultado.push({
+            horarioIdsDia.forEach(
+                horarioId=>{
 
-                fecha:
-                formatearFechaISO(
-                    cursor
-                ),
+                    resultado.push({
 
-                horarioId:
-                asignacion.horarioId,
+                        fecha:
+                        formatearFechaISO(
+                            cursor
+                        ),
 
-                asignacionId:
-                asignacion.id,
+                        horarioId,
 
-                tipo:
-                "SEMANAL"
+                        asignacionId:
+                        asignacion.id
+                        ||
+                        null,
 
-            });
+                        tipo:
+                        "SEMANAL"
+
+                    });
+
+                }
+            );
 
         }
 
@@ -4631,6 +4742,643 @@ function crearHTMLColaboradorAsignado(
 }
 
 
+function renderizarOpcionesHorarioSemanal(){
+
+    if(
+        !opcionesHorarioSemanal
+        ||
+        !buscarHorarioSemanal
+    ){
+
+        return;
+
+    }
+
+
+    const texto =
+    buscarHorarioSemanal.value
+    .trim()
+    .toLowerCase();
+
+
+    const horarios =
+    obtenerHorarios()
+    .filter(horario=>{
+
+        return (
+            horario.estado ===
+            "ACTIVO"
+            &&
+            String(
+                horario.nombre || ""
+            )
+            .toLowerCase()
+            .includes(
+                texto
+            )
+        );
+
+    });
+
+
+    if(
+        horarios.length === 0
+    ){
+
+        opcionesHorarioSemanal.innerHTML = `
+
+            <div class="estado-sin-colaboradores">
+
+                No se encontraron horarios.
+
+            </div>
+
+        `;
+
+        opcionesHorarioSemanal.hidden =
+        false;
+
+        return;
+
+    }
+
+
+    opcionesHorarioSemanal.innerHTML =
+    horarios.map(horario=>{
+
+        const entrada =
+        obtenerDatosEntrada(
+            horario
+        );
+
+
+        const salida =
+        obtenerDatosSalida(
+            horario
+        );
+
+
+        return `
+
+            <button
+                type="button"
+                class="opcion-horario-semanal"
+                data-horario-id="${horario.id}"
+            >
+
+                <div>
+
+                    <strong>
+                        ${escaparHTML(
+                            horario.nombre ||
+                            "Horario"
+                        )}
+                    </strong>
+
+                    <span>
+
+                        ${formatearHora(
+                            entrada.programada
+                        )}
+
+                        -
+
+                        ${formatearHora(
+                            salida.programada
+                        )}
+
+                    </span>
+
+                </div>
+
+                <i class="bi bi-chevron-right"></i>
+
+            </button>
+
+        `;
+
+    })
+    .join("");
+
+
+    opcionesHorarioSemanal
+    .querySelectorAll(
+        ".opcion-horario-semanal"
+    )
+    .forEach(boton=>{
+
+        boton.addEventListener(
+            "click",
+            ()=>{
+
+                seleccionarHorarioSemanal(
+                    boton.dataset.horarioId
+                );
+
+            }
+        );
+
+    });
+
+
+    opcionesHorarioSemanal.hidden =
+    false;
+
+}
+
+    function seleccionarHorarioSemanal(
+    horarioId
+){
+
+    const horario =
+    obtenerHorarios()
+    .find(item=>
+
+        item.id ===
+        horarioId
+
+    );
+
+
+    if(!horario){
+
+        return;
+
+    }
+
+
+    horarioSemanalSeleccionadoId =
+    horarioId;
+
+
+    if(buscarHorarioSemanal){
+
+        buscarHorarioSemanal.value =
+        horario.nombre ||
+        "Horario";
+
+    }
+
+
+    if(opcionesHorarioSemanal){
+
+        opcionesHorarioSemanal.hidden =
+        true;
+
+    }
+
+
+    actualizarHorarioSemanalSeleccionado();
+
+}
+
+    function actualizarHorarioSemanalSeleccionado(){
+
+    if(!horarioSemanalSeleccionado){
+
+        return;
+
+    }
+
+
+    const horario =
+    obtenerHorarios()
+    .find(item=>
+
+        item.id ===
+        horarioSemanalSeleccionadoId
+
+    );
+
+
+    if(!horario){
+
+        horarioSemanalSeleccionado.hidden =
+        true;
+
+        limpiarHorarioSemanal.hidden =
+        true;
+
+        return;
+
+    }
+
+
+    const entrada =
+    obtenerDatosEntrada(
+        horario
+    );
+
+
+    const salida =
+    obtenerDatosSalida(
+        horario
+    );
+
+
+    horarioSemanalSeleccionado.innerHTML = `
+
+        <div>
+
+            <strong>
+                ${escaparHTML(
+                    horario.nombre ||
+                    "Horario"
+                )}
+            </strong>
+
+            <span>
+
+                ${formatearHora(
+                    entrada.programada
+                )}
+
+                -
+
+                ${formatearHora(
+                    salida.programada
+                )}
+
+            </span>
+
+        </div>
+
+    `;
+
+
+    horarioSemanalSeleccionado.hidden =
+    false;
+
+
+    limpiarHorarioSemanal.hidden =
+    false;
+
+}
+
+async function agregarHorarioAProgramacionSemanal(){
+
+    if(!horarioSemanalSeleccionadoId){
+
+        Swal.fire({
+
+            icon:"warning",
+
+            title:"Selecciona un horario",
+
+            text:
+            "Busca y selecciona el horario que deseas agregar."
+
+        });
+
+        return;
+
+    }
+
+
+    const diasSeleccionados =
+    [
+        ...document.querySelectorAll(
+            'input[name="diaDestinoSemanal"]:checked'
+        )
+    ]
+    .map(input=>
+
+        input.value
+
+    );
+
+
+    if(
+        diasSeleccionados.length ===
+        0
+    ){
+
+        Swal.fire({
+
+            icon:"warning",
+
+            title:"Selecciona los días",
+
+            text:
+            "Selecciona al menos un día de la semana."
+
+        });
+
+        return;
+
+    }
+
+
+    for(
+        const dia of
+        diasSeleccionados
+    ){
+
+        const horariosDia =
+        programacionSemanal[dia]
+        ||
+        [];
+
+
+        if(
+            horariosDia.includes(
+                horarioSemanalSeleccionadoId
+            )
+        ){
+
+            continue;
+
+        }
+
+
+        const horarioNuevo =
+        obtenerHorarios()
+        .find(item=>
+
+            item.id ===
+            horarioSemanalSeleccionadoId
+
+        );
+
+
+        const horarioConflictoId =
+        horariosDia.find(
+            horarioId=>{
+
+                const horarioExistente =
+                obtenerHorarios()
+                .find(item=>
+
+                    item.id ===
+                    horarioId
+
+                );
+
+
+                return (
+                    horarioNuevo
+                    &&
+                    horarioExistente
+                    &&
+                    horariosSeSuperponen(
+                        horarioNuevo,
+                        horarioExistente
+                    )
+                );
+
+            }
+        );
+
+
+        if(horarioConflictoId){
+
+            const conflicto =
+            obtenerHorarios()
+            .find(item=>
+
+                item.id ===
+                horarioConflictoId
+
+            );
+
+
+            await Swal.fire({
+
+                icon:"warning",
+
+                title:"Horarios superpuestos",
+
+                text:
+                `${horarioNuevo.nombre} se cruza con ${conflicto.nombre} en ${formatearNombreDia(dia)}.`
+
+            });
+
+
+            continue;
+
+        }
+
+
+        programacionSemanal[dia]
+        .push(
+            horarioSemanalSeleccionadoId
+        );
+
+    }
+
+
+    renderizarProgramacionSemanal();
+
+}
+
+
+function renderizarProgramacionSemanal(){
+
+    Object.entries(
+        programacionSemanal
+    )
+    .forEach(
+        (
+            [
+                dia,
+                horarioIds
+            ]
+        )=>{
+
+            const diaCapitalizado =
+            dia.charAt(0)
+            .toUpperCase()
+            +
+            dia.slice(1);
+
+
+            const contenedor =
+            document.getElementById(
+                `programacionSemanal${diaCapitalizado}`
+            );
+
+
+            const contador =
+            document.getElementById(
+                `contadorSemanal${diaCapitalizado}`
+            );
+
+
+            if(contador){
+
+                contador.textContent =
+                `${horarioIds.length} horario${
+                    horarioIds.length === 1
+                    ?
+                    ""
+                    :
+                    "s"
+                }`;
+
+            }
+
+
+            if(!contenedor){
+
+                return;
+
+            }
+
+
+            if(
+                horarioIds.length === 0
+            ){
+
+                contenedor.innerHTML = `
+
+                    <div class="sin-horarios-dia-semanal">
+
+                        Sin horarios asignados
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            contenedor.innerHTML =
+            horarioIds.map(horarioId=>{
+
+                const horario =
+                obtenerHorarios()
+                .find(item=>
+
+                    item.id ===
+                    horarioId
+
+                );
+
+
+                const entrada =
+                horario
+                ?
+                obtenerDatosEntrada(
+                    horario
+                )
+                :
+                {};
+
+
+                const salida =
+                horario
+                ?
+                obtenerDatosSalida(
+                    horario
+                )
+                :
+                {};
+
+
+                return `
+
+                    <div class="horario-dia-semanal-item">
+
+                        <div>
+
+                            <strong>
+
+                                ${escaparHTML(
+                                    horario?.nombre ||
+                                    "Horario"
+                                )}
+
+                            </strong>
+
+                            <span>
+
+                                ${formatearHora(
+                                    entrada.programada
+                                )}
+
+                                -
+
+                                ${formatearHora(
+                                    salida.programada
+                                )}
+
+                            </span>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="btn-quitar-horario-semanal"
+                            data-dia="${dia}"
+                            data-horario-id="${horarioId}"
+                            aria-label="Quitar horario"
+                        >
+
+                            <i class="bi bi-trash"></i>
+
+                        </button>
+
+                    </div>
+
+                `;
+
+            })
+            .join("");
+
+
+            contenedor
+            .querySelectorAll(
+                ".btn-quitar-horario-semanal"
+            )
+            .forEach(boton=>{
+
+                boton.addEventListener(
+                    "click",
+                    ()=>{
+
+                        quitarHorarioSemanal(
+                            boton.dataset.dia,
+                            boton.dataset.horarioId
+                        );
+
+                    }
+                );
+
+            });
+
+        }
+    );
+
+}
+
+
+
+    function quitarHorarioSemanal(
+    dia,
+    horarioId
+){
+
+    programacionSemanal[dia] =
+    (
+        programacionSemanal[dia]
+        ||
+        []
+    )
+    .filter(id=>
+
+        id !==
+        horarioId
+
+    );
+
+
+    renderizarProgramacionSemanal();
+
+}
+    
     function crearResumenAsignacionColaborador(
     asignacion,
     horarioId
@@ -4923,84 +5671,123 @@ function crearHTMLColaboradorAsignado(
         }
 
 
-        if(
-            asignacion.tipoAsignacion ===
-            "SEMANAL"
-        ){
+if(
+    asignacion.tipoAsignacion ===
+    "SEMANAL"
+){
 
-            const dias =
-            Object.entries(
-                asignacion.diasSemana ||
-                {}
+    const diasConHorario =
+    Object.entries(
+        asignacion.programacionSemanal
+        ||
+        {}
+    )
+    .filter(
+        (
+            [
+                ,
+                horarioIds
+            ]
+        )=>
+
+            Array.isArray(
+                horarioIds
             )
-            .filter(
-                (
-                    [
-                        ,
-                        activo
-                    ]
-                )=>
-                activo
+            &&
+            horarioIds.includes(
+                horarioId
             )
-            .map(
-                (
-                    [
-                        dia
-                    ]
-                )=>
 
-                    dia.charAt(0)
-                    .toUpperCase()
-                    +
-                    dia.slice(1)
+    )
+    .map(
+        (
+            [
+                dia
+            ]
+        )=>
 
+            formatearNombreDia(
+                dia
             )
-            .join(", ");
+
+    );
 
 
-            return `
+    const cantidadColaboradores =
+    asignacion.cantidadColaboradores
+    ||
+    asignacion.colaboradorIds
+    ?.length
+    ||
+    0;
 
-                <div class="asignacion-horario-card">
 
-                    <div class="asignacion-horario-icono">
+    return `
 
-                        <i class="bi bi-calendar-week"></i>
+        <div class="asignacion-horario-card">
 
-                    </div>
+            <div class="asignacion-horario-icono">
 
-                    <div>
+                <i class="bi bi-calendar-week"></i>
 
-                        <strong>
-                            Asignación semanal
-                        </strong>
+            </div>
 
-                        <p>
-                            ${escaparHTML(
-                                dias
-                            )}
-                        </p>
 
-                        <small>
+            <div>
 
-                            ${formatearFechaVisible(
-                                asignacion.fechaInicio
-                            )}
+                <strong>
+                    Programación semanal
+                </strong>
 
-                            hasta
+                <p>
 
-                            ${formatearFechaVisible(
-                                asignacion.fechaFin
-                            )}
+                    ${
+                        escaparHTML(
+                            diasConHorario.join(
+                                ", "
+                            )
+                            ||
+                            "Sin días configurados"
+                        )
+                    }
 
-                        </small>
+                </p>
 
-                    </div>
+                <small>
 
-                </div>
+                    ${formatearFechaVisible(
+                        asignacion.fechaInicio
+                    )}
 
-            `;
+                    hasta
 
-        }
+                    ${formatearFechaVisible(
+                        asignacion.fechaFin
+                    )}
+
+                </small>
+
+                <small>
+
+                    ${cantidadColaboradores}
+
+                    colaborador${
+                        cantidadColaboradores === 1
+                        ?
+                        ""
+                        :
+                        "es"
+                    }
+
+                </small>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
 
 
         const diasHorario =
@@ -5064,6 +5851,55 @@ function crearHTMLColaboradorAsignado(
 
     }
 
+buscarHorarioSemanal
+?.addEventListener(
+    "focus",
+    renderizarOpcionesHorarioSemanal
+);
+
+
+buscarHorarioSemanal
+?.addEventListener(
+    "input",
+    ()=>{
+
+        horarioSemanalSeleccionadoId =
+        null;
+
+        actualizarHorarioSemanalSeleccionado();
+
+        renderizarOpcionesHorarioSemanal();
+
+    }
+);
+
+
+limpiarHorarioSemanal
+?.addEventListener(
+    "click",
+    ()=>{
+
+        horarioSemanalSeleccionadoId =
+        null;
+
+        buscarHorarioSemanal.value =
+        "";
+
+        opcionesHorarioSemanal.hidden =
+        true;
+
+        actualizarHorarioSemanalSeleccionado();
+
+    }
+);
+
+
+btnAgregarHorarioSemanal
+?.addEventListener(
+    "click",
+    agregarHorarioAProgramacionSemanal
+);
+    
 buscarColaboradorAsignacion
 ?.addEventListener(
     "input",
