@@ -335,12 +335,15 @@ onSnapshot(
 
 );
 
-    function obtenerNombreColaborador(
+function obtenerNombreColaborador(
     colaborador
 ){
 
     const nombres =
     String(
+        colaborador.datosPersonales
+        ?.nombres
+        ||
         colaborador.nombres
         ||
         colaborador.nombre
@@ -352,6 +355,9 @@ onSnapshot(
 
     const apellidos =
     String(
+        colaborador.datosPersonales
+        ?.apellidos
+        ||
         colaborador.apellidos
         ||
         colaborador.apellido
@@ -361,12 +367,8 @@ onSnapshot(
     .trim();
 
 
-    const nombreCompleto =
-    `${apellidos} ${nombres}`
-    .trim();
-
-
-    return nombreCompleto
+    return `${apellidos} ${nombres}`
+    .trim()
     ||
     "Colaborador sin nombre";
 
@@ -381,18 +383,24 @@ function obtenerDocumentoColaborador(
     return String(
 
         colaborador.documento
+        ?.numero
+
         ||
+
         colaborador.numeroDocumento
+
         ||
+
         colaborador.dni
+
         ||
+
         ""
 
     )
     .trim();
 
 }
-
 
 
 function obtenerInicialesColaborador(
@@ -558,36 +566,83 @@ function renderizarColaboradoresAsignacion(){
         );
 
 
-        const sucursal =
-        colaborador.sucursalNombre
-        ||
-        colaborador.nombreSucursal
-        ||
-        "";
+const sucursal =
+colaborador.organizacion
+?.sucursal
+
+||
+
+colaborador.sucursalNombre
+
+||
+
+colaborador.nombreSucursal
+
+||
+
+"";
 
 
-        const area =
-        colaborador.areaNombre
-        ||
-        colaborador.nombreArea
-        ||
-        "";
+const area =
+colaborador.organizacion
+?.area
+
+||
+
+colaborador.areaNombre
+
+||
+
+colaborador.nombreArea
+
+||
+
+"";
 
 
-        const datosSecundarios =
-        [
-            documento
-            ?
-            `Documento: ${documento}`
-            :
-            "",
+const subarea =
+colaborador.organizacion
+?.subarea
 
-            sucursal,
+||
 
-            area
-        ]
-        .filter(Boolean)
-        .join(" · ");
+colaborador.subareaNombre
+
+||
+
+colaborador.nombreSubarea
+
+||
+
+"";
+
+
+const tipoDocumento =
+String(
+    colaborador.documento
+    ?.tipo
+    ||
+    ""
+)
+.trim();
+
+
+const datosSecundarios =
+[
+    documento
+    ?
+    `${tipoDocumento || "Documento"}: ${documento}`
+    :
+    "",
+
+    sucursal,
+
+    area,
+
+    subarea
+]
+.filter(Boolean)
+.join(" · ");
 
 
         return `
