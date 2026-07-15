@@ -2769,7 +2769,7 @@
 
 .modal-asignar-horario{
 
-    width:min(1080px, 96vw);
+    min-width: max-content;
 
     max-height:94vh;
 
