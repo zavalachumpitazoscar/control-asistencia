@@ -127,6 +127,16 @@ export function iniciarHorarios(){
         "btnAsignarHorario"
     );
 
+    const btnAsignarColaboradores =
+    document.getElementById(
+    "btnAsignarColaboradores"
+    );
+
+
+    const btnAsignarColaboradoresVacio =
+    document.getElementById(
+    "btnAsignarColaboradoresVacio"
+    );
 
     let horarios = [];
 
@@ -955,6 +965,55 @@ function limpiarDetalleHorario(){
 }
 
 
+    function abrirAsignacionColaboradores(){
+
+    const horario =
+    obtenerHorarioSeleccionado();
+
+
+    if(!horario){
+
+        Swal.fire({
+
+            icon:"warning",
+
+            title:"Selecciona un horario",
+
+            text:
+            "Primero debes seleccionar el horario que deseas asignar."
+
+        });
+
+        return;
+
+    }
+
+
+    if(
+        horario.estado !==
+        "ACTIVO"
+    ){
+
+        Swal.fire({
+
+            icon:"warning",
+
+            title:"Horario inactivo",
+
+            text:
+            "Debes activar el horario antes de asignarlo a colaboradores."
+
+        });
+
+        return;
+
+    }
+
+
+    asignaciones.abrir();
+
+}
+
 
     function obtenerHorarioSeleccionado(){
 
@@ -1002,21 +1061,37 @@ function limpiarDetalleHorario(){
     }
 
 
-    if(btnAsignarHorario){
+if(btnAsignarHorario){
 
-        btnAsignarHorario.onclick =
-        asignaciones.abrir;
+    btnAsignarHorario.onclick =
+    abrirAsignacionColaboradores;
 
-    }
+}
 
 
-    document.getElementById(
-        "btnAsignarHorarioVacio"
-    )
-    ?.addEventListener(
-        "click",
-        asignaciones.abrir
-    );
+if(btnAsignarColaboradores){
+
+    btnAsignarColaboradores.onclick =
+    abrirAsignacionColaboradores;
+
+}
+
+
+if(btnAsignarColaboradoresVacio){
+
+    btnAsignarColaboradoresVacio.onclick =
+    abrirAsignacionColaboradores;
+
+}
+
+
+document.getElementById(
+    "btnAsignarHorarioVacio"
+)
+?.addEventListener(
+    "click",
+    abrirAsignacionColaboradores
+);
 
 
     if(buscarHorario){
