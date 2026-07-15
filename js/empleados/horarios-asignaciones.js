@@ -2664,10 +2664,25 @@ colaboradoresSeleccionados.size;
 
     boton.addEventListener(
         "click",
-        ()=>{
+        evento=>{
+
+            evento.preventDefault();
+
+            evento.stopPropagation();
+
+
+            const colaboradorId =
+            boton.dataset.colaboradorId;
+
+
+            console.log(
+                "Abriendo calendario del colaborador:",
+                colaboradorId
+            );
+
 
             abrirCalendarioColaborador(
-                boton.dataset.colaboradorId
+                colaboradorId
             );
 
         }
