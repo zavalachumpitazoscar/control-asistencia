@@ -2507,6 +2507,342 @@
 </div>
 
 
+<!--======================================
+    MODAL EDITAR DÍA DEL COLABORADOR
+=======================================-->
+
+<div
+    id="modalEditarDiaColaborador"
+    class="modal"
+>
+
+    <div class="modal-contenido modal-editar-dia-colaborador">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h3 id="tituloEditarDiaColaborador">
+                    Editar programación del día
+                </h3>
+
+                <p id="subtituloEditarDiaColaborador">
+                    Modifica únicamente esta fecha.
+                </p>
+
+            </div>
+
+
+            <button
+                id="cerrarEditarDiaColaborador"
+                type="button"
+                aria-label="Cerrar"
+            >
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <div class="editar-dia-body">
+
+            <!-- INFORMACIÓN DEL DÍA -->
+
+            <div class="resumen-dia-seleccionado">
+
+                <div class="resumen-dia-icono">
+
+                    <i class="bi bi-calendar-event"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Fecha seleccionada
+                    </span>
+
+                    <strong id="fechaEditarDiaColaborador">
+                        --
+                    </strong>
+
+                    <p id="nombreEditarDiaColaborador">
+                        Colaborador
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- HORARIOS ACTUALES -->
+
+            <div class="seccion-formulario">
+
+                <div class="titulo-seccion-formulario">
+
+                    <div class="icono-seccion">
+
+                        <i class="bi bi-clock-history"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            Horarios actuales
+                        </h4>
+
+                        <p>
+                            Programación efectiva antes de aplicar el cambio.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="horariosActualesEditarDia"
+                    class="horarios-actuales-editar-dia"
+                ></div>
+
+            </div>
+
+
+            <!-- TIPO DE CAMBIO -->
+
+            <div class="seccion-formulario">
+
+                <div class="titulo-seccion-formulario">
+
+                    <div class="icono-seccion">
+
+                        <i class="bi bi-sliders"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            Acción para esta fecha
+                        </h4>
+
+                        <p>
+                            El cambio afectará únicamente al día seleccionado.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="acciones-editar-dia-grid">
+
+                    <label class="accion-editar-dia">
+
+                        <input
+                            type="radio"
+                            name="accionEditarDia"
+                            value="REEMPLAZAR"
+                            checked
+                        >
+
+                        <span>
+
+                            <i class="bi bi-arrow-repeat"></i>
+
+                            <strong>
+                                Reemplazar horarios
+                            </strong>
+
+                            <small>
+                                Ignora la programación original y utiliza los horarios seleccionados.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+
+                    <label class="accion-editar-dia">
+
+                        <input
+                            type="radio"
+                            name="accionEditarDia"
+                            value="AGREGAR"
+                        >
+
+                        <span>
+
+                            <i class="bi bi-plus-circle"></i>
+
+                            <strong>
+                                Agregar horarios
+                            </strong>
+
+                            <small>
+                                Conserva los horarios actuales y añade otros.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+
+                    <label class="accion-editar-dia">
+
+                        <input
+                            type="radio"
+                            name="accionEditarDia"
+                            value="SIN_HORARIO"
+                        >
+
+                        <span>
+
+                            <i class="bi bi-calendar-x"></i>
+
+                            <strong>
+                                Dejar sin horario
+                            </strong>
+
+                            <small>
+                                El colaborador no tendrá horario en esta fecha.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+
+                    <label class="accion-editar-dia">
+
+                        <input
+                            type="radio"
+                            name="accionEditarDia"
+                            value="RESTAURAR"
+                        >
+
+                        <span>
+
+                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                            <strong>
+                                Restaurar programación
+                            </strong>
+
+                            <small>
+                                Elimina el cambio puntual y recupera la programación original.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- SELECCIÓN DE HORARIOS -->
+
+            <div
+                id="seccionHorariosEditarDia"
+                class="seccion-formulario"
+            >
+
+                <div class="titulo-seccion-formulario">
+
+                    <div class="icono-seccion">
+
+                        <i class="bi bi-clock"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            Seleccionar horarios
+                        </h4>
+
+                        <p>
+                            Puedes seleccionar uno o varios horarios que no se superpongan.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="campo-formulario">
+
+                    <label for="buscarHorarioEditarDia">
+                        Buscar horario
+                    </label>
+
+                    <div class="busqueda-colaborador-asignacion">
+
+                        <i class="bi bi-search"></i>
+
+                        <input
+                            id="buscarHorarioEditarDia"
+                            type="search"
+                            placeholder="Buscar por nombre"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="listaHorariosEditarDia"
+                    class="lista-horarios-editar-dia"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <button
+                id="cancelarEditarDiaColaborador"
+                type="button"
+                class="btn-secundario"
+            >
+
+                Cancelar
+
+            </button>
+
+
+            <button
+                id="guardarEditarDiaColaborador"
+                type="button"
+                class="btn-principal"
+            >
+
+                <i class="bi bi-check-circle"></i>
+
+                Aplicar cambio
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 
 </section>
