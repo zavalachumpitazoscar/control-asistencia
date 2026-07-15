@@ -204,7 +204,7 @@
         minmax(330px,420px)
         minmax(0,1fr);
 
-    min-height:650px;
+    min-height:360px;
 
     background:#ffffff;
 
@@ -299,6 +299,7 @@
 .lista-horarios{
 
     display:flex;
+
     flex-direction:column;
 
     gap:10px;
@@ -306,6 +307,10 @@
     padding:14px;
 
     overflow-y:auto;
+
+    min-height:0;
+
+    max-height:560px;
 
 }
 
@@ -540,9 +545,7 @@
 
 .detalle-horario-vacio{
 
-    height:100%;
-
-    min-height:600px;
+    min-height:360px;
 
     padding:35px;
 
@@ -2034,6 +2037,2123 @@
     .form-grid-dos-secundario{
 
         grid-template-columns:1fr;
+
+    }
+
+}
+
+/*=====================================================
+    AJUSTES NUEVA VISTA DE HORARIOS
+=====================================================*/
+
+.horarios-layout{
+
+    display:grid;
+
+    grid-template-columns:
+        minmax(320px,390px)
+        minmax(0,1fr);
+
+    min-height:360px;
+
+    gap:0;
+
+    align-items:start;
+
+    background:#ffffff;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 14px 38px rgba(15,23,42,.07);
+
+}
+
+
+
+/*=====================================================
+    PANEL IZQUIERDO
+=====================================================*/
+
+.panel-listado-horarios{
+
+    min-width:0;
+
+    max-height:650px;
+
+    overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
+
+    background:#f8fafc;
+
+    border-right:1px solid #e2e8f0;
+
+}
+
+
+.lista-horarios{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+    padding:14px;
+
+    overflow-y:auto;
+
+    min-height:0;
+
+    max-height:560px;
+
+}
+
+
+.horario-card-descripcion{
+
+    display:-webkit-box;
+
+    -webkit-line-clamp:2;
+
+    -webkit-box-orient:vertical;
+
+    overflow:hidden;
+
+}
+
+
+
+/*=====================================================
+    INFORMACIÓN ADICIONAL DE LA TARJETA
+=====================================================*/
+
+.horario-card-info{
+
+    display:flex;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:8px 14px;
+
+    padding-top:9px;
+
+    border-top:1px solid #f1f5f9;
+
+}
+
+
+.horario-card-info span{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    color:#64748b;
+
+    font-size:11px;
+
+    font-weight:600;
+
+}
+
+
+.horario-card-info i{
+
+    color:#2563eb;
+
+}
+
+
+
+/*=====================================================
+    PANEL DERECHO
+=====================================================*/
+
+.panel-detalle-horario{
+
+    min-width:0;
+
+    min-height:360px;
+
+    height:auto;
+
+    align-self:start;
+
+    background:#ffffff;
+
+}
+
+
+.detalle-horario-vacio{
+
+    min-height:360px;
+
+    padding:35px 25px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+}
+
+
+.detalle-horario{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+
+    padding:20px;
+
+    min-height:0;
+
+    height:auto;
+
+}
+
+
+.detalle-horario[hidden],
+.detalle-horario-vacio[hidden]{
+
+    display:none !important;
+
+}
+
+
+
+/*=====================================================
+    CABECERA COMPACTA
+=====================================================*/
+
+.detalle-horario-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:18px;
+
+    padding-bottom:16px;
+
+    border-bottom:1px solid #e2e8f0;
+
+}
+
+
+.detalle-titulo-linea h3{
+
+    margin:0;
+
+    font-size:21px;
+
+}
+
+
+.detalle-horario-header p{
+
+    margin:6px 0 0;
+
+    font-size:13px;
+
+    line-height:1.5;
+
+    color:#64748b;
+
+}
+
+
+.acciones-detalle-horario{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:flex-end;
+
+    gap:8px;
+
+    flex-wrap:wrap;
+
+}
+
+
+.acciones-detalle-horario button{
+
+    min-height:38px;
+
+    padding:9px 13px;
+
+    border-radius:10px;
+
+    white-space:nowrap;
+
+}
+
+
+
+/*=====================================================
+    BOTÓN ASIGNAR HORARIO
+=====================================================*/
+
+.btn-asignar-horario{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:7px;
+
+    padding:10px 14px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    cursor:pointer;
+
+    font-weight:700;
+
+    transition:.2s;
+
+}
+
+
+.btn-asignar-horario:hover{
+
+    background:#1d4ed8;
+
+}
+
+
+.btn-asignar-horario:disabled{
+
+    opacity:.55;
+
+    cursor:not-allowed;
+
+}
+
+
+
+/*=====================================================
+    RESUMEN
+=====================================================*/
+
+.resumen-detalle-horario{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(110px,1fr));
+
+    gap:10px;
+
+}
+
+
+.resumen-horario-card{
+
+    padding:13px 14px;
+
+    border-radius:13px;
+
+    min-height:72px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+}
+
+
+
+/*=====================================================
+    SECCIONES DEL DETALLE
+=====================================================*/
+
+.detalle-seccion{
+
+    padding:16px;
+
+    border-radius:15px;
+
+    margin:0;
+
+}
+
+
+.detalle-seccion-titulo{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:11px;
+
+    margin-bottom:14px;
+
+}
+
+
+.detalle-seccion-titulo > i{
+
+    width:36px;
+
+    height:36px;
+
+    flex:0 0 36px;
+
+}
+
+
+.detalle-datos-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(125px,1fr));
+
+    gap:10px;
+
+}
+
+
+.detalle-datos-grid > div{
+
+    padding:11px 12px;
+
+    min-height:64px;
+
+    border-radius:11px;
+
+}
+
+
+
+/*=====================================================
+    REFRIGERIO
+=====================================================*/
+
+.refrigerio-configurado{
+
+    padding:12px 14px;
+
+    border-radius:12px;
+
+}
+
+
+.refrigerio-configurado div{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+}
+
+
+.refrigerio-configurado strong{
+
+    font-size:13px;
+
+}
+
+
+.refrigerio-configurado span{
+
+    font-size:12px;
+
+}
+
+
+
+/*=====================================================
+    ASIGNACIONES
+=====================================================*/
+
+.sin-asignaciones-horario,
+.sin-colaboradores-horario{
+
+    min-height:145px;
+
+    padding:22px 18px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+    border:1px dashed #cbd5e1;
+
+    border-radius:13px;
+
+    color:#64748b;
+
+}
+
+
+.sin-asignaciones-horario i,
+.sin-colaboradores-horario i{
+
+    font-size:29px;
+
+    color:#94a3b8;
+
+}
+
+
+.sin-asignaciones-horario h4,
+.sin-colaboradores-horario h4{
+
+    margin:9px 0 4px;
+
+    color:#334155;
+
+}
+
+
+.sin-asignaciones-horario p,
+.sin-colaboradores-horario p{
+
+    max-width:430px;
+
+    margin:0 0 14px;
+
+    font-size:12px;
+
+    line-height:1.5;
+
+}
+
+
+.lista-asignaciones-horario{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+
+.asignacion-horario-card{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:12px;
+
+    padding:13px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+}
+
+
+.asignacion-horario-icono{
+
+    width:38px;
+
+    height:38px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 38px;
+
+    border-radius:10px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+}
+
+
+
+/*=====================================================
+    TABLET
+=====================================================*/
+
+@media(max-width:1100px){
+
+    .horarios-layout{
+
+        grid-template-columns:
+            minmax(290px,340px)
+            minmax(0,1fr);
+
+    }
+
+
+    .resumen-detalle-horario,
+    .detalle-datos-grid{
+
+        grid-template-columns:
+            repeat(2,minmax(120px,1fr));
+
+    }
+
+
+    .detalle-horario-header{
+
+        flex-direction:column;
+
+    }
+
+
+    .acciones-detalle-horario{
+
+        width:100%;
+
+        justify-content:flex-start;
+
+    }
+
+}
+
+
+
+/*=====================================================
+    MÓVIL
+=====================================================*/
+
+@media(max-width:780px){
+
+    .horarios-layout{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .panel-listado-horarios{
+
+        max-height:none;
+
+        border-right:none;
+
+        border-bottom:1px solid #e2e8f0;
+
+    }
+
+
+    .lista-horarios{
+
+        max-height:430px;
+
+    }
+
+
+    .panel-detalle-horario{
+
+        min-height:300px;
+
+    }
+
+
+    .detalle-horario{
+
+        padding:15px;
+
+    }
+
+
+    .resumen-detalle-horario,
+    .detalle-datos-grid{
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+
+    }
+
+
+    .acciones-detalle-horario{
+
+        display:grid;
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+
+    }
+
+
+    .acciones-detalle-horario button{
+
+        width:100%;
+
+    }
+
+
+    .btn-asignar-horario{
+
+        grid-column:1 / -1;
+
+    }
+
+}
+
+
+@media(max-width:480px){
+
+    .resumen-detalle-horario{
+
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+
+    }
+
+
+    .detalle-datos-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .acciones-detalle-horario{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .btn-asignar-horario{
+
+        grid-column:auto;
+
+    }
+
+}
+
+
+
+
+/*=====================================================
+    MODAL ASIGNAR HORARIO
+=====================================================*/
+
+.modal-asignar-horario{
+
+    width:min(1080px, 96vw);
+
+    max-height:94vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+#formAsignarHorario{
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-height:0;
+
+    flex:1;
+
+}
+
+
+.asignar-horario-body{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow-y:auto;
+
+    padding:23px 25px;
+
+    background:#f8fafc;
+
+}
+
+
+
+/*=====================================================
+    BOTÓN CERRAR MODAL ASIGNACIÓN
+=====================================================*/
+
+#cerrarAsignarHorario{
+
+    width:38px;
+
+    height:38px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#f1f5f9;
+
+    color:#475569;
+
+    font-size:25px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+#cerrarAsignarHorario:hover{
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+}
+
+
+
+/*=====================================================
+    HORARIO SELECCIONADO
+=====================================================*/
+
+.horario-seleccionado-asignacion{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:16px 18px;
+
+    margin-bottom:18px;
+
+    border:1px solid #bfdbfe;
+
+    border-radius:15px;
+
+    background:#eff6ff;
+
+}
+
+
+.horario-seleccionado-icono{
+
+    width:46px;
+
+    height:46px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 46px;
+
+    border-radius:13px;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    font-size:21px;
+
+}
+
+
+.horario-seleccionado-asignacion > div:last-child{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+
+    min-width:0;
+
+}
+
+
+.horario-seleccionado-asignacion span{
+
+    color:#64748b;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    letter-spacing:.04em;
+
+}
+
+
+.horario-seleccionado-asignacion strong{
+
+    color:#1e293b;
+
+    font-size:16px;
+
+}
+
+
+.horario-seleccionado-asignacion p{
+
+    margin:0;
+
+    color:#2563eb;
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+
+
+/*=====================================================
+    TIPOS DE ASIGNACIÓN
+=====================================================*/
+
+.tipos-asignacion-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+    gap:13px;
+
+}
+
+
+.tipo-asignacion-card{
+
+    min-width:0;
+
+    cursor:pointer;
+
+}
+
+
+.tipo-asignacion-card input{
+
+    position:absolute;
+
+    opacity:0;
+
+    pointer-events:none;
+
+}
+
+
+.tipo-asignacion-contenido{
+
+    min-height:135px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    padding:18px;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:15px;
+
+    background:#ffffff;
+
+    text-align:center;
+
+    transition:.2s;
+
+}
+
+
+.tipo-asignacion-contenido > i{
+
+    width:44px;
+
+    height:44px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:13px;
+
+    background:#f1f5f9;
+
+    color:#64748b;
+
+    font-size:20px;
+
+    transition:.2s;
+
+}
+
+
+.tipo-asignacion-contenido strong{
+
+    color:#334155;
+
+    font-size:14px;
+
+}
+
+
+.tipo-asignacion-contenido small{
+
+    color:#64748b;
+
+    font-size:11px;
+
+    line-height:1.45;
+
+}
+
+
+.tipo-asignacion-card:hover
+.tipo-asignacion-contenido{
+
+    border-color:#93c5fd;
+
+    transform:translateY(-1px);
+
+}
+
+
+.tipo-asignacion-card input:checked
++
+.tipo-asignacion-contenido{
+
+    border-color:#2563eb;
+
+    background:#eff6ff;
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.10);
+
+}
+
+
+.tipo-asignacion-card input:checked
++
+.tipo-asignacion-contenido
+> i{
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+}
+
+
+
+/*=====================================================
+    SECCIONES SEGÚN TIPO
+=====================================================*/
+
+.seccion-tipo-asignacion{
+
+    animation:aparecerAsignacion .2s ease;
+
+}
+
+
+.seccion-tipo-asignacion[hidden]{
+
+    display:none !important;
+
+}
+
+
+@keyframes aparecerAsignacion{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(5px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+
+/*=====================================================
+    INICIO DE PLANIFICACIÓN MENSUAL
+=====================================================*/
+
+.inicio-planificacion-mensual{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:13px;
+
+    margin-bottom:18px;
+
+}
+
+
+.opcion-inicio-planificacion{
+
+    cursor:pointer;
+
+}
+
+
+.opcion-inicio-planificacion input{
+
+    position:absolute;
+
+    opacity:0;
+
+    pointer-events:none;
+
+}
+
+
+.opcion-inicio-planificacion > span{
+
+    min-height:100px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:13px;
+
+    padding:16px;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:14px;
+
+    background:#ffffff;
+
+    transition:.2s;
+
+}
+
+
+.opcion-inicio-planificacion > span > i{
+
+    width:42px;
+
+    height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 42px;
+
+    border-radius:12px;
+
+    background:#f1f5f9;
+
+    color:#64748b;
+
+    font-size:19px;
+
+}
+
+
+.opcion-inicio-planificacion > span strong{
+
+    display:block;
+
+    margin-bottom:4px;
+
+    color:#334155;
+
+    font-size:13px;
+
+}
+
+
+.opcion-inicio-planificacion > span small{
+
+    display:block;
+
+    color:#64748b;
+
+    font-size:11px;
+
+    line-height:1.4;
+
+}
+
+
+.opcion-inicio-planificacion:hover > span{
+
+    border-color:#93c5fd;
+
+}
+
+
+.opcion-inicio-planificacion input:checked
++
+span{
+
+    border-color:#2563eb;
+
+    background:#eff6ff;
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.09);
+
+}
+
+
+.opcion-inicio-planificacion input:checked
++
+span > i{
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+}
+
+
+
+/*=====================================================
+    SELECTOR DE HORARIO DEL CALENDARIO
+=====================================================*/
+
+.selector-horario-calendario{
+
+    padding:16px;
+
+    margin-bottom:17px;
+
+    border:1px solid #dbeafe;
+
+    border-radius:14px;
+
+    background:#eff6ff;
+
+}
+
+
+.selector-horario-calendario .campo-formulario{
+
+    max-width:420px;
+
+}
+
+
+
+/*=====================================================
+    CABECERA DEL CALENDARIO
+=====================================================*/
+
+.calendario-mensual-header{
+
+    display:grid;
+
+    grid-template-columns:
+        42px
+        minmax(0,1fr)
+        42px;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:13px;
+
+}
+
+
+.calendario-mensual-header > div{
+
+    text-align:center;
+
+}
+
+
+.calendario-mensual-header h4{
+
+    margin:0;
+
+    color:#1e293b;
+
+    font-size:17px;
+
+}
+
+
+.calendario-mensual-header p{
+
+    margin:4px 0 0;
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+
+.btn-calendario-navegacion{
+
+    width:42px;
+
+    height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:1px solid #cbd5e1;
+
+    border-radius:11px;
+
+    background:#ffffff;
+
+    color:#475569;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+.btn-calendario-navegacion:hover{
+
+    border-color:#2563eb;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+}
+
+
+
+/*=====================================================
+    CALENDARIO
+=====================================================*/
+
+.calendario-asignacion{
+
+    overflow:hidden;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:15px;
+
+    background:#ffffff;
+
+}
+
+
+.calendario-dias-cabecera{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(7,minmax(0,1fr));
+
+    border-bottom:1px solid #e2e8f0;
+
+    background:#f8fafc;
+
+}
+
+
+.calendario-dias-cabecera span{
+
+    padding:11px 6px;
+
+    color:#64748b;
+
+    text-align:center;
+
+    font-size:11px;
+
+    font-weight:800;
+
+}
+
+
+.calendario-dias-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(7,minmax(0,1fr));
+
+}
+
+
+.calendario-dia{
+
+    position:relative;
+
+    min-height:88px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:7px;
+
+    padding:9px;
+
+    border:none;
+
+    border-right:1px solid #e2e8f0;
+
+    border-bottom:1px solid #e2e8f0;
+
+    background:#ffffff;
+
+    color:#334155;
+
+    cursor:pointer;
+
+    text-align:left;
+
+    transition:.15s;
+
+}
+
+
+.calendario-dia:nth-child(7n){
+
+    border-right:none;
+
+}
+
+
+.calendario-dia:hover{
+
+    background:#f8fafc;
+
+}
+
+
+.calendario-dia-vacio{
+
+    cursor:default;
+
+    background:#f8fafc;
+
+}
+
+
+.calendario-dia-vacio:hover{
+
+    background:#f8fafc;
+
+}
+
+
+.numero-dia{
+
+    width:28px;
+
+    height:28px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:8px;
+
+    color:#334155;
+
+    font-size:12px;
+
+    font-weight:800;
+
+}
+
+
+.horario-dia-calendario{
+
+    width:100%;
+
+    display:block;
+
+    padding:5px 7px;
+
+    border-radius:7px;
+
+    overflow:hidden;
+
+    background:#dbeafe;
+
+    color:#1d4ed8;
+
+    font-size:9px;
+
+    font-weight:700;
+
+    line-height:1.3;
+
+    white-space:nowrap;
+
+    text-overflow:ellipsis;
+
+}
+
+
+.calendario-dia.programado{
+
+    background:#eff6ff;
+
+    box-shadow:
+        inset 0 0 0 2px #2563eb;
+
+}
+
+
+.calendario-dia.programado
+.numero-dia{
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+}
+
+
+
+/*=====================================================
+    RESUMEN PROGRAMACIÓN MENSUAL
+=====================================================*/
+
+.resumen-programacion-mensual{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    margin-top:15px;
+
+    padding:14px 16px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:13px;
+
+    background:#f8fafc;
+
+}
+
+
+.resumen-programacion-mensual > div{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+
+}
+
+
+.resumen-programacion-mensual span{
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+
+.resumen-programacion-mensual strong{
+
+    color:#1e293b;
+
+    font-size:19px;
+
+}
+
+
+.btn-limpiar-programacion{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:7px;
+
+    padding:9px 12px;
+
+    border:1px solid #fecaca;
+
+    border-radius:10px;
+
+    background:#fff1f2;
+
+    color:#dc2626;
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+
+
+.btn-limpiar-programacion:hover{
+
+    background:#fee2e2;
+
+}
+
+
+
+/*=====================================================
+    MESES PROGRAMADOS
+=====================================================*/
+
+.meses-programados-asignacion{
+
+    margin-top:18px;
+
+    padding-top:17px;
+
+    border-top:1px solid #e2e8f0;
+
+}
+
+
+.lista-meses-programados{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:10px;
+
+}
+
+
+.meses-programados-vacio{
+
+    grid-column:1 / -1;
+
+    padding:18px;
+
+    border:1px dashed #cbd5e1;
+
+    border-radius:12px;
+
+    color:#64748b;
+
+    text-align:center;
+
+    font-size:12px;
+
+}
+
+
+.mes-programado-item{
+
+    padding:13px 14px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+}
+
+
+.mes-programado-item > div{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+}
+
+
+.mes-programado-item strong{
+
+    color:#334155;
+
+    font-size:13px;
+
+}
+
+
+.mes-programado-item span{
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+
+
+/*=====================================================
+    PREGUNTA SIGUIENTE MES
+=====================================================*/
+
+.pregunta-siguiente-mes{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:18px;
+
+    margin-top:17px;
+
+    padding:16px;
+
+    border:1px solid #bfdbfe;
+
+    border-radius:14px;
+
+    background:#eff6ff;
+
+}
+
+
+.pregunta-siguiente-mes[hidden]{
+
+    display:none !important;
+
+}
+
+
+.pregunta-siguiente-mes > div{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:12px;
+
+}
+
+
+.pregunta-siguiente-mes > div > i{
+
+    width:39px;
+
+    height:39px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 39px;
+
+    border-radius:11px;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    font-size:17px;
+
+}
+
+
+.pregunta-siguiente-mes strong{
+
+    color:#1e293b;
+
+    font-size:13px;
+
+}
+
+
+.pregunta-siguiente-mes p{
+
+    margin:4px 0 0;
+
+    color:#64748b;
+
+    font-size:11px;
+
+    line-height:1.45;
+
+}
+
+
+
+/*=====================================================
+    TARJETAS DE ASIGNACIONES GUARDADAS
+=====================================================*/
+
+.asignacion-horario-card{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:12px;
+
+    padding:13px 14px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+}
+
+
+.asignacion-horario-card > div:last-child{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+
+    min-width:0;
+
+}
+
+
+.asignacion-horario-card strong{
+
+    color:#334155;
+
+    font-size:13px;
+
+}
+
+
+.asignacion-horario-card p{
+
+    margin:0;
+
+    color:#475569;
+
+    font-size:12px;
+
+    line-height:1.45;
+
+}
+
+
+.asignacion-horario-card small{
+
+    color:#64748b;
+
+    font-size:10px;
+
+}
+
+
+.asignacion-horario-icono{
+
+    width:38px;
+
+    height:38px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 38px;
+
+    border-radius:10px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:17px;
+
+}
+
+
+
+/*=====================================================
+    RESPONSIVE MODAL ASIGNACIÓN
+=====================================================*/
+
+@media(max-width:900px){
+
+    .modal-asignar-horario{
+
+        width:min(760px, 96vw);
+
+    }
+
+
+    .tipos-asignacion-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .tipo-asignacion-contenido{
+
+        min-height:92px;
+
+        align-items:flex-start;
+
+        text-align:left;
+
+    }
+
+
+    .inicio-planificacion-mensual{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .lista-meses-programados{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .calendario-dia{
+
+        min-height:76px;
+
+        padding:7px;
+
+    }
+
+}
+
+
+
+@media(max-width:700px){
+
+    .modal-asignar-horario{
+
+        width:100%;
+
+        height:100%;
+
+        max-height:none;
+
+        border-radius:0;
+
+    }
+
+
+    .asignar-horario-body{
+
+        padding:16px;
+
+    }
+
+
+    .horario-seleccionado-asignacion{
+
+        padding:14px;
+
+    }
+
+
+    .calendario-asignacion{
+
+        overflow-x:auto;
+
+    }
+
+
+    .calendario-dias-cabecera,
+    .calendario-dias-grid{
+
+        min-width:650px;
+
+    }
+
+
+    .pregunta-siguiente-mes{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+
+    .pregunta-siguiente-mes .btn-principal{
+
+        width:100%;
+
+    }
+
+
+    .resumen-programacion-mensual{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+
+    .btn-limpiar-programacion{
+
+        width:100%;
+
+    }
+
+}
+
+
+
+@media(max-width:480px){
+
+    .modal-header{
+
+        padding:17px;
+
+    }
+
+
+    .asignar-horario-body{
+
+        padding:12px;
+
+    }
+
+
+    .seccion-formulario{
+
+        padding:15px;
+
+    }
+
+
+    .horario-seleccionado-icono{
+
+        width:40px;
+
+        height:40px;
+
+        flex-basis:40px;
+
+    }
+
+
+    .tipo-asignacion-contenido{
+
+        padding:14px;
+
+    }
+
+
+    .opcion-inicio-planificacion > span{
+
+        padding:13px;
 
     }
 
