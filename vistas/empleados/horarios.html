@@ -547,44 +547,79 @@
                     COLABORADORES ASIGNADOS
                 =======================================-->
 
-                <div class="detalle-seccion colaboradores-horario">
+<div class="detalle-seccion colaboradores-horario">
 
-                    <div class="detalle-seccion-titulo">
+    <div class="detalle-seccion-header">
 
-                        <i class="bi bi-people"></i>
+        <div class="detalle-seccion-titulo">
 
-                        <div>
+            <i class="bi bi-people"></i>
 
-                            <h4>
-                                Colaboradores asignados
-                            </h4>
+            <div>
 
-                            <p>
-                                Colaboradores que utilizarán esta jornada.
-                            </p>
+                <h4>
+                    Colaboradores asignados
+                </h4>
 
-                        </div>
+                <p>
+                    Colaboradores que utilizarán esta jornada.
+                </p>
 
-                    </div>
+            </div>
+
+        </div>
 
 
-                    <div class="sin-colaboradores-horario">
+        <button
+            id="btnAsignarColaboradores"
+            type="button"
+            class="btn-asignar-colaboradores"
+        >
 
-                        <i class="bi bi-person-x"></i>
+            <i class="bi bi-person-plus"></i>
 
-                        <h4>
-                            No hay colaboradores asignados
-                        </h4>
+            Asignar colaboradores
 
-                        <p>
-                            La asignación a colaboradores se realizará
-                            en una siguiente etapa.
-                        </p>
+        </button>
 
-                    </div>
+    </div>
 
-                </div>
 
+    <div
+        id="listaColaboradoresHorario"
+        class="lista-colaboradores-horario"
+    >
+
+        <div class="sin-colaboradores-horario">
+
+            <i class="bi bi-person-x"></i>
+
+            <h4>
+                No hay colaboradores asignados
+            </h4>
+
+            <p>
+                Selecciona los colaboradores que utilizarán este horario.
+            </p>
+
+
+            <button
+                id="btnAsignarColaboradoresVacio"
+                type="button"
+                class="btn-principal"
+            >
+
+                <i class="bi bi-person-plus"></i>
+
+                Asignar colaboradores
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
             </div>
 
         </div>
@@ -2082,6 +2117,139 @@
                     </button>
 
                 </div>
+
+                <!--======================================
+    COLABORADORES
+=======================================-->
+
+<div class="seccion-formulario">
+
+    <div class="titulo-seccion-formulario">
+
+        <div class="icono-seccion">
+
+            <i class="bi bi-people"></i>
+
+        </div>
+
+        <div>
+
+            <h4>
+                Colaboradores
+            </h4>
+
+            <p>
+                Selecciona quiénes utilizarán esta programación.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="filtros-colaboradores-asignacion">
+
+        <div class="campo-formulario">
+
+            <label for="buscarColaboradorAsignacion">
+                Buscar colaborador
+            </label>
+
+            <div class="busqueda-colaborador-asignacion">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    id="buscarColaboradorAsignacion"
+                    type="search"
+                    placeholder="Buscar por nombre o documento"
+                    autocomplete="off"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="campo-formulario">
+
+            <label for="filtroSucursalAsignacion">
+                Sucursal
+            </label>
+
+            <select id="filtroSucursalAsignacion">
+
+                <option value="">
+                    Todas las sucursales
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="campo-formulario">
+
+            <label for="filtroAreaAsignacion">
+                Área
+            </label>
+
+            <select id="filtroAreaAsignacion">
+
+                <option value="">
+                    Todas las áreas
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <div class="cabecera-colaboradores-asignacion">
+
+        <label class="seleccionar-todos-colaboradores">
+
+            <input
+                id="seleccionarTodosColaboradores"
+                type="checkbox"
+            >
+
+            <span>
+                Seleccionar visibles
+            </span>
+
+        </label>
+
+
+        <span id="contadorColaboradoresSeleccionados">
+
+            0 colaboradores seleccionados
+
+        </span>
+
+    </div>
+
+
+    <div
+        id="listaColaboradoresAsignacion"
+        class="lista-colaboradores-asignacion"
+    >
+
+        <div class="estado-cargando-colaboradores">
+
+            <i class="bi bi-hourglass-split"></i>
+
+            <span>
+                Cargando colaboradores...
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
 
             </form>
 
