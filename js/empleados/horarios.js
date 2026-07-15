@@ -536,21 +536,39 @@ export function iniciarHorarios(){
             `;
 
 
-            tarjeta.onclick =
-            ()=>{
+tarjeta.onclick =
+()=>{
 
-                horarioSeleccionadoId =
-                horario.id;
+    console.log(
+        "Horario seleccionado:",
+        horario
+    );
 
 
-                renderizarHorarios();
+    horarioSeleccionadoId =
+    horario.id;
 
 
-                mostrarDetalleHorario(
-                    horario
-                );
+    renderizarHorarios();
 
-            };
+
+    try{
+
+        mostrarDetalleHorario(
+            horario
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "Error mostrando detalle del horario:",
+            error
+        );
+
+    }
+
+};
 
 
             listaHorarios.appendChild(
@@ -563,12 +581,18 @@ export function iniciarHorarios(){
 
 
 
-    function mostrarDetalleHorario(
-        horario
-    ){
+function mostrarDetalleHorario(
+    horario
+){
 
-        horarioSeleccionadoId =
-        horario.id;
+    console.log(
+        "Ejecutando mostrarDetalleHorario:",
+        horario
+    );
+
+
+    horarioSeleccionadoId =
+    horario.id;
 
 
         const entrada =
@@ -583,12 +607,20 @@ export function iniciarHorarios(){
         );
 
 
-        detalleVacio.hidden =
-        true;
+if(detalleVacio){
+
+    detalleVacio.hidden =
+    true;
+
+}
 
 
-        detalleHorario.hidden =
-        false;
+if(detalleHorario){
+
+    detalleHorario.hidden =
+    false;
+
+}
 
 
         asignarTexto(
@@ -703,7 +735,21 @@ export function iniciarHorarios(){
         );
 
 
-        asignaciones.actualizarDetalle();
+        try{
+
+    asignaciones
+    ?.actualizarDetalle
+    ?.();
+
+}
+catch(error){
+
+    console.error(
+        "Error actualizando asignaciones:",
+        error
+    );
+
+}
 
     }
 
@@ -867,20 +913,43 @@ export function iniciarHorarios(){
 
 
 
-    function limpiarDetalleHorario(){
+function limpiarDetalleHorario(){
 
-        horarioSeleccionadoId =
-        null;
+    horarioSeleccionadoId =
+    null;
 
+
+    if(detalleVacio){
 
         detalleVacio.hidden =
         false;
 
+        detalleVacio.removeAttribute(
+            "hidden"
+        );
+
+        detalleVacio.style.display =
+        "flex";
+
+    }
+
+
+    if(detalleHorario){
 
         detalleHorario.hidden =
         true;
 
+        detalleHorario.setAttribute(
+            "hidden",
+            ""
+        );
+
+        detalleHorario.style.display =
+        "none";
+
     }
+
+}
 
 
 
