@@ -13,7 +13,7 @@
             </h2>
 
             <p>
-                Crea y administra los horarios laborales de la empresa.
+                Crea las jornadas laborales y administra sus asignaciones.
             </p>
 
         </div>
@@ -156,8 +156,8 @@
                 </h3>
 
                 <p>
-                    Aquí podrás visualizar sus días, horas,
-                    recurrencia y colaboradores asignados.
+                    Aquí podrás visualizar la jornada,
+                    sus reglas y asignaciones.
                 </p>
 
             </div>
@@ -169,7 +169,9 @@
             hidden>
 
 
-                <!-- CABECERA DEL DETALLE -->
+                <!--======================================
+                    CABECERA DEL DETALLE
+                =======================================-->
 
                 <div class="detalle-horario-header">
 
@@ -201,6 +203,19 @@
 
                     <div class="acciones-detalle-horario">
 
+
+                        <button
+                        id="btnAsignarHorario"
+                        type="button"
+                        class="btn-asignar-horario">
+
+                            <i class="bi bi-calendar-plus"></i>
+
+                            Asignar horario
+
+                        </button>
+
+
                         <button
                         id="btnEditarHorario"
                         type="button"
@@ -230,7 +245,9 @@
 
 
 
-                <!-- RESUMEN -->
+                <!--======================================
+                    RESUMEN
+                =======================================-->
 
                 <div class="resumen-detalle-horario">
 
@@ -276,11 +293,11 @@
                     <div class="resumen-horario-card">
 
                         <span>
-                            Frecuencia
+                            Asignaciones
                         </span>
 
-                        <strong id="detalleFrecuencia">
-                            Semanal
+                        <strong id="detalleCantidadAsignaciones">
+                            0
                         </strong>
 
                     </div>
@@ -289,7 +306,9 @@
 
 
 
-                <!-- INFORMACIÓN DEL HORARIO -->
+                <!--======================================
+                    JORNADA LABORAL
+                =======================================-->
 
                 <div class="detalle-seccion">
 
@@ -343,10 +362,62 @@
                         <div>
 
                             <span>
+                                Permitir entrada hasta
+                            </span>
+
+                            <strong id="detalleEntradaHasta">
+                                --:--
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Tolerancia
+                            </span>
+
+                            <strong id="detalleToleranciaEntrada">
+                                0 minutos
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Permitir salida desde
+                            </span>
+
+                            <strong id="detalleSalidaDesde">
+                                --:--
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
                                 Salida programada
                             </span>
 
                             <strong id="detalleSalidaProgramada">
+                                --:--
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Permitir salida hasta
+                            </span>
+
+                            <strong id="detalleSalidaHasta">
                                 --:--
                             </strong>
 
@@ -371,40 +442,9 @@
 
 
 
-                <!-- DÍAS -->
-
-                <div class="detalle-seccion">
-
-                    <div class="detalle-seccion-titulo">
-
-                        <i class="bi bi-calendar3"></i>
-
-                        <div>
-
-                            <h4>
-                                Días de aplicación
-                            </h4>
-
-                            <p>
-                                Días en los que se utiliza este horario.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                    id="detalleDiasHorario"
-                    class="detalle-dias-horario">
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- REFRIGERIO -->
+                <!--======================================
+                    REFRIGERIO
+                =======================================-->
 
                 <div class="detalle-seccion">
 
@@ -441,7 +481,71 @@
 
 
 
-                <!-- COLABORADORES ASIGNADOS -->
+                <!--======================================
+                    ASIGNACIONES
+                =======================================-->
+
+                <div class="detalle-seccion asignaciones-horario">
+
+                    <div class="detalle-seccion-titulo">
+
+                        <i class="bi bi-calendar-check"></i>
+
+                        <div>
+
+                            <h4>
+                                Asignaciones del horario
+                            </h4>
+
+                            <p>
+                                Fechas y periodos en los que se utilizará esta jornada.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                    id="listaAsignacionesHorario"
+                    class="lista-asignaciones-horario">
+
+                        <div class="sin-asignaciones-horario">
+
+                            <i class="bi bi-calendar-x"></i>
+
+                            <h4>
+                                No hay asignaciones
+                            </h4>
+
+                            <p>
+                                Este horario todavía no ha sido asignado
+                                a ninguna fecha o periodo.
+                            </p>
+
+
+                            <button
+                            id="btnAsignarHorarioVacio"
+                            type="button"
+                            class="btn-principal">
+
+                                <i class="bi bi-calendar-plus"></i>
+
+                                Asignar horario
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!--======================================
+                    COLABORADORES ASIGNADOS
+                =======================================-->
 
                 <div class="detalle-seccion colaboradores-horario">
 
@@ -456,7 +560,7 @@
                             </h4>
 
                             <p>
-                                Colaboradores que utilizan este horario.
+                                Colaboradores que utilizarán esta jornada.
                             </p>
 
                         </div>
@@ -473,8 +577,8 @@
                         </h4>
 
                         <p>
-                            La asignación de horarios se implementará
-                            en la siguiente etapa.
+                            La asignación a colaboradores se realizará
+                            en una siguiente etapa.
                         </p>
 
                     </div>
@@ -490,7 +594,7 @@
 
 
     <!--======================================
-        MODAL HORARIO
+        MODAL CREAR O EDITAR HORARIO
     =======================================-->
 
     <div
@@ -500,7 +604,9 @@
         <div class="modal-contenido modal-horario">
 
 
-            <!-- ENCABEZADO -->
+            <!--======================================
+                ENCABEZADO
+            =======================================-->
 
             <div class="modal-header">
 
@@ -530,7 +636,9 @@
 
 
 
-            <!-- FORMULARIO -->
+            <!--======================================
+                FORMULARIO
+            =======================================-->
 
             <form id="formHorario">
 
@@ -591,9 +699,7 @@
                             <div class="campo-formulario">
 
                                 <label for="estadoHorario">
-
                                     Estado
-
                                 </label>
 
                                 <select id="estadoHorario">
@@ -614,9 +720,7 @@
                             <div class="campo-formulario campo-completo">
 
                                 <label for="descripcionHorario">
-
                                     Descripción
-
                                 </label>
 
                                 <textarea
@@ -633,442 +737,8 @@
 
 
 
-<!--======================================
-    JORNADA LABORAL
-=======================================-->
-
-<div class="seccion-formulario">
-
-    <div class="titulo-seccion-formulario">
-
-        <div class="icono-seccion">
-
-            <i class="bi bi-clock-history"></i>
-
-        </div>
-
-        <div>
-
-            <h4>
-                Jornada laboral
-            </h4>
-
-            <p>
-                Define las horas programadas y los rangos permitidos de marcación.
-            </p>
-
-        </div>
-
-    </div>
-
-
-    <div class="switch-horario">
-
-        <div>
-
-            <strong>
-                Horario de amanecida
-            </strong>
-
-            <p>
-                Actívalo cuando la salida sea al día siguiente.
-            </p>
-
-        </div>
-
-
-        <label class="switch">
-
-            <input
-            id="cruzaMedianocheHorario"
-            type="checkbox">
-
-            <span class="slider"></span>
-
-        </label>
-
-    </div>
-
-
-    <!-- ENTRADA -->
-
-    <div class="subseccion-horario">
-
-        <div class="subseccion-horario-titulo">
-
-            <i class="bi bi-box-arrow-in-right"></i>
-
-            <div>
-
-                <h5>
-                    Entrada
-                </h5>
-
-                <p>
-                    Configura la ventana permitida para registrar la entrada.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-grid form-grid-tres">
-
-
-            <div class="campo-formulario">
-
-                <label for="permitirEntradaDesdeHorario">
-
-                    Permitir entrada desde
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="permitirEntradaDesdeHorario"
-                type="time"
-                required>
-
-            </div>
-
-
-            <div class="campo-formulario">
-
-                <label for="horaEntradaHorario">
-
-                    Entrada programada
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="horaEntradaHorario"
-                type="time"
-                required>
-
-            </div>
-
-
-            <div class="campo-formulario">
-
-                <label for="permitirEntradaHastaHorario">
-
-                    Permitir entrada hasta
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="permitirEntradaHastaHorario"
-                type="time"
-                required>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-grid form-grid-dos-secundario">
-
-            <div class="campo-formulario">
-
-                <label for="toleranciaEntradaHorario">
-
-                    Tolerancia de entrada
-                    <span>*</span>
-
-                </label>
-
-                <div class="campo-con-unidad">
-
-                    <input
-                    id="toleranciaEntradaHorario"
-                    type="number"
-                    min="0"
-                    max="180"
-                    value="5"
-                    required>
-
-                    <span>
-                        minutos
-                    </span>
-
-                </div>
-
-                <small>
-                    Después de esta tolerancia la entrada se considera tardanza.
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- SALIDA -->
-
-    <div class="subseccion-horario">
-
-        <div class="subseccion-horario-titulo">
-
-            <i class="bi bi-box-arrow-right"></i>
-
-            <div>
-
-                <h5>
-                    Salida
-                </h5>
-
-                <p>
-                    Configura la ventana permitida para registrar la salida.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-grid form-grid-cuatro">
-
-
-            <div class="campo-formulario">
-
-                <label for="permitirSalidaDesdeHorario">
-
-                    Permitir salida desde
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="permitirSalidaDesdeHorario"
-                type="time"
-                required>
-
-            </div>
-
-
-            <div class="campo-formulario">
-
-                <label for="horaSalidaHorario">
-
-                    Salida programada
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="horaSalidaHorario"
-                type="time"
-                required>
-
-            </div>
-
-
-            <div class="campo-formulario">
-
-                <label for="permitirSalidaHastaHorario">
-
-                    Permitir salida hasta
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="permitirSalidaHastaHorario"
-                type="time"
-                required>
-
-            </div>
-
-
-            <div class="campo-formulario">
-
-                <label for="horasExtraDesdeHorario">
-
-                    Horas extra desde
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="horasExtraDesdeHorario"
-                type="time"
-                required>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div
-    id="mensajeAmanecidaHorario"
-    class="mensaje-jornada">
-
-        <i class="bi bi-info-circle"></i>
-
-        <span>
-            La entrada y salida corresponden al mismo día.
-        </span>
-
-    </div>
-
-</div>
-
-
                     <!--======================================
-    REFRIGERIO
-=======================================-->
-
-<div class="seccion-formulario">
-
-    <div class="titulo-seccion-formulario">
-
-        <div class="icono-seccion">
-
-            <i class="bi bi-cup-hot"></i>
-
-        </div>
-
-        <div>
-
-            <h4>
-                Refrigerio
-            </h4>
-
-            <p>
-                Define el rango permitido y la duración máxima del descanso.
-            </p>
-
-        </div>
-
-    </div>
-
-
-    <div class="switch-horario">
-
-        <div>
-
-            <strong>
-                Incluir refrigerio
-            </strong>
-
-            <p>
-                Activa el rango permitido para tomar el descanso.
-            </p>
-
-        </div>
-
-
-        <label class="switch">
-
-            <input
-            id="refrigerioHabilitadoHorario"
-            type="checkbox">
-
-            <span class="slider"></span>
-
-        </label>
-
-    </div>
-
-
-    <div
-    id="camposRefrigerioHorario"
-    class="campos-refrigerio"
-    hidden>
-
-
-        <div class="form-grid form-grid-tres">
-
-
-            <div class="campo-formulario">
-
-                <label for="inicioRefrigerioHorario">
-
-                    Puede iniciar desde
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="inicioRefrigerioHorario"
-                type="time">
-
-            </div>
-
-
-            <div class="campo-formulario">
-
-                <label for="finRefrigerioHorario">
-
-                    Puede iniciar hasta
-                    <span>*</span>
-
-                </label>
-
-                <input
-                id="finRefrigerioHorario"
-                type="time">
-
-            </div>
-
-
-            <div class="campo-formulario">
-
-                <label for="duracionRefrigerioHorario">
-
-                    Duración permitida
-                    <span>*</span>
-
-                </label>
-
-                <div class="campo-con-unidad">
-
-                    <input
-                    id="duracionRefrigerioHorario"
-                    type="number"
-                    min="1"
-                    max="480"
-                    value="60">
-
-                    <span>
-                        minutos
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="mensaje-refrigerio">
-
-            <i class="bi bi-info-circle"></i>
-
-            <span>
-
-                Ejemplo: entre 12:00 p. m. y 4:00 p. m.,
-                el colaborador puede iniciar un refrigerio
-                de hasta 60 minutos.
-
-            </span>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-                    <!--======================================
-                        DÍAS
+                        JORNADA LABORAL
                     =======================================-->
 
                     <div class="seccion-formulario">
@@ -1077,18 +747,18 @@
 
                             <div class="icono-seccion">
 
-                                <i class="bi bi-calendar-week"></i>
+                                <i class="bi bi-clock-history"></i>
 
                             </div>
 
                             <div>
 
                                 <h4>
-                                    Días de aplicación
+                                    Jornada laboral
                                 </h4>
 
                                 <p>
-                                    Selecciona los días que utilizarán este horario.
+                                    Define las horas programadas y los rangos permitidos.
                                 </p>
 
                             </div>
@@ -1096,135 +766,264 @@
                         </div>
 
 
-                        <div class="acciones-dias-horario">
+                        <div class="switch-horario">
 
-                            <button
-                            id="btnLunesViernes"
-                            type="button">
+                            <div>
 
-                                Lunes a viernes
+                                <strong>
+                                    Horario de amanecida
+                                </strong>
 
-                            </button>
+                                <p>
+                                    Actívalo cuando la salida sea al día siguiente.
+                                </p>
 
-
-                            <button
-                            id="btnTodosDias"
-                            type="button">
-
-                                Todos los días
-
-                            </button>
+                            </div>
 
 
-                            <button
-                            id="btnLimpiarDias"
-                            type="button">
+                            <label class="switch">
 
-                                Limpiar
+                                <input
+                                id="cruzaMedianocheHorario"
+                                type="checkbox">
 
-                            </button>
+                                <span class="slider"></span>
+
+                            </label>
 
                         </div>
 
 
-                        <div class="dias-semana-grid">
 
-                            <label class="dia-semana">
+                        <!--======================================
+                            ENTRADA
+                        =======================================-->
 
-                                <input
-                                id="diaLunes"
-                                type="checkbox"
-                                value="lunes">
+                        <div class="subseccion-horario">
 
-                                <span>
-                                    Lun
-                                </span>
+                            <div class="subseccion-horario-titulo">
 
-                            </label>
+                                <i class="bi bi-box-arrow-in-right"></i>
 
+                                <div>
 
-                            <label class="dia-semana">
+                                    <h5>
+                                        Entrada
+                                    </h5>
 
-                                <input
-                                id="diaMartes"
-                                type="checkbox"
-                                value="martes">
+                                    <p>
+                                        Configura la ventana permitida para registrar la entrada.
+                                    </p>
 
-                                <span>
-                                    Mar
-                                </span>
+                                </div>
 
-                            </label>
+                            </div>
 
 
-                            <label class="dia-semana">
-
-                                <input
-                                id="diaMiercoles"
-                                type="checkbox"
-                                value="miercoles">
-
-                                <span>
-                                    Mié
-                                </span>
-
-                            </label>
+                            <div class="form-grid form-grid-tres">
 
 
-                            <label class="dia-semana">
+                                <div class="campo-formulario">
 
-                                <input
-                                id="diaJueves"
-                                type="checkbox"
-                                value="jueves">
+                                    <label for="permitirEntradaDesdeHorario">
 
-                                <span>
-                                    Jue
-                                </span>
+                                        Permitir entrada desde
+                                        <span>*</span>
 
-                            </label>
+                                    </label>
 
+                                    <input
+                                    id="permitirEntradaDesdeHorario"
+                                    type="time"
+                                    required>
 
-                            <label class="dia-semana">
-
-                                <input
-                                id="diaViernes"
-                                type="checkbox"
-                                value="viernes">
-
-                                <span>
-                                    Vie
-                                </span>
-
-                            </label>
+                                </div>
 
 
-                            <label class="dia-semana">
+                                <div class="campo-formulario">
 
-                                <input
-                                id="diaSabado"
-                                type="checkbox"
-                                value="sabado">
+                                    <label for="horaEntradaHorario">
 
-                                <span>
-                                    Sáb
-                                </span>
+                                        Entrada programada
+                                        <span>*</span>
 
-                            </label>
+                                    </label>
+
+                                    <input
+                                    id="horaEntradaHorario"
+                                    type="time"
+                                    required>
+
+                                </div>
 
 
-                            <label class="dia-semana">
+                                <div class="campo-formulario">
 
-                                <input
-                                id="diaDomingo"
-                                type="checkbox"
-                                value="domingo">
+                                    <label for="permitirEntradaHastaHorario">
 
-                                <span>
-                                    Dom
-                                </span>
+                                        Permitir entrada hasta
+                                        <span>*</span>
 
-                            </label>
+                                    </label>
+
+                                    <input
+                                    id="permitirEntradaHastaHorario"
+                                    type="time"
+                                    required>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="form-grid form-grid-dos-secundario">
+
+                                <div class="campo-formulario">
+
+                                    <label for="toleranciaEntradaHorario">
+
+                                        Tolerancia de entrada
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <div class="campo-con-unidad">
+
+                                        <input
+                                        id="toleranciaEntradaHorario"
+                                        type="number"
+                                        min="0"
+                                        max="180"
+                                        value="5"
+                                        required>
+
+                                        <span>
+                                            minutos
+                                        </span>
+
+                                    </div>
+
+                                    <small>
+                                        Después de esta tolerancia la entrada se considera tardanza.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!--======================================
+                            SALIDA
+                        =======================================-->
+
+                        <div class="subseccion-horario">
+
+                            <div class="subseccion-horario-titulo">
+
+                                <i class="bi bi-box-arrow-right"></i>
+
+                                <div>
+
+                                    <h5>
+                                        Salida
+                                    </h5>
+
+                                    <p>
+                                        Configura la ventana permitida para registrar la salida.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="form-grid form-grid-cuatro">
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="permitirSalidaDesdeHorario">
+
+                                        Permitir salida desde
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <input
+                                    id="permitirSalidaDesdeHorario"
+                                    type="time"
+                                    required>
+
+                                </div>
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="horaSalidaHorario">
+
+                                        Salida programada
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <input
+                                    id="horaSalidaHorario"
+                                    type="time"
+                                    required>
+
+                                </div>
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="permitirSalidaHastaHorario">
+
+                                        Permitir salida hasta
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <input
+                                    id="permitirSalidaHastaHorario"
+                                    type="time"
+                                    required>
+
+                                </div>
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="horasExtraDesdeHorario">
+
+                                        Horas extra desde
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <input
+                                    id="horasExtraDesdeHorario"
+                                    type="time"
+                                    required>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                        id="mensajeAmanecidaHorario"
+                        class="mensaje-jornada">
+
+                            <i class="bi bi-info-circle"></i>
+
+                            <span>
+                                La entrada y salida corresponden al mismo día.
+                            </span>
 
                         </div>
 
@@ -1233,7 +1032,7 @@
 
 
                     <!--======================================
-                        RECURRENCIA
+                        REFRIGERIO
                     =======================================-->
 
                     <div class="seccion-formulario">
@@ -1242,18 +1041,18 @@
 
                             <div class="icono-seccion">
 
-                                <i class="bi bi-arrow-repeat"></i>
+                                <i class="bi bi-cup-hot"></i>
 
                             </div>
 
                             <div>
 
                                 <h4>
-                                    Recurrencia
+                                    Refrigerio
                                 </h4>
 
                                 <p>
-                                    Define desde cuándo y cada cuánto se repite.
+                                    Define el rango permitido y la duración máxima del descanso.
                                 </p>
 
                             </div>
@@ -1261,45 +1060,115 @@
                         </div>
 
 
-                        <div class="form-grid">
+                        <div class="switch-horario">
 
+                            <div>
 
-                            <div class="campo-formulario">
+                                <strong>
+                                    Incluir refrigerio
+                                </strong>
 
-                                <label for="fechaInicioHorario">
-
-                                    Fecha de inicio
-                                    <span>*</span>
-
-                                </label>
-
-                                <input
-                                id="fechaInicioHorario"
-                                type="date"
-                                required>
+                                <p>
+                                    Activa el rango permitido para tomar el descanso.
+                                </p>
 
                             </div>
 
 
-                            <div class="campo-formulario">
+                            <label class="switch">
 
-                                <label for="intervaloSemanasHorario">
+                                <input
+                                id="refrigerioHabilitadoHorario"
+                                type="checkbox">
 
-                                    Repetición
+                                <span class="slider"></span>
 
-                                </label>
+                            </label>
 
-                                <select id="intervaloSemanasHorario">
+                        </div>
 
-                                    <option value="1">
-                                        Todas las semanas
-                                    </option>
 
-                                    <option value="2">
-                                        Cada dos semanas
-                                    </option>
+                        <div
+                        id="camposRefrigerioHorario"
+                        class="campos-refrigerio"
+                        hidden>
 
-                                </select>
+
+                            <div class="form-grid form-grid-tres">
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="inicioRefrigerioHorario">
+
+                                        Puede iniciar desde
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <input
+                                    id="inicioRefrigerioHorario"
+                                    type="time">
+
+                                </div>
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="finRefrigerioHorario">
+
+                                        Puede iniciar hasta
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <input
+                                    id="finRefrigerioHorario"
+                                    type="time">
+
+                                </div>
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="duracionRefrigerioHorario">
+
+                                        Duración permitida
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <div class="campo-con-unidad">
+
+                                        <input
+                                        id="duracionRefrigerioHorario"
+                                        type="number"
+                                        min="1"
+                                        max="480"
+                                        value="60">
+
+                                        <span>
+                                            minutos
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="mensaje-refrigerio">
+
+                                <i class="bi bi-info-circle"></i>
+
+                                <span>
+
+                                    Ejemplo: entre 12:00 p. m. y 4:00 p. m.,
+                                    el colaborador puede iniciar un refrigerio
+                                    de hasta 60 minutos.
+
+                                </span>
 
                             </div>
 
@@ -1307,7 +1176,13 @@
 
                     </div>
 
-                <!-- BOTONES -->
+                </div>
+
+
+
+                <!--======================================
+                    BOTONES
+                =======================================-->
 
                 <div class="modal-footer">
 
@@ -1329,6 +1204,880 @@
                         <i class="bi bi-floppy"></i>
 
                         Guardar horario
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <!--======================================
+        MODAL ASIGNAR HORARIO
+    =======================================-->
+
+    <div
+    id="modalAsignarHorario"
+    class="modal">
+
+        <div class="modal-contenido modal-asignar-horario">
+
+
+            <!--======================================
+                ENCABEZADO
+            =======================================-->
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h3>
+                        Asignar horario
+                    </h3>
+
+                    <p>
+                        Define cuándo se aplicará la jornada seleccionada.
+                    </p>
+
+                </div>
+
+
+                <button
+                id="cerrarAsignarHorario"
+                type="button"
+                aria-label="Cerrar">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+
+            <form id="formAsignarHorario">
+
+                <div class="modal-body asignar-horario-body">
+
+
+                    <!--======================================
+                        HORARIO SELECCIONADO
+                    =======================================-->
+
+                    <div class="horario-seleccionado-asignacion">
+
+                        <div class="horario-seleccionado-icono">
+
+                            <i class="bi bi-clock"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Horario seleccionado
+                            </span>
+
+                            <strong id="asignacionNombreHorario">
+                                Horario
+                            </strong>
+
+                            <p id="asignacionResumenHorario">
+                                --:-- - --:--
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!--======================================
+                        TIPO DE ASIGNACIÓN
+                    =======================================-->
+
+                    <div class="seccion-formulario">
+
+                        <div class="titulo-seccion-formulario">
+
+                            <div class="icono-seccion">
+
+                                <i class="bi bi-calendar-range"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Tipo de asignación
+                                </h4>
+
+                                <p>
+                                    Selecciona cómo deseas aplicar este horario.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="tipos-asignacion-grid">
+
+
+                            <label class="tipo-asignacion-card">
+
+                                <input
+                                type="radio"
+                                name="tipoAsignacionHorario"
+                                value="DIARIA"
+                                checked>
+
+                                <span class="tipo-asignacion-contenido">
+
+                                    <i class="bi bi-calendar-day"></i>
+
+                                    <strong>
+                                        Diaria
+                                    </strong>
+
+                                    <small>
+                                        Para una fecha específica.
+                                    </small>
+
+                                </span>
+
+                            </label>
+
+
+                            <label class="tipo-asignacion-card">
+
+                                <input
+                                type="radio"
+                                name="tipoAsignacionHorario"
+                                value="SEMANAL">
+
+                                <span class="tipo-asignacion-contenido">
+
+                                    <i class="bi bi-calendar-week"></i>
+
+                                    <strong>
+                                        Semanal
+                                    </strong>
+
+                                    <small>
+                                        Para días recurrentes de la semana.
+                                    </small>
+
+                                </span>
+
+                            </label>
+
+
+                            <label class="tipo-asignacion-card">
+
+                                <input
+                                type="radio"
+                                name="tipoAsignacionHorario"
+                                value="MENSUAL">
+
+                                <span class="tipo-asignacion-contenido">
+
+                                    <i class="bi bi-calendar3"></i>
+
+                                    <strong>
+                                        Mensual
+                                    </strong>
+
+                                    <small>
+                                        Planifica horarios en un calendario.
+                                    </small>
+
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!--======================================
+                        ASIGNACIÓN DIARIA
+                    =======================================-->
+
+                    <div
+                    id="seccionAsignacionDiaria"
+                    class="seccion-formulario seccion-tipo-asignacion">
+
+
+                        <div class="titulo-seccion-formulario">
+
+                            <div class="icono-seccion">
+
+                                <i class="bi bi-calendar-event"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Asignación para un día
+                                </h4>
+
+                                <p>
+                                    Selecciona la fecha exacta de aplicación.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-grid">
+
+
+                            <div class="campo-formulario">
+
+                                <label for="fechaAsignacionDiaria">
+
+                                    Fecha
+                                    <span>*</span>
+
+                                </label>
+
+                                <input
+                                id="fechaAsignacionDiaria"
+                                type="date">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!--======================================
+                        ASIGNACIÓN SEMANAL
+                    =======================================-->
+
+                    <div
+                    id="seccionAsignacionSemanal"
+                    class="seccion-formulario seccion-tipo-asignacion"
+                    hidden>
+
+
+                        <div class="titulo-seccion-formulario">
+
+                            <div class="icono-seccion">
+
+                                <i class="bi bi-calendar-week"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Asignación semanal
+                                </h4>
+
+                                <p>
+                                    Selecciona los días y el periodo de aplicación.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- DÍAS -->
+
+                        <div class="subseccion-horario">
+
+                            <div class="subseccion-horario-titulo">
+
+                                <i class="bi bi-calendar-check"></i>
+
+                                <div>
+
+                                    <h5>
+                                        Días de la semana
+                                    </h5>
+
+                                    <p>
+                                        Puedes utilizar una selección rápida o personalizada.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="acciones-dias-horario">
+
+                                <button
+                                id="btnAsignacionLunesViernes"
+                                type="button">
+
+                                    Lunes a viernes
+
+                                </button>
+
+
+                                <button
+                                id="btnAsignacionTodosDias"
+                                type="button">
+
+                                    Todos los días
+
+                                </button>
+
+
+                                <button
+                                id="btnAsignacionLimpiarDias"
+                                type="button">
+
+                                    Limpiar
+
+                                </button>
+
+                            </div>
+
+
+                            <div class="dias-semana-grid">
+
+
+                                <label class="dia-semana">
+
+                                    <input
+                                    id="asignacionDiaLunes"
+                                    type="checkbox"
+                                    value="lunes">
+
+                                    <span>
+                                        Lun
+                                    </span>
+
+                                </label>
+
+
+                                <label class="dia-semana">
+
+                                    <input
+                                    id="asignacionDiaMartes"
+                                    type="checkbox"
+                                    value="martes">
+
+                                    <span>
+                                        Mar
+                                    </span>
+
+                                </label>
+
+
+                                <label class="dia-semana">
+
+                                    <input
+                                    id="asignacionDiaMiercoles"
+                                    type="checkbox"
+                                    value="miercoles">
+
+                                    <span>
+                                        Mié
+                                    </span>
+
+                                </label>
+
+
+                                <label class="dia-semana">
+
+                                    <input
+                                    id="asignacionDiaJueves"
+                                    type="checkbox"
+                                    value="jueves">
+
+                                    <span>
+                                        Jue
+                                    </span>
+
+                                </label>
+
+
+                                <label class="dia-semana">
+
+                                    <input
+                                    id="asignacionDiaViernes"
+                                    type="checkbox"
+                                    value="viernes">
+
+                                    <span>
+                                        Vie
+                                    </span>
+
+                                </label>
+
+
+                                <label class="dia-semana">
+
+                                    <input
+                                    id="asignacionDiaSabado"
+                                    type="checkbox"
+                                    value="sabado">
+
+                                    <span>
+                                        Sáb
+                                    </span>
+
+                                </label>
+
+
+                                <label class="dia-semana">
+
+                                    <input
+                                    id="asignacionDiaDomingo"
+                                    type="checkbox"
+                                    value="domingo">
+
+                                    <span>
+                                        Dom
+                                    </span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- PERIODO -->
+
+                        <div class="subseccion-horario">
+
+                            <div class="subseccion-horario-titulo">
+
+                                <i class="bi bi-calendar-range"></i>
+
+                                <div>
+
+                                    <h5>
+                                        Periodo de aplicación
+                                    </h5>
+
+                                    <p>
+                                        Define desde cuándo y hasta cuándo estará vigente.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="form-grid form-grid-tres">
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="fechaInicioAsignacionSemanal">
+
+                                        Desde
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <input
+                                    id="fechaInicioAsignacionSemanal"
+                                    type="date">
+
+                                </div>
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="fechaFinAsignacionSemanal">
+
+                                        Hasta
+                                        <span>*</span>
+
+                                    </label>
+
+                                    <input
+                                    id="fechaFinAsignacionSemanal"
+                                    type="date">
+
+                                </div>
+
+
+                                <div class="campo-formulario">
+
+                                    <label for="intervaloAsignacionSemanal">
+
+                                        Repetición
+
+                                    </label>
+
+                                    <select id="intervaloAsignacionSemanal">
+
+                                        <option value="1">
+                                            Todas las semanas
+                                        </option>
+
+                                        <option value="2">
+                                            Cada dos semanas
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!--======================================
+                        ASIGNACIÓN MENSUAL
+                    =======================================-->
+
+                    <div
+                    id="seccionAsignacionMensual"
+                    class="seccion-formulario seccion-tipo-asignacion"
+                    hidden>
+
+
+                        <div class="titulo-seccion-formulario">
+
+                            <div class="icono-seccion">
+
+                                <i class="bi bi-calendar3"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    Planificación mensual
+                                </h4>
+
+                                <p>
+                                    Selecciona el periodo y asigna horarios en el calendario.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- ORIGEN DE LA PLANIFICACIÓN -->
+
+                        <div class="inicio-planificacion-mensual">
+
+                            <label class="opcion-inicio-planificacion">
+
+                                <input
+                                type="radio"
+                                name="inicioPlanificacionMensual"
+                                value="MES_ACTUAL"
+                                checked>
+
+                                <span>
+
+                                    <i class="bi bi-calendar-month"></i>
+
+                                    <strong>
+                                        Mes actual
+                                    </strong>
+
+                                    <small id="textoMesActualAsignacion">
+                                        Planificar desde el mes actual.
+                                    </small>
+
+                                </span>
+
+                            </label>
+
+
+                            <label class="opcion-inicio-planificacion">
+
+                                <input
+                                type="radio"
+                                name="inicioPlanificacionMensual"
+                                value="INICIO_ANIO">
+
+                                <span>
+
+                                    <i class="bi bi-calendar2-range"></i>
+
+                                    <strong>
+                                        Inicio del año actual
+                                    </strong>
+
+                                    <small id="textoAnioActualAsignacion">
+                                        Planificar desde enero.
+                                    </small>
+
+                                </span>
+
+                            </label>
+
+                        </div>
+
+
+
+                        <!-- SELECTOR DE HORARIO -->
+
+                        <div class="selector-horario-calendario">
+
+                            <div class="campo-formulario">
+
+                                <label for="horarioCalendarioMensual">
+
+                                    Horario para aplicar
+                                    <span>*</span>
+
+                                </label>
+
+                                <select id="horarioCalendarioMensual">
+
+                                    <option value="">
+                                        Selecciona un horario
+                                    </option>
+
+                                </select>
+
+                                <small>
+                                    Selecciona un horario y luego marca los días del calendario.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- NAVEGACIÓN DEL CALENDARIO -->
+
+                        <div class="calendario-mensual-header">
+
+                            <button
+                            id="btnMesAnteriorAsignacion"
+                            type="button"
+                            class="btn-calendario-navegacion"
+                            aria-label="Mes anterior">
+
+                                <i class="bi bi-chevron-left"></i>
+
+                            </button>
+
+
+                            <div>
+
+                                <h4 id="tituloMesAsignacion">
+                                    Mes
+                                </h4>
+
+                                <p id="resumenMesAsignacion">
+                                    Selecciona los días que utilizarán el horario.
+                                </p>
+
+                            </div>
+
+
+                            <button
+                            id="btnMesSiguienteAsignacion"
+                            type="button"
+                            class="btn-calendario-navegacion"
+                            aria-label="Mes siguiente">
+
+                                <i class="bi bi-chevron-right"></i>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- CALENDARIO -->
+
+                        <div class="calendario-asignacion">
+
+
+                            <div class="calendario-dias-cabecera">
+
+                                <span>Lun</span>
+                                <span>Mar</span>
+                                <span>Mié</span>
+                                <span>Jue</span>
+                                <span>Vie</span>
+                                <span>Sáb</span>
+                                <span>Dom</span>
+
+                            </div>
+
+
+                            <div
+                            id="calendarioDiasAsignacion"
+                            class="calendario-dias-grid">
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- RESUMEN DEL MES -->
+
+                        <div
+                        id="resumenProgramacionMensual"
+                        class="resumen-programacion-mensual">
+
+                            <div>
+
+                                <span>
+                                    Días programados en este mes
+                                </span>
+
+                                <strong id="cantidadDiasProgramadosMes">
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <button
+                            id="btnLimpiarMesAsignacion"
+                            type="button"
+                            class="btn-limpiar-programacion">
+
+                                <i class="bi bi-eraser"></i>
+
+                                Limpiar mes
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- MESES AGREGADOS -->
+
+                        <div class="meses-programados-asignacion">
+
+                            <div class="subseccion-horario-titulo">
+
+                                <i class="bi bi-calendar2-check"></i>
+
+                                <div>
+
+                                    <h5>
+                                        Meses agregados
+                                    </h5>
+
+                                    <p>
+                                        Resumen de los meses incluidos en la programación.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                            id="listaMesesProgramados"
+                            class="lista-meses-programados">
+
+                                <div class="meses-programados-vacio">
+
+                                    Todavía no existen meses programados.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- AGREGAR SIGUIENTE MES -->
+
+                        <div
+                        id="preguntaAgregarSiguienteMes"
+                        class="pregunta-siguiente-mes"
+                        hidden>
+
+                            <div>
+
+                                <i class="bi bi-calendar-plus"></i>
+
+                                <div>
+
+                                    <strong id="tituloPreguntaSiguienteMes">
+                                        ¿Deseas agregar el siguiente mes?
+                                    </strong>
+
+                                    <p>
+                                        Puedes continuar programando sin perder
+                                        los días seleccionados anteriormente.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <button
+                            id="btnAgregarSiguienteMes"
+                            type="button"
+                            class="btn-principal">
+
+                                Sí, agregar mes
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!--======================================
+                    PIE DEL MODAL
+                =======================================-->
+
+                <div class="modal-footer">
+
+                    <button
+                    id="cancelarAsignarHorario"
+                    type="button"
+                    class="btn-secundario">
+
+                        Cancelar
+
+                    </button>
+
+
+                    <button
+                    id="guardarAsignacionHorario"
+                    type="submit"
+                    class="btn-principal">
+
+                        <i class="bi bi-calendar-check"></i>
+
+                        Guardar asignación
 
                     </button>
 
