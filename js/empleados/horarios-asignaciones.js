@@ -2025,49 +2025,6 @@ actualizarHorarioSemanalSeleccionado();
 
     if(form){
 
-        function convertirHoraAMinutos(
-    hora
-){
-
-    if(!hora){
-
-        return null;
-
-    }
-
-
-    const partes =
-    String(
-        hora
-    )
-    .split(":")
-    .map(Number);
-
-
-    if(
-        partes.length < 2
-        ||
-        Number.isNaN(
-            partes[0]
-        )
-        ||
-        Number.isNaN(
-            partes[1]
-        )
-    ){
-
-        return null;
-
-    }
-
-
-    return (
-        partes[0] * 60
-        +
-        partes[1]
-    );
-
-}
 
 
 
@@ -2133,48 +2090,6 @@ function obtenerRangoHorario(
         fin
 
     };
-
-}
-
-
-
-function horariosSeSuperponen(
-    horarioA,
-    horarioB
-){
-
-    const rangoA =
-    obtenerRangoHorario(
-        horarioA
-    );
-
-
-    const rangoB =
-    obtenerRangoHorario(
-        horarioB
-    );
-
-
-    if(
-        !rangoA
-        ||
-        !rangoB
-    ){
-
-        return false;
-
-    }
-
-
-    return (
-        rangoA.inicio <
-        rangoB.fin
-
-        &&
-
-        rangoA.fin >
-        rangoB.inicio
-    );
 
 }
 
@@ -4419,6 +4334,194 @@ function obtenerProgramacionResultado(
     return resultado;
 
 }
+
+
+
+
+    /*=====================================================
+    VALIDACIÓN DE SUPERPOSICIÓN DE HORARIOS
+=====================================================*/
+
+function convertirHoraAMinutos(
+    hora
+){
+
+    if(!hora){
+
+        return null;
+
+    }
+
+
+    const partes =
+    String(
+        hora
+    )
+    .split(":");
+
+
+    if(
+        partes.length <
+        2
+    ){
+
+        return null;
+
+    }
+
+
+    const horas =
+    Number(
+        partes[0]
+    );
+
+
+    const minutos =
+    Number(
+        partes[1]
+    );
+
+
+    if(
+        Number.isNaN(
+            horas
+        )
+        ||
+        Number.isNaN(
+            minutos
+        )
+    ){
+
+        return null;
+
+    }
+
+
+    return (
+        horas * 60
+        +
+        minutos
+    );
+
+}
+
+
+
+function obtenerRangoProgramadoHorario(
+    horario
+){
+
+    if(!horario){
+
+        return null;
+
+    }
+
+
+    const entrada =
+    obtenerDatosEntrada(
+        horario
+    );
+
+
+    const salida =
+    obtenerDatosSalida(
+        horario
+    );
+
+
+    const inicio =
+    convertirHoraAMinutos(
+        entrada.programada
+    );
+
+
+    let fin =
+    convertirHoraAMinutos(
+        salida.programada
+    );
+
+
+    if(
+        inicio ===
+        null
+        ||
+        fin ===
+        null
+    ){
+
+        return null;
+
+    }
+
+
+    if(
+        horario.cruzaMedianoche
+        ||
+        fin <= inicio
+    ){
+
+        fin +=
+        24 * 60;
+
+    }
+
+
+    return {
+
+        inicio,
+
+        fin
+
+    };
+
+}
+
+
+
+function horariosSeSuperponen(
+    horarioA,
+    horarioB
+){
+
+    const rangoA =
+    obtenerRangoProgramadoHorario(
+        horarioA
+    );
+
+
+    const rangoB =
+    obtenerRangoProgramadoHorario(
+        horarioB
+    );
+
+
+    if(
+        !rangoA
+        ||
+        !rangoB
+    ){
+
+        return false;
+
+    }
+
+
+    return (
+        rangoA.inicio <
+        rangoB.fin
+        &&
+        rangoA.fin >
+        rangoB.inicio
+    );
+
+}
+
+
+
+/*=====================================================
+    VALIDAR CONFLICTOS DE LA ASIGNACIÓN
+=====================================================*/
 
     function validarConflictosAsignacion(
     resultado,
