@@ -7941,7 +7941,9 @@ return {
 
     cerrar,
 
-    actualizarDetalle
+    actualizarDetalle,
+
+    abrirCalendarioColaborador
 
 };
 
