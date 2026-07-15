@@ -71,6 +71,29 @@ export function iniciarAsignacionesHorarios({
         "guardarAsignacionHorario"
     );
 
+    const listaColaboradoresAsignacion =
+document.getElementById(
+    "listaColaboradoresAsignacion"
+);
+
+
+const buscarColaboradorAsignacion =
+document.getElementById(
+    "buscarColaboradorAsignacion"
+);
+
+
+const seleccionarTodosColaboradores =
+document.getElementById(
+    "seleccionarTodosColaboradores"
+);
+
+
+const contadorColaboradoresSeleccionados =
+document.getElementById(
+    "contadorColaboradoresSeleccionados"
+);
+
 
     const tiposAsignacion =
     document.querySelectorAll(
@@ -126,6 +149,11 @@ export function iniciarAsignacionesHorarios({
 
     let asignaciones = [];
 
+    let colaboradores = [];
+
+
+    let colaboradoresSeleccionados =
+    new Set();
 
     let añoCalendario =
     new Date()
@@ -195,6 +223,562 @@ export function iniciarAsignacionesHorarios({
 
     );
 
+    const consultaColaboradores =
+query(
+
+    collection(
+        db,
+        "colaboradores"
+    ),
+
+    where(
+        "empresaId",
+        "==",
+        empresaId
+    )
+
+);
+
+
+onSnapshot(
+
+    consultaColaboradores,
+
+    snapshot=>{
+
+        colaboradores = [];
+
+
+        snapshot.forEach(documento=>{
+
+            const datos =
+            documento.data();
+
+
+            colaboradores.push({
+
+                id:
+                documento.id,
+
+                ...datos
+
+            });
+
+        });
+
+
+        colaboradores.sort(
+            (
+                primero,
+                segundo
+            )=>{
+
+                const nombrePrimero =
+                obtenerNombreColaborador(
+                    primero
+                );
+
+
+                const nombreSegundo =
+                obtenerNombreColaborador(
+                    segundo
+                );
+
+
+                return nombrePrimero.localeCompare(
+
+                    nombreSegundo,
+
+                    "es",
+
+                    {
+                        sensitivity:"base"
+                    }
+
+                );
+
+            }
+        );
+
+
+        renderizarColaboradoresAsignacion();
+
+    },
+
+    error=>{
+
+        console.error(
+            "Error al cargar colaboradores:",
+            error
+        );
+
+
+        if(listaColaboradoresAsignacion){
+
+            listaColaboradoresAsignacion.innerHTML = `
+
+                <div class="estado-sin-colaboradores">
+
+                    <i class="bi bi-exclamation-circle"></i>
+
+                    <span>
+                        No se pudieron cargar los colaboradores.
+                    </span>
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+);
+
+    function obtenerNombreColaborador(
+    colaborador
+){
+
+    const nombres =
+    String(
+        colaborador.nombres
+        ||
+        colaborador.nombre
+        ||
+        ""
+    )
+    .trim();
+
+
+    const apellidos =
+    String(
+        colaborador.apellidos
+        ||
+        colaborador.apellido
+        ||
+        ""
+    )
+    .trim();
+
+
+    const nombreCompleto =
+    `${apellidos} ${nombres}`
+    .trim();
+
+
+    return nombreCompleto
+    ||
+    "Colaborador sin nombre";
+
+}
+
+
+
+function obtenerDocumentoColaborador(
+    colaborador
+){
+
+    return String(
+
+        colaborador.documento
+        ||
+        colaborador.numeroDocumento
+        ||
+        colaborador.dni
+        ||
+        ""
+
+    )
+    .trim();
+
+}
+
+
+
+function obtenerInicialesColaborador(
+    colaborador
+){
+
+    const nombre =
+    obtenerNombreColaborador(
+        colaborador
+    );
+
+
+    return nombre
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0,2)
+    .map(palabra=>
+
+        palabra.charAt(0)
+        .toUpperCase()
+
+    )
+    .join("")
+    ||
+    "CL";
+
+}
+
+
+
+function obtenerColaboradoresVisibles(){
+
+    const texto =
+    String(
+        buscarColaboradorAsignacion
+        ?.value
+        ||
+        ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+    return colaboradores.filter(
+        colaborador=>{
+
+            /*
+             * De momento mostramos únicamente colaboradores
+             * que no estén expresamente inactivos.
+             */
+            const activo =
+            colaborador.estado !==
+            "INACTIVO";
+
+
+            if(!activo){
+
+                return false;
+
+            }
+
+
+            const nombre =
+            obtenerNombreColaborador(
+                colaborador
+            )
+            .toLowerCase();
+
+
+            const documento =
+            obtenerDocumentoColaborador(
+                colaborador
+            )
+            .toLowerCase();
+
+
+            return (
+                nombre.includes(
+                    texto
+                )
+                ||
+                documento.includes(
+                    texto
+                )
+            );
+
+        }
+    );
+
+}
+
+
+
+function renderizarColaboradoresAsignacion(){
+
+    if(!listaColaboradoresAsignacion){
+
+        return;
+
+    }
+
+
+    const visibles =
+    obtenerColaboradoresVisibles();
+
+
+    actualizarContadorColaboradores();
+
+
+    if(
+        visibles.length === 0
+    ){
+
+        listaColaboradoresAsignacion.innerHTML = `
+
+            <div class="estado-sin-colaboradores">
+
+                <i class="bi bi-person-x"></i>
+
+                <span>
+                    No se encontraron colaboradores activos.
+                </span>
+
+            </div>
+
+        `;
+
+
+        if(seleccionarTodosColaboradores){
+
+            seleccionarTodosColaboradores.checked =
+            false;
+
+            seleccionarTodosColaboradores.indeterminate =
+            false;
+
+        }
+
+
+        return;
+
+    }
+
+
+    listaColaboradoresAsignacion.innerHTML =
+    visibles.map(colaborador=>{
+
+        const seleccionado =
+        colaboradoresSeleccionados.has(
+            colaborador.id
+        );
+
+
+        const nombre =
+        obtenerNombreColaborador(
+            colaborador
+        );
+
+
+        const documento =
+        obtenerDocumentoColaborador(
+            colaborador
+        );
+
+
+        const sucursal =
+        colaborador.sucursalNombre
+        ||
+        colaborador.nombreSucursal
+        ||
+        "";
+
+
+        const area =
+        colaborador.areaNombre
+        ||
+        colaborador.nombreArea
+        ||
+        "";
+
+
+        const datosSecundarios =
+        [
+            documento
+            ?
+            `Documento: ${documento}`
+            :
+            "",
+
+            sucursal,
+
+            area
+        ]
+        .filter(Boolean)
+        .join(" · ");
+
+
+        return `
+
+            <label
+            class="colaborador-asignacion-item ${
+                seleccionado
+                ?
+                "seleccionado"
+                :
+                ""
+            }"
+            data-colaborador-id="${colaborador.id}">
+
+                <input
+                type="checkbox"
+                class="check-colaborador-asignacion"
+                value="${colaborador.id}"
+                ${
+                    seleccionado
+                    ?
+                    "checked"
+                    :
+                    ""
+                }
+                >
+
+                <div class="colaborador-asignacion-avatar">
+
+                    ${escaparHTML(
+                        obtenerInicialesColaborador(
+                            colaborador
+                        )
+                    )}
+
+                </div>
+
+                <div class="colaborador-asignacion-datos">
+
+                    <strong>
+
+                        ${escaparHTML(
+                            nombre
+                        )}
+
+                    </strong>
+
+                    <span>
+
+                        ${escaparHTML(
+                            datosSecundarios
+                            ||
+                            "Sin información adicional"
+                        )}
+
+                    </span>
+
+                </div>
+
+            </label>
+
+        `;
+
+    })
+    .join("");
+
+
+    listaColaboradoresAsignacion
+    .querySelectorAll(
+        ".check-colaborador-asignacion"
+    )
+    .forEach(check=>{
+
+        check.addEventListener(
+            "change",
+            ()=>{
+
+                const colaboradorId =
+                check.value;
+
+
+                if(check.checked){
+
+                    colaboradoresSeleccionados.add(
+                        colaboradorId
+                    );
+
+                }
+                else{
+
+                    colaboradoresSeleccionados.delete(
+                        colaboradorId
+                    );
+
+                }
+
+
+                check
+                .closest(
+                    ".colaborador-asignacion-item"
+                )
+                ?.classList.toggle(
+                    "seleccionado",
+                    check.checked
+                );
+
+
+                actualizarContadorColaboradores();
+
+                actualizarSeleccionarTodos();
+
+            }
+        );
+
+    });
+
+
+    actualizarSeleccionarTodos();
+
+}
+
+
+
+function actualizarContadorColaboradores(){
+
+    const cantidad =
+    colaboradoresSeleccionados.size;
+
+
+    if(contadorColaboradoresSeleccionados){
+
+        contadorColaboradoresSeleccionados.textContent =
+        `${cantidad} colaborador${
+            cantidad === 1
+            ?
+            ""
+            :
+            "es"
+        } seleccionado${
+            cantidad === 1
+            ?
+            ""
+            :
+            "s"
+        }`;
+
+    }
+
+}
+
+
+
+function actualizarSeleccionarTodos(){
+
+    if(!seleccionarTodosColaboradores){
+
+        return;
+
+    }
+
+
+    const visibles =
+    obtenerColaboradoresVisibles();
+
+
+    const cantidadSeleccionadosVisibles =
+    visibles.filter(
+        colaborador=>
+
+            colaboradoresSeleccionados.has(
+                colaborador.id
+            )
+
+    )
+    .length;
+
+
+    seleccionarTodosColaboradores.checked =
+    visibles.length > 0
+    &&
+    cantidadSeleccionadosVisibles ===
+    visibles.length;
+
+
+    seleccionarTodosColaboradores.indeterminate =
+    cantidadSeleccionadosVisibles > 0
+    &&
+    cantidadSeleccionadosVisibles <
+    visibles.length;
+
+}
 
 
     function abrir(){
@@ -243,6 +827,7 @@ export function iniciarAsignacionesHorarios({
 
 
         reiniciarFormulario();
+        renderizarColaboradoresAsignacion();
 
 
         const entrada =
@@ -308,6 +893,19 @@ export function iniciarAsignacionesHorarios({
     function reiniciarFormulario(){
 
         form?.reset();
+
+        colaboradoresSeleccionados.clear();
+
+
+if(buscarColaboradorAsignacion){
+
+    buscarColaboradorAsignacion.value =
+    "";
+
+}
+
+
+actualizarContadorColaboradores();
 
 
         programacionMensual = {};
@@ -1233,6 +1831,27 @@ export function iniciarAsignacionesHorarios({
 
                 }
 
+                if(
+    colaboradoresSeleccionados.size ===
+    0
+){
+
+    await Swal.fire({
+
+        icon:"warning",
+
+        title:"Selecciona colaboradores",
+
+        text:
+        "Debes seleccionar al menos un colaborador para guardar la asignación."
+
+    });
+
+
+    return;
+
+}
+
 
                 const tipo =
                 obtenerTipoAsignacion();
@@ -1251,6 +1870,14 @@ export function iniciarAsignacionesHorarios({
 
                 }
 
+                resultado.colaboradorIds =
+[
+    ...colaboradoresSeleccionados
+];
+
+
+resultado.cantidadColaboradores =
+colaboradoresSeleccionados.size;
 
                 try{
 
@@ -1799,6 +2426,20 @@ export function iniciarAsignacionesHorarios({
                             )}
                         </p>
 
+                        <small>
+
+        ${
+            asignacion.cantidadColaboradores
+            ||
+            asignacion.colaboradorIds?.length
+            ||
+            0
+        }
+
+        colaboradores
+
+    </small>
+
                     </div>
 
                 </div>
@@ -1949,7 +2590,47 @@ export function iniciarAsignacionesHorarios({
 
     }
 
+buscarColaboradorAsignacion
+?.addEventListener(
+    "input",
+    renderizarColaboradoresAsignacion
+);
 
+    seleccionarTodosColaboradores
+?.addEventListener(
+    "change",
+    ()=>{
+
+        const visibles =
+        obtenerColaboradoresVisibles();
+
+
+        visibles.forEach(colaborador=>{
+
+            if(
+                seleccionarTodosColaboradores.checked
+            ){
+
+                colaboradoresSeleccionados.add(
+                    colaborador.id
+                );
+
+            }
+            else{
+
+                colaboradoresSeleccionados.delete(
+                    colaborador.id
+                );
+
+            }
+
+        });
+
+
+        renderizarColaboradoresAsignacion();
+
+    }
+);
 
     tiposAsignacion.forEach(input=>{
 
