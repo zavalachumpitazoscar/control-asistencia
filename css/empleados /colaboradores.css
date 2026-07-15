@@ -3915,3 +3915,116 @@
     }
 
 }
+
+
+
+/*=====================================================
+    COLUMNAS FIJAS: HORARIO Y ACCIONES
+=====================================================*/
+
+.tabla-colaboradores{
+
+    --ancho-acciones:80px;
+    --ancho-horario:120px;
+
+}
+
+
+.tabla-header .columna-horario,
+.tabla-fila .columna-horario{
+
+    position:sticky;
+
+    right:var(--ancho-acciones);
+
+    z-index:5;
+
+    width:var(--ancho-horario);
+
+    min-width:var(--ancho-horario);
+
+    max-width:var(--ancho-horario);
+
+    background:#ffffff;
+
+    box-shadow:
+        -1px 0 0 #e2e8f0;
+
+}
+
+
+.tabla-header .columna-acciones,
+.tabla-fila .columna-acciones{
+
+    position:sticky;
+
+    right:0;
+
+    z-index:6;
+
+    width:var(--ancho-acciones);
+
+    min-width:var(--ancho-acciones);
+
+    max-width:var(--ancho-acciones);
+
+    background:#ffffff;
+
+    box-shadow:
+        -1px 0 0 #e2e8f0;
+
+}
+
+
+.tabla-header .columna-horario,
+.tabla-header .columna-acciones{
+
+    z-index:10;
+
+    background:#f8fafc;
+
+}
+
+
+.btn-ver-horario-colaborador{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:6px;
+
+    min-height:34px;
+
+    padding:7px 11px;
+
+    border:1px solid #bfdbfe;
+
+    border-radius:9px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    cursor:pointer;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    transition:.2s;
+
+}
+
+
+.btn-ver-horario-colaborador:hover{
+
+    border-color:#93c5fd;
+
+    background:#dbeafe;
+
+    transform:translateY(-1px);
+
+}
