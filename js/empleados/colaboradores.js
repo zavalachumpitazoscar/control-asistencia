@@ -87,6 +87,114 @@ export function iniciarColaboradores(){
 
 }
 
+    const consultaHorariosColaboradores =
+query(
+
+    collection(
+        db,
+        "horarios"
+    ),
+
+    where(
+        "empresaId",
+        "==",
+        empresaId
+    )
+
+);
+
+
+onSnapshot(
+
+    consultaHorariosColaboradores,
+
+    snapshot=>{
+
+        horarios = [];
+
+
+        snapshot.forEach(documento=>{
+
+            horarios.push({
+
+                id:
+                documento.id,
+
+                ...documento.data()
+
+            });
+
+        });
+
+
+        horarios.sort(
+            (
+                primero,
+                segundo
+            )=>
+
+                String(
+                    primero.nombre || ""
+                )
+                .localeCompare(
+
+                    String(
+                        segundo.nombre || ""
+                    ),
+
+                    "es",
+
+                    {
+                        sensitivity:"base"
+                    }
+
+                )
+
+        );
+
+    },
+
+    error=>{
+
+        console.error(
+            "Error al cargar horarios en colaboradores:",
+            error
+        );
+
+    }
+
+);
+
+    const moduloCalendarioColaborador =
+iniciarAsignacionesHorarios({
+
+    empresaId,
+
+    obtenerHorarios:()=>{
+
+        return horarios;
+
+    },
+
+    /*
+     * En esta vista no se selecciona un horario general.
+     * Solo abriremos el calendario por colaborador.
+     */
+    obtenerHorarioSeleccionado:()=>{
+
+        return null;
+
+    },
+
+    alActualizar:()=>{
+
+        // No se requiere actualizar el detalle de Horarios
+        // dentro de la vista Colaboradores.
+
+    }
+
+});
+
 
     const buscar =
     document.getElementById(
@@ -114,6 +222,8 @@ export function iniciarColaboradores(){
 
 
 let colaboradores = [];
+
+let horarios = [];
 
 let seleccionados = [];
 
@@ -1429,12 +1539,6 @@ col.subarea ||
 "-";
 
 
-const horario =
-col.organizacion?.horario ||
-col.horario ||
-"-";
-
-
             lista.innerHTML +=`
 
 
@@ -1526,11 +1630,21 @@ col.horario ||
 
                 </div>
 
-                <div>
+<div class="centrado columna-horario">
 
-                ${horario}
+    <button
+        type="button"
+        class="btn-ver-horario-colaborador"
+        data-id="${col.id}"
+    >
 
-                </div>
+        <i class="bi bi-calendar3"></i>
+
+        Ver
+
+    </button>
+
+</div>
 
 
                 <div class="centrado columna-acciones">
@@ -1549,6 +1663,8 @@ col.horario ||
 activarChecks();
 
 activarEditar();
+
+activarVerCalendario();
 
 if(seleccionarTodos){
 
@@ -1951,6 +2067,73 @@ function activarEditar(){
 
                 await abrirModalEditarColaborador(
                     idColaborador
+                );
+
+            }
+        );
+
+    });
+
+}
+
+function activarVerCalendario(){
+
+    const botones =
+    document.querySelectorAll(
+        ".btn-ver-horario-colaborador"
+    );
+
+
+    botones.forEach(boton=>{
+
+        boton.addEventListener(
+            "click",
+            evento=>{
+
+                evento.preventDefault();
+
+                evento.stopPropagation();
+
+
+                const colaboradorId =
+                boton.dataset.id;
+
+
+                if(!colaboradorId){
+
+                    return;
+
+                }
+
+
+                if(
+                    !moduloCalendarioColaborador
+                    ?.abrirCalendarioColaborador
+                ){
+
+                    console.error(
+                        "No se inicializó el calendario del colaborador."
+                    );
+
+                    Swal.fire({
+
+                        icon:"error",
+
+                        title:"No se pudo abrir el calendario",
+
+                        text:
+                        "El módulo de horarios no está disponible."
+
+                    });
+
+                    return;
+
+                }
+
+
+                moduloCalendarioColaborador
+                .abrirCalendarioColaborador(
+                    colaboradorId
                 );
 
             }
