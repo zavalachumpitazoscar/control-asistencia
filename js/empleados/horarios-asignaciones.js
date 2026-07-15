@@ -2692,9 +2692,16 @@ colaboradoresSeleccionados.size;
 
 }
 
+
 function abrirCalendarioColaborador(
     colaboradorId
 ){
+
+    console.log(
+        "Ejecutando calendario:",
+        colaboradorId
+    );
+
 
     const colaborador =
     colaboradores.find(
@@ -2707,6 +2714,12 @@ function abrirCalendarioColaborador(
 
 
     if(!colaborador){
+
+        console.error(
+            "No se encontró colaborador:",
+            colaboradorId
+        );
+
 
         Swal.fire({
 
@@ -2724,6 +2737,59 @@ function abrirCalendarioColaborador(
     }
 
 
+    if(!modalCalendarioColaborador){
+
+        console.error(
+            "No existe #modalCalendarioColaborador en horarios.html"
+        );
+
+
+        Swal.fire({
+
+            icon:"error",
+
+            title:"No se encontró el calendario",
+
+            text:
+            "Falta agregar el modal del calendario del colaborador en horarios.html."
+
+        });
+
+        return;
+
+    }
+
+
+    const titulo =
+    document.getElementById(
+        "tituloCalendarioColaborador"
+    );
+
+
+    const subtitulo =
+    document.getElementById(
+        "subtituloCalendarioColaborador"
+    );
+
+
+    if(!titulo){
+
+        console.error(
+            "No existe #tituloCalendarioColaborador"
+        );
+
+    }
+
+
+    if(!subtitulo){
+
+        console.error(
+            "No existe #subtituloCalendarioColaborador"
+        );
+
+    }
+
+
     colaboradorCalendarioId =
     colaboradorId;
 
@@ -2736,33 +2802,87 @@ function abrirCalendarioColaborador(
     new Date();
 
 
-    document.getElementById(
-        "tituloCalendarioColaborador"
-    ).textContent =
-    obtenerNombreColaborador(
-        colaborador
-    );
+    if(titulo){
+
+        titulo.textContent =
+        obtenerNombreColaborador(
+            colaborador
+        );
+
+    }
 
 
-    document.getElementById(
-        "subtituloCalendarioColaborador"
-    ).textContent =
-    "Horarios, descansos y programación del colaborador.";
+    if(subtitulo){
+
+        subtitulo.textContent =
+        "Horarios, descansos y programación del colaborador.";
+
+    }
 
 
-    actualizarBotonesVistaCalendario();
+    /*
+     * Mostrar primero el modal.
+     * Así, si ocurre un error al construir el calendario,
+     * el modal igual aparecerá.
+     */
+    modalCalendarioColaborador.hidden =
+    false;
 
-    renderizarCalendarioColaborador();
+
+    modalCalendarioColaborador.style.display =
+    "flex";
 
 
-    if(modalCalendarioColaborador){
+    try{
 
-        modalCalendarioColaborador.style.display =
-        "flex";
+        actualizarBotonesVistaCalendario();
+
+        renderizarCalendarioColaborador();
+
+
+        console.log(
+            "Calendario abierto correctamente"
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "Error al renderizar calendario:",
+            error
+        );
+
+
+        if(vistaCalendarioColaborador){
+
+            vistaCalendarioColaborador.innerHTML = `
+
+                <div class="estado-error-calendario">
+
+                    <i class="bi bi-exclamation-triangle"></i>
+
+                    <h4>
+                        No se pudo mostrar el calendario
+                    </h4>
+
+                    <p>
+                        Revisa la consola para conocer el error.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
 
     }
 
 }
+
+
+
+
+    
 
 
     function cerrarModalCalendarioColaborador(){
