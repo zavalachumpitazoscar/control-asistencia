@@ -132,12 +132,6 @@ export function iniciarHorarios(){
     "btnAsignarColaboradores"
     );
 
-
-    const btnAsignarColaboradoresVacio =
-    document.getElementById(
-    "btnAsignarColaboradoresVacio"
-    );
-
     let horarios = [];
 
 
@@ -1072,14 +1066,6 @@ if(btnAsignarHorario){
 if(btnAsignarColaboradores){
 
     btnAsignarColaboradores.onclick =
-    abrirAsignacionColaboradores;
-
-}
-
-
-if(btnAsignarColaboradoresVacio){
-
-    btnAsignarColaboradoresVacio.onclick =
     abrirAsignacionColaboradores;
 
 }
