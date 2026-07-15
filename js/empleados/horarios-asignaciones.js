@@ -147,6 +147,54 @@ document.getElementById(
     };
 
 
+    const modalCalendarioColaborador =
+document.getElementById(
+    "modalCalendarioColaborador"
+);
+
+
+const cerrarCalendarioColaborador =
+document.getElementById(
+    "cerrarCalendarioColaborador"
+);
+
+
+const btnVistaMensualColaborador =
+document.getElementById(
+    "btnVistaMensualColaborador"
+);
+
+
+const btnVistaSemanalColaborador =
+document.getElementById(
+    "btnVistaSemanalColaborador"
+);
+
+
+const btnPeriodoAnteriorColaborador =
+document.getElementById(
+    "btnPeriodoAnteriorColaborador"
+);
+
+
+const btnPeriodoSiguienteColaborador =
+document.getElementById(
+    "btnPeriodoSiguienteColaborador"
+);
+
+
+const vistaCalendarioColaborador =
+document.getElementById(
+    "vistaCalendarioColaborador"
+);
+
+
+const leyendaHorariosColaborador =
+document.getElementById(
+    "leyendaHorariosColaborador"
+);
+
+
     let asignaciones = [];
 
     let colaboradores = [];
@@ -166,6 +214,17 @@ document.getElementById(
 
 
     let programacionMensual = {};
+
+    let colaboradorCalendarioId =
+null;
+
+
+let vistaCalendarioActual =
+"MENSUAL";
+
+
+let fechaCalendarioColaborador =
+new Date();
 
 
     const consulta =
@@ -2618,7 +2677,1038 @@ colaboradoresSeleccionados.size;
 
 }
 
+function abrirCalendarioColaborador(
+    colaboradorId
+){
 
+    const colaborador =
+    colaboradores.find(
+        item=>
+
+            item.id ===
+            colaboradorId
+
+    );
+
+
+    if(!colaborador){
+
+        Swal.fire({
+
+            icon:"warning",
+
+            title:"Colaborador no encontrado",
+
+            text:
+            "No se pudo cargar la información del colaborador."
+
+        });
+
+        return;
+
+    }
+
+
+    colaboradorCalendarioId =
+    colaboradorId;
+
+
+    vistaCalendarioActual =
+    "MENSUAL";
+
+
+    fechaCalendarioColaborador =
+    new Date();
+
+
+    document.getElementById(
+        "tituloCalendarioColaborador"
+    ).textContent =
+    obtenerNombreColaborador(
+        colaborador
+    );
+
+
+    document.getElementById(
+        "subtituloCalendarioColaborador"
+    ).textContent =
+    "Horarios, descansos y programación del colaborador.";
+
+
+    actualizarBotonesVistaCalendario();
+
+    renderizarCalendarioColaborador();
+
+
+    if(modalCalendarioColaborador){
+
+        modalCalendarioColaborador.style.display =
+        "flex";
+
+    }
+
+}
+
+
+    function cerrarModalCalendarioColaborador(){
+
+    if(modalCalendarioColaborador){
+
+        modalCalendarioColaborador.style.display =
+        "none";
+
+    }
+
+
+    colaboradorCalendarioId =
+    null;
+
+}
+
+
+function actualizarBotonesVistaCalendario(){
+
+    btnVistaMensualColaborador
+    ?.classList.toggle(
+        "activo",
+        vistaCalendarioActual ===
+        "MENSUAL"
+    );
+
+
+    btnVistaSemanalColaborador
+    ?.classList.toggle(
+        "activo",
+        vistaCalendarioActual ===
+        "SEMANAL"
+    );
+
+}
+
+
+    function obtenerProgramacionColaborador(){
+
+    if(!colaboradorCalendarioId){
+
+        return [];
+
+    }
+
+
+    const resultado = [];
+
+
+    asignaciones.forEach(
+        asignacion=>{
+
+            const colaboradorIds =
+            Array.isArray(
+                asignacion.colaboradorIds
+            )
+            ?
+            asignacion.colaboradorIds
+            :
+            [];
+
+
+            if(
+                !colaboradorIds.includes(
+                    colaboradorCalendarioId
+                )
+            ){
+
+                return;
+
+            }
+
+
+            if(
+                asignacion.tipoAsignacion ===
+                "DIARIA"
+            ){
+
+                resultado.push({
+
+                    fecha:
+                    asignacion.fechaInicio,
+
+                    horarioId:
+                    asignacion.horarioId,
+
+                    asignacionId:
+                    asignacion.id,
+
+                    tipo:
+                    "DIARIA"
+
+                });
+
+                return;
+
+            }
+
+
+            if(
+                asignacion.tipoAsignacion ===
+                "MENSUAL"
+            ){
+
+                (
+                    asignacion.programacion
+                    ||
+                    []
+                )
+                .forEach(item=>{
+
+                    resultado.push({
+
+                        fecha:
+                        item.fecha,
+
+                        horarioId:
+                        item.horarioId,
+
+                        asignacionId:
+                        asignacion.id,
+
+                        tipo:
+                        "MENSUAL"
+
+                    });
+
+                });
+
+                return;
+
+            }
+
+
+            if(
+                asignacion.tipoAsignacion ===
+                "SEMANAL"
+            ){
+
+                expandirAsignacionSemanal(
+                    asignacion
+                )
+                .forEach(item=>{
+
+                    resultado.push(
+                        item
+                    );
+
+                });
+
+            }
+
+        }
+    );
+
+
+    return resultado;
+
+}
+
+
+    function expandirAsignacionSemanal(
+    asignacion
+){
+
+    const resultado = [];
+
+
+    if(
+        !asignacion.fechaInicio
+        ||
+        !asignacion.fechaFin
+    ){
+
+        return resultado;
+
+    }
+
+
+    const mapaDias = {
+
+        domingo:
+        0,
+
+        lunes:
+        1,
+
+        martes:
+        2,
+
+        miercoles:
+        3,
+
+        jueves:
+        4,
+
+        viernes:
+        5,
+
+        sabado:
+        6
+
+    };
+
+
+    const diasPermitidos =
+    Object.entries(
+        asignacion.diasSemana ||
+        {}
+    )
+    .filter(
+        (
+            [
+                ,
+                activo
+            ]
+        )=>
+        activo
+    )
+    .map(
+        (
+            [
+                dia
+            ]
+        )=>
+        mapaDias[dia]
+    );
+
+
+    const fechaInicio =
+    new Date(
+        `${asignacion.fechaInicio}T00:00:00`
+    );
+
+
+    const fechaFin =
+    new Date(
+        `${asignacion.fechaFin}T00:00:00`
+    );
+
+
+    const intervalo =
+    Number(
+        asignacion.intervaloSemanas
+        ||
+        1
+    );
+
+
+    const cursor =
+    new Date(
+        fechaInicio
+    );
+
+
+    while(
+        cursor <=
+        fechaFin
+    ){
+
+        const diferenciaDias =
+        Math.floor(
+            (
+                cursor -
+                fechaInicio
+            )
+            /
+            86400000
+        );
+
+
+        const numeroSemana =
+        Math.floor(
+            diferenciaDias /
+            7
+        );
+
+
+        const semanaValida =
+        numeroSemana %
+        intervalo ===
+        0;
+
+
+        if(
+            semanaValida
+            &&
+            diasPermitidos.includes(
+                cursor.getDay()
+            )
+        ){
+
+            resultado.push({
+
+                fecha:
+                formatearFechaISO(
+                    cursor
+                ),
+
+                horarioId:
+                asignacion.horarioId,
+
+                asignacionId:
+                asignacion.id,
+
+                tipo:
+                "SEMANAL"
+
+            });
+
+        }
+
+
+        cursor.setDate(
+            cursor.getDate() +
+            1
+        );
+
+    }
+
+
+    return resultado;
+
+}
+
+
+    function renderizarCalendarioColaborador(){
+
+    if(
+        !vistaCalendarioColaborador
+        ||
+        !colaboradorCalendarioId
+    ){
+
+        return;
+
+    }
+
+
+    actualizarLeyendaHorariosColaborador();
+
+
+    if(
+        vistaCalendarioActual ===
+        "SEMANAL"
+    ){
+
+        renderizarVistaSemanalColaborador();
+
+        return;
+
+    }
+
+
+    renderizarVistaMensualColaborador();
+
+}
+
+    function renderizarVistaMensualColaborador(){
+
+    const año =
+    fechaCalendarioColaborador
+    .getFullYear();
+
+
+    const mes =
+    fechaCalendarioColaborador
+    .getMonth();
+
+
+    document.getElementById(
+        "tituloPeriodoColaborador"
+    ).textContent =
+    `${NOMBRES_MESES[mes]} ${año}`;
+
+
+    const programacion =
+    obtenerProgramacionColaborador();
+
+
+    const porFecha =
+    new Map();
+
+
+    programacion.forEach(item=>{
+
+        if(!porFecha.has(item.fecha)){
+
+            porFecha.set(
+                item.fecha,
+                []
+            );
+
+        }
+
+
+        porFecha.get(
+            item.fecha
+        )
+        .push(
+            item
+        );
+
+    });
+
+
+    const primerDia =
+    new Date(
+        año,
+        mes,
+        1
+    );
+
+
+    let desplazamiento =
+    primerDia.getDay();
+
+
+    desplazamiento =
+    desplazamiento === 0
+    ?
+    6
+    :
+    desplazamiento - 1;
+
+
+    const ultimoDia =
+    obtenerUltimoDiaMes(
+        año,
+        mes
+    );
+
+
+    let html = `
+
+        <div class="calendario-colaborador-mensual">
+
+            <div class="calendario-colaborador-cabecera">
+
+                <span>Lun</span>
+                <span>Mar</span>
+                <span>Mié</span>
+                <span>Jue</span>
+                <span>Vie</span>
+                <span>Sáb</span>
+                <span>Dom</span>
+
+            </div>
+
+            <div class="calendario-colaborador-grid">
+
+    `;
+
+
+    for(
+        let i = 0;
+        i < desplazamiento;
+        i++
+    ){
+
+        html += `
+
+            <div class="dia-colaborador vacio"></div>
+
+        `;
+
+    }
+
+
+    for(
+        let dia = 1;
+        dia <= ultimoDia;
+        dia++
+    ){
+
+        const fecha =
+        formatearFechaISO(
+            new Date(
+                año,
+                mes,
+                dia
+            )
+        );
+
+
+        const horariosDia =
+        porFecha.get(
+            fecha
+        )
+        ||
+        [];
+
+
+        html += `
+
+            <button
+                type="button"
+                class="dia-colaborador"
+                data-fecha="${fecha}"
+            >
+
+                <span class="numero-dia-colaborador">
+
+                    ${dia}
+
+                </span>
+
+
+                <div class="horarios-dia-colaborador">
+
+                    ${
+                        horariosDia.length === 0
+                        ?
+                        `
+
+                            <small class="dia-sin-horario">
+                                Sin horario
+                            </small>
+
+                        `
+                        :
+                        horariosDia
+                        .map(item=>
+
+                            crearEtiquetaHorarioCalendario(
+                                item.horarioId
+                            )
+
+                        )
+                        .join("")
+                    }
+
+                </div>
+
+            </button>
+
+        `;
+
+    }
+
+
+    html += `
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    vistaCalendarioColaborador.innerHTML =
+    html;
+
+}
+
+
+    function renderizarVistaSemanalColaborador(){
+
+    const inicioSemana =
+    obtenerInicioSemana(
+        fechaCalendarioColaborador
+    );
+
+
+    const finSemana =
+    new Date(
+        inicioSemana
+    );
+
+
+    finSemana.setDate(
+        finSemana.getDate() +
+        6
+    );
+
+
+    document.getElementById(
+        "tituloPeriodoColaborador"
+    ).textContent =
+    `${formatearFechaVisible(
+        formatearFechaISO(
+            inicioSemana
+        )
+    )} - ${formatearFechaVisible(
+        formatearFechaISO(
+            finSemana
+        )
+    )}`;
+
+
+    const programacion =
+    obtenerProgramacionColaborador();
+
+
+    let html = `
+
+        <div class="calendario-colaborador-semanal">
+
+    `;
+
+
+    for(
+        let i = 0;
+        i < 7;
+        i++
+    ){
+
+        const fecha =
+        new Date(
+            inicioSemana
+        );
+
+
+        fecha.setDate(
+            fecha.getDate() +
+            i
+        );
+
+
+        const fechaISO =
+        formatearFechaISO(
+            fecha
+        );
+
+
+        const horariosDia =
+        programacion.filter(
+            item=>
+
+                item.fecha ===
+                fechaISO
+
+        );
+
+
+        html += `
+
+            <div class="dia-semana-colaborador">
+
+                <div class="dia-semana-colaborador-header">
+
+                    <strong>
+
+                        ${[
+                            "Lunes",
+                            "Martes",
+                            "Miércoles",
+                            "Jueves",
+                            "Viernes",
+                            "Sábado",
+                            "Domingo"
+                        ][i]}
+
+                    </strong>
+
+                    <span>
+
+                        ${formatearFechaVisible(
+                            fechaISO
+                        )}
+
+                    </span>
+
+                </div>
+
+
+                <div class="dia-semana-colaborador-horarios">
+
+                    ${
+                        horariosDia.length === 0
+                        ?
+                        `
+
+                            <div class="descanso-colaborador">
+
+                                <i class="bi bi-moon-stars"></i>
+
+                                Sin horario / descanso
+
+                            </div>
+
+                        `
+                        :
+                        horariosDia
+                        .map(item=>
+
+                            crearTarjetaHorarioSemana(
+                                item.horarioId
+                            )
+
+                        )
+                        .join("")
+                    }
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    html += `
+
+        </div>
+
+    `;
+
+
+    vistaCalendarioColaborador.innerHTML =
+    html;
+
+}
+
+
+    function obtenerInicioSemana(
+    fecha
+){
+
+    const resultado =
+    new Date(
+        fecha
+    );
+
+
+    const dia =
+    resultado.getDay();
+
+
+    const diferencia =
+    dia === 0
+    ?
+    -6
+    :
+    1 - dia;
+
+
+    resultado.setDate(
+        resultado.getDate() +
+        diferencia
+    );
+
+
+    resultado.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    return resultado;
+
+}
+
+
+    function obtenerIndiceColorHorario(
+    horarioId
+){
+
+    const ids =
+    [
+        ...new Set(
+            obtenerHorarios()
+            .map(horario=>
+                horario.id
+            )
+        )
+    ];
+
+
+    const indice =
+    ids.indexOf(
+        horarioId
+    );
+
+
+    return indice >= 0
+    ?
+    indice % 8
+    :
+    0;
+
+}
+
+    function crearEtiquetaHorarioCalendario(
+    horarioId
+){
+
+    const horario =
+    obtenerHorarios()
+    .find(item=>
+
+        item.id ===
+        horarioId
+
+    );
+
+
+    const color =
+    obtenerIndiceColorHorario(
+        horarioId
+    );
+
+
+    return `
+
+        <span class="etiqueta-horario color-${color}">
+
+            ${escaparHTML(
+                horario?.nombre
+                ||
+                "Horario"
+            )}
+
+        </span>
+
+    `;
+
+}
+
+
+    function crearTarjetaHorarioSemana(
+    horarioId
+){
+
+    const horario =
+    obtenerHorarios()
+    .find(item=>
+
+        item.id ===
+        horarioId
+
+    );
+
+
+    const entrada =
+    horario
+    ?
+    obtenerDatosEntrada(
+        horario
+    )
+    :
+    {};
+
+
+    const salida =
+    horario
+    ?
+    obtenerDatosSalida(
+        horario
+    )
+    :
+    {};
+
+
+    const color =
+    obtenerIndiceColorHorario(
+        horarioId
+    );
+
+
+    return `
+
+        <div class="horario-semana-item color-${color}">
+
+            <strong>
+
+                ${escaparHTML(
+                    horario?.nombre
+                    ||
+                    "Horario"
+                )}
+
+            </strong>
+
+            <span>
+
+                ${formatearHora(
+                    entrada.programada
+                )}
+
+                -
+
+                ${formatearHora(
+                    salida.programada
+                )}
+
+            </span>
+
+        </div>
+
+    `;
+
+}
+
+
+    function actualizarLeyendaHorariosColaborador(){
+
+    if(!leyendaHorariosColaborador){
+
+        return;
+
+    }
+
+
+    const horarioIds =
+    [
+        ...new Set(
+            obtenerProgramacionColaborador()
+            .map(item=>
+
+                item.horarioId
+
+            )
+        )
+    ];
+
+
+    leyendaHorariosColaborador.innerHTML =
+    horarioIds.map(horarioId=>{
+
+        const horario =
+        obtenerHorarios()
+        .find(item=>
+
+            item.id ===
+            horarioId
+
+        );
+
+
+        const color =
+        obtenerIndiceColorHorario(
+            horarioId
+        );
+
+
+        return `
+
+            <span class="leyenda-horario-item">
+
+                <i class="color-${color}"></i>
+
+                ${escaparHTML(
+                    horario?.nombre
+                    ||
+                    "Horario"
+                )}
+
+            </span>
+
+        `;
+
+    })
+    .join("");
+
+}
+    
 function crearHTMLColaboradorAsignado(
     colaborador,
     asignacionesColaborador,
