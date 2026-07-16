@@ -405,6 +405,8 @@ INICIAR FERIADOS
 
 export async function iniciarFeriados(){
 
+    console.log("✅ INICIANDO MÓDULO FERIADOS");
+
     obtenerElementosFeriados();
 
 
