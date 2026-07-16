@@ -165,6 +165,8 @@ INICIAR MÓDULO
 
 export async function iniciarPermisos(){
 
+    console.log("✅ INICIANDO MÓDULO PERMISOS");
+
     obtenerElementosPermisos();
 
     if(
