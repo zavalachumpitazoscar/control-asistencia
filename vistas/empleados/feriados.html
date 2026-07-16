@@ -1,0 +1,1818 @@
+<section class="feriados">
+
+    <!-- =========================================
+         ENCABEZADO
+    ========================================== -->
+
+    <div class="encabezado-feriados">
+
+        <div>
+
+            <h2>
+                Feriados
+            </h2>
+
+            <p>
+                Administra los feriados, días no laborables y su aplicación
+                a los colaboradores.
+            </p>
+
+        </div>
+
+
+        <div class="feriados-acciones-principales">
+
+            <button
+                type="button"
+                class="btn-secundario-feriados"
+                id="btnSincronizarFeriados"
+            >
+
+                <i class="bi bi-arrow-repeat"></i>
+
+                Sincronizar feriados
+
+            </button>
+
+
+            <button
+                type="button"
+                class="btn-principal-feriados"
+                id="btnNuevoFeriado"
+            >
+
+                <i class="bi bi-plus-lg"></i>
+
+                Nuevo feriado
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         RESUMEN DEL AÑO
+    ========================================== -->
+
+    <div class="feriados-resumen">
+
+        <article class="feriado-resumen-card">
+
+            <div class="feriado-resumen-icono nacional">
+
+                <i class="bi bi-flag"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Feriados nacionales
+                </span>
+
+                <strong id="cantidadFeriadosNacionales">
+                    0
+                </strong>
+
+            </div>
+
+        </article>
+
+
+        <article class="feriado-resumen-card">
+
+            <div class="feriado-resumen-icono no-laborable">
+
+                <i class="bi bi-calendar2-week"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Días no laborables
+                </span>
+
+                <strong id="cantidadDiasNoLaborables">
+                    0
+                </strong>
+
+            </div>
+
+        </article>
+
+
+        <article class="feriado-resumen-card">
+
+            <div class="feriado-resumen-icono personalizado">
+
+                <i class="bi bi-building"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Fechas empresariales
+                </span>
+
+                <strong id="cantidadFeriadosEmpresa">
+                    0
+                </strong>
+
+            </div>
+
+        </article>
+
+
+        <article class="feriado-resumen-card">
+
+            <div class="feriado-resumen-icono pendiente">
+
+                <i class="bi bi-exclamation-circle"></i>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Pendientes de configurar
+                </span>
+
+                <strong id="cantidadFeriadosPendientes">
+                    0
+                </strong>
+
+            </div>
+
+        </article>
+
+    </div>
+
+
+
+    <!-- =========================================
+         CONTENEDOR PRINCIPAL
+    ========================================== -->
+
+    <div class="feriados-contenedor">
+
+
+        <!-- =====================================
+             PANEL IZQUIERDO
+        ====================================== -->
+
+        <aside class="feriados-panel-lista">
+
+
+            <!-- SELECTOR DE AÑO -->
+
+            <div class="feriados-panel-encabezado">
+
+                <div>
+
+                    <h3>
+                        Calendario laboral
+                    </h3>
+
+                    <span>
+                        Feriados registrados
+                    </span>
+
+                </div>
+
+
+                <select
+                    id="selectorAnioFeriados"
+                    class="selector-anio-feriados"
+                >
+
+                    <!-- Generado desde feriados.js -->
+
+                </select>
+
+            </div>
+
+
+
+            <!-- FILTROS -->
+
+            <div class="feriados-filtros">
+
+                <div class="feriados-buscador">
+
+                    <i class="bi bi-search"></i>
+
+                    <input
+                        type="text"
+                        id="buscarFeriado"
+                        placeholder="Buscar feriado..."
+                    >
+
+                </div>
+
+
+                <select id="filtroTipoFeriado">
+
+                    <option value="">
+                        Todos los tipos
+                    </option>
+
+                    <option value="FERIADO_NACIONAL">
+                        Feriado nacional
+                    </option>
+
+                    <option value="DIA_NO_LABORABLE">
+                        Día no laborable
+                    </option>
+
+                    <option value="FERIADO_REGIONAL">
+                        Feriado regional
+                    </option>
+
+                    <option value="FERIADO_LOCAL">
+                        Feriado local
+                    </option>
+
+                    <option value="DIA_INSTITUCIONAL">
+                        Día institucional
+                    </option>
+
+                    <option value="CIERRE_EXTRAORDINARIO">
+                        Cierre extraordinario
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- LISTA DE FERIADOS -->
+
+            <div
+                class="lista-feriados"
+                id="listaFeriados"
+            >
+
+                <div class="feriados-lista-vacia">
+
+                    <i class="bi bi-calendar-x"></i>
+
+                    <p>
+                        No hay feriados registrados.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- =====================================
+             PANEL CENTRAL
+        ====================================== -->
+
+        <main class="feriados-panel-calendario">
+
+
+            <!-- NAVEGACIÓN -->
+
+            <div class="feriados-calendario-navegacion">
+
+                <button
+                    type="button"
+                    class="btn-navegacion-feriados"
+                    id="btnMesAnteriorFeriados"
+                    title="Mes anterior"
+                >
+
+                    <i class="bi bi-chevron-left"></i>
+
+                </button>
+
+
+                <div class="feriados-mes-actual">
+
+                    <h3 id="tituloMesFeriados">
+                        Julio 2026
+                    </h3>
+
+                    <button
+                        type="button"
+                        class="btn-hoy-feriados"
+                        id="btnHoyFeriados"
+                    >
+                        Hoy
+                    </button>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-navegacion-feriados"
+                    id="btnMesSiguienteFeriados"
+                    title="Mes siguiente"
+                >
+
+                    <i class="bi bi-chevron-right"></i>
+
+                </button>
+
+            </div>
+
+
+
+            <!-- LEYENDA -->
+
+            <div class="feriados-leyenda">
+
+                <div class="feriados-leyenda-item">
+
+                    <span class="feriados-leyenda-color nacional"></span>
+
+                    Feriado nacional
+
+                </div>
+
+
+                <div class="feriados-leyenda-item">
+
+                    <span class="feriados-leyenda-color no-laborable"></span>
+
+                    Día no laborable
+
+                </div>
+
+
+                <div class="feriados-leyenda-item">
+
+                    <span class="feriados-leyenda-color regional"></span>
+
+                    Regional o local
+
+                </div>
+
+
+                <div class="feriados-leyenda-item">
+
+                    <span class="feriados-leyenda-color institucional"></span>
+
+                    Institucional
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CALENDARIO -->
+
+            <div class="feriados-calendario">
+
+                <div class="feriados-dias-semana">
+
+                    <div>Lun</div>
+                    <div>Mar</div>
+                    <div>Mié</div>
+                    <div>Jue</div>
+                    <div>Vie</div>
+                    <div>Sáb</div>
+                    <div>Dom</div>
+
+                </div>
+
+
+                <div
+                    class="feriados-dias-mes"
+                    id="feriadosDiasMes"
+                >
+
+                    <!-- Generado desde feriados.js -->
+
+                </div>
+
+            </div>
+
+        </main>
+
+
+
+        <!-- =====================================
+             PANEL DERECHO
+        ====================================== -->
+
+        <aside class="feriados-panel-detalle">
+
+
+            <!-- SIN SELECCIÓN -->
+
+            <div
+                class="feriado-sin-seleccion"
+                id="feriadoSinSeleccion"
+            >
+
+                <div class="feriado-sin-seleccion-icono">
+
+                    <i class="bi bi-calendar-event"></i>
+
+                </div>
+
+                <h3>
+                    Selecciona un feriado
+                </h3>
+
+                <p>
+                    Elige una fecha para consultar su configuración
+                    y los colaboradores a los que aplica.
+                </p>
+
+            </div>
+
+
+
+            <!-- DETALLE -->
+
+            <div
+                class="feriado-detalle-contenido"
+                id="feriadoDetalleContenido"
+            >
+
+
+                <!-- CABECERA -->
+
+                <div class="feriado-detalle-header">
+
+                    <div>
+
+                        <span
+                            class="feriado-detalle-tipo"
+                            id="detalleFeriadoTipo"
+                        >
+                            Feriado nacional
+                        </span>
+
+                        <h3 id="detalleFeriadoNombre">
+                            Fiestas Patrias
+                        </h3>
+
+                        <p id="detalleFeriadoFecha">
+                            28 de julio de 2026
+                        </p>
+
+                    </div>
+
+
+                    <span
+                        class="feriado-origen-badge"
+                        id="detalleFeriadoOrigen"
+                    >
+                        Oficial
+                    </span>
+
+                </div>
+
+
+
+                <!-- INFORMACIÓN -->
+
+                <div class="feriado-detalle-informacion">
+
+                    <div class="feriado-detalle-item">
+
+                        <span>
+                            Ámbito
+                        </span>
+
+                        <strong id="detalleFeriadoAmbito">
+                            Nacional
+                        </strong>
+
+                    </div>
+
+
+                    <div class="feriado-detalle-item">
+
+                        <span>
+                            Descanso remunerado
+                        </span>
+
+                        <strong id="detalleFeriadoRemunerado">
+                            Sí
+                        </strong>
+
+                    </div>
+
+
+                    <div class="feriado-detalle-item">
+
+                        <span>
+                            Compensable
+                        </span>
+
+                        <strong id="detalleFeriadoCompensable">
+                            No
+                        </strong>
+
+                    </div>
+
+
+                    <div class="feriado-detalle-item">
+
+                        <span>
+                            Estado
+                        </span>
+
+                        <strong id="detalleFeriadoEstado">
+                            Activo
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- REGLA GENERAL -->
+
+                <div class="feriado-regla-general">
+
+                    <div class="feriado-seccion-titulo">
+
+                        <div>
+
+                            <span>
+                                Regla general
+                            </span>
+
+                            <strong id="detalleFeriadoRegla">
+                                Toda la empresa descansa
+                            </strong>
+
+                        </div>
+
+                        <i class="bi bi-diagram-3"></i>
+
+                    </div>
+
+
+                    <p id="detalleFeriadoDescripcionRegla">
+                        Los colaboradores descansarán, salvo aquellos
+                        registrados como excepción.
+                    </p>
+
+                </div>
+
+
+
+                <!-- RESUMEN DE APLICACIÓN -->
+
+                <div class="feriado-aplicacion-resumen">
+
+                    <div class="feriado-aplicacion-card descansan">
+
+                        <span>
+                            Descansan
+                        </span>
+
+                        <strong id="cantidadDescansanFeriado">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="feriado-aplicacion-card trabajan">
+
+                        <span>
+                            Trabajan
+                        </span>
+
+                        <strong id="cantidadTrabajanFeriado">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="feriado-aplicacion-card pendientes">
+
+                        <span>
+                            Pendientes
+                        </span>
+
+                        <strong id="cantidadPendientesFeriado">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TRATAMIENTO -->
+
+                <div class="feriado-tratamiento">
+
+                    <span>
+                        Tratamiento para quienes trabajan
+                    </span>
+
+                    <strong id="detalleFeriadoTratamiento">
+                        Pendiente de definir
+                    </strong>
+
+                </div>
+
+
+
+                <!-- ACCIONES -->
+
+                <div class="feriado-detalle-acciones">
+
+                    <button
+                        type="button"
+                        class="btn-ver-colaboradores-feriado"
+                        id="btnVerColaboradoresFeriado"
+                    >
+
+                        <i class="bi bi-people"></i>
+
+                        Ver colaboradores
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn-configurar-feriado"
+                        id="btnConfigurarFeriado"
+                    >
+
+                        <i class="bi bi-sliders"></i>
+
+                        Configurar aplicación
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn-editar-feriado"
+                        id="btnEditarFeriado"
+                    >
+
+                        <i class="bi bi-pencil"></i>
+
+                        Editar
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn-desactivar-feriado"
+                        id="btnDesactivarFeriado"
+                    >
+
+                        <i class="bi bi-toggle-off"></i>
+
+                        Desactivar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     MODAL NUEVO / EDITAR FERIADO
+========================================== -->
+
+<div
+    class="modal-feriados"
+    id="modalFeriado"
+>
+
+    <div class="modal-feriados-contenido">
+
+
+        <!-- CABECERA -->
+
+        <div class="modal-feriados-header">
+
+            <div>
+
+                <span class="modal-feriados-etiqueta">
+                    Calendario laboral
+                </span>
+
+                <h3 id="tituloModalFeriado">
+                    Nuevo feriado
+                </h3>
+
+                <p id="subtituloModalFeriado">
+                    Registra una fecha especial para la empresa.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-cerrar-modal-feriados"
+                id="cerrarModalFeriado"
+                aria-label="Cerrar"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- CUERPO -->
+
+        <div class="modal-feriados-body">
+
+            <form
+                id="formularioFeriado"
+                autocomplete="off"
+            >
+
+                <input
+                    type="hidden"
+                    id="feriadoId"
+                >
+
+
+                <!-- NOMBRE -->
+
+                <div class="campo-feriado campo-completo">
+
+                    <label for="nombreFeriado">
+
+                        Nombre del feriado
+
+                        <span class="campo-obligatorio">
+                            *
+                        </span>
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nombreFeriado"
+                        maxlength="120"
+                        placeholder="Ejemplo: Aniversario de la empresa"
+                    >
+
+                </div>
+
+
+
+                <!-- TIPO Y ÁMBITO -->
+
+                <div class="formulario-feriados-grid">
+
+                    <div class="campo-feriado">
+
+                        <label for="tipoFeriado">
+
+                            Tipo de fecha
+
+                            <span class="campo-obligatorio">
+                                *
+                            </span>
+
+                        </label>
+
+                        <select id="tipoFeriado">
+
+                            <option value="">
+                                Seleccionar tipo
+                            </option>
+
+                            <option value="FERIADO_NACIONAL">
+                                Feriado nacional
+                            </option>
+
+                            <option value="DIA_NO_LABORABLE">
+                                Día no laborable
+                            </option>
+
+                            <option value="FERIADO_REGIONAL">
+                                Feriado regional
+                            </option>
+
+                            <option value="FERIADO_LOCAL">
+                                Feriado local
+                            </option>
+
+                            <option value="DIA_INSTITUCIONAL">
+                                Día institucional
+                            </option>
+
+                            <option value="CIERRE_EXTRAORDINARIO">
+                                Cierre extraordinario
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="campo-feriado">
+
+                        <label for="ambitoFeriado">
+
+                            Ámbito
+
+                            <span class="campo-obligatorio">
+                                *
+                            </span>
+
+                        </label>
+
+                        <select id="ambitoFeriado">
+
+                            <option value="NACIONAL">
+                                Nacional
+                            </option>
+
+                            <option value="REGIONAL">
+                                Regional
+                            </option>
+
+                            <option value="LOCAL">
+                                Local
+                            </option>
+
+                            <option value="EMPRESA">
+                                Empresa
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- FECHAS -->
+
+                <div class="formulario-feriados-grid">
+
+                    <div class="campo-feriado">
+
+                        <label for="fechaInicioFeriado">
+
+                            Fecha de inicio
+
+                            <span class="campo-obligatorio">
+                                *
+                            </span>
+
+                        </label>
+
+                        <input
+                            type="date"
+                            id="fechaInicioFeriado"
+                        >
+
+                    </div>
+
+
+                    <div class="campo-feriado">
+
+                        <label for="fechaFinFeriado">
+
+                            Fecha de término
+
+                            <span class="campo-obligatorio">
+                                *
+                            </span>
+
+                        </label>
+
+                        <input
+                            type="date"
+                            id="fechaFinFeriado"
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DEPARTAMENTO -->
+
+                <div
+                    class="campo-feriado campo-completo campo-feriado-oculto"
+                    id="contenedorDepartamentoFeriado"
+                >
+
+                    <label for="departamentoFeriado">
+                        Departamento o región
+                    </label>
+
+                    <select id="departamentoFeriado">
+
+                        <option value="">
+                            Seleccionar departamento
+                        </option>
+
+                        <option value="AMAZONAS">Amazonas</option>
+                        <option value="ANCASH">Áncash</option>
+                        <option value="APURIMAC">Apurímac</option>
+                        <option value="AREQUIPA">Arequipa</option>
+                        <option value="AYACUCHO">Ayacucho</option>
+                        <option value="CAJAMARCA">Cajamarca</option>
+                        <option value="CALLAO">Callao</option>
+                        <option value="CUSCO">Cusco</option>
+                        <option value="HUANCAVELICA">Huancavelica</option>
+                        <option value="HUANUCO">Huánuco</option>
+                        <option value="ICA">Ica</option>
+                        <option value="JUNIN">Junín</option>
+                        <option value="LA_LIBERTAD">La Libertad</option>
+                        <option value="LAMBAYEQUE">Lambayeque</option>
+                        <option value="LIMA">Lima</option>
+                        <option value="LORETO">Loreto</option>
+                        <option value="MADRE_DE_DIOS">Madre de Dios</option>
+                        <option value="MOQUEGUA">Moquegua</option>
+                        <option value="PASCO">Pasco</option>
+                        <option value="PIURA">Piura</option>
+                        <option value="PUNO">Puno</option>
+                        <option value="SAN_MARTIN">San Martín</option>
+                        <option value="TACNA">Tacna</option>
+                        <option value="TUMBES">Tumbes</option>
+                        <option value="UCAYALI">Ucayali</option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- PROVINCIA / DISTRITO -->
+
+                <div
+                    class="formulario-feriados-grid campo-feriado-oculto"
+                    id="contenedorUbicacionLocalFeriado"
+                >
+
+                    <div class="campo-feriado">
+
+                        <label for="provinciaFeriado">
+                            Provincia
+                        </label>
+
+                        <input
+                            type="text"
+                            id="provinciaFeriado"
+                            maxlength="80"
+                            placeholder="Ejemplo: Cañete"
+                        >
+
+                    </div>
+
+
+                    <div class="campo-feriado">
+
+                        <label for="distritoFeriado">
+                            Distrito
+                        </label>
+
+                        <input
+                            type="text"
+                            id="distritoFeriado"
+                            maxlength="80"
+                            placeholder="Ejemplo: Mala"
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- CARACTERÍSTICAS -->
+
+                <div class="feriado-opciones-configuracion">
+
+                    <label class="feriado-opcion-check">
+
+                        <input
+                            type="checkbox"
+                            id="descansoRemuneradoFeriado"
+                            checked
+                        >
+
+                        <span>
+
+                            <strong>
+                                Descanso remunerado
+                            </strong>
+
+                            <small>
+                                La fecha será considerada como descanso pagado.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+
+                    <label class="feriado-opcion-check">
+
+                        <input
+                            type="checkbox"
+                            id="compensableFeriado"
+                        >
+
+                        <span>
+
+                            <strong>
+                                Horas compensables
+                            </strong>
+
+                            <small>
+                                Las horas no laboradas deberán recuperarse.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+
+                    <label class="feriado-opcion-check">
+
+                        <input
+                            type="checkbox"
+                            id="permitirMarcacionFeriado"
+                            checked
+                        >
+
+                        <span>
+
+                            <strong>
+                                Permitir marcaciones
+                            </strong>
+
+                            <small>
+                                Los colaboradores programados podrán marcar asistencia.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- DESCRIPCIÓN -->
+
+                <div class="campo-feriado campo-completo">
+
+                    <label for="descripcionFeriado">
+                        Descripción u observaciones
+                    </label>
+
+                    <textarea
+                        id="descripcionFeriado"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Información adicional sobre esta fecha..."
+                    ></textarea>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+
+        <!-- PIE -->
+
+        <div class="modal-feriados-footer">
+
+            <button
+                type="button"
+                class="btn-cancelar-feriado"
+                id="cancelarModalFeriado"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                type="button"
+                class="btn-guardar-feriado"
+                id="guardarFeriado"
+            >
+
+                <i class="bi bi-check-lg"></i>
+
+                Guardar feriado
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================
+     MODAL CONFIGURAR APLICACIÓN
+========================================== -->
+
+<div
+    class="modal-feriados"
+    id="modalConfigurarFeriado"
+>
+
+    <div class="modal-feriados-contenido modal-configurar-feriado">
+
+
+        <!-- CABECERA -->
+
+        <div class="modal-feriados-header">
+
+            <div>
+
+                <span class="modal-feriados-etiqueta">
+                    Aplicación del feriado
+                </span>
+
+                <h3 id="tituloConfigurarFeriado">
+                    Configurar feriado
+                </h3>
+
+                <p id="fechaConfigurarFeriado">
+                    Define quién descansa y quién trabaja.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-cerrar-modal-feriados"
+                id="cerrarConfigurarFeriado"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- CUERPO -->
+
+        <div class="modal-feriados-body">
+
+
+            <!-- REGLA GENERAL -->
+
+            <div class="campo-feriado campo-completo">
+
+                <label for="reglaGeneralFeriado">
+
+                    Regla general
+
+                    <span class="campo-obligatorio">
+                        *
+                    </span>
+
+                </label>
+
+                <select id="reglaGeneralFeriado">
+
+                    <option value="TODOS_DESCANSAN">
+                        Toda la empresa descansa
+                    </option>
+
+                    <option value="TODOS_TRABAJAN">
+                        Toda la empresa trabaja normalmente
+                    </option>
+
+                    <option value="POR_CONFIGURAR">
+                        Definir aplicación individualmente
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- ALCANCE -->
+
+            <div class="campo-feriado campo-completo">
+
+                <label>
+                    Configurar excepciones por
+                </label>
+
+                <div class="feriado-alcance-opciones">
+
+                    <button
+                        type="button"
+                        class="feriado-alcance-btn activo"
+                        data-alcance="SUCURSAL"
+                    >
+
+                        <i class="bi bi-building"></i>
+
+                        Sucursal
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="feriado-alcance-btn"
+                        data-alcance="AREA"
+                    >
+
+                        <i class="bi bi-diagram-3"></i>
+
+                        Área
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="feriado-alcance-btn"
+                        data-alcance="SUBAREA"
+                    >
+
+                        <i class="bi bi-diagram-2"></i>
+
+                        Subárea
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="feriado-alcance-btn"
+                        data-alcance="COLABORADOR"
+                    >
+
+                        <i class="bi bi-person"></i>
+
+                        Colaborador
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BUSCADOR -->
+
+            <div class="feriado-excepciones-buscador">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="buscarExcepcionFeriado"
+                    placeholder="Buscar sucursal..."
+                >
+
+            </div>
+
+
+
+            <!-- LISTA DE EXCEPCIONES -->
+
+            <div
+                class="feriado-excepciones-lista"
+                id="listaExcepcionesFeriado"
+            >
+
+                <div class="feriado-excepciones-vacio">
+
+                    <i class="bi bi-inboxes"></i>
+
+                    <p>
+                        No hay elementos para mostrar.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- RESUMEN DE SELECCIÓN -->
+
+            <div class="feriado-excepciones-resumen">
+
+                <div>
+
+                    <span>
+                        Excepciones seleccionadas
+                    </span>
+
+                    <strong id="cantidadExcepcionesSeleccionadas">
+                        0
+                    </strong>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="btnLimpiarExcepcionesFeriado"
+                >
+                    Limpiar selección
+                </button>
+
+            </div>
+
+
+
+            <!-- TRATAMIENTO -->
+
+            <div class="campo-feriado campo-completo">
+
+                <label for="tratamientoTrabajoFeriado">
+
+                    Tratamiento para quienes trabajan
+
+                    <span class="campo-obligatorio">
+                        *
+                    </span>
+
+                </label>
+
+                <select id="tratamientoTrabajoFeriado">
+
+                    <option value="PENDIENTE">
+                        Pendiente de definir
+                    </option>
+
+                    <option value="PAGO_ADICIONAL">
+                        Pago adicional
+                    </option>
+
+                    <option value="DESCANSO_SUSTITUTORIO">
+                        Descanso sustitutorio
+                    </option>
+
+                    <option value="PAGO_Y_DESCANSO">
+                        Pago adicional y descanso sustitutorio
+                    </option>
+
+                    <option value="JORNADA_NORMAL">
+                        Jornada normal
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- CONTROLES DE ASISTENCIA -->
+
+            <div class="feriado-opciones-configuracion">
+
+                <label class="feriado-opcion-check">
+
+                    <input
+                        type="checkbox"
+                        id="noRegistrarFaltaFeriado"
+                        checked
+                    >
+
+                    <span>
+
+                        <strong>
+                            No registrar falta
+                        </strong>
+
+                        <small>
+                            Quienes descansen aparecerán como feriado.
+                        </small>
+
+                    </span>
+
+                </label>
+
+
+                <label class="feriado-opcion-check">
+
+                    <input
+                        type="checkbox"
+                        id="identificarFeriadoLaborado"
+                        checked
+                    >
+
+                    <span>
+
+                        <strong>
+                            Identificar feriado laborado
+                        </strong>
+
+                        <small>
+                            Las marcaciones se mostrarán como trabajo en feriado.
+                        </small>
+
+                    </span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PIE -->
+
+        <div class="modal-feriados-footer">
+
+            <button
+                type="button"
+                class="btn-cancelar-feriado"
+                id="cancelarConfigurarFeriado"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                type="button"
+                class="btn-guardar-feriado"
+                id="guardarConfiguracionFeriado"
+            >
+
+                <i class="bi bi-check-lg"></i>
+
+                Guardar configuración
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================
+     MODAL VER COLABORADORES
+========================================== -->
+
+<div
+    class="modal-feriados"
+    id="modalColaboradoresFeriado"
+>
+
+    <div class="modal-feriados-contenido modal-colaboradores-feriado">
+
+
+        <!-- CABECERA -->
+
+        <div class="modal-feriados-header">
+
+            <div>
+
+                <span class="modal-feriados-etiqueta">
+                    Aplicación por colaborador
+                </span>
+
+                <h3 id="tituloColaboradoresFeriado">
+                    Colaboradores
+                </h3>
+
+                <p id="subtituloColaboradoresFeriado">
+                    Consulta quién descansa y quién trabaja.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-cerrar-modal-feriados"
+                id="cerrarColaboradoresFeriado"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- FILTROS -->
+
+        <div class="colaboradores-feriado-filtros">
+
+            <div class="feriados-buscador">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="buscarColaboradorFeriado"
+                    placeholder="Buscar colaborador..."
+                >
+
+            </div>
+
+
+            <select id="filtroResultadoFeriado">
+
+                <option value="">
+                    Todos
+                </option>
+
+                <option value="DESCANSA">
+                    Descansan
+                </option>
+
+                <option value="TRABAJA">
+                    Trabajan
+                </option>
+
+                <option value="PENDIENTE">
+                    Pendientes
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <!-- TABLA -->
+
+        <div class="tabla-colaboradores-feriado-contenedor">
+
+            <table class="tabla-colaboradores-feriado">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Colaborador
+                        </th>
+
+                        <th>
+                            Sucursal
+                        </th>
+
+                        <th>
+                            Área
+                        </th>
+
+                        <th>
+                            Regla
+                        </th>
+
+                        <th>
+                            Resultado
+                        </th>
+
+                        <th>
+                            Tratamiento
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tablaColaboradoresFeriado">
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="tabla-feriados-vacia"
+                        >
+
+                            No hay colaboradores para mostrar.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+
+        <!-- PIE -->
+
+        <div class="modal-feriados-footer">
+
+            <button
+                type="button"
+                class="btn-cancelar-feriado"
+                id="cerrarListadoColaboradoresFeriado"
+            >
+                Cerrar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================
+     MODAL DESCANSO SUSTITUTORIO
+========================================== -->
+
+<div
+    class="modal-feriados"
+    id="modalDescansoSustitutorio"
+>
+
+    <div class="modal-feriados-contenido modal-descanso-sustitutorio">
+
+
+        <div class="modal-feriados-header">
+
+            <div>
+
+                <span class="modal-feriados-etiqueta">
+                    Feriado laborado
+                </span>
+
+                <h3>
+                    Registrar descanso sustitutorio
+                </h3>
+
+                <p>
+                    Asigna el día de descanso correspondiente.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-cerrar-modal-feriados"
+                id="cerrarDescansoSustitutorio"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <div class="modal-feriados-body">
+
+            <input
+                type="hidden"
+                id="feriadoTrabajadoId"
+            >
+
+            <input
+                type="hidden"
+                id="colaboradorDescansoId"
+            >
+
+
+            <div class="feriado-colaborador-resumen">
+
+                <div
+                    class="feriado-colaborador-avatar"
+                    id="avatarColaboradorDescanso"
+                >
+                    --
+                </div>
+
+                <div>
+
+                    <span>
+                        Colaborador
+                    </span>
+
+                    <strong id="nombreColaboradorDescanso">
+                        Sin seleccionar
+                    </strong>
+
+                    <small id="documentoColaboradorDescanso">
+                        Sin documento
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="campo-feriado campo-completo">
+
+                <label for="fechaDescansoSustitutorio">
+
+                    Fecha del descanso
+
+                    <span class="campo-obligatorio">
+                        *
+                    </span>
+
+                </label>
+
+                <input
+                    type="date"
+                    id="fechaDescansoSustitutorio"
+                >
+
+            </div>
+
+
+            <div class="campo-feriado campo-completo">
+
+                <label for="observacionDescansoSustitutorio">
+                    Observaciones
+                </label>
+
+                <textarea
+                    id="observacionDescansoSustitutorio"
+                    rows="4"
+                    maxlength="300"
+                    placeholder="Información adicional..."
+                ></textarea>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="modal-feriados-footer">
+
+            <button
+                type="button"
+                class="btn-cancelar-feriado"
+                id="cancelarDescansoSustitutorio"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                type="button"
+                class="btn-guardar-feriado"
+                id="guardarDescansoSustitutorio"
+            >
+
+                <i class="bi bi-check-lg"></i>
+
+                Guardar descanso
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
