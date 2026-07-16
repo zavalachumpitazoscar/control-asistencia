@@ -1,0 +1,1020 @@
+<section class="permisos">
+
+    <!-- =========================================
+         ENCABEZADO
+    ========================================== -->
+
+    <div class="encabezado-permisos">
+
+        <div>
+
+            <h2>
+                Permisos
+            </h2>
+
+            <p>
+                Gestiona vacaciones, licencias y permisos de los colaboradores.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         CONTENEDOR PRINCIPAL
+    ========================================== -->
+
+    <div class="permisos-contenedor">
+
+
+        <!-- =====================================
+             PANEL DE COLABORADORES
+        ====================================== -->
+
+        <aside class="permisos-colaboradores">
+
+            <div class="permisos-panel-titulo">
+
+                <div>
+
+                    <h3>
+                        Colaboradores
+                    </h3>
+
+                    <span id="cantidadColaboradoresPermisos">
+                        0 colaboradores
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUSCADOR -->
+
+            <div class="permisos-buscador">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="buscarColaboradorPermiso"
+                    placeholder="Buscar colaborador..."
+                >
+
+            </div>
+
+
+            <!-- LISTA -->
+
+            <div
+                class="lista-colaboradores-permisos"
+                id="listaColaboradoresPermisos"
+            >
+
+                <div class="permisos-vacio-lista">
+
+                    <i class="bi bi-people"></i>
+
+                    <p>
+                        No hay colaboradores para mostrar.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- =====================================
+             PANEL DEL CALENDARIO
+        ====================================== -->
+
+        <main class="permisos-calendario-panel">
+
+
+            <!-- ESTADO SIN COLABORADOR -->
+
+            <div
+                class="permisos-sin-colaborador"
+                id="permisosSinColaborador"
+            >
+
+                <div class="permisos-sin-colaborador-icono">
+
+                    <i class="bi bi-calendar-check"></i>
+
+                </div>
+
+                <h3>
+                    Selecciona un colaborador
+                </h3>
+
+                <p>
+                    Elige un colaborador para consultar y registrar sus permisos.
+                </p>
+
+            </div>
+
+
+
+            <!-- CONTENIDO DEL CALENDARIO -->
+
+            <div
+                class="permisos-calendario-contenido"
+                id="permisosCalendarioContenido"
+            >
+
+
+                <!-- CABECERA DEL COLABORADOR -->
+
+                <div class="permisos-colaborador-header">
+
+                    <div class="permisos-colaborador-info">
+
+                        <div
+                            class="permisos-avatar-grande"
+                            id="permisosAvatarColaborador"
+                        >
+                            --
+                        </div>
+
+                        <div>
+
+                            <span class="permisos-etiqueta">
+                                Calendario de permisos
+                            </span>
+
+                            <h3 id="permisosNombreColaborador">
+                                Colaborador
+                            </h3>
+
+                            <p id="permisosDocumentoColaborador">
+                                Sin documento
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="permisos-header-acciones">
+
+                        <button
+                            type="button"
+                            class="btn-secundario-permisos"
+                            id="btnHistorialPermisos"
+                        >
+
+                            <i class="bi bi-clock-history"></i>
+
+                            Historial
+
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn-principal-permisos"
+                            id="btnNuevoPermiso"
+                        >
+
+                            <i class="bi bi-plus-lg"></i>
+
+                            Nuevo permiso
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- NAVEGACIÓN DEL CALENDARIO -->
+
+                <div class="permisos-calendario-navegacion">
+
+                    <button
+                        type="button"
+                        class="btn-navegacion-calendario"
+                        id="btnMesAnteriorPermisos"
+                        title="Mes anterior"
+                    >
+
+                        <i class="bi bi-chevron-left"></i>
+
+                    </button>
+
+
+                    <div class="permisos-mes-actual">
+
+                        <h3 id="tituloMesPermisos">
+                            Julio 2026
+                        </h3>
+
+                        <button
+                            type="button"
+                            class="btn-hoy-permisos"
+                            id="btnHoyPermisos"
+                        >
+                            Hoy
+                        </button>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="btn-navegacion-calendario"
+                        id="btnMesSiguientePermisos"
+                        title="Mes siguiente"
+                    >
+
+                        <i class="bi bi-chevron-right"></i>
+
+                    </button>
+
+                </div>
+
+
+
+                <!-- LEYENDA -->
+
+                <div class="permisos-leyenda">
+
+                    <div class="leyenda-item">
+
+                        <span class="leyenda-color vacaciones"></span>
+
+                        Vacaciones
+
+                    </div>
+
+                    <div class="leyenda-item">
+
+                        <span class="leyenda-color licencia-medica"></span>
+
+                        Licencia médica
+
+                    </div>
+
+                    <div class="leyenda-item">
+
+                        <span class="leyenda-color permiso-personal"></span>
+
+                        Permiso personal
+
+                    </div>
+
+                    <div class="leyenda-item">
+
+                        <span class="leyenda-color otros"></span>
+
+                        Otros
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- CALENDARIO -->
+
+                <div class="permisos-calendario">
+
+
+                    <!-- DÍAS DE LA SEMANA -->
+
+                    <div class="permisos-dias-semana">
+
+                        <div>Lun</div>
+                        <div>Mar</div>
+                        <div>Mié</div>
+                        <div>Jue</div>
+                        <div>Vie</div>
+                        <div>Sáb</div>
+                        <div>Dom</div>
+
+                    </div>
+
+
+                    <!-- DÍAS DEL MES -->
+
+                    <div
+                        class="permisos-dias-mes"
+                        id="permisosDiasMes"
+                    >
+
+                        <!-- Generado desde permisos.js -->
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     MODAL NUEVO / EDITAR PERMISO
+========================================== -->
+
+<div
+    class="modal-permisos"
+    id="modalPermiso"
+>
+
+    <div class="modal-permisos-contenido">
+
+
+        <!-- CABECERA -->
+
+        <div class="modal-permisos-header">
+
+            <div>
+
+                <span class="modal-permisos-etiqueta">
+                    Gestión de permisos
+                </span>
+
+                <h3 id="tituloModalPermiso">
+                    Nuevo permiso
+                </h3>
+
+                <p id="subtituloModalPermiso">
+                    Registra un permiso para el colaborador seleccionado.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-cerrar-modal-permisos"
+                id="cerrarModalPermiso"
+                aria-label="Cerrar"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- CUERPO -->
+
+        <div class="modal-permisos-body">
+
+
+            <!-- RESUMEN DEL COLABORADOR -->
+
+            <div class="permiso-colaborador-resumen">
+
+                <div
+                    class="permiso-colaborador-avatar"
+                    id="modalPermisoAvatar"
+                >
+                    --
+                </div>
+
+                <div>
+
+                    <span>
+                        Colaborador
+                    </span>
+
+                    <strong id="modalPermisoColaborador">
+                        Sin seleccionar
+                    </strong>
+
+                    <small id="modalPermisoDocumento">
+                        Sin documento
+                    </small>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FORMULARIO -->
+
+            <form
+                id="formularioPermiso"
+                autocomplete="off"
+            >
+
+
+                <input
+                    type="hidden"
+                    id="permisoId"
+                >
+
+
+                <!-- TIPO DE PERMISO -->
+
+                <div class="campo-permiso campo-completo">
+
+                    <label for="tipoPermiso">
+
+                        Tipo de permiso
+
+                        <span class="campo-obligatorio">
+                            *
+                        </span>
+
+                    </label>
+
+                    <select id="tipoPermiso">
+
+                        <option value="">
+                            Seleccionar tipo
+                        </option>
+
+                        <option value="VACACIONES">
+                            Vacaciones
+                        </option>
+
+                        <option value="LICENCIA_MEDICA">
+                            Licencia médica
+                        </option>
+
+                        <option value="LICENCIA_MATERNIDAD">
+                            Licencia por maternidad
+                        </option>
+
+                        <option value="LICENCIA_PATERNIDAD">
+                            Licencia por paternidad
+                        </option>
+
+                        <option value="PERMISO_PERSONAL">
+                            Permiso personal
+                        </option>
+
+                        <option value="COMISION_SERVICIO">
+                            Comisión de servicio
+                        </option>
+
+                        <option value="CAPACITACION">
+                            Capacitación
+                        </option>
+
+                        <option value="DUELO">
+                            Licencia por duelo
+                        </option>
+
+                        <option value="PERMISO_CON_GOCE">
+                            Permiso con goce
+                        </option>
+
+                        <option value="PERMISO_SIN_GOCE">
+                            Permiso sin goce
+                        </option>
+
+                        <option value="TRABAJO_REMOTO">
+                            Trabajo remoto
+                        </option>
+
+                        <option value="OTRO">
+                            Otro
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- FECHAS -->
+
+                <div class="formulario-permisos-grid">
+
+                    <div class="campo-permiso">
+
+                        <label for="fechaInicioPermiso">
+
+                            Fecha de inicio
+
+                            <span class="campo-obligatorio">
+                                *
+                            </span>
+
+                        </label>
+
+                        <input
+                            type="date"
+                            id="fechaInicioPermiso"
+                        >
+
+                    </div>
+
+
+                    <div class="campo-permiso">
+
+                        <label for="fechaFinPermiso">
+
+                            Fecha de término
+
+                            <span class="campo-obligatorio">
+                                *
+                            </span>
+
+                        </label>
+
+                        <input
+                            type="date"
+                            id="fechaFinPermiso"
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- DURACIÓN -->
+
+                <div class="campo-permiso campo-completo">
+
+                    <label>
+                        Duración del permiso
+                    </label>
+
+                    <div class="opciones-duracion-permiso">
+
+                        <label class="opcion-duracion">
+
+                            <input
+                                type="radio"
+                                name="tipoDuracionPermiso"
+                                value="DIA_COMPLETO"
+                                checked
+                            >
+
+                            <span class="opcion-duracion-contenido">
+
+                                <i class="bi bi-calendar-day"></i>
+
+                                <strong>
+                                    Día completo
+                                </strong>
+
+                                <small>
+                                    Justifica toda la jornada.
+                                </small>
+
+                            </span>
+
+                        </label>
+
+
+                        <label class="opcion-duracion">
+
+                            <input
+                                type="radio"
+                                name="tipoDuracionPermiso"
+                                value="MEDIO_DIA"
+                            >
+
+                            <span class="opcion-duracion-contenido">
+
+                                <i class="bi bi-circle-half"></i>
+
+                                <strong>
+                                    Medio día
+                                </strong>
+
+                                <small>
+                                    Primera o segunda mitad.
+                                </small>
+
+                            </span>
+
+                        </label>
+
+
+                        <label class="opcion-duracion">
+
+                            <input
+                                type="radio"
+                                name="tipoDuracionPermiso"
+                                value="HORAS"
+                            >
+
+                            <span class="opcion-duracion-contenido">
+
+                                <i class="bi bi-clock"></i>
+
+                                <strong>
+                                    Por horas
+                                </strong>
+
+                                <small>
+                                    Define una hora inicial y final.
+                                </small>
+
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- OPCIONES DE MEDIO DÍA -->
+
+                <div
+                    class="campo-permiso campo-completo permiso-campo-oculto"
+                    id="contenedorMedioDiaPermiso"
+                >
+
+                    <label for="mitadDiaPermiso">
+                        Jornada autorizada
+                    </label>
+
+                    <select id="mitadDiaPermiso">
+
+                        <option value="PRIMERA_MITAD">
+                            Primera mitad del día
+                        </option>
+
+                        <option value="SEGUNDA_MITAD">
+                            Segunda mitad del día
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- OPCIONES POR HORAS -->
+
+                <div
+                    class="formulario-permisos-grid permiso-campo-oculto"
+                    id="contenedorHorasPermiso"
+                >
+
+                    <div class="campo-permiso">
+
+                        <label for="horaInicioPermiso">
+                            Hora desde
+                        </label>
+
+                        <input
+                            type="time"
+                            id="horaInicioPermiso"
+                        >
+
+                    </div>
+
+
+                    <div class="campo-permiso">
+
+                        <label for="horaFinPermiso">
+                            Hora hasta
+                        </label>
+
+                        <input
+                            type="time"
+                            id="horaFinPermiso"
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- MOTIVO -->
+
+                <div class="campo-permiso campo-completo">
+
+                    <label for="motivoPermiso">
+
+                        Motivo
+
+                        <span class="campo-obligatorio">
+                            *
+                        </span>
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="motivoPermiso"
+                        maxlength="150"
+                        placeholder="Ejemplo: Descanso médico indicado por el especialista"
+                    >
+
+                </div>
+
+
+
+                <!-- OBSERVACIONES -->
+
+                <div class="campo-permiso campo-completo">
+
+                    <label for="observacionesPermiso">
+                        Observaciones
+                    </label>
+
+                    <textarea
+                        id="observacionesPermiso"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Información adicional sobre el permiso..."
+                    ></textarea>
+
+                </div>
+
+
+
+                <!-- DOCUMENTO -->
+
+                <div class="campo-permiso campo-completo">
+
+                    <label for="documentoPermiso">
+                        Documento de sustento
+                    </label>
+
+                    <label
+                        class="permiso-documento-carga"
+                        for="documentoPermiso"
+                    >
+
+                        <i class="bi bi-cloud-arrow-up"></i>
+
+                        <div>
+
+                            <strong>
+                                Seleccionar documento
+                            </strong>
+
+                            <span>
+                                PDF, JPG o PNG
+                            </span>
+
+                        </div>
+
+                        <input
+                            type="file"
+                            id="documentoPermiso"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                        >
+
+                    </label>
+
+                    <div
+                        class="permiso-archivo-seleccionado"
+                        id="archivoPermisoSeleccionado"
+                    ></div>
+
+                </div>
+
+
+
+                <!-- ESTADO -->
+
+                <div class="campo-permiso campo-completo">
+
+                    <label for="estadoPermiso">
+                        Estado inicial
+                    </label>
+
+                    <select id="estadoPermiso">
+
+                        <option value="PENDIENTE">
+                            Pendiente
+                        </option>
+
+                        <option value="APROBADO">
+                            Aprobado
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+
+        <!-- PIE -->
+
+        <div class="modal-permisos-footer">
+
+            <button
+                type="button"
+                class="btn-cancelar-permiso"
+                id="cancelarModalPermiso"
+            >
+                Cancelar
+            </button>
+
+            <button
+                type="button"
+                class="btn-guardar-permiso"
+                id="guardarPermiso"
+            >
+
+                <i class="bi bi-check-lg"></i>
+
+                Guardar permiso
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================
+     MODAL DETALLE DEL PERMISO
+========================================== -->
+
+<div
+    class="modal-permisos"
+    id="modalDetallePermiso"
+>
+
+    <div class="modal-permisos-contenido modal-detalle-permiso">
+
+
+        <div class="modal-permisos-header">
+
+            <div>
+
+                <span class="modal-permisos-etiqueta">
+                    Detalle del permiso
+                </span>
+
+                <h3 id="detallePermisoTipo">
+                    Permiso
+                </h3>
+
+                <p id="detallePermisoFechas">
+                    Sin fechas
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="btn-cerrar-modal-permisos"
+                id="cerrarDetallePermiso"
+            >
+
+                <i class="bi bi-x-lg"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="modal-permisos-body">
+
+            <div class="detalle-permiso-estado">
+
+                <span>
+                    Estado
+                </span>
+
+                <strong id="detallePermisoEstado">
+                    Pendiente
+                </strong>
+
+            </div>
+
+
+            <div class="detalle-permiso-grid">
+
+                <div class="detalle-permiso-item">
+
+                    <span>
+                        Duración
+                    </span>
+
+                    <strong id="detallePermisoDuracion">
+                        Día completo
+                    </strong>
+
+                </div>
+
+
+                <div class="detalle-permiso-item">
+
+                    <span>
+                        Motivo
+                    </span>
+
+                    <strong id="detallePermisoMotivo">
+                        Sin motivo
+                    </strong>
+
+                </div>
+
+
+                <div class="detalle-permiso-item detalle-permiso-completo">
+
+                    <span>
+                        Observaciones
+                    </span>
+
+                    <p id="detallePermisoObservaciones">
+                        Sin observaciones.
+                    </p>
+
+                </div>
+
+
+                <div class="detalle-permiso-item detalle-permiso-completo">
+
+                    <span>
+                        Documento
+                    </span>
+
+                    <div id="detallePermisoDocumento">
+                        Sin documento adjunto.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-permisos-footer">
+
+            <button
+                type="button"
+                class="btn-anular-permiso"
+                id="btnAnularPermiso"
+            >
+
+                <i class="bi bi-x-circle"></i>
+
+                Anular
+
+            </button>
+
+            <button
+                type="button"
+                class="btn-rechazar-permiso"
+                id="btnRechazarPermiso"
+            >
+
+                <i class="bi bi-slash-circle"></i>
+
+                Rechazar
+
+            </button>
+
+            <button
+                type="button"
+                class="btn-editar-permiso"
+                id="btnEditarPermiso"
+            >
+
+                <i class="bi bi-pencil"></i>
+
+                Editar
+
+            </button>
+
+            <button
+                type="button"
+                class="btn-aprobar-permiso"
+                id="btnAprobarPermiso"
+            >
+
+                <i class="bi bi-check-circle"></i>
+
+                Aprobar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
