@@ -1,6 +1,7 @@
 import { iniciarColaboradores } from "./empleados/colaboradores.js";
 import { iniciarHorarios } from "./empleados/horarios.js";
 import { iniciarPermisos } from "./empleados/permisos.js";
+import { iniciarFeriados } from "./empleados/feriados.js";
 
 
 export function iniciarEmpleados(){
@@ -82,6 +83,12 @@ async function cargarTab(tab){
             case "permisos":
 
                 iniciarPermisos();
+
+            break;
+
+            case "feriado":
+
+                iniciarFeriados();
 
             break;
 
