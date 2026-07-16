@@ -79,6 +79,12 @@ async function cargarTab(tab){
 
             break;
 
+            case "permisos":
+
+                iniciarPermisos();
+
+            break;
+
         }
 
     }
