@@ -77,142 +77,144 @@ CATÁLOGO OFICIAL PERÚ 2026
     El día no laborable se carga por separado y queda
     pendiente de configuración empresarial.
 */
+const ANIO_ACTUAL = new Date().getFullYear();
+
 
 const FERIADOS_OFICIALES_PERU_2026 = [
 
     {
-        codigo:"PE-2026-01-01",
+        codigo:"PE-01-01",
         nombre:"Año Nuevo",
-        fechaInicio:"2026-01-01",
-        fechaFin:"2026-01-01",
+        fechaInicio:`${ANIO_ACTUAL}-01-01`,
+        fechaFin:`${ANIO_ACTUAL}-01-01`,
         tipo:"FERIADO_NACIONAL"
     },
-
+    
     {
         codigo:"PE-2026-01-02",
         nombre:"Día no laborable para el sector público",
-        fechaInicio:"2026-01-02",
-        fechaFin:"2026-01-02",
+        fechaInicio:`${ANIO_ACTUAL}-01-02`,
+        fechaFin:`${ANIO_ACTUAL}-01-02`,
         tipo:"DIA_NO_LABORABLE"
     },
 
     {
         codigo:"PE-2026-04-02",
         nombre:"Jueves Santo",
-        fechaInicio:"2026-04-02",
-        fechaFin:"2026-04-02",
+        fechaInicio:`${ANIO_ACTUAL}-04-02`,
+        fechaFin:`${ANIO_ACTUAL}-04-02`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-04-03",
         nombre:"Viernes Santo",
-        fechaInicio:"2026-04-03",
-        fechaFin:"2026-04-03",
+        fechaInicio:`${ANIO_ACTUAL}-04-03`,
+        fechaFin:`${ANIO_ACTUAL}-04-03`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-05-01",
         nombre:"Día del Trabajo",
-        fechaInicio:"2026-05-01",
-        fechaFin:"2026-05-01",
+        fechaInicio:`${ANIO_ACTUAL}-05-01`,
+        fechaFin:`${ANIO_ACTUAL}-05-01`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-06-07",
         nombre:"Batalla de Arica y Día de la Bandera",
-        fechaInicio:"2026-06-07",
-        fechaFin:"2026-06-07",
+        fechaInicio:`${ANIO_ACTUAL}-06-07`,
+        fechaFin:`${ANIO_ACTUAL}-06-07`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-06-29",
         nombre:"San Pedro y San Pablo",
-        fechaInicio:"2026-06-29",
-        fechaFin:"2026-06-29",
+        fechaInicio:`${ANIO_ACTUAL}-06-29`,
+        fechaFin:`${ANIO_ACTUAL}-06-29`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-07-23",
         nombre:"Día de la Fuerza Aérea del Perú",
-        fechaInicio:"2026-07-23",
-        fechaFin:"2026-07-23",
+        fechaInicio:`${ANIO_ACTUAL}-07-23`,
+        fechaFin:`${ANIO_ACTUAL}-07-23`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-07-27",
         nombre:"Día no laborable",
-        fechaInicio:"2026-07-27",
-        fechaFin:"2026-07-27",
+        fechaInicio:`${ANIO_ACTUAL}-07-27`,
+        fechaFin:`${ANIO_ACTUAL}-07-27`,
         tipo:"DIA_NO_LABORABLE"
     },
 
     {
         codigo:"PE-2026-07-28",
         nombre:"Fiestas Patrias",
-        fechaInicio:"2026-07-28",
-        fechaFin:"2026-07-29",
+        fechaInicio:`${ANIO_ACTUAL}-07-28`,
+        fechaFin:`${ANIO_ACTUAL}-07-29`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-08-06",
         nombre:"Batalla de Junín",
-        fechaInicio:"2026-08-06",
-        fechaFin:"2026-08-06",
+        fechaInicio:`${ANIO_ACTUAL}-08-06`,
+        fechaFin:`${ANIO_ACTUAL}-08-06`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-08-30",
         nombre:"Santa Rosa de Lima",
-        fechaInicio:"2026-08-30",
-        fechaFin:"2026-08-30",
+        fechaInicio:`${ANIO_ACTUAL}-08-30`,
+        fechaFin:`${ANIO_ACTUAL}-08-30`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-10-08",
         nombre:"Combate de Angamos",
-        fechaInicio:"2026-10-08",
-        fechaFin:"2026-10-08",
+        fechaInicio:`${ANIO_ACTUAL}-10-08`,
+        fechaFin:`${ANIO_ACTUAL}-10-08`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-11-01",
         nombre:"Día de Todos los Santos",
-        fechaInicio:"2026-11-01",
-        fechaFin:"2026-11-01",
+        fechaInicio:`${ANIO_ACTUAL}-11-01`,
+        fechaFin:`${ANIO_ACTUAL}-11-01`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-12-08",
         nombre:"Inmaculada Concepción",
-        fechaInicio:"2026-12-08",
-        fechaFin:"2026-12-08",
+        fechaInicio:`${ANIO_ACTUAL}-12-08`,
+        fechaFin:`${ANIO_ACTUAL}-12-08`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-12-09",
         nombre:"Batalla de Ayacucho",
-        fechaInicio:"2026-12-09",
-        fechaFin:"2026-12-09",
+        fechaInicio:`${ANIO_ACTUAL}-12-09`,
+        fechaFin:`${ANIO_ACTUAL}-12-09`,
         tipo:"FERIADO_NACIONAL"
     },
 
     {
         codigo:"PE-2026-12-25",
         nombre:"Navidad",
-        fechaInicio:"2026-12-25",
-        fechaFin:"2026-12-25",
+        fechaInicio:`${ANIO_ACTUAL}-12-25`,
+        fechaFin:`${ANIO_ACTUAL}-12-25`,
         tipo:"FERIADO_NACIONAL"
     }
 
