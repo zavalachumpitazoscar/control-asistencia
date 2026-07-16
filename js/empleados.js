@@ -86,7 +86,7 @@ async function cargarTab(tab){
 
             break;
 
-            case "feriado":
+            case "feriados":
 
                 iniciarFeriados();
 
