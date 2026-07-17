@@ -1,48 +1,232 @@
-<div class="asistencia-selector-fecha">
+/*=====================================================
+VARIABLES
+=====================================================*/
 
-    <button
-        type="button"
-        class="btn-fecha-navegacion"
-        id="btnDiaAnteriorAsistencia"
-        title="Día anterior"
-    >
+let fechaSeleccionada =
+    normalizarFecha(
+        new Date()
+    );
 
-        <i class="bi bi-chevron-left"></i>
+let fechaActualAsistencia;
 
-    </button>
+let btnDiaAnteriorAsistencia;
 
+let btnDiaSiguienteAsistencia;
 
-    <div class="asistencia-fecha-actual">
-
-        <span>
-            Fecha seleccionada
-        </span>
-
-        <strong id="fechaActualAsistencia">
-            Viernes, 17 de julio de 2026
-        </strong>
-
-    </div>
+let btnHoyAsistencia;
 
 
-    <button
-        type="button"
-        class="btn-fecha-navegacion"
-        id="btnDiaSiguienteAsistencia"
-        title="Día siguiente"
-    >
 
-        <i class="bi bi-chevron-right"></i>
+/*=====================================================
+INICIAR FECHA
+=====================================================*/
 
-    </button>
+export function iniciarFechaAsistencia(){
+
+    fechaActualAsistencia =
+        document.getElementById(
+            "fechaActualAsistencia"
+        );
+
+    btnDiaAnteriorAsistencia =
+        document.getElementById(
+            "btnDiaAnteriorAsistencia"
+        );
+
+    btnDiaSiguienteAsistencia =
+        document.getElementById(
+            "btnDiaSiguienteAsistencia"
+        );
+
+    btnHoyAsistencia =
+        document.getElementById(
+            "btnHoyAsistencia"
+        );
 
 
-    <button
-        type="button"
-        class="btn-asistencia-hoy"
-        id="btnHoyAsistencia"
-    >
-        Hoy
-    </button>
+    if(!fechaActualAsistencia){
 
-</div>
+        console.warn(
+            "No se encontró fechaActualAsistencia."
+        );
+
+        return;
+
+    }
+
+
+    if(btnDiaAnteriorAsistencia){
+
+        btnDiaAnteriorAsistencia.onclick =
+            ()=>cambiarFechaAsistencia(-1);
+
+    }
+
+
+    if(btnDiaSiguienteAsistencia){
+
+        btnDiaSiguienteAsistencia.onclick =
+            ()=>cambiarFechaAsistencia(1);
+
+    }
+
+
+    if(btnHoyAsistencia){
+
+        btnHoyAsistencia.onclick = ()=>{
+
+            fechaSeleccionada =
+                normalizarFecha(
+                    new Date()
+                );
+
+            actualizarFechaAsistencia();
+
+        };
+
+    }
+
+
+    actualizarFechaAsistencia();
+
+}
+
+
+
+/*=====================================================
+CAMBIAR FECHA
+=====================================================*/
+
+function cambiarFechaAsistencia(
+    cantidadDias
+){
+
+    fechaSeleccionada.setDate(
+        fechaSeleccionada.getDate() +
+        cantidadDias
+    );
+
+
+    fechaSeleccionada =
+        normalizarFecha(
+            fechaSeleccionada
+        );
+
+
+    actualizarFechaAsistencia();
+
+}
+
+
+
+/*=====================================================
+ACTUALIZAR FECHA
+=====================================================*/
+
+function actualizarFechaAsistencia(){
+
+    fechaActualAsistencia.textContent =
+        new Intl.DateTimeFormat(
+            "es-PE",
+            {
+                weekday:"long",
+                day:"2-digit",
+                month:"long",
+                year:"numeric"
+            }
+        )
+        .format(
+            fechaSeleccionada
+        );
+
+
+    document.dispatchEvent(
+        new CustomEvent(
+            "asistencia:cambio-fecha",
+            {
+                detail:{
+
+                    fecha:
+                        obtenerFechaISO(
+                            fechaSeleccionada
+                        ),
+
+                    fechaObjeto:
+                        new Date(
+                            fechaSeleccionada
+                        )
+
+                }
+            }
+        )
+    );
+
+}
+
+
+
+/*=====================================================
+OBTENER FECHA SELECCIONADA
+=====================================================*/
+
+export function obtenerFechaSeleccionadaAsistencia(){
+
+    return new Date(
+        fechaSeleccionada
+    );
+
+}
+
+
+
+/*=====================================================
+NORMALIZAR FECHA
+=====================================================*/
+
+function normalizarFecha(
+    fecha
+){
+
+    return new Date(
+        fecha.getFullYear(),
+        fecha.getMonth(),
+        fecha.getDate()
+    );
+
+}
+
+
+
+/*=====================================================
+FECHA ISO LOCAL
+=====================================================*/
+
+function obtenerFechaISO(
+    fecha
+){
+
+    const anio =
+        fecha.getFullYear();
+
+    const mes =
+        String(
+            fecha.getMonth() + 1
+        )
+        .padStart(
+            2,
+            "0"
+        );
+
+    const dia =
+        String(
+            fecha.getDate()
+        )
+        .padStart(
+            2,
+            "0"
+        );
+
+
+    return `${anio}-${mes}-${dia}`;
+
+}
