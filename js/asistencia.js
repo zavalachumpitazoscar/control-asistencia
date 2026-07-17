@@ -1,19 +1,19 @@
 import {
     iniciarNavegacionAsistencia
 }
-from "./navegacion-asistencia.js";
+from "./asistencia/navegacion-asistencia.js";
 
 
 import {
     iniciarFechaAsistencia
 }
-from "./fecha-asistencia.js";
+from "./asistencia/fecha-asistencia.js";
 
 
 import {
     iniciarImportacionMarcaciones
 }
-from "./importacion-marcaciones.js";
+from "./asistencia/importacion-marcaciones.js";
 
 
 
