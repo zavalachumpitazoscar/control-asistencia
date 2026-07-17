@@ -279,7 +279,7 @@ async function cargarVista(vista){
 
             case "empleados":
 
-            iniciarEmpleados();
+                iniciarEmpleados();
 
             break;
 
