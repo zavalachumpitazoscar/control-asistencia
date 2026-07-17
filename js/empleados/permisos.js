@@ -43,6 +43,18 @@ let cancelarEscuchaPermisos = null;
 
 let detallePermisoTratamiento;
 
+let permisoImpactoInfo;
+
+let permisoImpactoTitulo;
+
+let permisoImpactoDescripcion;
+
+let permisoImpactoJustifica;
+
+let permisoImpactoComputa;
+
+let permisoImpactoCompensable;
+
 /*=====================================================
 REGLAS DE LOS TIPOS DE PERMISO
 =====================================================*/
@@ -510,6 +522,36 @@ OBTENER ELEMENTOS
 =====================================================*/
 
 function obtenerElementosPermisos(){
+
+    permisoImpactoInfo =
+    document.getElementById(
+        "permisoImpactoInfo"
+    );
+
+permisoImpactoTitulo =
+    document.getElementById(
+        "permisoImpactoTitulo"
+    );
+
+permisoImpactoDescripcion =
+    document.getElementById(
+        "permisoImpactoDescripcion"
+    );
+
+permisoImpactoJustifica =
+    document.getElementById(
+        "permisoImpactoJustifica"
+    );
+
+permisoImpactoComputa =
+    document.getElementById(
+        "permisoImpactoComputa"
+    );
+
+permisoImpactoCompensable =
+    document.getElementById(
+        "permisoImpactoCompensable"
+    );
 
     detallePermisoTratamiento =
     document.getElementById(
@@ -1039,6 +1081,14 @@ function registrarEventosPermisos(){
 
     }
 
+    if(tipoPermiso){
+
+    tipoPermiso.addEventListener(
+        "change",
+        actualizarImpactoTipoPermiso
+    );
+
+}
 
     document.addEventListener(
         "keydown",
@@ -1161,6 +1211,73 @@ async function cargarColaboradoresPermisos(){
 
 }
 
+
+/*=====================================================
+actualizarImpactoTipoPermiso
+=====================================================*/
+
+
+function actualizarImpactoTipoPermiso(){
+
+    const tipo =
+        tipoPermiso.value;
+
+
+    if(!tipo){
+
+        permisoImpactoTitulo.textContent =
+            "Selecciona un tipo de permiso";
+
+        permisoImpactoDescripcion.textContent =
+            "Aquí se mostrará cómo afectará el permiso a la asistencia.";
+
+        permisoImpactoJustifica.textContent =
+            "—";
+
+        permisoImpactoComputa.textContent =
+            "—";
+
+        permisoImpactoCompensable.textContent =
+            "—";
+
+        return;
+
+    }
+
+
+    const reglas =
+        REGLAS_TIPOS_PERMISO[tipo] ||
+        REGLAS_TIPOS_PERMISO.OTRO;
+
+
+    permisoImpactoTitulo.textContent =
+        obtenerTextoImpactoAsistencia(
+            reglas.impactoAsistencia
+        );
+
+
+    permisoImpactoDescripcion.textContent =
+        reglas.descripcion;
+
+
+    permisoImpactoJustifica.textContent =
+        reglas.justificaAusencia
+        ? "✓ Justifica ausencia"
+        : "✕ No justifica ausencia";
+
+
+    permisoImpactoComputa.textContent =
+        reglas.computaComoLaborado
+        ? "✓ Computa como laborado"
+        : "✕ No computa como laborado";
+
+
+    permisoImpactoCompensable.textContent =
+        reglas.compensable
+        ? "✓ Requiere compensación"
+        : "✕ No requiere compensación";
+
+}
 
 
 /*=====================================================
@@ -1880,7 +1997,7 @@ function abrirNuevoPermiso(
 
 
     limpiarFormularioPermiso();
-
+    actualizarImpactoTipoPermiso();
 
     permisoSeleccionado = null;
 
@@ -1929,7 +2046,7 @@ function abrirEditarPermiso(
 
 
     limpiarFormularioPermiso();
-
+    actualizarImpactoTipoPermiso();
 
     permisoSeleccionado =
         permiso;
@@ -2012,9 +2129,11 @@ function abrirEditarPermiso(
     }
 
 
-    actualizarCamposDuracion();
+actualizarCamposDuracion();
 
-    abrirModalFormulario();
+actualizarImpactoTipoPermiso();
+
+abrirModalFormulario();
 
 }
 
