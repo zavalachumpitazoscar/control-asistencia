@@ -1,1 +1,1797 @@
+/*=====================================================
+ASISTENCIA
+=====================================================*/
 
+.asistencia{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:24px;
+
+    width:100%;
+
+}
+
+
+/*=====================================================
+ENCABEZADO
+=====================================================*/
+
+.asistencia-encabezado{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:25px;
+
+    flex-wrap:wrap;
+
+}
+
+
+.asistencia-etiqueta{
+
+    display:block;
+
+    margin-bottom:5px;
+
+    color:#2563eb;
+
+    font-size:12px;
+
+    font-weight:800;
+
+    letter-spacing:.08em;
+
+    text-transform:uppercase;
+
+}
+
+
+.asistencia-encabezado h2{
+
+    margin:0;
+
+    color:#0f172a;
+
+    font-size:30px;
+
+    font-weight:800;
+
+}
+
+
+.asistencia-encabezado p{
+
+    margin:7px 0 0;
+
+    color:#64748b;
+
+    font-size:14px;
+
+    line-height:1.6;
+
+}
+
+
+.asistencia-acciones-encabezado{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    flex-wrap:wrap;
+
+}
+
+
+.btn-asistencia-principal,
+.btn-asistencia-secundario{
+
+    min-height:44px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:9px;
+
+    padding:0 17px;
+
+    border-radius:12px;
+
+    font-size:13px;
+
+    font-weight:750;
+
+    cursor:pointer;
+
+    transition:.22s ease;
+
+}
+
+
+.btn-asistencia-principal{
+
+    border:1px solid #2563eb;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+    box-shadow:
+        0 10px 25px rgba(37,99,235,.22);
+
+}
+
+
+.btn-asistencia-principal:hover{
+
+    background:#1d4ed8;
+
+    border-color:#1d4ed8;
+
+    transform:translateY(-1px);
+
+}
+
+
+.btn-asistencia-secundario{
+
+    border:1px solid #dbe3ef;
+
+    background:#ffffff;
+
+    color:#334155;
+
+}
+
+
+.btn-asistencia-secundario:hover{
+
+    background:#f8fafc;
+
+    border-color:#cbd5e1;
+
+}
+
+
+/*=====================================================
+PESTAÑAS
+=====================================================*/
+
+.asistencia-tabs{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    padding:7px;
+
+    overflow-x:auto;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:16px;
+
+    background:#ffffff;
+
+    box-shadow:
+        0 8px 25px rgba(15,23,42,.04);
+
+}
+
+
+.asistencia-tabs::-webkit-scrollbar{
+
+    height:4px;
+
+}
+
+
+.asistencia-tabs::-webkit-scrollbar-thumb{
+
+    background:#cbd5e1;
+
+    border-radius:20px;
+
+}
+
+
+.asistencia-tab{
+
+    position:relative;
+
+    min-height:43px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    flex:0 0 auto;
+
+    padding:0 15px;
+
+    border:none;
+
+    border-radius:11px;
+
+    background:transparent;
+
+    color:#64748b;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.22s ease;
+
+}
+
+
+.asistencia-tab i{
+
+    font-size:16px;
+
+}
+
+
+.asistencia-tab:hover{
+
+    background:#f8fafc;
+
+    color:#1e293b;
+
+}
+
+
+.asistencia-tab.activo{
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+}
+
+
+.asistencia-tab-contador{
+
+    min-width:22px;
+
+    height:22px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:0 6px;
+
+    border-radius:20px;
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+    font-size:10px;
+
+    font-weight:800;
+
+}
+
+
+/*=====================================================
+CONTENIDO
+=====================================================*/
+
+.asistencia-contenido{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+}
+
+
+/*=====================================================
+FILTROS PRINCIPALES
+=====================================================*/
+
+.asistencia-filtros{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:18px;
+
+    flex-wrap:wrap;
+
+}
+
+
+.asistencia-selector-fecha{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+    padding:7px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:14px;
+
+    background:#ffffff;
+
+}
+
+
+.btn-fecha-navegacion{
+
+    width:38px;
+
+    height:38px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 38px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#f8fafc;
+
+    color:#475569;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+.btn-fecha-navegacion:hover{
+
+    background:#e2e8f0;
+
+    color:#0f172a;
+
+}
+
+
+.asistencia-fecha-actual{
+
+    min-width:220px;
+
+    padding:0 7px;
+
+}
+
+
+.asistencia-fecha-actual span{
+
+    display:block;
+
+    margin-bottom:2px;
+
+    color:#94a3b8;
+
+    font-size:10px;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    letter-spacing:.05em;
+
+}
+
+
+.asistencia-fecha-actual strong{
+
+    display:block;
+
+    color:#1e293b;
+
+    font-size:13px;
+
+    font-weight:800;
+
+}
+
+
+.btn-asistencia-hoy{
+
+    min-height:38px;
+
+    padding:0 13px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:12px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+}
+
+
+.asistencia-buscador{
+
+    position:relative;
+
+    min-width:290px;
+
+    flex:1;
+
+    max-width:430px;
+
+}
+
+
+.asistencia-buscador i{
+
+    position:absolute;
+
+    top:50%;
+
+    left:15px;
+
+    transform:translateY(-50%);
+
+    color:#94a3b8;
+
+    pointer-events:none;
+
+}
+
+
+.asistencia-buscador input{
+
+    width:100%;
+
+    min-height:48px;
+
+    padding:0 16px 0 43px;
+
+    border:1px solid #dbe3ef;
+
+    border-radius:13px;
+
+    outline:none;
+
+    background:#ffffff;
+
+    color:#0f172a;
+
+    font-size:13px;
+
+    transition:.2s;
+
+}
+
+
+.asistencia-buscador input:focus{
+
+    border-color:#60a5fa;
+
+    box-shadow:
+        0 0 0 4px rgba(37,99,235,.09);
+
+}
+
+
+/*=====================================================
+FILTROS SECUNDARIOS
+=====================================================*/
+
+.asistencia-filtros-secundarios{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(160px,1fr))
+        auto;
+
+    align-items:end;
+
+    gap:13px;
+
+    padding:16px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:16px;
+
+    background:#ffffff;
+
+}
+
+
+.campo-filtro-asistencia{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+
+}
+
+
+.campo-filtro-asistencia label{
+
+    color:#64748b;
+
+    font-size:11px;
+
+    font-weight:750;
+
+}
+
+
+.campo-filtro-asistencia select{
+
+    width:100%;
+
+    min-height:42px;
+
+    padding:0 12px;
+
+    border:1px solid #dbe3ef;
+
+    border-radius:11px;
+
+    outline:none;
+
+    background:#ffffff;
+
+    color:#334155;
+
+    font-size:12px;
+
+    cursor:pointer;
+
+}
+
+
+.campo-filtro-asistencia select:focus{
+
+    border-color:#60a5fa;
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.08);
+
+}
+
+
+.btn-limpiar-filtros-asistencia{
+
+    min-height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    padding:0 14px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:11px;
+
+    background:#f8fafc;
+
+    color:#475569;
+
+    font-size:12px;
+
+    font-weight:750;
+
+    cursor:pointer;
+
+}
+
+
+/*=====================================================
+TARJETAS DE RESUMEN
+=====================================================*/
+
+.asistencia-resumen{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(6,minmax(160px,1fr));
+
+    gap:13px;
+
+}
+
+
+.asistencia-resumen-card{
+
+    min-width:0;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:16px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:16px;
+
+    background:#ffffff;
+
+    text-align:left;
+
+    cursor:pointer;
+
+    transition:.22s ease;
+
+    box-shadow:
+        0 8px 22px rgba(15,23,42,.035);
+
+}
+
+
+.asistencia-resumen-card:hover{
+
+    transform:translateY(-2px);
+
+    border-color:#cbd5e1;
+
+    box-shadow:
+        0 14px 30px rgba(15,23,42,.07);
+
+}
+
+
+.resumen-card-icono{
+
+    width:43px;
+
+    height:43px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 43px;
+
+    border-radius:13px;
+
+    font-size:19px;
+
+}
+
+
+.resumen-card-icono.programados{
+
+    background:#e0f2fe;
+
+    color:#0284c7;
+
+}
+
+
+.resumen-card-icono.presentes{
+
+    background:#dcfce7;
+
+    color:#16a34a;
+
+}
+
+
+.resumen-card-icono.tardanzas{
+
+    background:#fef3c7;
+
+    color:#d97706;
+
+}
+
+
+.resumen-card-icono.ausentes{
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+}
+
+
+.resumen-card-icono.permisos{
+
+    background:#ede9fe;
+
+    color:#7c3aed;
+
+}
+
+
+.resumen-card-icono.incompletos{
+
+    background:#ffedd5;
+
+    color:#ea580c;
+
+}
+
+
+.asistencia-resumen-card > div:last-child{
+
+    min-width:0;
+
+}
+
+
+.asistencia-resumen-card span{
+
+    display:block;
+
+    color:#64748b;
+
+    font-size:11px;
+
+    font-weight:750;
+
+}
+
+
+.asistencia-resumen-card strong{
+
+    display:block;
+
+    margin:2px 0;
+
+    color:#0f172a;
+
+    font-size:24px;
+
+    font-weight:850;
+
+}
+
+
+.asistencia-resumen-card small{
+
+    display:block;
+
+    overflow:hidden;
+
+    color:#94a3b8;
+
+    font-size:9px;
+
+    white-space:nowrap;
+
+    text-overflow:ellipsis;
+
+}
+
+
+/*=====================================================
+TARJETA DE TABLA
+=====================================================*/
+
+.asistencia-tabla-card{
+
+    overflow:hidden;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:18px;
+
+    background:#ffffff;
+
+    box-shadow:
+        0 12px 35px rgba(15,23,42,.05);
+
+}
+
+
+.asistencia-tabla-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    padding:18px 20px;
+
+    border-bottom:1px solid #eef2f7;
+
+}
+
+
+.asistencia-tabla-header h3{
+
+    margin:0;
+
+    color:#0f172a;
+
+    font-size:16px;
+
+    font-weight:800;
+
+}
+
+
+.asistencia-tabla-header p{
+
+    margin:4px 0 0;
+
+    color:#94a3b8;
+
+    font-size:11px;
+
+}
+
+
+.asistencia-tabla-opciones{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+
+.btn-tabla-asistencia{
+
+    min-height:38px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    padding:0 13px;
+
+    border:1px solid #dbe3ef;
+
+    border-radius:10px;
+
+    background:#ffffff;
+
+    color:#475569;
+
+    font-size:11px;
+
+    font-weight:750;
+
+    cursor:pointer;
+
+}
+
+
+.btn-tabla-asistencia.solo-icono{
+
+    width:38px;
+
+    padding:0;
+
+}
+
+
+/*=====================================================
+TABLA
+=====================================================*/
+
+.asistencia-tabla-contenedor{
+
+    width:100%;
+
+    overflow-x:auto;
+
+}
+
+
+.asistencia-tabla{
+
+    width:100%;
+
+    min-width:1180px;
+
+    border-collapse:collapse;
+
+}
+
+
+.asistencia-tabla th{
+
+    padding:13px 15px;
+
+    border-bottom:1px solid #e2e8f0;
+
+    background:#f8fafc;
+
+    color:#64748b;
+
+    font-size:10px;
+
+    font-weight:800;
+
+    text-align:left;
+
+    text-transform:uppercase;
+
+    letter-spacing:.04em;
+
+    white-space:nowrap;
+
+}
+
+
+.asistencia-tabla td{
+
+    padding:14px 15px;
+
+    border-bottom:1px solid #f1f5f9;
+
+    color:#334155;
+
+    font-size:12px;
+
+    vertical-align:middle;
+
+}
+
+
+.asistencia-tabla tbody tr{
+
+    transition:.18s;
+
+}
+
+
+.asistencia-tabla tbody tr:hover{
+
+    background:#fbfdff;
+
+}
+
+
+.asistencia-tabla tbody tr:last-child td{
+
+    border-bottom:none;
+
+}
+
+
+/*=====================================================
+COLABORADOR
+=====================================================*/
+
+.asistencia-colaborador{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:11px;
+
+    min-width:210px;
+
+}
+
+
+.asistencia-avatar{
+
+    width:39px;
+
+    height:39px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 39px;
+
+    border-radius:12px;
+
+    background:linear-gradient(
+        135deg,
+        #dbeafe,
+        #ede9fe
+    );
+
+    color:#4338ca;
+
+    font-size:12px;
+
+    font-weight:850;
+
+}
+
+
+.asistencia-colaborador strong{
+
+    display:block;
+
+    color:#1e293b;
+
+    font-size:12px;
+
+    font-weight:800;
+
+}
+
+
+.asistencia-colaborador span{
+
+    display:block;
+
+    margin-top:3px;
+
+    color:#94a3b8;
+
+    font-size:10px;
+
+}
+
+
+/*=====================================================
+HORARIO
+=====================================================*/
+
+.asistencia-horario{
+
+    min-width:145px;
+
+}
+
+
+.asistencia-horario strong{
+
+    display:block;
+
+    color:#1e293b;
+
+    font-size:12px;
+
+}
+
+
+.asistencia-horario span{
+
+    display:block;
+
+    margin-top:3px;
+
+    color:#94a3b8;
+
+    font-size:9px;
+
+}
+
+
+/*=====================================================
+MARCACIONES
+=====================================================*/
+
+.asistencia-marcacion{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+    min-width:125px;
+
+}
+
+
+.asistencia-marcacion > i{
+
+    width:30px;
+
+    height:30px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 30px;
+
+    border-radius:9px;
+
+    font-size:13px;
+
+}
+
+
+.asistencia-marcacion strong{
+
+    display:block;
+
+    color:#1e293b;
+
+    font-size:12px;
+
+}
+
+
+.asistencia-marcacion span{
+
+    display:block;
+
+    margin-top:2px;
+
+    color:#94a3b8;
+
+    font-size:9px;
+
+}
+
+
+.asistencia-marcacion.correcta > i{
+
+    background:#dcfce7;
+
+    color:#16a34a;
+
+}
+
+
+.asistencia-marcacion.tardanza > i{
+
+    background:#fef3c7;
+
+    color:#d97706;
+
+}
+
+
+.asistencia-marcacion.pendiente > i{
+
+    background:#e0f2fe;
+
+    color:#0284c7;
+
+}
+
+
+.asistencia-marcacion.faltante > i{
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+}
+
+
+/*=====================================================
+PERMISO
+=====================================================*/
+
+.asistencia-permiso-info{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    min-width:260px;
+
+    padding:9px 11px;
+
+    border:1px solid #ddd6fe;
+
+    border-radius:11px;
+
+    background:#f5f3ff;
+
+}
+
+
+.asistencia-permiso-info > i{
+
+    color:#7c3aed;
+
+    font-size:18px;
+
+}
+
+
+.asistencia-permiso-info strong{
+
+    display:block;
+
+    color:#5b21b6;
+
+    font-size:11px;
+
+}
+
+
+.asistencia-permiso-info span{
+
+    display:block;
+
+    margin-top:2px;
+
+    color:#7c3aed;
+
+    font-size:9px;
+
+}
+
+
+/*=====================================================
+ESTADOS
+=====================================================*/
+
+.estado-asistencia{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-height:27px;
+
+    padding:0 10px;
+
+    border-radius:20px;
+
+    font-size:9px;
+
+    font-weight:850;
+
+    white-space:nowrap;
+
+}
+
+
+.estado-asistencia.presente{
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+}
+
+
+.estado-asistencia.tardanza{
+
+    background:#fef3c7;
+
+    color:#b45309;
+
+}
+
+
+.estado-asistencia.ausente{
+
+    background:#fee2e2;
+
+    color:#b91c1c;
+
+}
+
+
+.estado-asistencia.permiso{
+
+    background:#ede9fe;
+
+    color:#6d28d9;
+
+}
+
+
+.estado-asistencia.incompleto{
+
+    background:#ffedd5;
+
+    color:#c2410c;
+
+}
+
+
+.valor-asistencia{
+
+    font-size:11px;
+
+    font-weight:800;
+
+}
+
+
+.valor-asistencia.neutro{
+
+    color:#64748b;
+
+}
+
+
+.valor-asistencia.negativo{
+
+    color:#dc2626;
+
+}
+
+
+.horas-trabajadas{
+
+    color:#1e293b;
+
+    font-size:11px;
+
+    white-space:nowrap;
+
+}
+
+
+/*=====================================================
+ACCIONES FIJAS
+=====================================================*/
+
+.columna-acciones-asistencia{
+
+    position:sticky;
+
+    right:0;
+
+    z-index:2;
+
+    background:#ffffff;
+
+    box-shadow:
+        -8px 0 12px rgba(15,23,42,.035);
+
+}
+
+
+.asistencia-tabla th.columna-acciones-asistencia{
+
+    z-index:3;
+
+    background:#f8fafc;
+
+}
+
+
+.asistencia-tabla tbody tr:hover
+.columna-acciones-asistencia{
+
+    background:#fbfdff;
+
+}
+
+
+.btn-ver-asistencia{
+
+    min-height:34px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:7px;
+
+    padding:0 11px;
+
+    border:1px solid #dbeafe;
+
+    border-radius:9px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:10px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+}
+
+
+/*=====================================================
+PIE Y PAGINACIÓN
+=====================================================*/
+
+.asistencia-tabla-footer{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+    padding:14px 18px;
+
+    border-top:1px solid #eef2f7;
+
+}
+
+
+.asistencia-tabla-footer > span{
+
+    color:#94a3b8;
+
+    font-size:10px;
+
+}
+
+
+.asistencia-paginacion{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+}
+
+
+.asistencia-paginacion button{
+
+    width:32px;
+
+    height:32px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:9px;
+
+    background:#ffffff;
+
+    color:#475569;
+
+    font-size:10px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+}
+
+
+.asistencia-paginacion button.activo{
+
+    border-color:#2563eb;
+
+    background:#2563eb;
+
+    color:#ffffff;
+
+}
+
+
+.asistencia-paginacion button:disabled{
+
+    opacity:.45;
+
+    cursor:not-allowed;
+
+}
+
+
+/*=====================================================
+RESPONSIVE
+=====================================================*/
+
+@media(max-width:1350px){
+
+    .asistencia-resumen{
+
+        grid-template-columns:
+            repeat(3,minmax(180px,1fr));
+
+    }
+
+
+    .asistencia-filtros-secundarios{
+
+        grid-template-columns:
+            repeat(4,minmax(150px,1fr));
+
+    }
+
+
+    .btn-limpiar-filtros-asistencia{
+
+        grid-column:1 / -1;
+
+        justify-self:end;
+
+    }
+
+}
+
+
+@media(max-width:900px){
+
+    .asistencia-encabezado{
+
+        align-items:flex-start;
+
+    }
+
+
+    .asistencia-acciones-encabezado{
+
+        width:100%;
+
+    }
+
+
+    .btn-asistencia-principal,
+    .btn-asistencia-secundario{
+
+        flex:1;
+
+    }
+
+
+    .asistencia-filtros{
+
+        align-items:stretch;
+
+    }
+
+
+    .asistencia-selector-fecha{
+
+        width:100%;
+
+    }
+
+
+    .asistencia-fecha-actual{
+
+        flex:1;
+
+        min-width:0;
+
+    }
+
+
+    .asistencia-buscador{
+
+        width:100%;
+
+        max-width:none;
+
+    }
+
+
+    .asistencia-filtros-secundarios{
+
+        grid-template-columns:
+            repeat(2,minmax(150px,1fr));
+
+    }
+
+
+    .asistencia-resumen{
+
+        grid-template-columns:
+            repeat(2,minmax(160px,1fr));
+
+    }
+
+}
+
+
+@media(max-width:600px){
+
+    .asistencia{
+
+        gap:18px;
+
+    }
+
+
+    .asistencia-encabezado h2{
+
+        font-size:25px;
+
+    }
+
+
+    .asistencia-acciones-encabezado{
+
+        flex-direction:column;
+
+    }
+
+
+    .btn-asistencia-principal,
+    .btn-asistencia-secundario{
+
+        width:100%;
+
+    }
+
+
+    .asistencia-tabs{
+
+        margin:0 -2px;
+
+    }
+
+
+    .asistencia-tab{
+
+        padding:0 12px;
+
+    }
+
+
+    .asistencia-selector-fecha{
+
+        display:grid;
+
+        grid-template-columns:
+            38px 1fr 38px;
+
+    }
+
+
+    .btn-asistencia-hoy{
+
+        grid-column:1 / -1;
+
+        width:100%;
+
+    }
+
+
+    .asistencia-fecha-actual{
+
+        text-align:center;
+
+    }
+
+
+    .asistencia-fecha-actual strong{
+
+        font-size:11px;
+
+    }
+
+
+    .asistencia-filtros-secundarios{
+
+        grid-template-columns:1fr;
+
+        padding:13px;
+
+    }
+
+
+    .btn-limpiar-filtros-asistencia{
+
+        grid-column:auto;
+
+        width:100%;
+
+    }
+
+
+    .asistencia-resumen{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .asistencia-resumen-card{
+
+        min-height:78px;
+
+    }
+
+
+    .asistencia-tabla-header{
+
+        padding:15px;
+
+    }
+
+
+    .asistencia-tabla-opciones{
+
+        width:100%;
+
+    }
+
+
+    .btn-tabla-asistencia:not(.solo-icono){
+
+        flex:1;
+
+    }
+
+
+    .asistencia-tabla-footer{
+
+        justify-content:center;
+
+        text-align:center;
+
+    }
+
+}
