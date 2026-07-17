@@ -1,1 +1,1246 @@
+<section class="asistencia">
 
+
+    <!-- =========================================
+         ENCABEZADO
+    ========================================== -->
+
+    <div class="asistencia-encabezado">
+
+        <div>
+
+            <span class="asistencia-etiqueta">
+                Control de asistencia
+            </span>
+
+            <h2>
+                Asistencia
+            </h2>
+
+            <p>
+                Consulta marcaciones, tardanzas, permisos e incidencias de los colaboradores.
+            </p>
+
+        </div>
+
+
+        <div class="asistencia-acciones-encabezado">
+
+            <button
+                type="button"
+                class="btn-asistencia-secundario"
+            >
+
+                <i class="bi bi-arrow-clockwise"></i>
+
+                Recalcular
+
+            </button>
+
+
+            <button
+                type="button"
+                class="btn-asistencia-principal"
+            >
+
+                <i class="bi bi-plus-lg"></i>
+
+                Registrar marcación
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         PESTAÑAS
+    ========================================== -->
+
+    <div class="asistencia-tabs">
+
+        <button
+            type="button"
+            class="asistencia-tab activo"
+            data-tab="resumen"
+        >
+
+            <i class="bi bi-grid-1x2"></i>
+
+            <span>
+                Resumen diario
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="asistencia-tab"
+            data-tab="marcaciones"
+        >
+
+            <i class="bi bi-fingerprint"></i>
+
+            <span>
+                Marcaciones
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="asistencia-tab"
+            data-tab="incidencias"
+        >
+
+            <i class="bi bi-exclamation-triangle"></i>
+
+            <span>
+                Incidencias
+            </span>
+
+            <small class="asistencia-tab-contador">
+                3
+            </small>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="asistencia-tab"
+            data-tab="regularizaciones"
+        >
+
+            <i class="bi bi-pencil-square"></i>
+
+            <span>
+                Regularizaciones
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="asistencia-tab"
+            data-tab="cierres"
+        >
+
+            <i class="bi bi-lock"></i>
+
+            <span>
+                Cierres
+            </span>
+
+        </button>
+
+    </div>
+
+
+
+    <!-- =========================================
+         CONTENIDO DE RESUMEN DIARIO
+    ========================================== -->
+
+    <div class="asistencia-contenido">
+
+
+        <!-- =====================================
+             FILTROS PRINCIPALES
+        ====================================== -->
+
+        <div class="asistencia-filtros">
+
+
+            <!-- FECHA -->
+
+            <div class="asistencia-selector-fecha">
+
+                <button
+                    type="button"
+                    class="btn-fecha-navegacion"
+                    title="Día anterior"
+                >
+
+                    <i class="bi bi-chevron-left"></i>
+
+                </button>
+
+
+                <div class="asistencia-fecha-actual">
+
+                    <span>
+                        Fecha seleccionada
+                    </span>
+
+                    <strong>
+                        Viernes, 17 de julio de 2026
+                    </strong>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-fecha-navegacion"
+                    title="Día siguiente"
+                >
+
+                    <i class="bi bi-chevron-right"></i>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn-asistencia-hoy"
+                >
+                    Hoy
+                </button>
+
+            </div>
+
+
+
+            <!-- BUSCADOR -->
+
+            <div class="asistencia-buscador">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    placeholder="Buscar colaborador o documento..."
+                >
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================
+             FILTROS SECUNDARIOS
+        ====================================== -->
+
+        <div class="asistencia-filtros-secundarios">
+
+            <div class="campo-filtro-asistencia">
+
+                <label>
+                    Sucursal
+                </label>
+
+                <select>
+
+                    <option>
+                        Todas las sucursales
+                    </option>
+
+                    <option>
+                        Sede principal
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo-filtro-asistencia">
+
+                <label>
+                    Área
+                </label>
+
+                <select>
+
+                    <option>
+                        Todas las áreas
+                    </option>
+
+                    <option>
+                        Administración
+                    </option>
+
+                    <option>
+                        Operaciones
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo-filtro-asistencia">
+
+                <label>
+                    Subárea
+                </label>
+
+                <select>
+
+                    <option>
+                        Todas las subáreas
+                    </option>
+
+                    <option>
+                        Finanzas
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo-filtro-asistencia">
+
+                <label>
+                    Estado
+                </label>
+
+                <select>
+
+                    <option>
+                        Todos los estados
+                    </option>
+
+                    <option>
+                        Presente
+                    </option>
+
+                    <option>
+                        Tardanza
+                    </option>
+
+                    <option>
+                        Ausente
+                    </option>
+
+                    <option>
+                        Permiso
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-limpiar-filtros-asistencia"
+            >
+
+                <i class="bi bi-funnel"></i>
+
+                Limpiar filtros
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =====================================
+             TARJETAS DE RESUMEN
+        ====================================== -->
+
+        <div class="asistencia-resumen">
+
+
+            <!-- PROGRAMADOS -->
+
+            <button
+                type="button"
+                class="asistencia-resumen-card"
+            >
+
+                <div class="resumen-card-icono programados">
+
+                    <i class="bi bi-people"></i>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        Programados
+                    </span>
+
+                    <strong>
+                        25
+                    </strong>
+
+                    <small>
+                        Colaboradores con horario
+                    </small>
+
+                </div>
+
+            </button>
+
+
+
+            <!-- PRESENTES -->
+
+            <button
+                type="button"
+                class="asistencia-resumen-card"
+            >
+
+                <div class="resumen-card-icono presentes">
+
+                    <i class="bi bi-person-check"></i>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        Presentes
+                    </span>
+
+                    <strong>
+                        18
+                    </strong>
+
+                    <small>
+                        Ingresaron correctamente
+                    </small>
+
+                </div>
+
+            </button>
+
+
+
+            <!-- TARDANZAS -->
+
+            <button
+                type="button"
+                class="asistencia-resumen-card"
+            >
+
+                <div class="resumen-card-icono tardanzas">
+
+                    <i class="bi bi-clock-history"></i>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        Tardanzas
+                    </span>
+
+                    <strong>
+                        3
+                    </strong>
+
+                    <small>
+                        Fuera de tolerancia
+                    </small>
+
+                </div>
+
+            </button>
+
+
+
+            <!-- AUSENTES -->
+
+            <button
+                type="button"
+                class="asistencia-resumen-card"
+            >
+
+                <div class="resumen-card-icono ausentes">
+
+                    <i class="bi bi-person-x"></i>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        Ausentes
+                    </span>
+
+                    <strong>
+                        2
+                    </strong>
+
+                    <small>
+                        Sin marcación ni permiso
+                    </small>
+
+                </div>
+
+            </button>
+
+
+
+            <!-- PERMISOS -->
+
+            <button
+                type="button"
+                class="asistencia-resumen-card"
+            >
+
+                <div class="resumen-card-icono permisos">
+
+                    <i class="bi bi-calendar-check"></i>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        Con permiso
+                    </span>
+
+                    <strong>
+                        1
+                    </strong>
+
+                    <small>
+                        Permisos aprobados
+                    </small>
+
+                </div>
+
+            </button>
+
+
+
+            <!-- INCOMPLETOS -->
+
+            <button
+                type="button"
+                class="asistencia-resumen-card"
+            >
+
+                <div class="resumen-card-icono incompletos">
+
+                    <i class="bi bi-exclamation-circle"></i>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        Incompletos
+                    </span>
+
+                    <strong>
+                        1
+                    </strong>
+
+                    <small>
+                        Falta entrada o salida
+                    </small>
+
+                </div>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =====================================
+             TABLA DE ASISTENCIA
+        ====================================== -->
+
+        <div class="asistencia-tabla-card">
+
+
+            <!-- CABECERA DE LA TABLA -->
+
+            <div class="asistencia-tabla-header">
+
+                <div>
+
+                    <h3>
+                        Resumen del día
+                    </h3>
+
+                    <p>
+                        Mostrando el estado de asistencia de los colaboradores.
+                    </p>
+
+                </div>
+
+
+                <div class="asistencia-tabla-opciones">
+
+                    <button
+                        type="button"
+                        class="btn-tabla-asistencia"
+                    >
+
+                        <i class="bi bi-download"></i>
+
+                        Exportar
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn-tabla-asistencia solo-icono"
+                        title="Configurar columnas"
+                    >
+
+                        <i class="bi bi-sliders"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CONTENEDOR RESPONSIVE -->
+
+            <div class="asistencia-tabla-contenedor">
+
+                <table class="asistencia-tabla">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Colaborador
+                            </th>
+
+                            <th>
+                                Horario
+                            </th>
+
+                            <th>
+                                Entrada
+                            </th>
+
+                            <th>
+                                Salida
+                            </th>
+
+                            <th>
+                                Estado
+                            </th>
+
+                            <th>
+                                Tardanza
+                            </th>
+
+                            <th>
+                                Horas trabajadas
+                            </th>
+
+                            <th class="columna-acciones-asistencia">
+                                Acciones
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        <!-- FILA PRESENTE -->
+
+                        <tr>
+
+                            <td>
+
+                                <div class="asistencia-colaborador">
+
+                                    <div class="asistencia-avatar">
+                                        JP
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            Juan Pérez López
+                                        </strong>
+
+                                        <span>
+                                            DNI 70452743
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-horario">
+
+                                    <strong>
+                                        08:00 - 17:00
+                                    </strong>
+
+                                    <span>
+                                        Horario administrativo
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-marcacion correcta">
+
+                                    <i class="bi bi-box-arrow-in-right"></i>
+
+                                    <div>
+
+                                        <strong>
+                                            07:56
+                                        </strong>
+
+                                        <span>
+                                            Programado 08:00
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-marcacion correcta">
+
+                                    <i class="bi bi-box-arrow-right"></i>
+
+                                    <div>
+
+                                        <strong>
+                                            17:08
+                                        </strong>
+
+                                        <span>
+                                            Programado 17:00
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="estado-asistencia presente">
+                                    Presente
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="valor-asistencia neutro">
+                                    0 min
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <strong class="horas-trabajadas">
+                                    8 h 12 min
+                                </strong>
+
+                            </td>
+
+
+                            <td class="columna-acciones-asistencia">
+
+                                <button
+                                    type="button"
+                                    class="btn-ver-asistencia"
+                                >
+
+                                    <i class="bi bi-eye"></i>
+
+                                    Ver
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+
+
+                        <!-- FILA TARDANZA -->
+
+                        <tr>
+
+                            <td>
+
+                                <div class="asistencia-colaborador">
+
+                                    <div class="asistencia-avatar">
+                                        MA
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            María Álvarez Ruiz
+                                        </strong>
+
+                                        <span>
+                                            DNI 75841269
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-horario">
+
+                                    <strong>
+                                        08:00 - 17:00
+                                    </strong>
+
+                                    <span>
+                                        Horario administrativo
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-marcacion tardanza">
+
+                                    <i class="bi bi-clock"></i>
+
+                                    <div>
+
+                                        <strong>
+                                            08:12
+                                        </strong>
+
+                                        <span>
+                                            Programado 08:00
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-marcacion pendiente">
+
+                                    <i class="bi bi-hourglass-split"></i>
+
+                                    <div>
+
+                                        <strong>
+                                            Sin salida
+                                        </strong>
+
+                                        <span>
+                                            Aún en jornada
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="estado-asistencia tardanza">
+                                    Tardanza
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="valor-asistencia negativo">
+                                    7 min
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <strong class="horas-trabajadas">
+                                    En curso
+                                </strong>
+
+                            </td>
+
+
+                            <td class="columna-acciones-asistencia">
+
+                                <button
+                                    type="button"
+                                    class="btn-ver-asistencia"
+                                >
+
+                                    <i class="bi bi-eye"></i>
+
+                                    Ver
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+
+
+                        <!-- FILA PERMISO -->
+
+                        <tr>
+
+                            <td>
+
+                                <div class="asistencia-colaborador">
+
+                                    <div class="asistencia-avatar">
+                                        CR
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            Carlos Ramírez Soto
+                                        </strong>
+
+                                        <span>
+                                            DNI 70125896
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-horario">
+
+                                    <strong>
+                                        09:00 - 18:00
+                                    </strong>
+
+                                    <span>
+                                        Horario comercial
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td colspan="2">
+
+                                <div class="asistencia-permiso-info">
+
+                                    <i class="bi bi-calendar-heart"></i>
+
+                                    <div>
+
+                                        <strong>
+                                            Licencia médica
+                                        </strong>
+
+                                        <span>
+                                            Ausencia justificada no laborada
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="estado-asistencia permiso">
+                                    Con permiso
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="valor-asistencia neutro">
+                                    —
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <strong class="horas-trabajadas">
+                                    No laborado
+                                </strong>
+
+                            </td>
+
+
+                            <td class="columna-acciones-asistencia">
+
+                                <button
+                                    type="button"
+                                    class="btn-ver-asistencia"
+                                >
+
+                                    <i class="bi bi-eye"></i>
+
+                                    Ver
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+
+
+                        <!-- FILA AUSENTE -->
+
+                        <tr>
+
+                            <td>
+
+                                <div class="asistencia-colaborador">
+
+                                    <div class="asistencia-avatar">
+                                        LT
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            Lucía Torres Díaz
+                                        </strong>
+
+                                        <span>
+                                            DNI 74859621
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-horario">
+
+                                    <strong>
+                                        08:00 - 17:00
+                                    </strong>
+
+                                    <span>
+                                        Horario administrativo
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-marcacion faltante">
+
+                                    <i class="bi bi-x-circle"></i>
+
+                                    <div>
+
+                                        <strong>
+                                            Sin entrada
+                                        </strong>
+
+                                        <span>
+                                            Sin marcación
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="asistencia-marcacion faltante">
+
+                                    <i class="bi bi-x-circle"></i>
+
+                                    <div>
+
+                                        <strong>
+                                            Sin salida
+                                        </strong>
+
+                                        <span>
+                                            Sin marcación
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="estado-asistencia ausente">
+                                    Ausente
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="valor-asistencia neutro">
+                                    —
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <strong class="horas-trabajadas">
+                                    0 h
+                                </strong>
+
+                            </td>
+
+
+                            <td class="columna-acciones-asistencia">
+
+                                <button
+                                    type="button"
+                                    class="btn-ver-asistencia"
+                                >
+
+                                    <i class="bi bi-eye"></i>
+
+                                    Ver
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+
+            <!-- PIE DE TABLA -->
+
+            <div class="asistencia-tabla-footer">
+
+                <span>
+                    Mostrando 1 - 4 de 25 colaboradores
+                </span>
+
+
+                <div class="asistencia-paginacion">
+
+                    <button
+                        type="button"
+                        disabled
+                    >
+
+                        <i class="bi bi-chevron-left"></i>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="activo"
+                    >
+                        1
+                    </button>
+
+
+                    <button
+                        type="button"
+                    >
+                        2
+                    </button>
+
+
+                    <button
+                        type="button"
+                    >
+
+                        <i class="bi bi-chevron-right"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
