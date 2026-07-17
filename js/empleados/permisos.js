@@ -3024,18 +3024,17 @@ function abrirDetallePermiso(
     id
 ){
 
-    detallePermisoTratamiento.textContent =
-    obtenerTextoImpactoAsistencia(
-        permiso.impactoAsistencia
-    );
-
     const permiso =
         permisosColaborador.find(
             item=>item.id === id
         );
 
 
-    if(!permiso) return;
+    if(!permiso){
+
+        return;
+
+    }
 
 
     permisoSeleccionado =
@@ -3078,7 +3077,8 @@ function abrirDetallePermiso(
         );
 
 
-    detallePermisoEstado.className = "";
+    detallePermisoEstado.className =
+        "";
 
     detallePermisoEstado.classList.add(
         (
@@ -3091,6 +3091,12 @@ function abrirDetallePermiso(
     detallePermisoDuracion.textContent =
         obtenerTextoDuracion(
             permiso
+        );
+
+
+    detallePermisoTratamiento.textContent =
+        obtenerTextoImpactoAsistencia(
+            permiso.impactoAsistencia
         );
 
 
@@ -3114,6 +3120,7 @@ function abrirDetallePermiso(
                 rel="noopener noreferrer"
             >
                 <i class="bi bi-file-earmark-arrow-down"></i>
+
                 ${escaparHTML(
                     permiso.documentoNombre ||
                     "Ver documento"
