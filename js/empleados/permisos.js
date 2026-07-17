@@ -44,6 +44,261 @@ let cancelarEscuchaPermisos = null;
 
 
 /*=====================================================
+REGLAS DE LOS TIPOS DE PERMISO
+=====================================================*/
+
+const REGLAS_TIPOS_PERMISO = {
+
+    VACACIONES:{
+
+        impactoAsistencia:"COMPUTABLE",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:true,
+
+        compensable:false,
+
+        descuentaVacaciones:true,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "Justifica toda la jornada y descuenta el saldo de vacaciones."
+
+    },
+
+
+    LICENCIA_MEDICA:{
+
+        impactoAsistencia:
+            "JUSTIFICADO_NO_LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:false,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:true,
+
+        descripcion:
+            "Justifica la ausencia por salud, pero no representa trabajo realizado."
+
+    },
+
+
+    LICENCIA_MATERNIDAD:{
+
+        impactoAsistencia:
+            "JUSTIFICADO_NO_LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:false,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:true,
+
+        descripcion:
+            "Ausencia justificada por licencia de maternidad."
+
+    },
+
+
+    LICENCIA_PATERNIDAD:{
+
+        impactoAsistencia:
+            "JUSTIFICADO_NO_LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:false,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:true,
+
+        descripcion:
+            "Ausencia justificada por licencia de paternidad."
+
+    },
+
+
+    PERMISO_PERSONAL:{
+
+        impactoAsistencia:
+            "JUSTIFICADO_NO_LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:false,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "Justifica la ausencia, pero no se considera jornada laborada."
+
+    },
+
+
+    COMISION_SERVICIO:{
+
+        impactoAsistencia:"LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:true,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "Se considera trabajo realizado fuera del centro habitual."
+
+    },
+
+
+    CAPACITACION:{
+
+        impactoAsistencia:"LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:true,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "Se considera jornada laboral por capacitación autorizada."
+
+    },
+
+
+    DUELO:{
+
+        impactoAsistencia:
+            "JUSTIFICADO_NO_LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:false,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "Ausencia justificada por fallecimiento de un familiar."
+
+    },
+
+
+    PERMISO_CON_GOCE:{
+
+        impactoAsistencia:"COMPUTABLE",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:true,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "No se trabajó, pero el tiempo se considera computable."
+
+    },
+
+
+    PERMISO_SIN_GOCE:{
+
+        impactoAsistencia:
+            "JUSTIFICADO_NO_LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:false,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "Ausencia autorizada que no se considera tiempo laborado."
+
+    },
+
+
+    TRABAJO_REMOTO:{
+
+        impactoAsistencia:"LABORADO",
+
+        justificaAusencia:true,
+
+        computaComoLaborado:true,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "Se considera jornada laborada bajo modalidad remota."
+
+    },
+
+
+    OTRO:{
+
+        impactoAsistencia:"POR_CONFIGURAR",
+
+        justificaAusencia:false,
+
+        computaComoLaborado:false,
+
+        compensable:false,
+
+        descuentaVacaciones:false,
+
+        requiereDocumento:false,
+
+        descripcion:
+            "El tratamiento deberá definirse posteriormente."
+
+    }
+
+};
+
+
+
+/*=====================================================
 ELEMENTOS HTML
 =====================================================*/
 
@@ -2074,6 +2329,10 @@ async function guardarFormularioPermiso(){
 
     }
 
+    const reglasTipo =
+    REGLAS_TIPOS_PERMISO[tipo] ||
+    REGLAS_TIPOS_PERMISO.OTRO;
+
 
     if(!fechaInicio){
 
@@ -2246,6 +2505,19 @@ async function guardarFormularioPermiso(){
         documentoPermiso.files?.[0] ||
         null;
 
+    if(
+    reglasTipo.requiereDocumento &&
+    !archivo &&
+    !permisoSeleccionado?.documentoNombre
+){
+
+    mostrarAlertaAdvertencia(
+        "Este tipo de permiso requiere un documento de sustento."
+    );
+
+    return;
+
+}
 
     /*
         Por ahora guardamos los datos del archivo.
@@ -2277,6 +2549,27 @@ async function guardarFormularioPermiso(){
             obtenerNombreTipoPermiso(
                 tipo
             ),
+
+        impactoAsistencia:
+    reglasTipo.impactoAsistencia,
+
+justificaAusencia:
+    reglasTipo.justificaAusencia,
+
+computaComoLaborado:
+    reglasTipo.computaComoLaborado,
+
+compensable:
+    reglasTipo.compensable,
+
+descuentaVacaciones:
+    reglasTipo.descuentaVacaciones,
+
+requiereDocumento:
+    reglasTipo.requiereDocumento,
+
+descripcionTratamiento:
+    reglasTipo.descripcion,
 
         fechaInicio,
 
