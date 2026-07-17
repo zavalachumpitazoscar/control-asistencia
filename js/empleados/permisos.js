@@ -2046,7 +2046,6 @@ function abrirEditarPermiso(
 
 
     limpiarFormularioPermiso();
-    actualizarImpactoTipoPermiso();
 
     permisoSeleccionado =
         permiso;
