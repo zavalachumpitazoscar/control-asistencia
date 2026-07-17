@@ -41,7 +41,7 @@ let fechaCalendarioPermisos = new Date();
 
 let cancelarEscuchaPermisos = null;
 
-
+let detallePermisoTratamiento;
 
 /*=====================================================
 REGLAS DE LOS TIPOS DE PERMISO
@@ -510,6 +510,11 @@ OBTENER ELEMENTOS
 =====================================================*/
 
 function obtenerElementosPermisos(){
+
+    detallePermisoTratamiento =
+    document.getElementById(
+        "detallePermisoTratamiento"
+    );
 
     cantidadColaboradoresPermisos =
         document.getElementById(
@@ -2900,6 +2905,11 @@ function abrirDetallePermiso(
     id
 ){
 
+    detallePermisoTratamiento.textContent =
+    obtenerTextoImpactoAsistencia(
+        permiso.impactoAsistencia
+    );
+
     const permiso =
         permisosColaborador.find(
             item=>item.id === id
@@ -3018,6 +3028,41 @@ function abrirDetallePermiso(
 
 }
 
+/*=====================================================
+obtenerTextoImpactoAsistencia
+=====================================================*/
+
+
+function obtenerTextoImpactoAsistencia(
+    impacto
+){
+
+    const impactos = {
+
+        LABORADO:
+            "Se considera jornada laborada",
+
+        COMPUTABLE:
+            "Computable para asistencia",
+
+        JUSTIFICADO_NO_LABORADO:
+            "Ausencia justificada no laborada",
+
+        COMPENSABLE:
+            "Tiempo pendiente de compensación",
+
+        POR_CONFIGURAR:
+            "Pendiente de configurar"
+
+    };
+
+
+    return (
+        impactos[impacto] ||
+        "Sin tratamiento definido"
+    );
+
+}
 
 
 /*=====================================================
