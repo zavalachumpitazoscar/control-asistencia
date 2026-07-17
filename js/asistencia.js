@@ -15,10 +15,6 @@ import {
 }
 from "./asistencia/importacion-marcaciones.js";
 
-import {
-    guardarMarcacionesImportadas
-}
-from "./asistencia/guardar-marcaciones.js";
 
 /*=====================================================
 INICIAR MÓDULO DE ASISTENCIA
