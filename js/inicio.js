@@ -283,6 +283,12 @@ async function cargarVista(vista){
 
             break;
 
+            case "asistencia":
+
+                iniciarAsistencia();
+
+            break;
+
         }
 
     }
