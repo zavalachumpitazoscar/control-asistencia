@@ -16,7 +16,7 @@ import {
 from "./asistencia/importacion-marcaciones.js";
 
 import {
-    iniciarImportacionMarcaciones
+    guardarMarcacionesImportadas
 }
 from "./asistencia/guardar-marcaciones.js";
 
@@ -36,5 +36,7 @@ export async function iniciarAsistencia(){
     iniciarFechaAsistencia();
 
     iniciarImportacionMarcaciones();
+
+    guardarMarcacionesImportadas();
 
 }
