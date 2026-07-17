@@ -1219,6 +1219,20 @@ actualizarImpactoTipoPermiso
 
 function actualizarImpactoTipoPermiso(){
 
+    if(
+        !tipoPermiso ||
+        !permisoImpactoTitulo ||
+        !permisoImpactoDescripcion ||
+        !permisoImpactoJustifica ||
+        !permisoImpactoComputa ||
+        !permisoImpactoCompensable
+    ){
+
+        return;
+
+    }
+
+
     const tipo =
         tipoPermiso.value;
 
