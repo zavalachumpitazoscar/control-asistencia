@@ -3038,3 +3038,157 @@ MÓVIL PEQUEÑO
     }
 
 }
+
+/*=====================================================
+INFORMACIÓN DEL IMPACTO DEL PERMISO
+=====================================================*/
+
+.permiso-impacto-info{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:13px;
+
+    padding:14px 15px;
+
+    border:1px solid #dbeafe;
+
+    border-radius:14px;
+
+    background:#f0f7ff;
+
+}
+
+
+.permiso-impacto-icono{
+
+    flex:0 0 40px;
+
+    width:40px;
+
+    height:40px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:12px;
+
+    background:#dbeafe;
+
+    color:#2563eb;
+
+    font-size:19px;
+
+}
+
+
+.permiso-impacto-info > div:last-child{
+
+    min-width:0;
+
+    flex:1;
+
+}
+
+
+.permiso-impacto-info strong{
+
+    display:block;
+
+    margin-bottom:4px;
+
+    color:#1e3a8a;
+
+    font-size:13px;
+
+    font-weight:800;
+
+}
+
+
+.permiso-impacto-info p{
+
+    margin:0;
+
+    color:#475569;
+
+    font-size:12px;
+
+    line-height:1.5;
+
+}
+
+
+.permiso-impacto-reglas{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    flex-wrap:wrap;
+
+    margin-top:10px;
+
+}
+
+
+.permiso-impacto-reglas span{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    min-height:28px;
+
+    padding:5px 9px;
+
+    border:1px solid #bfdbfe;
+
+    border-radius:20px;
+
+    background:#ffffff;
+
+    color:#334155;
+
+    font-size:10px;
+
+    font-weight:700;
+
+}
+
+@media(max-width:600px){
+
+    .permiso-impacto-info{
+
+        padding:13px;
+
+    }
+
+
+    .permiso-impacto-reglas{
+
+        flex-direction:column;
+
+        align-items:stretch;
+
+    }
+
+
+    .permiso-impacto-reglas span{
+
+        width:100%;
+
+        justify-content:flex-start;
+
+        border-radius:9px;
+
+    }
+
+}
