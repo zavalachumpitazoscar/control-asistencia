@@ -15,7 +15,10 @@ import {
 }
 from "./asistencia/importacion-marcaciones.js";
 
-
+import {
+    iniciarImportacionMarcaciones
+}
+from "./asistencia/guardar-marcaciones.js";
 
 /*=====================================================
 INICIAR MÓDULO DE ASISTENCIA
