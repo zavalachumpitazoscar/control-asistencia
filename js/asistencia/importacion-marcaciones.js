@@ -810,39 +810,294 @@ function mostrarVistaPreviaImportacion(
 
 
 /*=====================================================
-CONFIRMAR IMPORTACIÓN
+CONFIRMAR Y GUARDAR IMPORTACIÓN
 =====================================================*/
 
-function confirmarImportacionMarcaciones(){
+async function confirmarImportacionMarcaciones(){
 
-    /*
-        En la siguiente parte:
+    if(
+        marcacionesProcesadas.length === 0
+    ){
 
-        1. Buscaremos los colaboradores por DNI.
-        2. Detectaremos DNI inexistentes.
-        3. Revisaremos duplicados en Firestore.
-        4. Guardaremos las marcaciones válidas.
-        5. Recalcularemos las asistencias afectadas.
-    */
+        mostrarError(
+            "No existen marcaciones válidas para guardar."
+        );
+
+        return;
+
+    }
 
 
-    console.log(
-        "Marcaciones listas:",
-        marcacionesProcesadas
+    mostrarCargando(
+        "Guardando marcaciones..."
     );
+
+
+    try{
+
+        const resultado =
+            await guardarMarcacionesImportadas(
+                marcacionesProcesadas
+            );
+
+
+        mostrarResultadoGuardado(
+            resultado
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "Error guardando marcaciones:",
+            error
+        );
+
+
+        mostrarError(
+            error.message ||
+            "No se pudieron guardar las marcaciones."
+        );
+
+    }
+
+}
+
+
+/*=====================================================
+MOSTRAR RESULTADO DEL GUARDADO
+=====================================================*/
+
+function mostrarResultadoGuardado(
+    resultado
+){
+
+    const existenObservaciones =
+        resultado.cantidadDuplicadas > 0 ||
+        resultado.cantidadDniNoEncontrados > 0 ||
+        resultado.cantidadInactivos > 0 ||
+        resultado.cantidadErrores > 0;
+
+
+    const icono =
+        resultado.cantidadGuardadas === 0
+            ? "warning"
+            : existenObservaciones
+                ? "info"
+                : "success";
+
+
+    const titulo =
+        resultado.cantidadGuardadas === 0
+            ? "No se guardaron marcaciones"
+            : "Importación completada";
+
+
+    const filasNoEncontradas =
+        resultado.dniNoEncontrados
+        .slice(
+            0,
+            8
+        )
+        .map(
+            registro=>
+            `
+                <li>
+                    <strong>
+                        DNI ${escaparHTML(registro.dni)}
+                    </strong>
+
+                    <span>
+                        ${escaparHTML(registro.fechaHoraTexto)}
+                    </span>
+                </li>
+            `
+        )
+        .join("");
+
+
+    const filasInactivas =
+        resultado.colaboradoresInactivos
+        .slice(
+            0,
+            8
+        )
+        .map(
+            registro=>
+            `
+                <li>
+                    <strong>
+                        ${escaparHTML(registro.colaboradorNombre)}
+                    </strong>
+
+                    <span>
+                        DNI ${escaparHTML(registro.dni)}
+                    </span>
+                </li>
+            `
+        )
+        .join("");
 
 
     Swal.fire({
 
-        icon:"info",
+        icon:icono,
 
-        title:"Archivo validado",
+        title:titulo,
 
-        text:
-            `${marcacionesProcesadas.length} marcaciones están listas para guardarse.`,
+        width:720,
 
-        confirmButtonColor:
-            "#2563eb"
+        confirmButtonText:"Aceptar",
+
+        confirmButtonColor:"#2563eb",
+
+        html:
+        `
+            <div class="resultado-importacion-marcaciones">
+
+                <div class="resultado-importacion-grid">
+
+                    <div class="resultado-importacion-card guardadas">
+
+                        <span>
+                            Guardadas
+                        </span>
+
+                        <strong>
+                            ${resultado.cantidadGuardadas}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="resultado-importacion-card duplicadas">
+
+                        <span>
+                            Ya existentes
+                        </span>
+
+                        <strong>
+                            ${resultado.cantidadDuplicadas}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="resultado-importacion-card no-encontradas">
+
+                        <span>
+                            DNI no encontrados
+                        </span>
+
+                        <strong>
+                            ${resultado.cantidadDniNoEncontrados}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="resultado-importacion-card inactivas">
+
+                        <span>
+                            Colaboradores inactivos
+                        </span>
+
+                        <strong>
+                            ${resultado.cantidadInactivos}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="resultado-importacion-card errores">
+
+                        <span>
+                            Errores
+                        </span>
+
+                        <strong>
+                            ${resultado.cantidadErrores}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                ${
+                    resultado.cantidadDniNoEncontrados > 0
+                    ?
+                    `
+                        <div class="resultado-importacion-detalle">
+
+                            <h4>
+                                DNI no encontrados
+                            </h4>
+
+                            <ul>
+                                ${filasNoEncontradas}
+                            </ul>
+
+                            ${
+                                resultado.cantidadDniNoEncontrados > 8
+                                ?
+                                `
+                                    <small>
+                                        Y ${
+                                            resultado.cantidadDniNoEncontrados - 8
+                                        } registros adicionales.
+                                    </small>
+                                `
+                                :
+                                ""
+                            }
+
+                        </div>
+                    `
+                    :
+                    ""
+                }
+
+
+                ${
+                    resultado.cantidadInactivos > 0
+                    ?
+                    `
+                        <div class="resultado-importacion-detalle">
+
+                            <h4>
+                                Colaboradores inactivos
+                            </h4>
+
+                            <ul>
+                                ${filasInactivas}
+                            </ul>
+
+                        </div>
+                    `
+                    :
+                    ""
+                }
+
+            </div>
+        `
+
+    })
+    .then(()=>{
+
+        /*
+            Avisamos al resto del módulo que
+            existen nuevas marcaciones.
+        */
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "asistencia:marcaciones-importadas",
+                {
+                    detail:resultado
+                }
+            )
+        );
 
     });
 
