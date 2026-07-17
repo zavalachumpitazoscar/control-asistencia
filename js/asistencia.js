@@ -37,6 +37,4 @@ export async function iniciarAsistencia(){
 
     iniciarImportacionMarcaciones();
 
-    guardarMarcacionesImportadas();
-
 }
