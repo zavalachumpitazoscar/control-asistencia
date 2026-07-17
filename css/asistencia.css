@@ -1795,3 +1795,296 @@ RESPONSIVE
     }
 
 }
+
+
+/*=====================================================
+IMPORTACIÓN DE MARCACIONES
+=====================================================*/
+
+.importacion-marcaciones-resumen{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    margin-top:10px;
+
+    text-align:left;
+
+}
+
+
+.importacion-archivo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:13px;
+
+    padding:14px;
+
+    border:1px solid #dbeafe;
+
+    border-radius:14px;
+
+    background:#eff6ff;
+
+}
+
+
+.importacion-archivo > i{
+
+    width:42px;
+
+    height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex:0 0 42px;
+
+    border-radius:12px;
+
+    background:#dbeafe;
+
+    color:#2563eb;
+
+    font-size:20px;
+
+}
+
+
+.importacion-archivo strong{
+
+    display:block;
+
+    color:#1e3a8a;
+
+    font-size:13px;
+
+    font-weight:800;
+
+}
+
+
+.importacion-archivo span{
+
+    display:block;
+
+    margin-top:3px;
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+
+.importacion-indicadores{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:12px;
+
+}
+
+
+.importacion-indicador{
+
+    padding:13px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:13px;
+
+    background:#ffffff;
+
+}
+
+
+.importacion-indicador span{
+
+    display:block;
+
+    color:#64748b;
+
+    font-size:10px;
+
+    font-weight:700;
+
+}
+
+
+.importacion-indicador strong{
+
+    display:block;
+
+    margin-top:3px;
+
+    color:#0f172a;
+
+    font-size:22px;
+
+    font-weight:850;
+
+}
+
+
+.importacion-indicador.correcta{
+
+    border-color:#bbf7d0;
+
+    background:#f0fdf4;
+
+}
+
+
+.importacion-indicador.advertencia{
+
+    border-color:#fde68a;
+
+    background:#fffbeb;
+
+}
+
+
+.importacion-indicador.error{
+
+    border-color:#fecaca;
+
+    background:#fef2f2;
+
+}
+
+
+.importacion-vista-previa{
+
+    max-height:310px;
+
+    overflow:auto;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:13px;
+
+}
+
+
+.importacion-vista-previa table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+.importacion-vista-previa th{
+
+    position:sticky;
+
+    top:0;
+
+    padding:11px 12px;
+
+    background:#f8fafc;
+
+    color:#64748b;
+
+    font-size:10px;
+
+    font-weight:800;
+
+    text-align:left;
+
+    text-transform:uppercase;
+
+}
+
+
+.importacion-vista-previa td{
+
+    padding:11px 12px;
+
+    border-top:1px solid #f1f5f9;
+
+    color:#334155;
+
+    font-size:11px;
+
+}
+
+
+.importacion-estado{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    min-height:25px;
+
+    padding:0 9px;
+
+    border-radius:20px;
+
+    font-size:9px;
+
+    font-weight:800;
+
+}
+
+
+.importacion-estado.valida{
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+}
+
+
+.importacion-mas-registros{
+
+    margin:0;
+
+    color:#94a3b8;
+
+    font-size:10px;
+
+    text-align:center;
+
+}
+
+
+@media(max-width:600px){
+
+    .importacion-indicadores{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .importacion-vista-previa{
+
+        overflow-x:auto;
+
+    }
+
+
+    .importacion-vista-previa table{
+
+        min-width:520px;
+
+    }
+
+}
