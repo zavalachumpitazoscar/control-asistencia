@@ -27,6 +27,7 @@ from
 
 import { iniciarCompañia } from "./compañia.js";
 import { iniciarEmpleados } from "./empleados.js";
+import { iniciarAsistencia } from "./asistencia.js";
 
 const sidebar = document.querySelector(".sidebar");
 
@@ -280,6 +281,12 @@ async function cargarVista(vista){
             case "empleados":
 
                 iniciarEmpleados();
+
+            break;
+
+            case "asistencia":
+
+                iniciarAsistencia();
 
             break;
 
