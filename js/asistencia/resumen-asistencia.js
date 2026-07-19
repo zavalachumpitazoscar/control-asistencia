@@ -1887,7 +1887,7 @@ function crearEntradaHTML(
     return `
         <button
             type="button"
-            class="asistencia-marcacion ${clase} editable"
+            class="btn-horario-resumen ${clase} editable"
             data-accion="editar-marcacion-existente"
             data-marcacion-id="${escaparHTML(
                 registro.entrada.id ||
