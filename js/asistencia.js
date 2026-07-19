@@ -33,6 +33,8 @@ export async function iniciarAsistencia(){
 
     iniciarNavegacionAsistencia();
 
+    iniciarResumenAsistencia();
+
     iniciarFechaAsistencia();
 
     iniciarImportacionMarcaciones();
