@@ -2880,3 +2880,170 @@ MODAL MARCACIÓN MANUAL
     line-height:1.5;
 
 }
+
+
+
+/*======================================
+MARCACIONES DE REFRIGERIO
+======================================*/
+
+.marcacion-refrigerio{
+
+    width:100%;
+
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    padding:9px 10px;
+
+    border-radius:10px;
+
+    text-align:left;
+
+}
+
+
+button.marcacion-refrigerio{
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+.marcacion-refrigerio i{
+
+    width:30px;
+    height:30px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-shrink:0;
+
+    border-radius:9px;
+
+}
+
+
+.marcacion-refrigerio div{
+
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+
+}
+
+
+.marcacion-refrigerio strong{
+
+    font-size:13px;
+
+}
+
+
+.marcacion-refrigerio span{
+
+    color:#64748b;
+
+    font-size:10px;
+
+}
+
+
+/* AUTOMÁTICO */
+
+.marcacion-refrigerio.automatica{
+
+    border:1px solid #ddd6fe;
+
+    background:#f5f3ff;
+
+    color:#7c3aed;
+
+}
+
+
+.marcacion-refrigerio.automatica i{
+
+    background:#ede9fe;
+
+    color:#7c3aed;
+
+}
+
+
+/* REAL */
+
+.marcacion-refrigerio.real{
+
+    border:1px solid transparent;
+
+    background:#f0fdf4;
+
+    color:#15803d;
+
+}
+
+
+.marcacion-refrigerio.real:hover{
+
+    border-color:#86efac;
+
+    background:#dcfce7;
+
+}
+
+
+.marcacion-refrigerio.real i{
+
+    background:#dcfce7;
+
+    color:#16a34a;
+
+}
+
+
+/* NO APLICA */
+
+.marcacion-refrigerio.no-aplica{
+
+    color:#94a3b8;
+
+}
+
+
+.marcacion-refrigerio.no-aplica i{
+
+    background:#f1f5f9;
+
+    color:#94a3b8;
+
+}
+
+
+/* BOTÓN FALTANTE */
+
+.btn-marcacion-faltante.refrigerio i{
+
+    background:#fef3c7;
+
+    color:#d97706;
+
+}
+
+
+.btn-marcacion-faltante.refrigerio:hover{
+
+    border-color:#fbbf24;
+
+    background:#fffbeb;
+
+    color:#b45309;
+
+}
