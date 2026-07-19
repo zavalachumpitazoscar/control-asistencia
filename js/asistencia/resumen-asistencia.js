@@ -19,6 +19,11 @@ import {
 from "./clasificar-marcaciones.js";
 
 
+import {
+    calcularJornadaAsistencia
+}
+from "./calcular-jornada-asistencia.js";
+
 /*=====================================================
 VARIABLES
 =====================================================*/
