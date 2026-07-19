@@ -3683,3 +3683,219 @@ HORAS EXTRA
     color:#64748b;
 
 }
+
+
+
+/*======================================
+APROBACIÓN DE HORAS EXTRA
+======================================*/
+
+button.horas-extra-resumen{
+
+    width:100%;
+
+    border:1px solid transparent;
+
+    background:transparent;
+
+    text-align:left;
+
+    cursor:pointer;
+
+    font-family:inherit;
+
+    transition:.2s;
+
+}
+
+
+button.horas-extra-resumen:hover{
+
+    padding:7px;
+
+    border-color:#ddd6fe;
+    border-radius:9px;
+
+    background:#f5f3ff;
+
+}
+
+
+.horas-extra-resumen em{
+
+    color:#7c3aed;
+
+    font-size:9px;
+    font-style:normal;
+    font-weight:700;
+
+}
+
+
+.modal-horas-extra{
+
+    width:550px;
+    max-width:calc(100vw - 30px);
+    max-height:calc(100vh - 30px);
+
+    display:flex;
+    flex-direction:column;
+
+}
+
+
+.horas-extra-modal-body{
+
+    padding:20px;
+
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+
+    overflow-y:auto;
+
+}
+
+
+.resumen-horas-extra-modal{
+
+    display:grid;
+    grid-template-columns:150px 1fr;
+    gap:15px;
+
+    padding:14px;
+
+    border:1px solid #ddd6fe;
+    border-radius:11px;
+
+    background:#f5f3ff;
+
+}
+
+
+.resumen-horas-extra-modal > div{
+
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+
+}
+
+
+.resumen-horas-extra-modal span{
+
+    color:#64748b;
+
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+
+}
+
+
+.resumen-horas-extra-modal strong{
+
+    color:#7c3aed;
+
+    font-size:20px;
+
+}
+
+
+#detalleHorasExtraCalculadas{
+
+    color:#64748b;
+
+    font-size:11px;
+    line-height:1.5;
+
+}
+
+
+.opciones-aprobacion-extra{
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+
+}
+
+
+.opcion-aprobacion-extra{
+
+    cursor:pointer;
+
+}
+
+
+.opcion-aprobacion-extra input{
+
+    position:absolute;
+
+    opacity:0;
+    pointer-events:none;
+
+}
+
+
+.opcion-aprobacion-extra span{
+
+    min-height:100%;
+
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+
+    padding:13px;
+
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+
+    background:#fff;
+
+    transition:.2s;
+
+}
+
+
+.opcion-aprobacion-extra input:checked + span{
+
+    border-color:#7c3aed;
+
+    background:#f5f3ff;
+
+    box-shadow:
+        0 0 0 1px #7c3aed;
+
+}
+
+
+.opcion-aprobacion-extra strong{
+
+    color:#0f172a;
+
+    font-size:12px;
+
+}
+
+
+.opcion-aprobacion-extra small{
+
+    color:#64748b;
+
+    font-size:10px;
+    line-height:1.4;
+
+}
+
+
+@media(max-width:600px){
+
+    .resumen-horas-extra-modal,
+    .opciones-aprobacion-extra{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
