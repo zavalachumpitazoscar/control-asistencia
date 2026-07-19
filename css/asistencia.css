@@ -3585,3 +3585,34 @@ ESTADO DEL REFRIGERIO EN JORNADA
     color:#059669;
 
 }
+
+
+.asistencia-tabla th:nth-child(8),
+.asistencia-tabla td:nth-child(8){
+
+    min-width:125px;
+
+}
+
+
+.asistencia-tabla th:nth-child(9),
+.asistencia-tabla td:nth-child(9){
+
+    min-width:95px;
+
+}
+
+
+.detalle-tardanza{
+
+    min-width:105px;
+
+}
+
+
+.detalle-tardanza span,
+.detalle-tardanza small{
+
+    white-space:nowrap;
+
+}
