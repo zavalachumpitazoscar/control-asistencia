@@ -12,6 +12,11 @@ import {
 }
 from "../firebase-config.js";
 
+import {
+    clasificarMarcaciones
+}
+from "./clasificar-marcaciones.js";
+
 
 /*=====================================================
 VARIABLES
