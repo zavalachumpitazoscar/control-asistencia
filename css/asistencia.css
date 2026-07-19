@@ -2598,3 +2598,285 @@ MARCACIÓN MANUAL DESDE EL RESUMEN
     color:#2563eb;
 
 }
+
+
+/*======================================
+MODAL MARCACIÓN MANUAL
+======================================*/
+
+.modal-marcacion-manual{
+
+    width:520px;
+    max-width:calc(100vw - 30px);
+    max-height:calc(100vh - 30px);
+
+    display:flex;
+    flex-direction:column;
+
+}
+
+
+.marcacion-manual-body{
+
+    padding:20px;
+
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+
+    overflow-y:auto;
+
+}
+
+
+.resumen-marcacion-manual{
+
+    display:flex;
+    align-items:center;
+    gap:13px;
+
+    padding:15px;
+
+    border:1px solid #bfdbfe;
+    border-radius:12px;
+
+    background:#eff6ff;
+
+}
+
+
+.resumen-marcacion-icono{
+
+    width:40px;
+    height:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-shrink:0;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:#fff;
+
+    font-size:18px;
+
+}
+
+
+.resumen-marcacion-manual div:last-child{
+
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+
+}
+
+
+.resumen-marcacion-manual span{
+
+    color:#64748b;
+
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+
+}
+
+
+.resumen-marcacion-manual strong{
+
+    color:#0f172a;
+
+    font-size:14px;
+
+}
+
+
+.resumen-marcacion-manual p{
+
+    margin:0;
+
+    color:#2563eb;
+
+    font-size:12px;
+    font-weight:600;
+
+}
+
+
+.tipo-marcacion-manual{
+
+    padding:11px 13px;
+
+    border-radius:10px;
+
+    font-size:13px;
+    font-weight:700;
+
+}
+
+
+.tipo-marcacion-manual.entrada{
+
+    border:1px solid #bbf7d0;
+
+    background:#f0fdf4;
+
+    color:#15803d;
+
+}
+
+
+.tipo-marcacion-manual.salida{
+
+    border:1px solid #bfdbfe;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+}
+
+
+.horario-marcacion-manual{
+
+    padding:12px 13px;
+
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+
+    background:#f8fafc;
+
+    color:#334155;
+
+    font-size:12px;
+    line-height:1.5;
+
+}
+
+
+.resultado-interpretacion-marcacion{
+
+    margin-top:12px;
+
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+
+    padding:12px;
+
+    border:1px solid #bfdbfe;
+    border-radius:10px;
+
+    background:#eff6ff;
+
+    color:#1d4ed8;
+
+}
+
+
+.resultado-interpretacion-marcacion[hidden]{
+
+    display:none;
+
+}
+
+
+.resultado-interpretacion-marcacion.advertencia{
+
+    border-color:#fde68a;
+
+    background:#fffbeb;
+
+    color:#b45309;
+
+}
+
+
+.resultado-interpretacion-marcacion.error{
+
+    border-color:#fecaca;
+
+    background:#fef2f2;
+
+    color:#dc2626;
+
+}
+
+
+.resultado-interpretacion-marcacion div{
+
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+
+}
+
+
+.resultado-interpretacion-marcacion strong{
+
+    font-size:12px;
+
+}
+
+
+.resultado-interpretacion-marcacion span{
+
+    font-size:11px;
+    line-height:1.4;
+
+}
+
+
+.contador-motivo-marcacion{
+
+    margin-top:6px;
+
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+
+    color:#64748b;
+
+}
+
+
+.advertencia-marcacion-manual{
+
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+
+    padding:12px;
+
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+
+    background:#f8fafc;
+
+    color:#64748b;
+
+}
+
+
+.advertencia-marcacion-manual i{
+
+    color:#2563eb;
+
+}
+
+
+.advertencia-marcacion-manual p{
+
+    margin:0;
+
+    font-size:11px;
+    line-height:1.5;
+
+}
