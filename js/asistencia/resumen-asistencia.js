@@ -1831,64 +1831,49 @@ function crearEntradaHTML(
     registro
 ){
 
+    /*
+        Si no existe entrada mostramos el botón
+        para agregarla manualmente.
+    */
+
     if(!registro.entrada){
 
-return `
-    <button
-        type="button"
-        class="asistencia-marcacion ${clase} editable"
-        data-accion="editar-marcacion-existente"
-        data-marcacion-id="${escaparHTML(
-            registro.entrada.id ||
-            ""
-        )}"
-        data-tipo-marcacion="ENTRADA"
-        data-colaborador-id="${escaparHTML(
-            registro.colaboradorId
-        )}"
-        title="Editar entrada"
-    >
+        return `
+            <button
+                type="button"
+                class="btn-marcacion-faltante entrada"
+                data-accion="agregar-marcacion-manual"
+                data-tipo-marcacion="ENTRADA"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="Registrar entrada manualmente"
+            >
 
-        <i class="bi bi-box-arrow-in-right"></i>
+                <i class="bi bi-plus-circle"></i>
 
-        <div>
+                <span>
 
-            <strong>
-                ${formatearHora(
-                    obtenerHoraMarcacion(
-                        registro.entrada
-                    )
-                )}
-            </strong>
+                    <strong>
+                        Sin entrada
+                    </strong>
 
-            <span>
+                    <small>
+                        Agregar entrada
+                    </small>
 
-                ${
-                    registro.horarioPrincipal
-                    ?
-                    `Programado ${
-                        formatearHora(
-                            registro.horarioPrincipal
-                            .entrada?.programada
-                        )
-                    }`
-                    :
-                    "Sin horario programado"
-                }
+                </span>
 
-            </span>
-
-            <small class="marcacion-editar-ayuda">
-                Editar entrada
-            </small>
-
-        </div>
-
-    </button>
-`;
+            </button>
+        `;
 
     }
 
+
+    /*
+        La clase debe definirse antes de construir
+        el HTML que la utiliza.
+    */
 
     const clase =
         registro.estado ===
@@ -1900,7 +1885,20 @@ return `
 
 
     return `
-        <div class="asistencia-marcacion ${clase}">
+        <button
+            type="button"
+            class="asistencia-marcacion ${clase} editable"
+            data-accion="editar-marcacion-existente"
+            data-marcacion-id="${escaparHTML(
+                registro.entrada.id ||
+                ""
+            )}"
+            data-tipo-marcacion="ENTRADA"
+            data-colaborador-id="${escaparHTML(
+                registro.colaboradorId
+            )}"
+            title="Editar entrada"
+        >
 
             <i class="bi bi-box-arrow-in-right"></i>
 
@@ -1931,13 +1929,16 @@ return `
 
                 </span>
 
+                <small class="marcacion-editar-ayuda">
+                    Editar entrada
+                </small>
+
             </div>
 
-        </div>
+        </button>
     `;
 
 }
-
 
 /*=====================================================
 INICIO DEL REFRIGERIO
