@@ -950,20 +950,40 @@ function construirRegistroColaborador(
         "";
 
 
-    const entrada =
-        marcaciones[0]
-        ||
-        null;
+const clasificacion =
+    clasificarMarcaciones({
+
+        marcaciones,
+
+        horarios,
+
+        fecha:
+            fechaResumenSeleccionada
+
+    });
 
 
-    const salida =
-        marcaciones.length >= 2
-        ?
-        marcaciones[
-            marcaciones.length - 1
-        ]
-        :
-        null;
+const entrada =
+    clasificacion.entrada;
+
+
+const salida =
+    clasificacion.salida;
+
+
+const minutosRefrigerio =
+    clasificacion.refrigerios
+    .reduce(
+        (
+            total,
+            periodo
+        )=>
+
+            total +
+            periodo.minutos,
+
+        0
+    );
 
 
     const horarioPrincipal =
@@ -1002,74 +1022,117 @@ function construirRegistroColaborador(
             "AUSENTE";
 
     }
-    else if(
-        marcaciones.length === 1
-    ){
+if(
+    horarios.length > 0
+    &&
+    !entrada
+    &&
+    !salida
+){
+
+    estado =
+        "AUSENTE";
+
+}
+else if(
+    entrada
+    &&
+    !salida
+){
+
+    estado =
+        "INCOMPLETO";
+
+}
+else if(
+    !entrada
+    &&
+    salida
+){
+
+    estado =
+        "INCOMPLETO";
+
+}
+else if(
+    entrada
+    &&
+    salida
+){
+
+    if(horarioPrincipal){
+
+        const entradaProgramada =
+            convertirHoraAMinutos(
+                horarioPrincipal.entrada
+                ?.programada
+            );
+
+
+        const tolerancia =
+            Number(
+                horarioPrincipal.entrada
+                ?.toleranciaMinutos
+                ||
+                0
+            );
+
+
+        const entradaReal =
+            convertirHoraAMinutos(
+                obtenerHoraMarcacion(
+                    entrada
+                )
+            );
+
+
+        tardanzaMinutos =
+            Math.max(
+                0,
+                entradaReal -
+                (
+                    entradaProgramada +
+                    tolerancia
+                )
+            );
+
 
         estado =
-            "INCOMPLETO";
+            tardanzaMinutos > 0
+            ?
+            "TARDANZA"
+            :
+            "PRESENTE";
 
     }
-    else if(
-        marcaciones.length >= 2
-    ){
+    else{
 
-        if(horarioPrincipal){
-
-            const entradaProgramada =
-                convertirHoraAMinutos(
-                    horarioPrincipal.entrada
-                    ?.programada
-                );
-
-
-            const tolerancia =
-                Number(
-                    horarioPrincipal.entrada
-                    ?.toleranciaMinutos
-                    ||
-                    0
-                );
-
-
-            const entradaReal =
-                convertirHoraAMinutos(
-                    obtenerHoraMarcacion(
-                        entrada
-                    )
-                );
-
-
-            tardanzaMinutos =
-                Math.max(
-                    0,
-                    entradaReal -
-                    (
-                        entradaProgramada +
-                        tolerancia
-                    )
-                );
-
-
-            estado =
-                tardanzaMinutos > 0
-                ?
-                "TARDANZA"
-                :
-                "PRESENTE";
-
-        }
-        else{
-
-            estado =
-                "PRESENTE";
-
-        }
+        estado =
+            "PRESENTE";
 
     }
+
+}
+else if(
+    marcaciones.length > 0
+){
+
+    /*
+        Existen marcaciones, pero ninguna coincide
+        con las ventanas configuradas.
+    */
+
+    estado =
+        "INCOMPLETO";
+
+}
 
 
     return {
+
+        clasificacion,
+
+        minutosRefrigerio,
 
         colaboradorId:
             colaborador.id,
@@ -1122,11 +1185,17 @@ function construirRegistroColaborador(
 
         tardanzaMinutos,
 
-        minutosTrabajados:
-            calcularMinutosTrabajados(
-                entrada,
-                salida
-            )
+minutosTrabajados:
+    Math.max(
+        0,
+
+        calcularMinutosTrabajados(
+            entrada,
+            salida
+        )
+        -
+        minutosRefrigerio
+    )
 
     };
 
