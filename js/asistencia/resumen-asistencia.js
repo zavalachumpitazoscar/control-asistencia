@@ -166,6 +166,32 @@ export function iniciarResumenAsistencia(){
 );
 
 
+document.addEventListener(
+    "asistencia:ajuste-diario-actualizado",
+    evento=>{
+
+        const fechaActualizada =
+            evento.detail?.fecha;
+
+
+        if(
+            fechaResumenSeleccionada
+            &&
+            fechaActualizada ===
+            fechaResumenSeleccionada
+        ){
+
+            cargarResumenAsistencia(
+                fechaResumenSeleccionada
+            );
+
+        }
+
+    }
+);
+
+    
+
 cuerpoResumen.addEventListener(
     "click",
     evento=>{
@@ -528,7 +554,8 @@ async function cargarResumenAsistencia(
             excepciones,
             sucursales,
             areas,
-            subareas
+            subareas,
+            ajustesAsistencia
         ] = await Promise.all([
 
             consultarColeccionEmpresa(
@@ -569,6 +596,11 @@ async function cargarResumenAsistencia(
             consultarColeccionEmpresa(
                 "subareas",
                 empresaId
+            ),
+
+            consultarColeccionEmpresa(
+                "ajustesAsistenciaDiaria",
+                empresaId
             )
 
         ]);
@@ -608,7 +640,9 @@ async function cargarResumenAsistencia(
 
                 horarios,
 
-                excepciones
+                excepciones,
+
+                ajustesAsistencia
 
             });
 
@@ -687,7 +721,8 @@ function construirRegistrosResumen({
     marcaciones,
     asignaciones,
     horarios,
-    excepciones
+    excepciones,
+    ajustesAsistencia
 
 }){
 
@@ -752,16 +787,42 @@ function construirRegistrosResumen({
             ||
             [];
 
+        const ajusteAsistencia =
+    ajustesAsistencia.find(
+        ajuste=>
 
-        return construirRegistroColaborador(
+            ajuste.colaboradorId ===
+            colaborador.id
 
-            colaborador,
+            &&
 
-            horariosDia,
+            ajuste.fecha ===
+            fecha
 
-            marcacionesDia
+            &&
 
-        );
+            String(
+                ajuste.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() !==
+            "INACTIVO"
+
+    )
+    ||
+    null;
+
+return construirRegistroColaborador(
+
+    colaborador,
+
+    horariosDia,
+
+    marcacionesDia,
+
+    ajusteAsistencia
+
+);
 
     })
     .sort(
@@ -1175,7 +1236,8 @@ CONSTRUIR REGISTRO DEL COLABORADOR
 function construirRegistroColaborador(
     colaborador,
     horarios,
-    marcaciones
+    marcaciones,
+    ajusteAsistencia
 ){
 
     const nombres =
@@ -1278,27 +1340,33 @@ function construirRegistroColaborador(
         tardanza y cumplimiento de jornada.
     */
 
-    const calculoAsistencia =
-        calcularJornadaAsistencia({
+const tratamientoRefrigerio =
+    ajusteAsistencia
+    ?.tratamientoRefrigerio
+    ||
+    "LABORADO";
 
-            horario:
-                horarioPrincipal,
 
-            clasificacion,
+const tratamientoRefrigerioCorto =
+    ajusteAsistencia
+    ?.tratamientoRefrigerioCorto
+    ||
+    "NO_CONSIDERAR_EXTRA";
 
-            /*
-                Estos son los comportamientos
-                predeterminados mientras todavía no
-                guardamos decisiones del usuario.
-            */
 
-            tratamientoRefrigerio:
-                "LABORADO",
+const calculoAsistencia =
+    calcularJornadaAsistencia({
 
-            tratamientoRefrigerioCorto:
-                "NO_CONSIDERAR_EXTRA"
+        horario:
+            horarioPrincipal,
 
-        });
+        clasificacion,
+
+        tratamientoRefrigerio,
+
+        tratamientoRefrigerioCorto
+
+    });
 
 
     let estado =
@@ -1450,6 +1518,12 @@ function construirRegistroColaborador(
         */
 
         calculoAsistencia,
+
+        ajusteAsistencia,
+
+        tratamientoRefrigerio,
+
+        tratamientoRefrigerioCorto,
 
         toleranciaMinutos:
             calculoAsistencia
