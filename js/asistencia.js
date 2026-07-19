@@ -29,6 +29,11 @@ import {
 }
 from "./asistencia/marcacion-manual-asistencia.js";
 
+import {
+    iniciarAjusteRefrigerioAsistencia
+}
+from "./asistencia/ajuste-refrigerio-asistencia.js";
+
 /*=====================================================
 INICIAR MÓDULO DE ASISTENCIA
 =====================================================*/
