@@ -233,7 +233,25 @@ export function iniciarResumenAsistencia(){
                         salidaActual:
                             registro?.salida
                             ||
-                            null
+                            null,
+
+                        inicioRefrigerioActual:
+    registro?.clasificacion
+    ?.inicioRefrigerio
+    ||
+    null,
+
+finRefrigerioActual:
+    registro?.clasificacion
+    ?.finRefrigerio
+    ||
+    null,
+
+refrigerio:
+    registro?.horarioPrincipal
+    ?.refrigerio
+    ||
+    null,
 
                     }
                 }
@@ -1478,14 +1496,24 @@ function crearFilaResumen(
             </td>
 
 
-            <td>
-                ${crearEntradaHTML(registro)}
-            </td>
+<td>
+    ${crearEntradaHTML(registro)}
+</td>
 
 
-            <td>
-                ${crearSalidaHTML(registro)}
-            </td>
+<td>
+    ${crearInicioRefrigerioHTML(registro)}
+</td>
+
+
+<td>
+    ${crearFinRefrigerioHTML(registro)}
+</td>
+
+
+<td>
+    ${crearSalidaHTML(registro)}
+</td>
 
 
             <td>
@@ -1738,6 +1766,265 @@ function crearEntradaHTML(
 
 }
 
+
+/*=====================================================
+INICIO DEL REFRIGERIO
+=====================================================*/
+
+function crearInicioRefrigerioHTML(
+    registro
+){
+
+    const refrigerio =
+        registro.horarioPrincipal
+        ?.refrigerio;
+
+
+    if(
+        !refrigerio
+        ?.habilitado
+    ){
+
+        return crearRefrigerioNoAplica();
+
+    }
+
+
+    const marcacion =
+        registro.clasificacion
+        ?.inicioRefrigerio;
+
+
+    if(!marcacion){
+
+        return crearBotonRefrigerioFaltante(
+            registro,
+            "INICIO_REFRIGERIO",
+            "Sin inicio",
+            "Agregar inicio"
+        );
+
+    }
+
+
+    return crearMarcacionRefrigerioHTML(
+        registro,
+        marcacion,
+        "INICIO_REFRIGERIO"
+    );
+
+}
+
+
+/*=====================================================
+FIN DEL REFRIGERIO
+=====================================================*/
+
+function crearFinRefrigerioHTML(
+    registro
+){
+
+    const refrigerio =
+        registro.horarioPrincipal
+        ?.refrigerio;
+
+
+    if(
+        !refrigerio
+        ?.habilitado
+    ){
+
+        return crearRefrigerioNoAplica();
+
+    }
+
+
+    const marcacion =
+        registro.clasificacion
+        ?.finRefrigerio;
+
+
+    if(!marcacion){
+
+        return crearBotonRefrigerioFaltante(
+            registro,
+            "FIN_REFRIGERIO",
+            "Sin término",
+            "Agregar término"
+        );
+
+    }
+
+
+    return crearMarcacionRefrigerioHTML(
+        registro,
+        marcacion,
+        "FIN_REFRIGERIO"
+    );
+
+}
+
+
+/*=====================================================
+MARCACIÓN DE REFRIGERIO
+=====================================================*/
+
+function crearMarcacionRefrigerioHTML(
+    registro,
+    marcacion,
+    tipo
+){
+
+    const esAutomatica =
+        Boolean(
+            marcacion.esAutomatica
+        );
+
+
+    if(esAutomatica){
+
+        return `
+            <div class="marcacion-refrigerio automatica">
+
+                <i class="bi bi-cpu"></i>
+
+                <div>
+
+                    <strong>
+                        ${formatearHora(
+                            obtenerHoraMarcacion(
+                                marcacion
+                            )
+                        )}
+                    </strong>
+
+                    <span>
+                        Automático
+                    </span>
+
+                </div>
+
+            </div>
+        `;
+
+    }
+
+
+    /*
+        Las marcaciones reales se dejan preparadas
+        como botones para su posterior edición.
+    */
+
+    return `
+        <button
+            type="button"
+            class="marcacion-refrigerio real"
+            data-accion="editar-marcacion-existente"
+            data-marcacion-id="${escaparHTML(
+                marcacion.id ||
+                ""
+            )}"
+            data-tipo-marcacion="${tipo}"
+            data-colaborador-id="${escaparHTML(
+                registro.colaboradorId
+            )}"
+            title="Editar marcación"
+        >
+
+            <i class="bi bi-cup-hot"></i>
+
+            <div>
+
+                <strong>
+                    ${formatearHora(
+                        obtenerHoraMarcacion(
+                            marcacion
+                        )
+                    )}
+                </strong>
+
+                <span>
+                    Marcación real
+                </span>
+
+            </div>
+
+        </button>
+    `;
+
+}
+
+
+/*=====================================================
+REFRIGERIO FALTANTE
+=====================================================*/
+
+function crearBotonRefrigerioFaltante(
+    registro,
+    tipo,
+    titulo,
+    subtitulo
+){
+
+    return `
+        <button
+            type="button"
+            class="btn-marcacion-faltante refrigerio"
+            data-accion="agregar-marcacion-manual"
+            data-tipo-marcacion="${tipo}"
+            data-colaborador-id="${escaparHTML(
+                registro.colaboradorId
+            )}"
+            title="${escaparHTML(subtitulo)}"
+        >
+
+            <i class="bi bi-plus-circle"></i>
+
+            <span>
+
+                <strong>
+                    ${escaparHTML(titulo)}
+                </strong>
+
+                <small>
+                    ${escaparHTML(subtitulo)}
+                </small>
+
+            </span>
+
+        </button>
+    `;
+
+}
+
+
+/*=====================================================
+REFRIGERIO NO APLICA
+=====================================================*/
+
+function crearRefrigerioNoAplica(){
+
+    return `
+        <div class="marcacion-refrigerio no-aplica">
+
+            <i class="bi bi-dash-circle"></i>
+
+            <div>
+
+                <strong>
+                    No aplica
+                </strong>
+
+                <span>
+                    Sin refrigerio
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+}
 
 /*=====================================================
 HTML SALIDA
@@ -2319,7 +2606,7 @@ function mostrarMensajeTabla(
         <tr>
 
             <td
-                colspan="8"
+                colspan="10"
                 class="asistencia-tabla-vacia"
             >
                 ${escaparHTML(mensaje)}
