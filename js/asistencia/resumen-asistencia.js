@@ -2207,67 +2207,65 @@ function crearSalidaHTML(
     registro
 ){
 
+    /*
+        Si no existe una salida, mostramos
+        el botón para agregarla.
+    */
+
     if(!registro.salida){
 
         return `
-    <button
-        type="button"
-        class="asistencia-marcacion correcta editable"
-        data-accion="editar-marcacion-existente"
-        data-marcacion-id="${escaparHTML(
-            registro.salida.id ||
-            ""
-        )}"
-        data-tipo-marcacion="SALIDA"
-        data-colaborador-id="${escaparHTML(
-            registro.colaboradorId
-        )}"
-        title="Editar salida"
-    >
+            <button
+                type="button"
+                class="btn-marcacion-faltante salida"
+                data-accion="agregar-marcacion-manual"
+                data-tipo-marcacion="SALIDA"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="Registrar salida manualmente"
+            >
 
-        <i class="bi bi-box-arrow-right"></i>
+                <i class="bi bi-plus-circle"></i>
 
-        <div>
+                <span>
 
-            <strong>
-                ${formatearHora(
-                    obtenerHoraMarcacion(
-                        registro.salida
-                    )
-                )}
-            </strong>
+                    <strong>
+                        Sin salida
+                    </strong>
 
-            <span>
+                    <small>
+                        Agregar salida
+                    </small>
 
-                ${
-                    registro.horarioPrincipal
-                    ?
-                    `Programado ${
-                        formatearHora(
-                            registro.horarioPrincipal
-                            .salida?.programada
-                        )
-                    }`
-                    :
-                    "Sin horario programado"
-                }
+                </span>
 
-            </span>
-
-            <small class="marcacion-editar-ayuda">
-                Editar salida
-            </small>
-
-        </div>
-
-    </button>
-`;
+            </button>
+        `;
 
     }
 
 
+    /*
+        Si la salida sí existe, mostramos
+        la hora como botón editable.
+    */
+
     return `
-        <div class="asistencia-marcacion correcta">
+        <button
+            type="button"
+            class="asistencia-marcacion correcta editable"
+            data-accion="editar-marcacion-existente"
+            data-marcacion-id="${escaparHTML(
+                registro.salida.id ||
+                ""
+            )}"
+            data-tipo-marcacion="SALIDA"
+            data-colaborador-id="${escaparHTML(
+                registro.colaboradorId
+            )}"
+            title="Editar salida"
+        >
 
             <i class="bi bi-box-arrow-right"></i>
 
@@ -2298,13 +2296,16 @@ function crearSalidaHTML(
 
                 </span>
 
+                <small class="marcacion-editar-ayuda">
+                    Editar salida
+                </small>
+
             </div>
 
-        </div>
+        </button>
     `;
 
 }
-
 
 /*=====================================================
 CONTADORES
