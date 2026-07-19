@@ -106,6 +106,11 @@ export function iniciarFormularioHorarios({
             "ACTIVO"
         );
 
+        asignarValor(
+        "modoRefrigerioHorario",
+        "MARCACION"
+        );
+
 
         asignarValor(
             "toleranciaEntradaHorario",
