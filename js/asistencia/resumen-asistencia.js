@@ -824,7 +824,9 @@ async function cargarResumenAsistencia(
 
                 excepciones,
 
-                ajustesAsistencia
+                ajustesAsistencia,
+
+                aprobacionesHorasExtra
 
             });
 
@@ -1029,7 +1031,9 @@ return construirRegistroColaborador(
 
     marcacionesDia,
 
-    ajusteAsistencia
+    ajusteAsistencia,
+
+    aprobacionHorasExtra
 
 );
 
