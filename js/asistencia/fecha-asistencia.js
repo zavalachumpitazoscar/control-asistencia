@@ -16,7 +16,6 @@ let btnDiaSiguienteAsistencia;
 let btnHoyAsistencia;
 
 
-
 /*=====================================================
 INICIAR FECHA
 =====================================================*/
