@@ -46,6 +46,8 @@ export async function iniciarAsistencia(){
 
     iniciarEditarDiaAsistencia();
 
+    iniciarMarcacionManualAsistencia();
+
     iniciarFechaAsistencia();
 
     iniciarImportacionMarcaciones();
