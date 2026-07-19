@@ -20,6 +20,11 @@ import {
 }
 from "./asistencia/resumen-asistencia.js";
 
+import {
+    iniciarEditarDiaAsistencia
+}
+from "./asistencia/editar-dia-asistencia.js";
+
 /*=====================================================
 INICIAR MÓDULO DE ASISTENCIA
 =====================================================*/
