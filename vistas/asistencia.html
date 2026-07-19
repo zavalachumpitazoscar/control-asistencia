@@ -1684,5 +1684,284 @@
 </div>
 
 
+<!--======================================
+    MODAL APROBAR HORAS EXTRA
+=======================================-->
+
+<div
+    id="modalHorasExtraAsistencia"
+    class="modal"
+>
+
+    <div class="modal-contenido modal-horas-extra">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h3>
+                    Revisar horas extra
+                </h3>
+
+                <p>
+                    Aprueba o rechaza el tiempo adicional calculado.
+                </p>
+
+            </div>
+
+
+            <button
+                id="cerrarHorasExtraAsistencia"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="horas-extra-modal-body">
+
+            <!-- COLABORADOR -->
+
+            <div class="resumen-marcacion-manual">
+
+                <div class="resumen-marcacion-icono">
+
+                    <i class="bi bi-clock-history"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Colaborador
+                    </span>
+
+                    <strong id="nombreHorasExtraAsistencia">
+                        Colaborador
+                    </strong>
+
+                    <p id="fechaHorasExtraAsistencia">
+                        Fecha
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- RESUMEN -->
+
+            <div class="resumen-horas-extra-modal">
+
+                <div>
+
+                    <span>
+                        Tiempo calculado
+                    </span>
+
+                    <strong id="totalHorasExtraCalculadas">
+                        0 min
+                    </strong>
+
+                </div>
+
+
+                <div id="detalleHorasExtraCalculadas">
+
+                    Sin detalle.
+
+                </div>
+
+            </div>
+
+
+            <!-- DECISIÓN -->
+
+            <div class="seccion-formulario">
+
+                <div class="titulo-seccion-formulario">
+
+                    <div class="icono-seccion">
+
+                        <i class="bi bi-check2-square"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            Decisión
+                        </h4>
+
+                        <p>
+                            Selecciona cómo debe considerarse este tiempo.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="opciones-aprobacion-extra">
+
+                    <label class="opcion-aprobacion-extra">
+
+                        <input
+                            type="radio"
+                            name="decisionHorasExtra"
+                            value="APROBADO"
+                            checked
+                        >
+
+                        <span>
+
+                            <i class="bi bi-check-circle"></i>
+
+                            <strong>
+                                Aprobar
+                            </strong>
+
+                            <small>
+                                Reconoce el tiempo seleccionado como horas extra.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+
+                    <label class="opcion-aprobacion-extra">
+
+                        <input
+                            type="radio"
+                            name="decisionHorasExtra"
+                            value="RECHAZADO"
+                        >
+
+                        <span>
+
+                            <i class="bi bi-x-circle"></i>
+
+                            <strong>
+                                Rechazar
+                            </strong>
+
+                            <small>
+                                El tiempo no se reconocerá como horas extra.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- MINUTOS APROBADOS -->
+
+            <div
+                id="seccionMinutosAprobados"
+                class="seccion-formulario"
+            >
+
+                <div class="campo-formulario">
+
+                    <label for="minutosHorasExtraAprobados">
+
+                        Minutos que se aprobarán
+
+                        <span class="campo-obligatorio">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        id="minutosHorasExtraAprobados"
+                        type="number"
+                        min="1"
+                        step="1"
+                    >
+
+
+                    <small class="ayuda-campo">
+
+                        Puedes aprobar todo el tiempo o solamente una parte.
+
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- MOTIVO -->
+
+            <div class="seccion-formulario">
+
+                <div class="campo-formulario">
+
+                    <label for="motivoHorasExtraAsistencia">
+
+                        Motivo de la decisión
+
+                        <span class="campo-obligatorio">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <textarea
+                        id="motivoHorasExtraAsistencia"
+                        rows="3"
+                        maxlength="300"
+                        placeholder="Explica brevemente por qué se aprueba o rechaza este tiempo."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <button
+                id="cancelarHorasExtraAsistencia"
+                type="button"
+                class="btn-secundario"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                id="guardarHorasExtraAsistencia"
+                type="button"
+                class="btn-principal"
+            >
+
+                <i class="bi bi-check-circle"></i>
+
+                Guardar decisión
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
     
 </section>
