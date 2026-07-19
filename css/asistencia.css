@@ -3616,3 +3616,70 @@ ESTADO DEL REFRIGERIO EN JORNADA
     white-space:nowrap;
 
 }
+
+
+/*======================================
+HORAS EXTRA
+======================================*/
+
+.horas-extra-resumen{
+
+    min-width:120px;
+
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+
+}
+
+
+.horas-extra-resumen strong{
+
+    font-size:12px;
+
+}
+
+
+.horas-extra-resumen span,
+.horas-extra-resumen small{
+
+    font-size:9px;
+    line-height:1.3;
+
+}
+
+
+.horas-extra-resumen.sin-extra strong{
+
+    color:#64748b;
+
+}
+
+
+.horas-extra-resumen.sin-extra span,
+.horas-extra-resumen.sin-dato{
+
+    color:#94a3b8;
+
+}
+
+
+.horas-extra-resumen.pendiente strong{
+
+    color:#7c3aed;
+
+}
+
+
+.horas-extra-resumen.pendiente span{
+
+    color:#d97706;
+
+}
+
+
+.horas-extra-resumen.pendiente small{
+
+    color:#64748b;
+
+}
