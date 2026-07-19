@@ -271,6 +271,36 @@ function mostrarAdvertencias(){
     }
 
 
+    /*
+        Resultado actual del cálculo de asistencia.
+    */
+
+    const calculo =
+        datosActuales
+        ?.calculoAsistencia
+        ||
+        {};
+
+
+    /*
+        Comprobamos si el colaborador excedió
+        la duración permitida.
+    */
+
+    const tieneExceso =
+        advertencias.some(
+            advertencia=>
+
+                advertencia.codigo ===
+                "REFRIGERIO_EXCESIVO"
+
+        );
+
+
+    /*
+        Mostramos las advertencias.
+    */
+
     listaAdvertencias.innerHTML =
         advertencias
         .map(
@@ -289,7 +319,45 @@ function mostrarAdvertencias(){
                 </div>
             `
         )
-        .join("");
+        .join("")
+        +
+        (
+            tieneExceso
+            ?
+            `
+                <div class="tratamiento-refrigerio-aplicado">
+
+                    <i class="bi bi-calculator"></i>
+
+                    <div>
+
+                        <strong>
+                            Tratamiento automático
+                        </strong>
+
+                        <span>
+
+                            Se descontarán ${
+                                calculo.minutosRefrigerioDescontados
+                                ||
+                                0
+                            } minutos de refrigerio.
+
+                            El exceso de ${
+                                calculo.minutosExcesoRefrigerio
+                                ||
+                                0
+                            } minuto(s) también reducirá el cumplimiento de jornada.
+
+                        </span>
+
+                    </div>
+
+                </div>
+            `
+            :
+            ""
+        );
 
 }
 
