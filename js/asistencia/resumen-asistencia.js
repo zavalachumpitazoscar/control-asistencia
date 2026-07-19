@@ -2254,7 +2254,7 @@ function crearSalidaHTML(
     return `
         <button
             type="button"
-            class="asistencia-marcacion correcta editable"
+            class="btn-horario-resumen"
             data-accion="editar-marcacion-existente"
             data-marcacion-id="${escaparHTML(
                 registro.salida.id ||
