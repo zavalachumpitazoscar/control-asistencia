@@ -1598,7 +1598,13 @@ else{
 }
 
     
+/*
+    Se guarda antes de cerrar el modal porque
+    cerrarModal() restablece modoEdicion.
+*/
 
+const fueEdicion =
+    modoEdicion;
 
 /*
     Guardamos los datos antes de cerrar el modal,
@@ -1643,16 +1649,23 @@ Swal.fire({
 
     icon:"success",
 
-    title:"Marcación registrada",
+    title:
+        fueEdicion
+        ?
+        "Marcación modificada"
+        :
+        "Marcación registrada",
 
     text:
+        fueEdicion
+        ?
+        `La marcación fue modificada correctamente a las ${hora}.`
+        :
         `${
             obtenerTextoTipo(
                 datosActualizacion.tipo
             )
-        } registrada correctamente a las ${
-            datosActualizacion.hora
-        }.`,
+        } registrada correctamente a las ${hora}.`,
 
     confirmButtonColor:
         "#2563eb"
@@ -1786,54 +1799,21 @@ function cerrarModal(){
         null;
 
     inicioRefrigerioActual =
-    null;
+        null;
 
-finRefrigerioActual =
-    null;
+    finRefrigerioActual =
+        null;
 
-configuracionRefrigerio =
-    null;
+    configuracionRefrigerio =
+        null;
 
-modoEdicion =
-    false;
+    modoEdicion =
+        false;
 
-marcacionEditando =
-    null;
-
-const fueEdicion =
-    modoEdicion;
-
-    Swal.fire({
-
-    icon:"success",
-
-    title:
-        fueEdicion
-        ?
-        "Marcación modificada"
-        :
-        "Marcación registrada",
-
-    text:
-        fueEdicion
-        ?
-        `La marcación fue modificada correctamente a las ${hora}.`
-        :
-        `${
-            obtenerTextoTipo(
-                datosActualizacion.tipo
-            )
-        } registrada correctamente a las ${hora}.`,
-
-    confirmButtonColor:
-        "#2563eb"
-
-});
-
-    
+    marcacionEditando =
+        null;
 
 }
-
 
 /*=====================================================
 CONTADOR DE MOTIVO
