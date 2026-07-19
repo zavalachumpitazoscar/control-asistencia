@@ -15,6 +15,10 @@ import {
 }
 from "./asistencia/importacion-marcaciones.js";
 
+import {
+    iniciarResumenAsistencia
+}
+from "./asistencia/resumen-asistencia.js";
 
 /*=====================================================
 INICIAR MÓDULO DE ASISTENCIA
