@@ -1221,41 +1221,10 @@ function construirRegistroColaborador(
         "";
 
 
-const clasificacion =
-    clasificarMarcaciones({
-
-        marcaciones,
-
-        horarios,
-
-        fecha:
-            fechaResumenSeleccionada
-
-    });
-
-
-const entrada =
-    clasificacion.entrada;
-
-
-const salida =
-    clasificacion.salida;
-
-
-const minutosRefrigerio =
-    clasificacion.refrigerios
-    .reduce(
-        (
-            total,
-            periodo
-        )=>
-
-            total +
-            periodo.minutos,
-
-        0
-    );
-
+    /*
+        Seleccionamos el primer horario del día
+        como horario principal para el resumen.
+    */
 
     const horarioPrincipal =
         [...horarios]
@@ -1278,132 +1247,150 @@ const minutosRefrigerio =
         null;
 
 
-    let estado = "SIN_HORARIO";
+    /*
+        Clasificamos las marcas según las ventanas
+        del horario.
+    */
 
-    let tardanzaMinutos = 0;
+    const clasificacion =
+        clasificarMarcaciones({
 
+            marcaciones,
+
+            horarios,
+
+            fecha:
+                fechaResumenSeleccionada
+
+        });
+
+
+    const entrada =
+        clasificacion.entrada;
+
+
+    const salida =
+        clasificacion.salida;
+
+
+    /*
+        Calculamos horas trabajadas, refrigerio,
+        tardanza y cumplimiento de jornada.
+    */
+
+    const calculoAsistencia =
+        calcularJornadaAsistencia({
+
+            horario:
+                horarioPrincipal,
+
+            clasificacion,
+
+            /*
+                Estos son los comportamientos
+                predeterminados mientras todavía no
+                guardamos decisiones del usuario.
+            */
+
+            tratamientoRefrigerio:
+                "LABORADO",
+
+            tratamientoRefrigerioCorto:
+                "NO_CONSIDERAR_EXTRA"
+
+        });
+
+
+    let estado =
+        "SIN_HORARIO";
+
+
+    let tardanzaMinutos =
+        calculoAsistencia
+        .minutosTardanza;
+
+
+    /*
+        Determinar estado general.
+    */
 
     if(
         horarios.length > 0
         &&
-        marcaciones.length === 0
+        !entrada
+        &&
+        !salida
     ){
 
         estado =
             "AUSENTE";
 
     }
-if(
-    horarios.length > 0
-    &&
-    !entrada
-    &&
-    !salida
-){
-
-    estado =
-        "AUSENTE";
-
-}
-else if(
-    entrada
-    &&
-    !salida
-){
-
-    estado =
-        "INCOMPLETO";
-
-}
-else if(
-    !entrada
-    &&
-    salida
-){
-
-    estado =
-        "INCOMPLETO";
-
-}
-else if(
-    entrada
-    &&
-    salida
-){
-
-    if(horarioPrincipal){
-
-        const entradaProgramada =
-            convertirHoraAMinutos(
-                horarioPrincipal.entrada
-                ?.programada
-            );
-
-
-        const tolerancia =
-            Number(
-                horarioPrincipal.entrada
-                ?.toleranciaMinutos
-                ||
-                0
-            );
-
-
-        const entradaReal =
-            convertirHoraAMinutos(
-                obtenerHoraMarcacion(
-                    entrada
-                )
-            );
-
-
-        tardanzaMinutos =
-            Math.max(
-                0,
-                entradaReal -
-                (
-                    entradaProgramada +
-                    tolerancia
-                )
-            );
-
+    else if(
+        entrada
+        &&
+        !salida
+    ){
 
         estado =
-            tardanzaMinutos > 0
-            ?
-            "TARDANZA"
-            :
-            "PRESENTE";
+            "INCOMPLETO";
 
     }
-    else{
+    else if(
+        !entrada
+        &&
+        salida
+    ){
 
         estado =
-            "PRESENTE";
+            "INCOMPLETO";
 
     }
+    else if(
+        entrada
+        &&
+        salida
+    ){
 
-}
-else if(
-    marcaciones.length > 0
-){
+        if(horarioPrincipal){
 
-    /*
-        Existen marcaciones, pero ninguna coincide
-        con las ventanas configuradas.
-    */
+            estado =
+                tardanzaMinutos > 0
+                ?
+                "TARDANZA"
+                :
+                "PRESENTE";
 
-    estado =
-        "INCOMPLETO";
+        }
+        else{
 
-}
+            /*
+                Tiene entrada y salida, pero todavía
+                no tiene horario asignado.
+            */
+
+            estado =
+                "PRESENTE";
+
+        }
+
+    }
+    else if(
+        marcaciones.length > 0
+    ){
+
+        /*
+            Existen marcas, pero ninguna coincide con
+            las ventanas configuradas.
+        */
+
+        estado =
+            "INCOMPLETO";
+
+    }
 
 
     return {
-
-        clasificacion,
-
-        minutosRefrigerio,
 
         colaboradorId:
             colaborador.id,
@@ -1445,6 +1432,8 @@ else if(
 
         horarioPrincipal,
 
+        clasificacion,
+
         entrada,
 
         salida,
@@ -1456,17 +1445,31 @@ else if(
 
         tardanzaMinutos,
 
-minutosTrabajados:
-    Math.max(
-        0,
+        /*
+            Resultado centralizado del cálculo.
+        */
 
-        calcularMinutosTrabajados(
-            entrada,
-            salida
-        )
-        -
-        minutosRefrigerio
-    )
+        calculoAsistencia,
+
+        toleranciaMinutos:
+            calculoAsistencia
+            .toleranciaMinutos,
+
+        minutosJornadaProgramada:
+            calculoAsistencia
+            .minutosJornadaProgramada,
+
+        minutosJornadaCumplida:
+            calculoAsistencia
+            .minutosJornadaCumplida,
+
+        advertencias:
+            calculoAsistencia
+            .advertencias,
+
+        minutosTrabajados:
+            calculoAsistencia
+            .minutosTrabajados
 
     };
 
@@ -2524,40 +2527,6 @@ function obtenerHoraMarcacion(
 }
 
 
-function calcularMinutosTrabajados(
-    entrada,
-    salida
-){
-
-    if(
-        !entrada
-        ||
-        !salida
-    ){
-
-        return 0;
-
-    }
-
-
-    return Math.max(
-        0,
-        Math.floor(
-            (
-                obtenerMilisegundosMarcacion(
-                    salida
-                )
-                -
-                obtenerMilisegundosMarcacion(
-                    entrada
-                )
-            )
-            /
-            60000
-        )
-    );
-
-}
 
 
 function formatearMinutosTrabajados(
