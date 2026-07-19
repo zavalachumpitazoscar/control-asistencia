@@ -1682,42 +1682,66 @@ function crearFilaResumen(
             </td>
 
 
-            <td>
+<!-- TARDANZA -->
 
-                <span class="valor-asistencia ${
-                    registro.tardanzaMinutos > 0
-                    ?
-                    "negativo"
-                    :
-                    "neutro"
-                }">
+<td>
 
-                    ${
-                        registro.tardanzaMinutos > 0
-                        ?
-                        `${registro.tardanzaMinutos} min`
-                        :
-                        registro.estado === "PRESENTE"
-                        ?
-                        "0 min"
-                        :
-                        "—"
-                    }
+    <span class="valor-asistencia ${
+        registro.tardanzaMinutos > 0
+        ?
+        "negativo"
+        :
+        "neutro"
+    }">
 
-                </span>
+        ${
+            registro.tardanzaMinutos > 0
+            ?
+            `${registro.tardanzaMinutos} min`
+            :
+            registro.estado === "PRESENTE"
+            ||
+            registro.estado === "TARDANZA"
+            ?
+            "0 min"
+            :
+            "—"
+        }
 
-            </td>
+    </span>
+
+</td>
 
 
-            <td>
+<!-- TOLERANCIA -->
 
-                <strong class="horas-trabajadas">
+<td>
 
-                    ${formatearMinutosTrabajados(registro)}
+    ${crearToleranciaHTML(registro)}
 
-                </strong>
+</td>
 
-            </td>
+
+<!-- HORAS TRABAJADAS -->
+
+<td>
+
+    <strong class="horas-trabajadas">
+
+        ${formatearMinutosTrabajados(registro)}
+
+    </strong>
+
+</td>
+
+
+<!-- JORNADA -->
+
+<td>
+
+    ${crearJornadaHTML(registro)}
+
+</td>
 
 
             <td class="columna-acciones-asistencia">
@@ -2315,6 +2339,220 @@ function crearSalidaHTML(
 
 }
 
+
+
+/*=====================================================
+TOLERANCIA
+=====================================================*/
+
+function crearToleranciaHTML(
+    registro
+){
+
+    if(!registro.horarioPrincipal){
+
+        return `
+            <span class="tolerancia-asistencia sin-dato">
+                —
+            </span>
+        `;
+
+    }
+
+
+    const tolerancia =
+        Number(
+            registro.toleranciaMinutos
+            ||
+            0
+        );
+
+
+    if(tolerancia === 0){
+
+        return `
+            <span class="tolerancia-asistencia sin-tolerancia">
+
+                <i class="bi bi-clock"></i>
+
+                Sin tolerancia
+
+            </span>
+        `;
+
+    }
+
+
+    return `
+        <span class="tolerancia-asistencia">
+
+            <i class="bi bi-clock-history"></i>
+
+            ${tolerancia} min
+
+        </span>
+    `;
+
+}
+
+
+/*=====================================================
+JORNADA
+=====================================================*/
+
+function crearJornadaHTML(
+    registro
+){
+
+    if(!registro.horarioPrincipal){
+
+        return `
+            <div class="jornada-asistencia sin-horario">
+
+                <strong>
+                    —
+                </strong>
+
+                <span>
+                    Sin horario
+                </span>
+
+            </div>
+        `;
+
+    }
+
+
+    const calculo =
+        registro.calculoAsistencia;
+
+
+    const programada =
+        registro.minutosJornadaProgramada
+        ||
+        0;
+
+
+    const cumplida =
+        registro.minutosJornadaCumplida
+        ||
+        0;
+
+
+    /*
+        Si falta entrada o salida, todavía no podemos
+        calcular completamente la jornada.
+    */
+
+    if(!calculo?.calculable){
+
+        const noTieneMarcaciones =
+            !registro.entrada
+            &&
+            !registro.salida;
+
+
+        return `
+            <div class="jornada-asistencia incompleta">
+
+                <strong>
+
+                    ${
+                        noTieneMarcaciones
+                        ?
+                        `0 h de ${
+                            formatearDuracionCorta(
+                                programada
+                            )
+                        }`
+                        :
+                        "Por calcular"
+                    }
+
+                </strong>
+
+                <span>
+
+                    ${
+                        noTieneMarcaciones
+                        ?
+                        "Jornada no cumplida"
+                        :
+                        "Marcación incompleta"
+                    }
+
+                </span>
+
+            </div>
+        `;
+
+    }
+
+
+    const completa =
+        calculo.jornadaCompleta;
+
+
+    return `
+        <div class="jornada-asistencia ${
+            completa
+            ?
+            "completa"
+            :
+            "incompleta"
+        }">
+
+            <strong>
+
+                ${formatearDuracionCorta(cumplida)}
+
+                de
+
+                ${formatearDuracionCorta(programada)}
+
+            </strong>
+
+            <span>
+
+                ${
+                    completa
+                    ?
+                    "Jornada cumplida"
+                    :
+                    "Jornada incompleta"
+                }
+
+            </span>
+
+            ${
+                registro.advertencias
+                ?.length > 0
+                ?
+                `
+                    <small
+                        class="contador-advertencias-jornada"
+                        title="${escaparHTML(
+                            registro.advertencias
+                            .map(item=>item.mensaje)
+                            .join(" | ")
+                        )}"
+                    >
+
+                        <i class="bi bi-exclamation-triangle"></i>
+
+                        ${registro.advertencias.length}
+
+                    </small>
+                `
+                :
+                ""
+            }
+
+        </div>
+    `;
+
+}
+
 /*=====================================================
 CONTADORES
 =====================================================*/
@@ -2380,6 +2618,43 @@ function actualizarContadores(
 
 }
 
+function formatearDuracionCorta(
+    minutosTotales
+){
+
+    const total =
+        Math.max(
+            0,
+            Number(
+                minutosTotales
+                ||
+                0
+            )
+        );
+
+
+    const horas =
+        Math.floor(
+            total /
+            60
+        );
+
+
+    const minutos =
+        total %
+        60;
+
+
+    if(minutos === 0){
+
+        return `${horas} h`;
+
+    }
+
+
+    return `${horas} h ${minutos} min`;
+
+}
 
 /*=====================================================
 FILTROS
@@ -2779,7 +3054,7 @@ function mostrarMensajeTabla(
         <tr>
 
             <td
-                colspan="10"
+                colspan="12"
                 class="asistencia-tabla-vacia"
             >
                 ${escaparHTML(mensaje)}
