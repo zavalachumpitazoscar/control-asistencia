@@ -49,6 +49,12 @@ let tipoSolicitado = null;
 
 let horarioSeleccionado = null;
 
+let inicioRefrigerioActual = null;
+
+let finRefrigerioActual = null;
+
+let configuracionRefrigerio = null;
+
 let empresaId = null;
 
 let controlEventos = null;
@@ -226,19 +232,36 @@ async function abrirModalMarcacionManual(
         datos?.horario ||
         null;
 
+    inicioRefrigerioActual =
+    datos?.inicioRefrigerioActual ||
+    null;
+
+
+finRefrigerioActual =
+    datos?.finRefrigerioActual ||
+    null;
+
+
+configuracionRefrigerio =
+    datos?.refrigerio ||
+    horarioSeleccionado?.refrigerio ||
+    null;
+
 
     if(
         !colaboradorId
         ||
         !fechaSeleccionada
         ||
-        ![
-            "ENTRADA",
-            "SALIDA"
-        ]
-        .includes(
-            tipoSolicitado
-        )
+![
+    "ENTRADA",
+    "INICIO_REFRIGERIO",
+    "FIN_REFRIGERIO",
+    "SALIDA"
+]
+.includes(
+    tipoSolicitado
+)
     ){
 
         return;
@@ -277,25 +300,12 @@ async function abrirModalMarcacionManual(
         Hora sugerida según la marcación faltante.
     */
 
-    if(inputHora){
+if(inputHora){
 
-        inputHora.value =
-            tipoSolicitado ===
-            "ENTRADA"
-            ?
-            horarioSeleccionado
-            ?.entrada
-            ?.programada
-            ||
-            ""
-            :
-            horarioSeleccionado
-            ?.salida
-            ?.programada
-            ||
-            "";
+    inputHora.value =
+        obtenerHoraSugerida();
 
-    }
+}
 
 
     modal.style.display =
@@ -328,6 +338,128 @@ async function abrirModalMarcacionManual(
         },
         100
     );
+
+}
+
+
+/*=====================================================
+OBTENER HORA SUGERIDA
+=====================================================*/
+
+function obtenerHoraSugerida(){
+
+    if(
+        tipoSolicitado ===
+        "ENTRADA"
+    ){
+
+        return horarioSeleccionado
+        ?.entrada
+        ?.programada
+        ||
+        "";
+
+    }
+
+
+    if(
+        tipoSolicitado ===
+        "SALIDA"
+    ){
+
+        return horarioSeleccionado
+        ?.salida
+        ?.programada
+        ||
+        "";
+
+    }
+
+
+    if(
+        tipoSolicitado ===
+        "INICIO_REFRIGERIO"
+    ){
+
+        const desde =
+            configuracionRefrigerio
+            ?.permitirInicioDesde;
+
+
+        const hasta =
+            configuracionRefrigerio
+            ?.permitirInicioHasta;
+
+
+        if(
+            desde
+            &&
+            hasta
+        ){
+
+            const puntoMedio =
+                Math.floor(
+                    (
+                        convertirHoraAMinutos(
+                            desde
+                        )
+                        +
+                        convertirHoraAMinutos(
+                            hasta
+                        )
+                    )
+                    /
+                    2
+                );
+
+
+            return convertirMinutosAHora(
+                puntoMedio
+            );
+
+        }
+
+
+        return desde ||
+        "";
+
+    }
+
+
+    if(
+        tipoSolicitado ===
+        "FIN_REFRIGERIO"
+    ){
+
+        const horaInicio =
+            obtenerHoraMarcacionLocal(
+                inicioRefrigerioActual
+            );
+
+
+        if(horaInicio){
+
+            return convertirMinutosAHora(
+
+                convertirHoraAMinutos(
+                    horaInicio
+                )
+                +
+                Number(
+                    configuracionRefrigerio
+                    ?.duracionMinutos
+                    ||
+                    0
+                )
+
+            );
+
+        }
+
+    }
+
+
+    return "";
 
 }
 
@@ -443,44 +575,77 @@ function mostrarDatosModal(){
         );
 
 
-    if(tipoElemento){
+if(tipoElemento){
 
-        tipoElemento.textContent =
-            tipoSolicitado ===
-            "ENTRADA"
-            ?
-            "Entrada manual"
-            :
-            "Salida manual";
+    tipoElemento.textContent =
+        `${obtenerTextoTipo(
+            tipoSolicitado
+        )} manual`;
 
 
-        tipoElemento.classList.toggle(
-            "entrada",
-            tipoSolicitado ===
-            "ENTRADA"
+    tipoElemento.classList.remove(
+        "entrada",
+        "salida",
+        "refrigerio"
+    );
+
+
+    if(
+        tipoSolicitado ===
+        "ENTRADA"
+    ){
+
+        tipoElemento.classList.add(
+            "entrada"
         );
 
+    }
+    else if(
+        tipoSolicitado ===
+        "SALIDA"
+    ){
 
-        tipoElemento.classList.toggle(
-            "salida",
-            tipoSolicitado ===
-            "SALIDA"
+        tipoElemento.classList.add(
+            "salida"
+        );
+
+    }
+    else{
+
+        tipoElemento.classList.add(
+            "refrigerio"
         );
 
     }
 
+}
 
-    if(icono){
 
-        icono.className =
-            tipoSolicitado ===
-            "ENTRADA"
-            ?
-            "bi bi-box-arrow-in-right"
-            :
-            "bi bi-box-arrow-right";
+if(icono){
 
-    }
+    const iconos = {
+
+        ENTRADA:
+            "bi bi-box-arrow-in-right",
+
+        SALIDA:
+            "bi bi-box-arrow-right",
+
+        INICIO_REFRIGERIO:
+            "bi bi-cup-hot",
+
+        FIN_REFRIGERIO:
+            "bi bi-cup-straw"
+
+    };
+
+
+    icono.className =
+        iconos[tipoSolicitado]
+        ||
+        "bi bi-clock";
+
+}
 
 
     mostrarHorarioAsignado();
@@ -648,6 +813,206 @@ function validarHoraIngresada(){
         };
 
     }
+
+    /*
+    FIN DEL REFRIGERIO
+
+    No se puede interpretar solamente con la ventana
+    de inicio. Debe ser posterior al inicio real y
+    anterior a la salida.
+*/
+
+if(
+    tipoSolicitado ===
+    "FIN_REFRIGERIO"
+){
+
+    const horaInicio =
+        obtenerHoraMarcacionLocal(
+            inicioRefrigerioActual
+        );
+
+
+    if(!horaInicio){
+
+        resultadoElemento.classList.add(
+            "error"
+        );
+
+
+        titulo.textContent =
+            "Falta el inicio del refrigerio";
+
+
+        detalle.textContent =
+            "Primero registra la marcación de inicio del refrigerio.";
+
+
+        return {
+
+            valido:false,
+
+            tipoInterpretado:
+                "FIN_REFRIGERIO"
+
+        };
+
+    }
+
+
+    const minutosInicio =
+        convertirHoraAMinutos(
+            horaInicio
+        );
+
+
+    const minutosFin =
+        convertirHoraAMinutos(
+            hora
+        );
+
+
+    const minutosSalida =
+        convertirHoraAMinutos(
+            horarioSeleccionado
+            ?.salida
+            ?.permitirDesde
+        );
+
+
+    if(
+        minutosFin <=
+        minutosInicio
+    ){
+
+        resultadoElemento.classList.add(
+            "error"
+        );
+
+
+        titulo.textContent =
+            "Hora de término incorrecta";
+
+
+        detalle.textContent =
+            "El término del refrigerio debe ser posterior a su inicio.";
+
+
+        return {
+
+            valido:false,
+
+            tipoInterpretado:
+                "FIN_REFRIGERIO"
+
+        };
+
+    }
+
+
+    if(
+        minutosSalida
+        &&
+        minutosFin >=
+        minutosSalida
+    ){
+
+        resultadoElemento.classList.add(
+            "error"
+        );
+
+
+        titulo.textContent =
+            "Hora fuera del refrigerio";
+
+
+        detalle.textContent =
+            "El término del refrigerio debe ser anterior a la ventana de salida.";
+
+
+        return {
+
+            valido:false,
+
+            tipoInterpretado:
+                "FIN_REFRIGERIO"
+
+        };
+
+    }
+
+
+    const duracionReal =
+        minutosFin -
+        minutosInicio;
+
+
+    const duracionPermitida =
+        Number(
+            configuracionRefrigerio
+            ?.duracionMinutos
+            ||
+            0
+        );
+
+
+    titulo.textContent =
+        "Fin de refrigerio válido";
+
+
+    if(
+        duracionReal ===
+        duracionPermitida
+    ){
+
+        detalle.textContent =
+            `El refrigerio tiene la duración programada de ${duracionPermitida} minutos.`;
+
+    }
+    else if(
+        duracionReal <
+        duracionPermitida
+    ){
+
+        resultadoElemento.classList.add(
+            "advertencia"
+        );
+
+
+        detalle.textContent =
+            `El refrigerio duró ${duracionReal} minutos, ${
+                duracionPermitida - duracionReal
+            } minutos menos de lo programado.`;
+
+    }
+    else{
+
+        resultadoElemento.classList.add(
+            "advertencia"
+        );
+
+
+        detalle.textContent =
+            `El refrigerio duró ${duracionReal} minutos, ${
+                duracionReal - duracionPermitida
+            } minutos más de lo permitido.`;
+
+    }
+
+
+    return {
+
+        valido:true,
+
+        tipoInterpretado:
+            "FIN_REFRIGERIO",
+
+        horarioId:
+            horarioSeleccionado.id
+
+    };
+
+}
 
 
     const interpretacion =
@@ -1201,6 +1566,15 @@ function cerrarModal(){
     horarioSeleccionado =
         null;
 
+    inicioRefrigerioActual =
+    null;
+
+finRefrigerioActual =
+    null;
+
+configuracionRefrigerio =
+    null;
+
 }
 
 
@@ -1480,5 +1854,101 @@ function escaparHTML(
         "'",
         "&#039;"
     );
+
+}
+
+
+function obtenerHoraMarcacionLocal(
+    marcacion
+){
+
+    return String(
+        marcacion?.hora ||
+        ""
+    )
+    .slice(
+        0,
+        5
+    );
+
+}
+
+
+function convertirHoraAMinutos(
+    hora
+){
+
+    if(!hora){
+
+        return 0;
+
+    }
+
+
+    const [
+        horas,
+        minutos
+    ] =
+        String(
+            hora
+        )
+        .split(":")
+        .map(Number);
+
+
+    return (
+        horas *
+        60
+    )
+    +
+    minutos;
+
+}
+
+
+function convertirMinutosAHora(
+    minutosTotales
+){
+
+    const normalizados =
+        (
+            minutosTotales %
+            1440
+            +
+            1440
+        )
+        %
+        1440;
+
+
+    const horas =
+        Math.floor(
+            normalizados /
+            60
+        );
+
+
+    const minutos =
+        normalizados %
+        60;
+
+
+    return `${
+        String(
+            horas
+        )
+        .padStart(
+            2,
+            "0"
+        )
+    }:${
+        String(
+            minutos
+        )
+        .padStart(
+            2,
+            "0"
+        )
+    }`;
 
 }
