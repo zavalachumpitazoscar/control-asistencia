@@ -242,6 +242,23 @@ export function iniciarResumenAsistencia(){
     }
 );
 
+
+document.addEventListener(
+    "asistencia:marcacion-manual-registrada",
+    ()=>{
+
+        if(fechaResumenSeleccionada){
+
+            cargarResumenAsistencia(
+                fechaResumenSeleccionada
+            );
+
+        }
+
+    }
+);
+    
+
     document.addEventListener(
         "asistencia:marcaciones-importadas",
         ()=>{
