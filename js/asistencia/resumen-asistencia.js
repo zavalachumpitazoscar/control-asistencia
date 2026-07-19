@@ -2595,9 +2595,15 @@ function crearJornadaHTML(
         0;
 
 
+    const advertenciasRefrigerio =
+        obtenerAdvertenciasRefrigerioRegistro(
+            registro
+        );
+
+
     /*
-        Si falta entrada o salida, todavía no podemos
-        calcular completamente la jornada.
+        Si falta entrada o salida no puede calcularse
+        completamente la jornada.
     */
 
     if(!calculo?.calculable){
@@ -2668,6 +2674,7 @@ function crearJornadaHTML(
 
             </strong>
 
+
             <span>
 
                 ${
@@ -2680,55 +2687,41 @@ function crearJornadaHTML(
 
             </span>
 
-${
-    tieneAdvertenciaRefrigerio(
-        registro
-    )
-    ?
-    `
-        <button
-            type="button"
-            class="btn-ajustar-refrigerio"
-            data-accion="ajustar-refrigerio"
-            data-colaborador-id="${escaparHTML(
-                registro.colaboradorId
-            )}"
-            title="Revisar tratamiento del refrigerio"
-        >
 
-            <i class="bi bi-exclamation-triangle"></i>
+            ${
+                advertenciasRefrigerio.length > 0
+                ?
+                `
+                    <button
+                        type="button"
+                        class="contador-advertencias-jornada"
+                        data-accion="gestionar-ajuste-refrigerio"
+                        data-colaborador-id="${escaparHTML(
+                            registro.colaboradorId
+                        )}"
+                        title="${escaparHTML(
+                            advertenciasRefrigerio
+                            .map(
+                                advertencia=>
+                                    advertencia.mensaje
+                            )
+                            .join(" | ")
+                        )}"
+                    >
 
-            Revisar refrigerio
+                        <i class="bi bi-exclamation-triangle"></i>
 
-        </button>
-    `
-    :
-    registro.advertencias?.length > 0
-    ?
-    `
-<button
-    type="button"
-    class="contador-advertencias-jornada"
-    data-accion="gestionar-ajuste-refrigerio"
-    data-colaborador-id="${escaparHTML(
-        registro.colaboradorId
-    )}"
-    title="Revisar advertencias"
->
+                        ${advertenciasRefrigerio.length}
 
-    <i class="bi bi-exclamation-triangle"></i>
+                        <span>
+                            Revisar
+                        </span>
 
-    ${registro.advertencias.length}
-
-    <span>
-        Revisar
-    </span>
-
-</button>
-    `
-    :
-    ""
-}
+                    </button>
+                `
+                :
+                ""
+            }
 
         </div>
     `;
@@ -2736,7 +2729,11 @@ ${
 }
 
 
-function tieneAdvertenciaRefrigerio(
+/*=====================================================
+OBTENER ADVERTENCIAS DE REFRIGERIO
+=====================================================*/
+
+function obtenerAdvertenciasRefrigerioRegistro(
     registro
 ){
 
@@ -2752,6 +2749,54 @@ function tieneAdvertenciaRefrigerio(
 
     ];
 
+
+    return (
+        registro.advertencias ||
+        []
+    )
+    .filter(
+        advertencia=>
+
+            codigosRefrigerio.includes(
+                advertencia.codigo
+            )
+
+    );
+
+}
+
+
+function obtenerAdvertenciasRefrigerioRegistro(
+    registro
+){
+
+    const codigosRefrigerio = [
+
+        "REFRIGERIO_SIN_MARCACIONES",
+
+        "REFRIGERIO_INCOMPLETO",
+
+        "REFRIGERIO_CORTO",
+
+        "REFRIGERIO_EXCESIVO"
+
+    ];
+
+
+    return (
+        registro.advertencias ||
+        []
+    )
+    .filter(
+        advertencia=>
+
+            codigosRefrigerio.includes(
+                advertencia.codigo
+            )
+
+    );
+
+}
 
     return registro.advertencias
     ?.some(
