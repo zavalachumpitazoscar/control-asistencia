@@ -2077,6 +2077,12 @@ function crearHorasExtraHTML(
         registro.calculoHorasExtra;
 
 
+    const aprobacion =
+        registro.aprobacionHorasExtra
+        ||
+        null;
+
+
     if(
         !calculo
         ||
@@ -2122,46 +2128,298 @@ function crearHorasExtraHTML(
     }
 
 
-return `
-    <button
-        type="button"
-        class="horas-extra-resumen pendiente editable"
-        data-accion="gestionar-horas-extra"
-        data-colaborador-id="${escaparHTML(
-            registro.colaboradorId
-        )}"
-        title="Revisar horas extra"
-    >
+    /*
+        Si el cálculo cambió después de la decisión,
+        debe revisarse nuevamente.
+    */
 
-        <strong>
-            ${formatearDuracionCorta(
-                calculo.minutosExtraTotal
-            )}
-        </strong>
-
-        <span>
-            Pendiente de aprobación
-        </span>
-
-        ${calculo.detalles
-        .map(
-            detalle=>
-            `
-                <small>
-                    ${escaparHTML(
-                        detalle.mensaje
-                    )}
-                </small>
-            `
+    const calculoCambio =
+        aprobacion
+        &&
+        Number(
+            aprobacion.minutosCalculados
+            ||
+            0
         )
-        .join("")}
+        !==
+        Number(
+            calculo.minutosExtraTotal
+            ||
+            0
+        );
 
-        <em>
-            Revisar
-        </em>
 
-    </button>
-`;
+    if(calculoCambio){
+
+        return `
+            <button
+                type="button"
+                class="horas-extra-resumen revision editable"
+                data-accion="gestionar-horas-extra"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="El cálculo de horas extra cambió"
+            >
+
+                <strong>
+                    ${formatearDuracionCorta(
+                        calculo.minutosExtraTotal
+                    )}
+                </strong>
+
+                <span>
+                    Revisión requerida
+                </span>
+
+                <small>
+
+                    El cálculo anterior fue de ${
+                        formatearDuracionCorta(
+                            aprobacion.minutosCalculados
+                            ||
+                            0
+                        )
+                    }.
+
+                </small>
+
+                <em>
+                    Revisar nuevamente
+                </em>
+
+            </button>
+        `;
+
+    }
+
+
+    /*
+        HORAS EXTRA RECHAZADAS
+    */
+
+    if(
+        aprobacion?.decision ===
+        "RECHAZADO"
+    ){
+
+        return `
+            <button
+                type="button"
+                class="horas-extra-resumen rechazada editable"
+                data-accion="gestionar-horas-extra"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="${escaparHTML(
+                    aprobacion.motivo ||
+                    "Horas extra rechazadas"
+                )}"
+            >
+
+                <strong>
+                    0 min aprobados
+                </strong>
+
+                <span>
+                    Horas extra rechazadas
+                </span>
+
+                <small>
+
+                    ${
+                        formatearDuracionCorta(
+                            calculo.minutosExtraTotal
+                        )
+                    }
+
+                    trabajados, no aprobados
+
+                </small>
+
+                <em>
+                    Cambiar decisión
+                </em>
+
+            </button>
+        `;
+
+    }
+
+
+    /*
+        APROBACIÓN PARCIAL
+    */
+
+    if(
+        aprobacion
+        &&
+        Number(
+            aprobacion.minutosAprobados
+            ||
+            0
+        )
+        <
+        calculo.minutosExtraTotal
+    ){
+
+        return `
+            <button
+                type="button"
+                class="horas-extra-resumen parcial editable"
+                data-accion="gestionar-horas-extra"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="${escaparHTML(
+                    aprobacion.motivo ||
+                    "Aprobación parcial"
+                )}"
+            >
+
+                <strong>
+
+                    ${
+                        formatearDuracionCorta(
+                            aprobacion.minutosAprobados
+                            ||
+                            0
+                        )
+                    }
+
+                    de
+
+                    ${
+                        formatearDuracionCorta(
+                            calculo.minutosExtraTotal
+                        )
+                    }
+
+                </strong>
+
+                <span>
+                    Aprobación parcial
+                </span>
+
+                <small>
+
+                    ${
+                        calculo.minutosExtraTotal
+                        -
+                        (
+                            aprobacion.minutosAprobados
+                            ||
+                            0
+                        )
+                    }
+
+                    min no aprobados
+
+                </small>
+
+                <em>
+                    Cambiar decisión
+                </em>
+
+            </button>
+        `;
+
+    }
+
+
+    /*
+        APROBACIÓN COMPLETA
+    */
+
+    if(
+        aprobacion?.decision ===
+        "APROBADO"
+    ){
+
+        return `
+            <button
+                type="button"
+                class="horas-extra-resumen aprobada editable"
+                data-accion="gestionar-horas-extra"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="${escaparHTML(
+                    aprobacion.motivo ||
+                    "Horas extra aprobadas"
+                )}"
+            >
+
+                <strong>
+                    ${formatearDuracionCorta(
+                        aprobacion.minutosAprobados
+                        ||
+                        calculo.minutosExtraTotal
+                    )}
+                </strong>
+
+                <span>
+                    Horas extra aprobadas
+                </span>
+
+                <small>
+                    Tiempo reconocido oficialmente
+                </small>
+
+                <em>
+                    Cambiar decisión
+                </em>
+
+            </button>
+        `;
+
+    }
+
+
+    /*
+        PENDIENTE
+    */
+
+    return `
+        <button
+            type="button"
+            class="horas-extra-resumen pendiente editable"
+            data-accion="gestionar-horas-extra"
+            data-colaborador-id="${escaparHTML(
+                registro.colaboradorId
+            )}"
+            title="Revisar horas extra"
+        >
+
+            <strong>
+                ${formatearDuracionCorta(
+                    calculo.minutosExtraTotal
+                )}
+            </strong>
+
+            <span>
+                Pendiente de aprobación
+            </span>
+
+            ${calculo.detalles
+            .map(
+                detalle=>
+                `
+                    <small>
+                        ${escaparHTML(
+                            detalle.mensaje
+                        )}
+                    </small>
+                `
+            )
+            .join("")}
+
+            <em>
+                Revisar
+            </em>
+
+        </button>
+    `;
 
 }
 
