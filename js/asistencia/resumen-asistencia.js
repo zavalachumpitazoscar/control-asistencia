@@ -2765,19 +2765,6 @@ function obtenerAdvertenciasRefrigerioRegistro(
 
 }
 
-    return registro.advertencias
-    ?.some(
-        advertencia=>
-
-            codigosRefrigerio.includes(
-                advertencia.codigo
-            )
-
-    )
-    ||
-    false;
-
-}
 
 /*=====================================================
 CONTADORES
