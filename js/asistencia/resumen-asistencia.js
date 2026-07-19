@@ -2765,39 +2765,6 @@ function obtenerAdvertenciasRefrigerioRegistro(
 
 }
 
-
-function obtenerAdvertenciasRefrigerioRegistro(
-    registro
-){
-
-    const codigosRefrigerio = [
-
-        "REFRIGERIO_SIN_MARCACIONES",
-
-        "REFRIGERIO_INCOMPLETO",
-
-        "REFRIGERIO_CORTO",
-
-        "REFRIGERIO_EXCESIVO"
-
-    ];
-
-
-    return (
-        registro.advertencias ||
-        []
-    )
-    .filter(
-        advertencia=>
-
-            codigosRefrigerio.includes(
-                advertencia.codigo
-            )
-
-    );
-
-}
-
     return registro.advertencias
     ?.some(
         advertencia=>
