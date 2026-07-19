@@ -1050,4 +1050,308 @@
 
 </div>
 
+
+
+    <!--======================================
+    MODAL REGISTRAR MARCACIÓN MANUAL
+=======================================-->
+
+<div
+    id="modalMarcacionManualAsistencia"
+    class="modal"
+>
+
+    <div class="modal-contenido modal-marcacion-manual">
+
+        <!-- CABECERA -->
+
+        <div class="modal-header">
+
+            <div>
+
+                <h3>
+                    Registrar marcación manual
+                </h3>
+
+                <p>
+                    Agrega una marcación faltante del colaborador.
+                </p>
+
+            </div>
+
+
+            <button
+                id="cerrarMarcacionManualAsistencia"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- CONTENIDO -->
+
+        <div class="marcacion-manual-body">
+
+
+            <!-- COLABORADOR Y FECHA -->
+
+            <div class="resumen-marcacion-manual">
+
+                <div class="resumen-marcacion-icono">
+
+                    <i class="bi bi-person-clock"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Colaborador
+                    </span>
+
+                    <strong id="nombreMarcacionManualAsistencia">
+                        Colaborador
+                    </strong>
+
+                    <p id="fechaMarcacionManualAsistencia">
+                        Fecha
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- TIPO SOLICITADO -->
+
+            <div class="seccion-formulario">
+
+                <div class="titulo-seccion-formulario">
+
+                    <div class="icono-seccion">
+
+                        <i
+                            id="iconoTipoMarcacionManual"
+                            class="bi bi-box-arrow-in-right"
+                        ></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            Marcación que se agregará
+                        </h4>
+
+                        <p>
+                            El tipo también será comprobado con el horario asignado.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="tipoMarcacionManualAsistencia"
+                    class="tipo-marcacion-manual entrada"
+                >
+                    Entrada
+                </div>
+
+            </div>
+
+
+            <!-- HORARIO ASIGNADO -->
+
+            <div class="seccion-formulario">
+
+                <div class="titulo-seccion-formulario">
+
+                    <div class="icono-seccion">
+
+                        <i class="bi bi-clock-history"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            Horario asignado
+                        </h4>
+
+                        <p>
+                            La hora ingresada se validará con estas ventanas.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="horarioMarcacionManualAsistencia"
+                    class="horario-marcacion-manual"
+                >
+                    Cargando horario...
+                </div>
+
+            </div>
+
+
+            <!-- HORA -->
+
+            <div class="seccion-formulario">
+
+                <div class="campo-formulario">
+
+                    <label for="horaMarcacionManualAsistencia">
+
+                        Hora de la marcación
+
+                        <span class="campo-obligatorio">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        id="horaMarcacionManualAsistencia"
+                        type="time"
+                        step="60"
+                    >
+
+
+                    <small
+                        id="ayudaHoraMarcacionManual"
+                        class="ayuda-campo"
+                    >
+                        Selecciona la hora que realmente marcó o debió marcar el colaborador.
+                    </small>
+
+                </div>
+
+
+                <!-- RESULTADO DE LA INTERPRETACIÓN -->
+
+                <div
+                    id="resultadoInterpretacionMarcacion"
+                    class="resultado-interpretacion-marcacion"
+                    hidden
+                >
+
+                    <i class="bi bi-info-circle"></i>
+
+                    <div>
+
+                        <strong id="tituloInterpretacionMarcacion">
+                            Tipo interpretado
+                        </strong>
+
+                        <span id="detalleInterpretacionMarcacion">
+                            La hora corresponde al horario asignado.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MOTIVO -->
+
+            <div class="seccion-formulario">
+
+                <div class="campo-formulario">
+
+                    <label for="motivoMarcacionManualAsistencia">
+
+                        Motivo del registro manual
+
+                        <span class="campo-obligatorio">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <textarea
+                        id="motivoMarcacionManualAsistencia"
+                        rows="3"
+                        maxlength="300"
+                        placeholder="Ejemplo: El colaborador olvidó marcar su salida."
+                    ></textarea>
+
+
+                    <div class="contador-motivo-marcacion">
+
+                        <small>
+                            Este motivo quedará registrado para auditoría.
+                        </small>
+
+                        <small id="contadorMotivoMarcacionManual">
+                            0/300
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ADVERTENCIA -->
+
+            <div class="advertencia-marcacion-manual">
+
+                <i class="bi bi-shield-check"></i>
+
+                <p>
+                    La marcación se guardará como registro manual junto con el usuario que realizó el cambio.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- PIE -->
+
+        <div class="modal-footer">
+
+            <button
+                id="cancelarMarcacionManualAsistencia"
+                type="button"
+                class="btn-secundario"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                id="guardarMarcacionManualAsistencia"
+                type="button"
+                class="btn-principal"
+            >
+
+                <i class="bi bi-check-circle"></i>
+
+                Registrar marcación
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 </section>
