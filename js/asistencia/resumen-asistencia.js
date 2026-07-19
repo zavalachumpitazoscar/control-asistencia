@@ -173,6 +173,26 @@ export function iniciarResumenAsistencia(){
 );
 
 
+
+document.addEventListener(
+    "asistencia:horas-extra-actualizadas",
+    evento=>{
+
+        if(
+            evento.detail?.fecha ===
+            fechaResumenSeleccionada
+        ){
+
+            cargarResumenAsistencia(
+                fechaResumenSeleccionada
+            );
+
+        }
+
+    }
+);
+
+    
 cuerpoResumen.addEventListener(
     "click",
     evento=>{
@@ -712,7 +732,8 @@ async function cargarResumenAsistencia(
             sucursales,
             areas,
             subareas,
-            ajustesAsistencia
+            ajustesAsistencia,
+            aprobacionesHorasExtra
         ] = await Promise.all([
 
             consultarColeccionEmpresa(
@@ -758,8 +779,12 @@ async function cargarResumenAsistencia(
             consultarColeccionEmpresa(
                 "ajustesAsistenciaDiaria",
                 empresaId
-            )
+            ),
 
+            consultarColeccionEmpresa(
+                "aprobacionesHorasExtra",
+                empresaId
+            )
         ]);
 
 
@@ -879,7 +904,8 @@ function construirRegistrosResumen({
     asignaciones,
     horarios,
     excepciones,
-    ajustesAsistencia
+    ajustesAsistencia,
+    aprobacionesHorasExtra
 
 }){
 
@@ -960,6 +986,32 @@ function construirRegistrosResumen({
 
             String(
                 ajuste.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() !==
+            "INACTIVO"
+
+    )
+    ||
+    null;
+
+
+        const aprobacionHorasExtra =
+    aprobacionesHorasExtra.find(
+        aprobacion=>
+
+            aprobacion.colaboradorId ===
+            colaborador.id
+
+            &&
+
+            aprobacion.fecha ===
+            fecha
+
+            &&
+
+            String(
+                aprobacion.estado ||
                 "ACTIVO"
             )
             .toUpperCase() !==
@@ -1394,7 +1446,8 @@ function construirRegistroColaborador(
     colaborador,
     horarios,
     marcaciones,
-    ajusteAsistencia
+    ajusteAsistencia,
+    aprobacionHorasExtra
 ){
 
     const nombres =
@@ -1721,7 +1774,9 @@ ajusteAsistencia,
 
         minutosTrabajados:
             calculoAsistencia
-            .minutosTrabajados
+            .minutosTrabajados,
+
+        aprobacionHorasExtra,
 
     };
 
