@@ -433,6 +433,11 @@ if(!inicioRefrigerio){
 }
 
 
+/*
+    Primero buscamos un fin de refrigerio
+    declarado manualmente.
+*/
+
 let finRefrigerio =
     marcaciones.find(
         marcacion=>
@@ -446,6 +451,11 @@ let finRefrigerio =
 
     );
 
+
+/*
+    Si no existe uno manual, buscamos la siguiente
+    marcación libre después del inicio del refrigerio.
+*/
 
 if(!finRefrigerio){
 
@@ -550,34 +560,20 @@ if(automaticas.fin){
         horario.id;
 
 
-    const finRefrigerio =
-        marcaciones.find(
-            marcacion=>
+/*
+    Clasificamos la marcación encontrada.
+*/
 
-                !marcacion.tipoInterpretado
+if(finRefrigerio){
 
-                &&
-
-                marcacion.minutosJornada >
-                inicioRefrigerio.minutosJornada
-
-                &&
-
-                marcacion.minutosJornada <
-                rango.salidaDesde
-
-        );
+    finRefrigerio.tipoInterpretado =
+        "FIN_REFRIGERIO";
 
 
-    if(finRefrigerio){
+    finRefrigerio.horarioInterpretadoId =
+        horario.id;
 
-        finRefrigerio.tipoInterpretado =
-            "FIN_REFRIGERIO";
-
-        finRefrigerio.horarioInterpretadoId =
-            horario.id;
-
-    }
+}
 
     /*
     REFRIGERIO AUTOMÁTICO
