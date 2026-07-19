@@ -3407,3 +3407,54 @@ button.contador-advertencias-jornada:hover{
     }
 
 }
+
+
+.tratamiento-refrigerio-aplicado{
+
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+
+    padding:13px;
+
+    border:1px solid #bbf7d0;
+    border-radius:10px;
+
+    background:#f0fdf4;
+
+    color:#15803d;
+
+}
+
+
+.tratamiento-refrigerio-aplicado i{
+
+    margin-top:2px;
+
+    font-size:15px;
+
+}
+
+
+.tratamiento-refrigerio-aplicado div{
+
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+
+}
+
+
+.tratamiento-refrigerio-aplicado strong{
+
+    font-size:12px;
+
+}
+
+
+.tratamiento-refrigerio-aplicado span{
+
+    font-size:11px;
+    line-height:1.5;
+
+}
