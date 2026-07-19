@@ -131,10 +131,11 @@ export function clasificarMarcaciones({
 
     horariosOrdenados.forEach(horario=>{
 
-        clasificarHorario(
-            marcas,
-            horario
-        );
+clasificarHorario(
+    marcas,
+    horario,
+    fecha
+);
 
     });
 
@@ -236,7 +237,8 @@ CLASIFICAR PARA UN HORARIO
 
 function clasificarHorario(
     marcaciones,
-    horario
+    horario,
+    fecha
 ){
 
     const rango =
@@ -378,6 +380,11 @@ function clasificarHorario(
 
     }
 
+    const modoRefrigerio =
+    horario.refrigerio?.modo
+    ||
+    "MARCACION";
+
 
     const inicioRefrigerio =
         marcaciones.find(
@@ -396,11 +403,77 @@ function clasificarHorario(
         );
 
 
-    if(!inicioRefrigerio){
+if(!inicioRefrigerio){
 
-        return;
+    if(
+        modoRefrigerio ===
+        "AUTOMATICO"
+    ){
+
+        const automaticas =
+            construirRefrigerioAutomatico(
+                horario,
+                rango
+            );
+
+        if(automaticas.inicio){
+
+    automaticas.inicio.fecha =
+        fecha;
+
+    marcaciones.push(
+        automaticas.inicio
+    );
+
+}
+
+
+if(automaticas.fin){
+
+    automaticas.fin.fecha =
+        fecha;
+
+    marcaciones.push(
+        automaticas.fin
+    );
+
+}
+
+        if(automaticas.inicio){
+
+            marcaciones.push(
+                automaticas.inicio
+            );
+
+        }
+
+
+        if(automaticas.fin){
+
+            marcaciones.push(
+                automaticas.fin
+            );
+
+        }
+
+
+        marcaciones.sort(
+            (
+                primero,
+                segundo
+            )=>
+
+                primero.minutosJornada -
+                segundo.minutosJornada
+
+        );
 
     }
+
+
+    return;
+
+}
 
 
     inicioRefrigerio.tipoInterpretado =
@@ -438,6 +511,104 @@ function clasificarHorario(
             horario.id;
 
     }
+
+    /*
+    REFRIGERIO AUTOMÁTICO
+
+    Si el horario es automático y no existen
+    marcaciones reales de refrigerio, se generan
+    dos marcaciones virtuales para el resumen.
+*/
+
+if(
+    modoRefrigerio ===
+    "AUTOMATICO"
+){
+
+    const existeRefrigerioReal =
+        marcaciones.some(
+            marcacion=>
+
+                !marcacion.esAutomatica
+
+                &&
+
+                (
+                    marcacion.tipoInterpretado ===
+                    "INICIO_REFRIGERIO"
+
+                    ||
+
+                    marcacion.tipoInterpretado ===
+                    "FIN_REFRIGERIO"
+                )
+
+        );
+
+
+    if(!existeRefrigerioReal){
+
+        const automaticas =
+            construirRefrigerioAutomatico(
+                horario,
+                rango
+            );
+
+        if(automaticas.inicio){
+
+    automaticas.inicio.fecha =
+        fecha;
+
+    marcaciones.push(
+        automaticas.inicio
+    );
+
+}
+
+
+if(automaticas.fin){
+
+    automaticas.fin.fecha =
+        fecha;
+
+    marcaciones.push(
+        automaticas.fin
+    );
+
+}
+
+        if(automaticas.inicio){
+
+            marcaciones.push(
+                automaticas.inicio
+            );
+
+        }
+
+
+        if(automaticas.fin){
+
+            marcaciones.push(
+                automaticas.fin
+            );
+
+        }
+
+
+        marcaciones.sort(
+            (
+                primero,
+                segundo
+            )=>
+
+                primero.minutosJornada -
+                segundo.minutosJornada
+
+        );
+
+    }
+
+}
 
 }
 
@@ -569,6 +740,171 @@ function construirRangoHorario(
         refrigerioDesde,
 
         refrigerioHasta
+
+    };
+
+}
+
+/*=====================================================
+CONSTRUIR REFRIGERIO AUTOMÁTICO
+=====================================================*/
+
+function construirRefrigerioAutomatico(
+    horario,
+    rango
+){
+
+    const duracion =
+        Number(
+            horario.refrigerio
+            ?.duracionMinutos
+            ||
+            0
+        );
+
+
+    if(
+        duracion <= 0
+        ||
+        rango.refrigerioDesde ===
+        undefined
+        ||
+        rango.refrigerioHasta ===
+        undefined
+    ){
+
+        return {
+
+            inicio:null,
+
+            fin:null
+
+        };
+
+    }
+
+
+    /*
+        Se utiliza el punto medio del rango permitido.
+
+        Ejemplo:
+        Rango: 12:00 a 16:00
+        Punto medio: 14:00
+        Duración: 60 minutos
+        Resultado: 14:00 a 15:00
+    */
+
+    let inicioMinutos =
+        Math.floor(
+            (
+                rango.refrigerioDesde +
+                rango.refrigerioHasta
+            )
+            /
+            2
+        );
+
+
+    let finMinutos =
+        inicioMinutos +
+        duracion;
+
+
+    /*
+        Evitamos que el refrigerio automático
+        termine después del inicio permitido
+        de la salida.
+    */
+
+    if(
+        finMinutos >
+        rango.salidaDesde
+    ){
+
+        finMinutos =
+            rango.salidaDesde;
+
+
+        inicioMinutos =
+            Math.max(
+                rango.refrigerioDesde,
+                finMinutos -
+                duracion
+            );
+
+    }
+
+
+    return {
+
+        inicio:{
+
+            id:null,
+
+            tipo:
+                "INICIO_REFRIGERIO",
+
+            tipoInterpretado:
+                "INICIO_REFRIGERIO",
+
+            horarioInterpretadoId:
+                horario.id,
+
+            minutosJornada:
+                inicioMinutos,
+
+            hora:
+                convertirMinutosAHora(
+                    inicioMinutos
+                ),
+
+            origen:
+                "SISTEMA",
+
+            esAutomatica:true,
+
+            estado:
+                "VIRTUAL",
+
+            observaciones:
+                "Refrigerio calculado automáticamente por el horario."
+
+        },
+
+
+        fin:{
+
+            id:null,
+
+            tipo:
+                "FIN_REFRIGERIO",
+
+            tipoInterpretado:
+                "FIN_REFRIGERIO",
+
+            horarioInterpretadoId:
+                horario.id,
+
+            minutosJornada:
+                finMinutos,
+
+            hora:
+                convertirMinutosAHora(
+                    finMinutos
+                ),
+
+            origen:
+                "SISTEMA",
+
+            esAutomatica:true,
+
+            estado:
+                "VIRTUAL",
+
+            observaciones:
+                "Refrigerio calculado automáticamente por el horario."
+
+        }
 
     };
 
@@ -915,5 +1251,53 @@ function estaDentroDelRango(
 
         valor <= hasta
     );
+
+}
+
+
+function convertirMinutosAHora(
+    minutosTotales
+){
+
+    const minutosNormalizados =
+        (
+            minutosTotales %
+            1440
+            +
+            1440
+        )
+        %
+        1440;
+
+
+    const horas =
+        Math.floor(
+            minutosNormalizados /
+            60
+        );
+
+
+    const minutos =
+        minutosNormalizados %
+        60;
+
+
+    return `${
+        String(
+            horas
+        )
+        .padStart(
+            2,
+            "0"
+        )
+    }:${
+        String(
+            minutos
+        )
+        .padStart(
+            2,
+            "0"
+        )
+    }:00`;
 
 }
