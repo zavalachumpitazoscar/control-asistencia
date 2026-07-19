@@ -7,6 +7,7 @@ let fechaSeleccionada =
         new Date()
     );
 
+
 let fechaActualAsistencia;
 
 let btnDiaAnteriorAsistencia;
