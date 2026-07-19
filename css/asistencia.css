@@ -3899,3 +3899,99 @@ button.horas-extra-resumen:hover{
     }
 
 }
+
+
+
+/* APROBADAS */
+
+.horas-extra-resumen.aprobada{
+
+    color:#15803d;
+
+}
+
+
+.horas-extra-resumen.aprobada strong,
+.horas-extra-resumen.aprobada span{
+
+    color:#15803d;
+
+}
+
+
+button.horas-extra-resumen.aprobada:hover{
+
+    border-color:#86efac;
+
+    background:#f0fdf4;
+
+}
+
+
+/* APROBACIÓN PARCIAL */
+
+.horas-extra-resumen.parcial strong{
+
+    color:#d97706;
+
+}
+
+
+.horas-extra-resumen.parcial span{
+
+    color:#b45309;
+
+}
+
+
+button.horas-extra-resumen.parcial:hover{
+
+    border-color:#fde68a;
+
+    background:#fffbeb;
+
+}
+
+
+/* RECHAZADAS */
+
+.horas-extra-resumen.rechazada strong,
+.horas-extra-resumen.rechazada span{
+
+    color:#dc2626;
+
+}
+
+
+button.horas-extra-resumen.rechazada:hover{
+
+    border-color:#fecaca;
+
+    background:#fef2f2;
+
+}
+
+
+/* REVISIÓN REQUERIDA */
+
+.horas-extra-resumen.revision strong{
+
+    color:#7c3aed;
+
+}
+
+
+.horas-extra-resumen.revision span{
+
+    color:#d97706;
+
+}
+
+
+button.horas-extra-resumen.revision:hover{
+
+    border-color:#ddd6fe;
+
+    background:#f5f3ff;
+
+}
