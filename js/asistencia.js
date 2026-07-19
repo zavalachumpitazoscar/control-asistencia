@@ -45,15 +45,17 @@ export async function iniciarAsistencia(){
     );
 
 
-    iniciarNavegacionAsistencia();
+iniciarNavegacionAsistencia();
 
-    iniciarResumenAsistencia();
+iniciarResumenAsistencia();
 
-    iniciarEditarDiaAsistencia();
+iniciarEditarDiaAsistencia();
 
-    iniciarMarcacionManualAsistencia();
+iniciarMarcacionManualAsistencia();
 
-    iniciarFechaAsistencia();
+iniciarAjusteRefrigerioAsistencia();
 
-    iniciarImportacionMarcaciones();
+iniciarFechaAsistencia();
+
+iniciarImportacionMarcaciones();
 }
