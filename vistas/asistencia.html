@@ -216,10 +216,8 @@
 
                 <i class="bi bi-search"></i>
 
-                <input
-                    type="text"
-                    placeholder="Buscar colaborador o documento..."
-                >
+           <input type="text" id="buscarResumenAsistencia"
+           placeholder="Buscar colaborador o documento...">
 
             </div>
 
@@ -239,17 +237,13 @@
                     Sucursal
                 </label>
 
-                <select>
+<select id="filtroSucursalAsistencia">
 
-                    <option>
-                        Todas las sucursales
-                    </option>
+    <option value="">
+        Todas las sucursales
+    </option>
 
-                    <option>
-                        Sede principal
-                    </option>
-
-                </select>
+</select>
 
             </div>
 
@@ -260,21 +254,13 @@
                     Área
                 </label>
 
-                <select>
+<select id="filtroAreaAsistencia">
 
-                    <option>
-                        Todas las áreas
-                    </option>
+    <option value="">
+        Todas las áreas
+    </option>
 
-                    <option>
-                        Administración
-                    </option>
-
-                    <option>
-                        Operaciones
-                    </option>
-
-                </select>
+</select>
 
             </div>
 
@@ -285,17 +271,13 @@
                     Subárea
                 </label>
 
-                <select>
+<select id="filtroSubareaAsistencia">
 
-                    <option>
-                        Todas las subáreas
-                    </option>
+    <option value="">
+        Todas las subáreas
+    </option>
 
-                    <option>
-                        Finanzas
-                    </option>
-
-                </select>
+</select>
 
             </div>
 
@@ -306,37 +288,38 @@
                     Estado
                 </label>
 
-                <select>
+<select id="filtroEstadoAsistencia">
 
-                    <option>
-                        Todos los estados
-                    </option>
+    <option value="">
+        Todos los estados
+    </option>
 
-                    <option>
-                        Presente
-                    </option>
+    <option value="PRESENTE">
+        Presente
+    </option>
 
-                    <option>
-                        Tardanza
-                    </option>
+    <option value="TARDANZA">
+        Tardanza
+    </option>
 
-                    <option>
-                        Ausente
-                    </option>
+    <option value="AUSENTE">
+        Ausente
+    </option>
 
-                    <option>
-                        Permiso
-                    </option>
+    <option value="INCOMPLETO">
+        Incompleto
+    </option>
 
-                </select>
+    <option value="SIN_HORARIO">
+        Sin horario
+    </option>
+
+</select>
 
             </div>
 
 
-            <button
-                type="button"
-                class="btn-limpiar-filtros-asistencia"
-            >
+            <button type="button" class="btn-limpiar-filtros-asistencia" id="btnLimpiarFiltrosAsistencia">
 
                 <i class="bi bi-funnel"></i>
 
@@ -374,9 +357,9 @@
                         Programados
                     </span>
 
-                    <strong>
-                        25
-                    </strong>
+<strong id="totalProgramadosAsistencia">
+    0
+</strong>
 
                     <small>
                         Colaboradores con horario
@@ -407,9 +390,9 @@
                         Presentes
                     </span>
 
-                    <strong>
-                        18
-                    </strong>
+<strong id="totalPresentesAsistencia">
+    0
+</strong>
 
                     <small>
                         Ingresaron correctamente
@@ -440,9 +423,9 @@
                         Tardanzas
                     </span>
 
-                    <strong>
-                        3
-                    </strong>
+<strong id="totalTardanzasAsistencia">
+    0
+</strong>
 
                     <small>
                         Fuera de tolerancia
@@ -473,9 +456,9 @@
                         Ausentes
                     </span>
 
-                    <strong>
-                        2
-                    </strong>
+<strong id="totalAusentesAsistencia">
+    0
+</strong>
 
                     <small>
                         Sin marcación ni permiso
@@ -506,9 +489,9 @@
                         Con permiso
                     </span>
 
-                    <strong>
-                        1
-                    </strong>
+<strong id="totalPermisosAsistencia">
+    0
+</strong>
 
                     <small>
                         Permisos aprobados
@@ -539,9 +522,9 @@
                         Incompletos
                     </span>
 
-                    <strong>
-                        1
-                    </strong>
+<strong id="totalIncompletosAsistencia">
+    0
+</strong>
 
                     <small>
                         Falta entrada o salida
@@ -655,537 +638,20 @@
                     </thead>
 
 
-                    <tbody>
+<tbody id="cuerpoResumenAsistencia">
 
+    <tr>
 
-                        <!-- FILA PRESENTE -->
+        <td
+            colspan="8"
+            class="asistencia-tabla-vacia"
+        >
+            Cargando colaboradores...
+        </td>
 
-                        <tr>
+    </tr>
 
-                            <td>
-
-                                <div class="asistencia-colaborador">
-
-                                    <div class="asistencia-avatar">
-                                        JP
-                                    </div>
-
-                                    <div>
-
-                                        <strong>
-                                            Juan Pérez López
-                                        </strong>
-
-                                        <span>
-                                            DNI 70452743
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-horario">
-
-                                    <strong>
-                                        08:00 - 17:00
-                                    </strong>
-
-                                    <span>
-                                        Horario administrativo
-                                    </span>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-marcacion correcta">
-
-                                    <i class="bi bi-box-arrow-in-right"></i>
-
-                                    <div>
-
-                                        <strong>
-                                            07:56
-                                        </strong>
-
-                                        <span>
-                                            Programado 08:00
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-marcacion correcta">
-
-                                    <i class="bi bi-box-arrow-right"></i>
-
-                                    <div>
-
-                                        <strong>
-                                            17:08
-                                        </strong>
-
-                                        <span>
-                                            Programado 17:00
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="estado-asistencia presente">
-                                    Presente
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="valor-asistencia neutro">
-                                    0 min
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <strong class="horas-trabajadas">
-                                    8 h 12 min
-                                </strong>
-
-                            </td>
-
-
-                            <td class="columna-acciones-asistencia">
-
-                                <button
-                                    type="button"
-                                    class="btn-ver-asistencia"
-                                >
-
-                                    <i class="bi bi-eye"></i>
-
-                                    Ver
-
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-
-
-                        <!-- FILA TARDANZA -->
-
-                        <tr>
-
-                            <td>
-
-                                <div class="asistencia-colaborador">
-
-                                    <div class="asistencia-avatar">
-                                        MA
-                                    </div>
-
-                                    <div>
-
-                                        <strong>
-                                            María Álvarez Ruiz
-                                        </strong>
-
-                                        <span>
-                                            DNI 75841269
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-horario">
-
-                                    <strong>
-                                        08:00 - 17:00
-                                    </strong>
-
-                                    <span>
-                                        Horario administrativo
-                                    </span>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-marcacion tardanza">
-
-                                    <i class="bi bi-clock"></i>
-
-                                    <div>
-
-                                        <strong>
-                                            08:12
-                                        </strong>
-
-                                        <span>
-                                            Programado 08:00
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-marcacion pendiente">
-
-                                    <i class="bi bi-hourglass-split"></i>
-
-                                    <div>
-
-                                        <strong>
-                                            Sin salida
-                                        </strong>
-
-                                        <span>
-                                            Aún en jornada
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="estado-asistencia tardanza">
-                                    Tardanza
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="valor-asistencia negativo">
-                                    7 min
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <strong class="horas-trabajadas">
-                                    En curso
-                                </strong>
-
-                            </td>
-
-
-                            <td class="columna-acciones-asistencia">
-
-                                <button
-                                    type="button"
-                                    class="btn-ver-asistencia"
-                                >
-
-                                    <i class="bi bi-eye"></i>
-
-                                    Ver
-
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-
-
-                        <!-- FILA PERMISO -->
-
-                        <tr>
-
-                            <td>
-
-                                <div class="asistencia-colaborador">
-
-                                    <div class="asistencia-avatar">
-                                        CR
-                                    </div>
-
-                                    <div>
-
-                                        <strong>
-                                            Carlos Ramírez Soto
-                                        </strong>
-
-                                        <span>
-                                            DNI 70125896
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-horario">
-
-                                    <strong>
-                                        09:00 - 18:00
-                                    </strong>
-
-                                    <span>
-                                        Horario comercial
-                                    </span>
-
-                                </div>
-
-                            </td>
-
-
-                            <td colspan="2">
-
-                                <div class="asistencia-permiso-info">
-
-                                    <i class="bi bi-calendar-heart"></i>
-
-                                    <div>
-
-                                        <strong>
-                                            Licencia médica
-                                        </strong>
-
-                                        <span>
-                                            Ausencia justificada no laborada
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="estado-asistencia permiso">
-                                    Con permiso
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="valor-asistencia neutro">
-                                    —
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <strong class="horas-trabajadas">
-                                    No laborado
-                                </strong>
-
-                            </td>
-
-
-                            <td class="columna-acciones-asistencia">
-
-                                <button
-                                    type="button"
-                                    class="btn-ver-asistencia"
-                                >
-
-                                    <i class="bi bi-eye"></i>
-
-                                    Ver
-
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-
-
-                        <!-- FILA AUSENTE -->
-
-                        <tr>
-
-                            <td>
-
-                                <div class="asistencia-colaborador">
-
-                                    <div class="asistencia-avatar">
-                                        LT
-                                    </div>
-
-                                    <div>
-
-                                        <strong>
-                                            Lucía Torres Díaz
-                                        </strong>
-
-                                        <span>
-                                            DNI 74859621
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-horario">
-
-                                    <strong>
-                                        08:00 - 17:00
-                                    </strong>
-
-                                    <span>
-                                        Horario administrativo
-                                    </span>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-marcacion faltante">
-
-                                    <i class="bi bi-x-circle"></i>
-
-                                    <div>
-
-                                        <strong>
-                                            Sin entrada
-                                        </strong>
-
-                                        <span>
-                                            Sin marcación
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="asistencia-marcacion faltante">
-
-                                    <i class="bi bi-x-circle"></i>
-
-                                    <div>
-
-                                        <strong>
-                                            Sin salida
-                                        </strong>
-
-                                        <span>
-                                            Sin marcación
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="estado-asistencia ausente">
-                                    Ausente
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="valor-asistencia neutro">
-                                    —
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <strong class="horas-trabajadas">
-                                    0 h
-                                </strong>
-
-                            </td>
-
-
-                            <td class="columna-acciones-asistencia">
-
-                                <button
-                                    type="button"
-                                    class="btn-ver-asistencia"
-                                >
-
-                                    <i class="bi bi-eye"></i>
-
-                                    Ver
-
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    </tbody>
+</tbody>
 
                 </table>
 
@@ -1197,12 +663,12 @@
 
             <div class="asistencia-tabla-footer">
 
-                <span>
-                    Mostrando 1 - 4 de 25 colaboradores
-                </span>
+<span id="informacionPaginacionAsistencia">
+    Mostrando 0 - 0 de 0 colaboradores
+</span>
 
 
-                <div class="asistencia-paginacion">
+                <div class="asistencia-paginacion" hidden>
 
                     <button
                         type="button"
