@@ -1370,4 +1370,315 @@
 
 </div>
 
+
+
+<!--======================================
+    MODAL AJUSTAR REFRIGERIO
+=======================================-->
+
+<div
+    id="modalAjusteRefrigerioAsistencia"
+    class="modal"
+>
+
+    <div class="modal-contenido modal-ajuste-refrigerio">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h3>
+                    Revisar refrigerio
+                </h3>
+
+                <p>
+                    Define cómo debe considerarse en el cálculo diario.
+                </p>
+
+            </div>
+
+
+            <button
+                id="cerrarAjusteRefrigerioAsistencia"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="ajuste-refrigerio-body">
+
+            <!-- COLABORADOR -->
+
+            <div class="resumen-marcacion-manual">
+
+                <div class="resumen-marcacion-icono">
+
+                    <i class="bi bi-cup-hot"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Colaborador
+                    </span>
+
+                    <strong id="nombreAjusteRefrigerio">
+                        Colaborador
+                    </strong>
+
+                    <p id="fechaAjusteRefrigerio">
+                        Fecha
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ADVERTENCIAS -->
+
+            <div
+                id="listaAdvertenciasRefrigerio"
+                class="lista-advertencias-refrigerio"
+            ></div>
+
+
+            <!-- SIN MARCACIONES -->
+
+            <div
+                id="seccionRefrigerioSinMarcaciones"
+                class="seccion-formulario"
+                hidden
+            >
+
+                <div class="titulo-seccion-formulario">
+
+                    <div class="icono-seccion">
+
+                        <i class="bi bi-question-circle"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            Refrigerio sin marcaciones
+                        </h4>
+
+                        <p>
+                            Indica qué ocurrió durante ese periodo.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="opciones-ajuste-refrigerio">
+
+                    <label class="opcion-ajuste-refrigerio">
+
+                        <input
+                            type="radio"
+                            name="tratamientoRefrigerio"
+                            value="LABORADO"
+                            checked
+                        >
+
+                        <span>
+
+                            <strong>
+                                Considerar trabajado
+                            </strong>
+
+                            <small>
+                                No descuenta el refrigerio y tampoco genera horas extra.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+
+                    <label class="opcion-ajuste-refrigerio">
+
+                        <input
+                            type="radio"
+                            name="tratamientoRefrigerio"
+                            value="DESCONTAR_PROGRAMADO"
+                        >
+
+                        <span>
+
+                            <strong>
+                                Descontar refrigerio programado
+                            </strong>
+
+                            <small>
+                                Descuenta la duración configurada en el horario.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- REFRIGERIO CORTO -->
+
+            <div
+                id="seccionRefrigerioCorto"
+                class="seccion-formulario"
+                hidden
+            >
+
+                <div class="titulo-seccion-formulario">
+
+                    <div class="icono-seccion">
+
+                        <i class="bi bi-stopwatch"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            Refrigerio menor al programado
+                        </h4>
+
+                        <p>
+                            Define cómo tratar el tiempo que no utilizó.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="opciones-ajuste-refrigerio">
+
+                    <label class="opcion-ajuste-refrigerio">
+
+                        <input
+                            type="radio"
+                            name="tratamientoRefrigerioCorto"
+                            value="NO_CONSIDERAR_EXTRA"
+                            checked
+                        >
+
+                        <span>
+
+                            <strong>
+                                No considerar tiempo adicional
+                            </strong>
+
+                            <small>
+                                Se descuenta todo el refrigerio programado.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+
+                    <label class="opcion-ajuste-refrigerio">
+
+                        <input
+                            type="radio"
+                            name="tratamientoRefrigerioCorto"
+                            value="CONSIDERAR_REAL"
+                        >
+
+                        <span>
+
+                            <strong>
+                                Considerar tiempo realmente trabajado
+                            </strong>
+
+                            <small>
+                                Solo descuenta el refrigerio que realmente tomó.
+                            </small>
+
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- MOTIVO -->
+
+            <div class="seccion-formulario">
+
+                <div class="campo-formulario">
+
+                    <label for="motivoAjusteRefrigerio">
+
+                        Motivo de la decisión
+
+                        <span class="campo-obligatorio">
+                            *
+                        </span>
+
+                    </label>
+
+
+                    <textarea
+                        id="motivoAjusteRefrigerio"
+                        rows="3"
+                        maxlength="300"
+                        placeholder="Explica brevemente por qué se aplica esta decisión."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <button
+                id="cancelarAjusteRefrigerioAsistencia"
+                type="button"
+                class="btn-secundario"
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                id="guardarAjusteRefrigerioAsistencia"
+                type="button"
+                class="btn-principal"
+            >
+
+                <i class="bi bi-check-circle"></i>
+
+                Aplicar decisión
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+    
 </section>
