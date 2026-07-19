@@ -2808,13 +2808,13 @@ function crearTardanzaHTML(
                     0 min
                 </strong>
 
-                <span>
-                    Llegó ${llegadaPosterior} min después
-                </span>
+<span>
+    Llegada: +${llegadaPosterior} min
+</span>
 
-                <small>
-                    Dentro de tolerancia
-                </small>
+<small>
+    Dentro del margen
+</small>
 
             </div>
         `;
@@ -2828,23 +2828,19 @@ function crearTardanzaHTML(
 
     if(tardanza > 0){
 
-        return `
-            <div class="detalle-tardanza tardanza-real">
+return `
+    <div class="detalle-tardanza tardanza-real">
 
-                <strong>
-                    ${tardanza} min
-                </strong>
+        <strong>
+            ${tardanza} min
+        </strong>
 
-                <span>
-                    Llegó ${llegadaPosterior} min después
-                </span>
+        <span>
+            Llegada: +${llegadaPosterior} min
+        </span>
 
-                <small>
-                    Tolerancia: ${tolerancia} min
-                </small>
-
-            </div>
-        `;
+    </div>
+`;
 
     }
 
