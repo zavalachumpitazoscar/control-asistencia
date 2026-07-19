@@ -1458,6 +1458,21 @@ const calculoAsistencia =
     });
 
 
+    const calculoHorasExtra =
+    calcularHorasExtraAsistencia({
+
+        horario:
+            horarioPrincipal,
+
+        clasificacion,
+
+        calculoAsistencia,
+
+        tratamientoRefrigerioCorto
+
+    });
+
+
     let estado =
         "SIN_HORARIO";
 
@@ -1606,9 +1621,15 @@ const calculoAsistencia =
             Resultado centralizado del cálculo.
         */
 
-        calculoAsistencia,
+calculoAsistencia,
 
-        ajusteAsistencia,
+calculoHorasExtra,
+
+minutosExtra:
+    calculoHorasExtra
+    .minutosExtraTotal,
+
+ajusteAsistencia,
 
         tratamientoRefrigerio,
 
