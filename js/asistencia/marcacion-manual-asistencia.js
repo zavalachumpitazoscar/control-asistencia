@@ -2,6 +2,8 @@ import {
     doc,
     getDoc,
     setDoc,
+    updateDoc,
+    arrayUnion,
     serverTimestamp,
     Timestamp
 }
@@ -59,6 +61,9 @@ let empresaId = null;
 
 let controlEventos = null;
 
+let modoEdicion = false;
+
+let marcacionEditando = null;
 
 /*=====================================================
 INICIAR MARCACIÓN MANUAL
@@ -145,6 +150,18 @@ export function iniciarMarcacionManualAsistencia(){
         opcionesEvento
     );
 
+    document.addEventListener(
+    "asistencia:editar-marcacion-existente",
+    evento=>{
+
+        abrirModalMarcacionManual(
+            evento.detail
+        );
+
+    },
+    opcionesEvento
+);
+    
 
     btnCerrar?.addEventListener(
         "click",
@@ -248,6 +265,16 @@ configuracionRefrigerio =
     null;
 
 
+marcacionEditando =
+    datos?.marcacion ||
+    null;
+
+
+modoEdicion =
+    Boolean(
+        marcacionEditando?.id
+    );
+    
     if(
         !colaboradorId
         ||
@@ -303,6 +330,17 @@ configuracionRefrigerio =
 if(inputHora){
 
     inputHora.value =
+        modoEdicion
+        ?
+        String(
+            marcacionEditando?.hora ||
+            ""
+        )
+        .slice(
+            0,
+            5
+        )
+        :
         obtenerHoraSugerida();
 
 }
@@ -548,6 +586,57 @@ MOSTRAR INFORMACIÓN
 =====================================================*/
 
 function mostrarDatosModal(){
+
+    asignarTexto(
+    "tituloModalMarcacionManual",
+
+    modoEdicion
+    ?
+    "Editar marcación"
+    :
+    "Registrar marcación manual"
+);
+
+
+asignarTexto(
+    "subtituloModalMarcacionManual",
+
+    modoEdicion
+    ?
+    "Modifica la hora registrada conservando el historial del cambio."
+    :
+    "Agrega una marcación faltante del colaborador."
+);
+
+
+if(btnGuardar){
+
+    btnGuardar.innerHTML =
+        modoEdicion
+        ?
+        `
+            <i class="bi bi-pencil-square"></i>
+            Guardar modificación
+        `
+        :
+        `
+            <i class="bi bi-check-circle"></i>
+            Registrar marcación
+        `;
+
+}
+
+
+if(inputMotivo){
+
+    inputMotivo.placeholder =
+        modoEdicion
+        ?
+        "Explica por qué se está modificando esta marcación."
+        :
+        "Ejemplo: El colaborador olvidó marcar su salida.";
+
+}
 
     asignarTexto(
         "nombreMarcacionManualAsistencia",
@@ -1221,20 +1310,28 @@ async function guardarMarcacionManual(){
     }
 
 
-    const marcacionId =
-        construirIdMarcacion(
-            empresaId,
-            colaboradorId,
-            fechaHora
-        );
+const marcacionIdNuevo =
+    construirIdMarcacion(
+        empresaId,
+        colaboradorId,
+        fechaHora
+    );
 
 
-    const referencia =
-        doc(
-            db,
-            "marcaciones",
-            marcacionId
-        );
+const marcacionIdOriginal =
+    modoEdicion
+    ?
+    marcacionEditando.id
+    :
+    marcacionIdNuevo;
+
+
+const referencia =
+    doc(
+        db,
+        "marcaciones",
+        marcacionIdOriginal
+    );
 
 
     try{
@@ -1249,19 +1346,41 @@ async function guardarMarcacionManual(){
         `;
 
 
-        const existente =
-            await getDoc(
-                referencia
-            );
+/*
+    Si se modifica la hora, comprobamos que no exista
+    otra marcación en la nueva fecha y hora.
+*/
+
+if(
+    !modoEdicion
+    ||
+    marcacionIdNuevo !==
+    marcacionIdOriginal
+){
+
+    const referenciaNueva =
+        doc(
+            db,
+            "marcaciones",
+            marcacionIdNuevo
+        );
 
 
-        if(existente.exists()){
+    const existente =
+        await getDoc(
+            referenciaNueva
+        );
 
-            throw new Error(
-                "Ya existe una marcación para el colaborador en esa fecha y hora."
-            );
 
-        }
+    if(existente.exists()){
+
+        throw new Error(
+            "Ya existe otra marcación para el colaborador en esa fecha y hora."
+        );
+
+    }
+
+}
 
 
         const colaboradorDocumentoFirestore =
@@ -1282,7 +1401,201 @@ async function guardarMarcacionManual(){
             {};
 
 
-        await setDoc(
+        if(modoEdicion){
+
+    await updateDoc(
+        referencia,
+        {
+
+            fecha:
+                fechaSeleccionada,
+
+            fechaHora:
+                Timestamp.fromDate(
+                    fechaHora
+                ),
+
+            fechaHoraISO:
+                convertirFechaHoraAISO(
+                    fechaHora
+                ),
+
+            hora:
+                `${hora}:00`,
+
+            tipo:
+                tipoSolicitado,
+
+            tipoInterpretado:
+                validacion.tipoInterpretado,
+
+            horarioIdInterpretado:
+                validacion.horarioId
+                ||
+                horarioSeleccionado?.id
+                ||
+                null,
+
+            /*
+                Información de la última edición.
+            */
+
+            editada:true,
+
+            horaAnterior:
+                marcacionEditando.hora
+                ||
+                null,
+
+            fechaHoraAnterior:
+                marcacionEditando.fechaHora
+                ||
+                null,
+
+            motivoUltimaEdicion:
+                motivo,
+
+            editadaPor:
+                usuario.uid,
+
+            fechaEdicion:
+                serverTimestamp(),
+
+            /*
+                Historial permanente.
+            */
+
+            historialEdiciones:
+                arrayUnion({
+
+                    horaAnterior:
+                        marcacionEditando.hora
+                        ||
+                        null,
+
+                    horaNueva:
+                        `${hora}:00`,
+
+                    tipoAnterior:
+                        marcacionEditando.tipo
+                        ||
+                        "SIN_CLASIFICAR",
+
+                    tipoNuevo:
+                        tipoSolicitado,
+
+                    motivo,
+
+                    usuarioId:
+                        usuario.uid,
+
+                    fecha:
+                        Timestamp.now()
+
+                })
+
+        }
+    );
+
+}
+else{
+
+    await setDoc(
+        referencia,
+        {
+
+            empresaId,
+
+            colaboradorId,
+
+            colaboradorNombre,
+
+            colaboradorDocumento,
+
+            fecha:
+                fechaSeleccionada,
+
+            fechaHora:
+                Timestamp.fromDate(
+                    fechaHora
+                ),
+
+            fechaHoraISO:
+                convertirFechaHoraAISO(
+                    fechaHora
+                ),
+
+            hora:
+                `${hora}:00`,
+
+            tipo:
+                tipoSolicitado,
+
+            tipoOriginal:
+                "MANUAL",
+
+            tipoInterpretado:
+                validacion.tipoInterpretado,
+
+            horarioIdInterpretado:
+                validacion.horarioId
+                ||
+                horarioSeleccionado?.id
+                ||
+                null,
+
+            origen:
+                "MANUAL",
+
+            sucursalId:
+                datosColaborador.organizacion
+                ?.sucursalId
+                ||
+                datosColaborador.sucursalId
+                ||
+                null,
+
+            areaId:
+                datosColaborador.organizacion
+                ?.areaId
+                ||
+                datosColaborador.areaId
+                ||
+                null,
+
+            subareaId:
+                datosColaborador.organizacion
+                ?.subareaId
+                ||
+                datosColaborador.subareaId
+                ||
+                null,
+
+            estado:
+                "VALIDA",
+
+            observaciones:
+                motivo,
+
+            motivoRegistroManual:
+                motivo,
+
+            registradaManualmentePor:
+                usuario.uid,
+
+            fechaRegistroManual:
+                serverTimestamp(),
+
+            creadoPor:
+                usuario.uid,
+
+            fechaCreacion:
+                serverTimestamp()
+
+        }
+    );
+
+}
             referencia,
             {
 
@@ -1574,6 +1887,44 @@ finRefrigerioActual =
 
 configuracionRefrigerio =
     null;
+
+modoEdicion =
+    false;
+
+marcacionEditando =
+    null;
+
+const fueEdicion =
+    modoEdicion;
+
+    Swal.fire({
+
+    icon:"success",
+
+    title:
+        fueEdicion
+        ?
+        "Marcación modificada"
+        :
+        "Marcación registrada",
+
+    text:
+        fueEdicion
+        ?
+        `La marcación fue modificada correctamente a las ${hora}.`
+        :
+        `${
+            obtenerTextoTipo(
+                datosActualizacion.tipo
+            )
+        } registrada correctamente a las ${hora}.`,
+
+    confirmButtonColor:
+        "#2563eb"
+
+});
+
+    
 
 }
 
