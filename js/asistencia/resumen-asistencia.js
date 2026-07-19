@@ -1906,6 +1906,14 @@ function crearFilaResumen(
 
 </td>
 
+<!-- HORAS EXTRA -->
+
+<td>
+
+    ${crearHorasExtraHTML(registro)}
+
+</td>
+
 
             <td class="columna-acciones-asistencia">
 
@@ -1928,6 +1936,95 @@ function crearFilaResumen(
 
 }
 
+
+
+/*=====================================================
+HORAS EXTRA
+=====================================================*/
+
+function crearHorasExtraHTML(
+    registro
+){
+
+    const calculo =
+        registro.calculoHorasExtra;
+
+
+    if(
+        !calculo
+        ||
+        !calculo.calculable
+    ){
+
+        return `
+            <div class="horas-extra-resumen sin-dato">
+
+                <strong>
+                    —
+                </strong>
+
+                <span>
+                    Sin cálculo
+                </span>
+
+            </div>
+        `;
+
+    }
+
+
+    if(
+        calculo.minutosExtraTotal <=
+        0
+    ){
+
+        return `
+            <div class="horas-extra-resumen sin-extra">
+
+                <strong>
+                    0 min
+                </strong>
+
+                <span>
+                    Sin horas extra
+                </span>
+
+            </div>
+        `;
+
+    }
+
+
+    return `
+        <div class="horas-extra-resumen pendiente">
+
+            <strong>
+                ${formatearDuracionCorta(
+                    calculo.minutosExtraTotal
+                )}
+            </strong>
+
+            <span>
+                Pendiente de aprobación
+            </span>
+
+            ${calculo.detalles
+            .map(
+                detalle=>
+                `
+                    <small>
+                        ${escaparHTML(
+                            detalle.mensaje
+                        )}
+                    </small>
+                `
+            )
+            .join("")}
+
+        </div>
+    `;
+
+}
 
 /*=====================================================
 HTML HORARIO
@@ -3911,7 +4008,7 @@ function mostrarMensajeTabla(
         <tr>
 
             <td
-                colspan="12"
+                colspan="13"
                 class="asistencia-tabla-vacia"
             >
                 ${escaparHTML(mensaje)}
