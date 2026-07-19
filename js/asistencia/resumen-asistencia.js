@@ -139,6 +139,20 @@ export function iniciarResumenAsistencia(){
         }
     );
 
+    document.addEventListener(
+    "asistencia:horario-dia-actualizado",
+    ()=>{
+
+        if(fechaResumenSeleccionada){
+
+            cargarResumenAsistencia(
+                fechaResumenSeleccionada
+            );
+
+        }
+
+    }
+);
 
     document.addEventListener(
         "asistencia:marcaciones-importadas",
