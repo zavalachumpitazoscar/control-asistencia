@@ -425,6 +425,74 @@ cuerpoResumen.addEventListener(
     }
 );
 
+cuerpoResumen.addEventListener(
+    "click",
+    evento=>{
+
+        const boton =
+            evento.target.closest(
+                '[data-accion="gestionar-horas-extra"]'
+            );
+
+
+        if(!boton){
+
+            return;
+
+        }
+
+
+        const colaboradorId =
+            boton.dataset.colaboradorId;
+
+
+        const registro =
+            registrosResumen.find(
+                item=>
+
+                    item.colaboradorId ===
+                    colaboradorId
+
+            );
+
+
+        if(!registro){
+
+            return;
+
+        }
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "asistencia:gestionar-horas-extra",
+                {
+                    detail:{
+
+                        colaboradorId,
+
+                        colaboradorNombre:
+                            registro.nombre,
+
+                        fecha:
+                            fechaResumenSeleccionada,
+
+                        calculoHorasExtra:
+                            registro.calculoHorasExtra,
+
+                        aprobacionHorasExtra:
+                            registro.aprobacionHorasExtra
+                            ||
+                            null
+
+                    }
+                }
+            )
+        );
+
+    }
+);
+
     
 
     cuerpoResumen.addEventListener(
@@ -1995,34 +2063,46 @@ function crearHorasExtraHTML(
     }
 
 
-    return `
-        <div class="horas-extra-resumen pendiente">
+return `
+    <button
+        type="button"
+        class="horas-extra-resumen pendiente editable"
+        data-accion="gestionar-horas-extra"
+        data-colaborador-id="${escaparHTML(
+            registro.colaboradorId
+        )}"
+        title="Revisar horas extra"
+    >
 
-            <strong>
-                ${formatearDuracionCorta(
-                    calculo.minutosExtraTotal
-                )}
-            </strong>
+        <strong>
+            ${formatearDuracionCorta(
+                calculo.minutosExtraTotal
+            )}
+        </strong>
 
-            <span>
-                Pendiente de aprobación
-            </span>
+        <span>
+            Pendiente de aprobación
+        </span>
 
-            ${calculo.detalles
-            .map(
-                detalle=>
-                `
-                    <small>
-                        ${escaparHTML(
-                            detalle.mensaje
-                        )}
-                    </small>
-                `
-            )
-            .join("")}
+        ${calculo.detalles
+        .map(
+            detalle=>
+            `
+                <small>
+                    ${escaparHTML(
+                        detalle.mensaje
+                    )}
+                </small>
+            `
+        )
+        .join("")}
 
-        </div>
-    `;
+        <em>
+            Revisar
+        </em>
+
+    </button>
+`;
 
 }
 
