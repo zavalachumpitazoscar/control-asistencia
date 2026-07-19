@@ -155,6 +155,46 @@ export function iniciarResumenAsistencia(){
         }
     );
 
+    cuerpoResumen.addEventListener(
+    "click",
+    evento=>{
+
+        const boton =
+            evento.target.closest(
+                '[data-accion="editar-horario-dia"]'
+            );
+
+
+        if(!boton){
+
+            return;
+
+        }
+
+
+        const colaboradorId =
+            boton.dataset.colaboradorId;
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "asistencia:editar-horario-dia",
+                {
+                    detail:{
+
+                        colaboradorId,
+
+                        fecha:
+                            fechaResumenSeleccionada
+
+                    }
+                }
+            )
+        );
+
+    }
+);
+
 }
 
 
@@ -1345,40 +1385,75 @@ function crearHorarioHTML(
     if(!horario){
 
         return `
-            <div class="asistencia-horario">
+            <button
+                type="button"
+                class="btn-asignar-horario-resumen"
+                data-accion="editar-horario-dia"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="Asignar horario para esta fecha"
+            >
 
-                <strong>
-                    Sin horario
-                </strong>
+                <i class="bi bi-calendar-plus"></i>
 
                 <span>
-                    No programado
+
+                    <strong>
+                        Sin horario
+                    </strong>
+
+                    <small>
+                        Agregar horario
+                    </small>
+
                 </span>
 
-            </div>
+            </button>
         `;
 
     }
 
 
     return `
-        <div class="asistencia-horario">
+        <button
+            type="button"
+            class="btn-horario-resumen"
+            data-accion="editar-horario-dia"
+            data-colaborador-id="${escaparHTML(
+                registro.colaboradorId
+            )}"
+            title="Editar horario de esta fecha"
+        >
 
-            <strong>
-
-                ${formatearHora(horario.entrada?.programada)}
-
-                -
-
-                ${formatearHora(horario.salida?.programada)}
-
-            </strong>
+            <i class="bi bi-clock"></i>
 
             <span>
-                ${escaparHTML(horario.nombre || "Horario")}
+
+                <strong>
+
+                    ${formatearHora(
+                        horario.entrada?.programada
+                    )}
+
+                    -
+
+                    ${formatearHora(
+                        horario.salida?.programada
+                    )}
+
+                </strong>
+
+                <small>
+                    ${escaparHTML(
+                        horario.nombre ||
+                        "Horario"
+                    )}
+                </small>
+
             </span>
 
-        </div>
+        </button>
     `;
 
 }
