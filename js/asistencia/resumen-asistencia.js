@@ -24,6 +24,13 @@ import {
 }
 from "./calcular-jornada-asistencia.js";
 
+import {
+    calcularHorasExtraAsistencia
+}
+from "./calcular-horas-extra-asistencia.js";
+
+
+
 /*=====================================================
 VARIABLES
 =====================================================*/
