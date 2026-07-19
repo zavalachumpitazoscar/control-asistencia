@@ -3119,3 +3119,128 @@ button.asistencia-marcacion.editable:hover
     opacity:1;
 
 }
+
+
+/*======================================
+TOLERANCIA
+======================================*/
+
+.tolerancia-asistencia{
+
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+
+    padding:6px 8px;
+
+    border-radius:8px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:11px;
+    font-weight:700;
+
+    white-space:nowrap;
+
+}
+
+
+.tolerancia-asistencia.sin-tolerancia{
+
+    background:#f8fafc;
+
+    color:#64748b;
+
+}
+
+
+.tolerancia-asistencia.sin-dato{
+
+    background:transparent;
+
+    color:#94a3b8;
+
+}
+
+
+/*======================================
+JORNADA
+======================================*/
+
+.jornada-asistencia{
+
+    position:relative;
+
+    min-width:120px;
+
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+
+}
+
+
+.jornada-asistencia strong{
+
+    color:#0f172a;
+
+    font-size:12px;
+    white-space:nowrap;
+
+}
+
+
+.jornada-asistencia span{
+
+    font-size:10px;
+    white-space:nowrap;
+
+}
+
+
+.jornada-asistencia.completa span{
+
+    color:#16a34a;
+
+}
+
+
+.jornada-asistencia.incompleta span{
+
+    color:#dc2626;
+
+}
+
+
+.jornada-asistencia.sin-horario span{
+
+    color:#94a3b8;
+
+}
+
+
+.contador-advertencias-jornada{
+
+    width:max-content;
+
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+
+    margin-top:3px;
+
+    padding:3px 6px;
+
+    border-radius:6px;
+
+    background:#fffbeb;
+
+    color:#d97706;
+
+    font-size:9px;
+
+    cursor:help;
+
+}
