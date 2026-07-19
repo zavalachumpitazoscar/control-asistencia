@@ -306,6 +306,14 @@ export function iniciarFormularioHorarios({
             60
         );
 
+        asignarValor(
+            "modoRefrigerioHorario",
+
+             horario.refrigerio?.modo
+             ||
+             "MARCACION"
+        );
+
 
         actualizarMensajeAmanecida();
 
@@ -711,6 +719,17 @@ export function iniciarFormularioHorarios({
                 habilitado:
                 refrigerioHabilitado.checked,
 
+                modo:
+                refrigerioHabilitado.checked
+                ?
+                obtenerValor(
+                "modoRefrigerioHorario"
+                )
+                ||
+                "MARCACION"
+                :
+                null,
+
                 permitirInicioDesde:
                 obtenerValor(
                     "inicioRefrigerioHorario"
@@ -913,6 +932,28 @@ export function iniciarFormularioHorarios({
 
         if(datos.refrigerio.habilitado){
 
+            if(
+    ![
+        "MARCACION",
+        "AUTOMATICO"
+    ]
+    .includes(
+        datos.refrigerio.modo
+    )
+){
+
+    await mostrarAdvertencia(
+
+        "Control de refrigerio incompleto",
+
+        "Selecciona si el refrigerio será automático o requerirá marcaciones."
+
+    );
+
+    return false;
+
+}
+
             const refrigerio =
             datos.refrigerio;
 
@@ -1062,33 +1103,42 @@ export function iniciarFormularioHorarios({
 
             },
 
-            refrigerio:{
+refrigerio:{
 
-                habilitado:
-                datos.refrigerio.habilitado,
+    habilitado:
+        datos.refrigerio.habilitado,
 
-                permitirInicioDesde:
-                datos.refrigerio.habilitado
-                ?
-                datos.refrigerio.permitirInicioDesde
-                :
-                null,
+    modo:
+        datos.refrigerio.habilitado
+        ?
+        datos.refrigerio.modo
+        ||
+        "MARCACION"
+        :
+        null,
 
-                permitirInicioHasta:
-                datos.refrigerio.habilitado
-                ?
-                datos.refrigerio.permitirInicioHasta
-                :
-                null,
+    permitirInicioDesde:
+        datos.refrigerio.habilitado
+        ?
+        datos.refrigerio.permitirInicioDesde
+        :
+        null,
 
-                duracionMinutos:
-                datos.refrigerio.habilitado
-                ?
-                datos.refrigerio.duracionMinutos
-                :
-                null
+    permitirInicioHasta:
+        datos.refrigerio.habilitado
+        ?
+        datos.refrigerio.permitirInicioHasta
+        :
+        null,
 
-            }
+    duracionMinutos:
+        datos.refrigerio.habilitado
+        ?
+        datos.refrigerio.duracionMinutos
+        :
+        null
+
+}
 
         };
 
