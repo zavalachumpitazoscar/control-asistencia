@@ -3,7 +3,6 @@ import { iniciarHorarios } from "./empleados/horarios.js";
 import { iniciarPermisos } from "./empleados/permisos.js";
 import { iniciarFeriados } from "./empleados/feriados.js";
 
-
 export function iniciarEmpleados(){
 
     const botones =
