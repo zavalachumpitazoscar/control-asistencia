@@ -3058,3 +3058,64 @@ button.marcacion-refrigerio{
     color:#b45309;
 
 }
+
+
+/*======================================
+MARCACIONES EDITABLES
+======================================*/
+
+button.asistencia-marcacion{
+
+    width:100%;
+
+    border:1px solid transparent;
+
+    text-align:left;
+
+    cursor:pointer;
+
+    font-family:inherit;
+
+    transition:
+        border-color .2s,
+        background .2s,
+        transform .2s;
+
+}
+
+
+button.asistencia-marcacion.editable:hover{
+
+    border-color:#93c5fd;
+
+    background:#eff6ff;
+
+    transform:translateY(-1px);
+
+}
+
+
+.marcacion-editar-ayuda{
+
+    display:block;
+
+    margin-top:2px;
+
+    color:#2563eb !important;
+
+    font-size:9px !important;
+    font-weight:600;
+
+    opacity:0;
+
+    transition:.2s;
+
+}
+
+
+button.asistencia-marcacion.editable:hover
+.marcacion-editar-ayuda{
+
+    opacity:1;
+
+}
