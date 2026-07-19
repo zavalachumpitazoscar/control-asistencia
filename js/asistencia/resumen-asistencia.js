@@ -160,6 +160,153 @@ export function iniciarResumenAsistencia(){
     }
 );
 
+
+cuerpoResumen.addEventListener(
+    "click",
+    evento=>{
+
+        const boton =
+            evento.target.closest(
+                '[data-accion="editar-marcacion-existente"]'
+            );
+
+
+        if(!boton){
+
+            return;
+
+        }
+
+
+        const colaboradorId =
+            boton.dataset.colaboradorId;
+
+
+        const marcacionId =
+            boton.dataset.marcacionId;
+
+
+        const tipo =
+            boton.dataset.tipoMarcacion;
+
+
+        const registro =
+            registrosResumen.find(
+                item=>
+
+                    item.colaboradorId ===
+                    colaboradorId
+
+            );
+
+
+        const marcacion =
+            registro
+            ?.clasificacion
+            ?.todas
+            ?.find(
+                item=>
+
+                    item.id ===
+                    marcacionId
+
+            );
+
+
+        if(
+            !registro
+            ||
+            !marcacion
+            ||
+            !marcacionId
+        ){
+
+            Swal.fire({
+
+                icon:"warning",
+
+                title:"Marcación no editable",
+
+                text:
+                    "No se encontró el registro original de esta marcación.",
+
+                confirmButtonColor:
+                    "#2563eb"
+
+            });
+
+            return;
+
+        }
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "asistencia:editar-marcacion-existente",
+                {
+                    detail:{
+
+                        colaboradorId,
+
+                        colaboradorNombre:
+                            registro.nombre,
+
+                        fecha:
+                            fechaResumenSeleccionada,
+
+                        tipo,
+
+                        marcacion,
+
+                        horarioId:
+                            registro.horarioPrincipal
+                            ?.id
+                            ||
+                            null,
+
+                        horario:
+                            registro.horarioPrincipal
+                            ||
+                            null,
+
+                        entradaActual:
+                            registro.entrada
+                            ||
+                            null,
+
+                        salidaActual:
+                            registro.salida
+                            ||
+                            null,
+
+                        inicioRefrigerioActual:
+                            registro.clasificacion
+                            ?.inicioRefrigerio
+                            ||
+                            null,
+
+                        finRefrigerioActual:
+                            registro.clasificacion
+                            ?.finRefrigerio
+                            ||
+                            null,
+
+                        refrigerio:
+                            registro.horarioPrincipal
+                            ?.refrigerio
+                            ||
+                            null
+
+                    }
+                }
+            )
+        );
+
+    }
+);
+
+    
+
     cuerpoResumen.addEventListener(
     "click",
     evento=>{
@@ -1686,34 +1833,59 @@ function crearEntradaHTML(
 
     if(!registro.entrada){
 
-        return `
-            <button
-                type="button"
-                class="btn-marcacion-faltante entrada"
-                data-accion="agregar-marcacion-manual"
-                data-tipo-marcacion="ENTRADA"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
-                title="Registrar entrada manualmente"
-            >
+return `
+    <button
+        type="button"
+        class="asistencia-marcacion ${clase} editable"
+        data-accion="editar-marcacion-existente"
+        data-marcacion-id="${escaparHTML(
+            registro.entrada.id ||
+            ""
+        )}"
+        data-tipo-marcacion="ENTRADA"
+        data-colaborador-id="${escaparHTML(
+            registro.colaboradorId
+        )}"
+        title="Editar entrada"
+    >
 
-                <i class="bi bi-plus-circle"></i>
+        <i class="bi bi-box-arrow-in-right"></i>
 
-                <span>
+        <div>
 
-                    <strong>
-                        Sin entrada
-                    </strong>
+            <strong>
+                ${formatearHora(
+                    obtenerHoraMarcacion(
+                        registro.entrada
+                    )
+                )}
+            </strong>
 
-                    <small>
-                        Agregar entrada
-                    </small>
+            <span>
 
-                </span>
+                ${
+                    registro.horarioPrincipal
+                    ?
+                    `Programado ${
+                        formatearHora(
+                            registro.horarioPrincipal
+                            .entrada?.programada
+                        )
+                    }`
+                    :
+                    "Sin horario programado"
+                }
 
-            </button>
-        `;
+            </span>
+
+            <small class="marcacion-editar-ayuda">
+                Editar entrada
+            </small>
+
+        </div>
+
+    </button>
+`;
 
     }
 
@@ -2037,33 +2209,58 @@ function crearSalidaHTML(
     if(!registro.salida){
 
         return `
-            <button
-                type="button"
-                class="btn-marcacion-faltante salida"
-                data-accion="agregar-marcacion-manual"
-                data-tipo-marcacion="SALIDA"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
-                title="Registrar salida manualmente"
-            >
+    <button
+        type="button"
+        class="asistencia-marcacion correcta editable"
+        data-accion="editar-marcacion-existente"
+        data-marcacion-id="${escaparHTML(
+            registro.salida.id ||
+            ""
+        )}"
+        data-tipo-marcacion="SALIDA"
+        data-colaborador-id="${escaparHTML(
+            registro.colaboradorId
+        )}"
+        title="Editar salida"
+    >
 
-                <i class="bi bi-plus-circle"></i>
+        <i class="bi bi-box-arrow-right"></i>
 
-                <span>
+        <div>
 
-                    <strong>
-                        Sin salida
-                    </strong>
+            <strong>
+                ${formatearHora(
+                    obtenerHoraMarcacion(
+                        registro.salida
+                    )
+                )}
+            </strong>
 
-                    <small>
-                        Agregar salida
-                    </small>
+            <span>
 
-                </span>
+                ${
+                    registro.horarioPrincipal
+                    ?
+                    `Programado ${
+                        formatearHora(
+                            registro.horarioPrincipal
+                            .salida?.programada
+                        )
+                    }`
+                    :
+                    "Sin horario programado"
+                }
 
-            </button>
-        `;
+            </span>
+
+            <small class="marcacion-editar-ayuda">
+                Editar salida
+            </small>
+
+        </div>
+
+    </button>
+`;
 
     }
 
