@@ -2465,3 +2465,136 @@ BOTÓN ASIGNAR HORARIO DESDE RESUMEN
     font-size:11px;
 
 }
+
+
+
+
+/*======================================
+MARCACIÓN MANUAL DESDE EL RESUMEN
+======================================*/
+
+.btn-marcacion-faltante{
+
+    width:100%;
+
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    padding:9px 10px;
+
+    border:1px dashed #cbd5e1;
+    border-radius:10px;
+
+    background:#f8fafc;
+
+    color:#475569;
+
+    text-align:left;
+
+    cursor:pointer;
+
+    transition:
+        background .2s,
+        border-color .2s,
+        color .2s,
+        transform .2s;
+
+}
+
+
+.btn-marcacion-faltante:hover{
+
+    transform:translateY(-1px);
+
+}
+
+
+.btn-marcacion-faltante i{
+
+    width:30px;
+    height:30px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-shrink:0;
+
+    border-radius:9px;
+
+    font-size:14px;
+
+}
+
+
+.btn-marcacion-faltante span{
+
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+
+}
+
+
+.btn-marcacion-faltante strong{
+
+    font-size:13px;
+    font-weight:700;
+
+}
+
+
+.btn-marcacion-faltante small{
+
+    color:#64748b;
+
+    font-size:10px;
+
+}
+
+
+/* ENTRADA */
+
+.btn-marcacion-faltante.entrada:hover{
+
+    border-color:#22c55e;
+
+    background:#f0fdf4;
+
+    color:#15803d;
+
+}
+
+
+.btn-marcacion-faltante.entrada i{
+
+    background:#dcfce7;
+
+    color:#16a34a;
+
+}
+
+
+/* SALIDA */
+
+.btn-marcacion-faltante.salida:hover{
+
+    border-color:#3b82f6;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+}
+
+
+.btn-marcacion-faltante.salida i{
+
+    background:#dbeafe;
+
+    color:#2563eb;
+
+}
