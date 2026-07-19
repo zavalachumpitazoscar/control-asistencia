@@ -1016,48 +1016,64 @@ async function guardarMarcacionManual(){
         );
 
 
-        cerrarModal();
+/*
+    Guardamos los datos antes de cerrar el modal,
+    porque cerrarModal() limpia las variables.
+*/
+
+const datosActualizacion = {
+
+    colaboradorId,
+
+    fecha:
+        fechaSeleccionada,
+
+    tipo:
+        tipoSolicitado,
+
+    hora
+
+};
 
 
-        await Swal.fire({
+/*
+    Avisamos inmediatamente al resumen para que
+    vuelva a consultar las marcaciones.
+*/
 
-            icon:"success",
-
-            title:"Marcación registrada",
-
-            text:
-                `${
-                    obtenerTextoTipo(
-                        tipoSolicitado
-                    )
-                } registrada correctamente a las ${hora}.`,
-
-            confirmButtonColor:
-                "#2563eb"
-
-        });
+document.dispatchEvent(
+    new CustomEvent(
+        "asistencia:marcacion-manual-registrada",
+        {
+            detail:
+                datosActualizacion
+        }
+    )
+);
 
 
-        document.dispatchEvent(
-            new CustomEvent(
-                "asistencia:marcacion-manual-registrada",
-                {
-                    detail:{
+cerrarModal();
 
-                        colaboradorId,
 
-                        fecha:
-                            fechaSeleccionada,
+Swal.fire({
 
-                        tipo:
-                            tipoSolicitado,
+    icon:"success",
 
-                        hora
+    title:"Marcación registrada",
 
-                    }
-                }
+    text:
+        `${
+            obtenerTextoTipo(
+                datosActualizacion.tipo
             )
-        );
+        } registrada correctamente a las ${
+            datosActualizacion.hora
+        }.`,
+
+    confirmButtonColor:
+        "#2563eb"
+
+});
 
     }
     catch(error){
