@@ -1838,33 +1838,12 @@ function crearFilaResumen(
             </td>
 
 
+
 <!-- TARDANZA -->
 
 <td>
 
-    <span class="valor-asistencia ${
-        registro.tardanzaMinutos > 0
-        ?
-        "negativo"
-        :
-        "neutro"
-    }">
-
-        ${
-            registro.tardanzaMinutos > 0
-            ?
-            `${registro.tardanzaMinutos} min`
-            :
-            registro.estado === "PRESENTE"
-            ||
-            registro.estado === "TARDANZA"
-            ?
-            "0 min"
-            :
-            "—"
-        }
-
-    </span>
+    ${crearTardanzaHTML(registro)}
 
 </td>
 
@@ -2688,7 +2667,11 @@ function crearJornadaHTML(
             </span>
 
 
+            ${crearDetalleDescuentoJornada(registro)}
+
+
             ${crearEstadoRefrigerioHTML(registro)}
+            
             ${
                 advertenciasRefrigerio.length > 0
                 ?
@@ -2749,6 +2732,274 @@ function crearJornadaHTML(
 }
 
 
+
+/*=====================================================
+DETALLE DE TARDANZA
+=====================================================*/
+
+function crearTardanzaHTML(
+    registro
+){
+
+    if(
+        !registro.horarioPrincipal
+        ||
+        !registro.entrada
+    ){
+
+        return `
+            <div class="detalle-tardanza sin-dato">
+
+                <strong>
+                    —
+                </strong>
+
+            </div>
+        `;
+
+    }
+
+
+    const calculo =
+        registro.calculoAsistencia
+        ||
+        {};
+
+
+    const llegadaPosterior =
+        Number(
+            calculo.minutosLlegadaPosterior
+            ||
+            0
+        );
+
+
+    const tardanza =
+        Number(
+            calculo.minutosTardanza
+            ||
+            0
+        );
+
+
+    const tolerancia =
+        Number(
+            calculo.toleranciaMinutos
+            ||
+            0
+        );
+
+
+    /*
+        Llegó después, pero todavía se encuentra
+        dentro de la tolerancia.
+    */
+
+    if(
+        llegadaPosterior > 0
+        &&
+        tardanza === 0
+    ){
+
+        return `
+            <div class="detalle-tardanza tolerada">
+
+                <strong>
+                    0 min
+                </strong>
+
+                <span>
+                    Llegó ${llegadaPosterior} min después
+                </span>
+
+                <small>
+                    Dentro de tolerancia
+                </small>
+
+            </div>
+        `;
+
+    }
+
+
+    /*
+        Superó la tolerancia.
+    */
+
+    if(tardanza > 0){
+
+        return `
+            <div class="detalle-tardanza tardanza-real">
+
+                <strong>
+                    ${tardanza} min
+                </strong>
+
+                <span>
+                    Llegó ${llegadaPosterior} min después
+                </span>
+
+                <small>
+                    Tolerancia: ${tolerancia} min
+                </small>
+
+            </div>
+        `;
+
+    }
+
+
+    /*
+        Llegó a la hora programada o antes.
+    */
+
+    return `
+        <div class="detalle-tardanza puntual">
+
+            <strong>
+                0 min
+            </strong>
+
+            <span>
+                Llegó a tiempo
+            </span>
+
+        </div>
+    `;
+
+}
+
+
+/*=====================================================
+MOTIVOS DE JORNADA INCOMPLETA
+=====================================================*/
+
+function crearDetalleDescuentoJornada(
+    registro
+){
+
+    const calculo =
+        registro.calculoAsistencia
+        ||
+        {};
+
+
+    const motivos = [];
+
+
+    const llegadaPosterior =
+        Number(
+            calculo.minutosLlegadaPosterior
+            ||
+            0
+        );
+
+
+    const salidaAnticipada =
+        Number(
+            calculo.minutosSalidaAnticipada
+            ||
+            0
+        );
+
+
+    const excesoRefrigerio =
+        Number(
+            calculo.minutosExcesoRefrigerio
+            ||
+            0
+        );
+
+
+    if(llegadaPosterior > 0){
+
+        motivos.push({
+
+            icono:
+                "bi-box-arrow-in-right",
+
+            texto:
+                `${llegadaPosterior} min por llegada posterior`,
+
+            clase:
+                calculo.minutosTardanza > 0
+                ?
+                "negativo"
+                :
+                "informativo"
+
+        });
+
+    }
+
+
+    if(salidaAnticipada > 0){
+
+        motivos.push({
+
+            icono:
+                "bi-box-arrow-right",
+
+            texto:
+                `${salidaAnticipada} min por salida anticipada`,
+
+            clase:
+                "negativo"
+
+        });
+
+    }
+
+
+    if(excesoRefrigerio > 0){
+
+        motivos.push({
+
+            icono:
+                "bi-cup-hot",
+
+            texto:
+                `${excesoRefrigerio} min por exceso de refrigerio`,
+
+            clase:
+                "negativo"
+
+        });
+
+    }
+
+
+    if(motivos.length === 0){
+
+        return "";
+
+    }
+
+
+    return `
+        <div class="detalle-descuento-jornada">
+
+            ${motivos
+            .map(
+                motivo=>
+                `
+                    <small class="${motivo.clase}">
+
+                        <i class="bi ${motivo.icono}"></i>
+
+                        ${escaparHTML(
+                            motivo.texto
+                        )}
+
+                    </small>
+                `
+            )
+            .join("")}
+
+        </div>
+    `;
+
+}
 
 
 /*=====================================================
