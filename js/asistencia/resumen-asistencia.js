@@ -159,6 +159,89 @@ export function iniciarResumenAsistencia(){
     }
 );
 
+    cuerpoResumen.addEventListener(
+    "click",
+    evento=>{
+
+        const boton =
+            evento.target.closest(
+                '[data-accion="agregar-marcacion-manual"]'
+            );
+
+
+        if(!boton){
+
+            return;
+
+        }
+
+
+        const colaboradorId =
+            boton.dataset.colaboradorId;
+
+
+        const tipo =
+            boton.dataset.tipoMarcacion;
+
+
+        const registro =
+            registrosResumen.find(
+                item=>
+
+                    item.colaboradorId ===
+                    colaboradorId
+
+            );
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "asistencia:agregar-marcacion-manual",
+                {
+                    detail:{
+
+                        colaboradorId,
+
+                        colaboradorNombre:
+                            registro?.nombre ||
+                            "Colaborador",
+
+                        fecha:
+                            fechaResumenSeleccionada,
+
+                        tipo,
+
+                        horarioId:
+                            registro
+                            ?.horarioPrincipal
+                            ?.id
+                            ||
+                            null,
+
+                        horario:
+                            registro
+                            ?.horarioPrincipal
+                            ||
+                            null,
+
+                        entradaActual:
+                            registro?.entrada
+                            ||
+                            null,
+
+                        salidaActual:
+                            registro?.salida
+                            ||
+                            null
+
+                    }
+                }
+            )
+        );
+
+    }
+);
+
     document.addEventListener(
         "asistencia:marcaciones-importadas",
         ()=>{
@@ -1558,23 +1641,32 @@ function crearEntradaHTML(
     if(!registro.entrada){
 
         return `
-            <div class="asistencia-marcacion faltante">
+            <button
+                type="button"
+                class="btn-marcacion-faltante entrada"
+                data-accion="agregar-marcacion-manual"
+                data-tipo-marcacion="ENTRADA"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="Registrar entrada manualmente"
+            >
 
-                <i class="bi bi-x-circle"></i>
+                <i class="bi bi-plus-circle"></i>
 
-                <div>
+                <span>
 
                     <strong>
                         Sin entrada
                     </strong>
 
-                    <span>
-                        Sin marcación
-                    </span>
+                    <small>
+                        Agregar entrada
+                    </small>
 
-                </div>
+                </span>
 
-            </div>
+            </button>
         `;
 
     }
@@ -1597,7 +1689,11 @@ function crearEntradaHTML(
             <div>
 
                 <strong>
-                    ${formatearHora(obtenerHoraMarcacion(registro.entrada))}
+                    ${formatearHora(
+                        obtenerHoraMarcacion(
+                            registro.entrada
+                        )
+                    )}
                 </strong>
 
                 <span>
@@ -1636,23 +1732,32 @@ function crearSalidaHTML(
     if(!registro.salida){
 
         return `
-            <div class="asistencia-marcacion pendiente">
+            <button
+                type="button"
+                class="btn-marcacion-faltante salida"
+                data-accion="agregar-marcacion-manual"
+                data-tipo-marcacion="SALIDA"
+                data-colaborador-id="${escaparHTML(
+                    registro.colaboradorId
+                )}"
+                title="Registrar salida manualmente"
+            >
 
-                <i class="bi bi-hourglass-split"></i>
+                <i class="bi bi-plus-circle"></i>
 
-                <div>
+                <span>
 
                     <strong>
                         Sin salida
                     </strong>
 
-                    <span>
-                        Falta marcación
-                    </span>
+                    <small>
+                        Agregar salida
+                    </small>
 
-                </div>
+                </span>
 
-            </div>
+            </button>
         `;
 
     }
@@ -1666,7 +1771,11 @@ function crearSalidaHTML(
             <div>
 
                 <strong>
-                    ${formatearHora(obtenerHoraMarcacion(registro.salida))}
+                    ${formatearHora(
+                        obtenerHoraMarcacion(
+                            registro.salida
+                        )
+                    )}
                 </strong>
 
                 <span>
