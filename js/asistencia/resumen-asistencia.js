@@ -2688,13 +2688,20 @@ function crearJornadaHTML(
             </span>
 
 
+            ${crearEstadoRefrigerioHTML(registro)}
             ${
                 advertenciasRefrigerio.length > 0
                 ?
                 `
                     <button
                         type="button"
-                        class="contador-advertencias-jornada"
+                        class="contador-advertencias-jornada ${
+    registro.ajusteAsistencia
+    ?
+    "resuelta"
+    :
+    ""
+}"
                         data-accion="gestionar-ajuste-refrigerio"
                         data-colaborador-id="${escaparHTML(
                             registro.colaboradorId
@@ -2713,9 +2720,22 @@ function crearJornadaHTML(
 
                         ${advertenciasRefrigerio.length}
 
-                        <span>
-                            Revisar
-                        </span>
+<span>
+
+    ${
+        registro.ajusteAsistencia
+        ?
+        "Cambiar"
+        :
+        registro.calculoAsistencia
+        ?.minutosExcesoRefrigerio > 0
+        ?
+        "Ver"
+        :
+        "Revisar"
+    }
+
+</span>
 
                     </button>
                 `
@@ -2725,6 +2745,355 @@ function crearJornadaHTML(
 
         </div>
     `;
+
+}
+
+
+
+
+/*=====================================================
+ESTADO DEL REFRIGERIO
+=====================================================*/
+
+function crearEstadoRefrigerioHTML(
+    registro
+){
+
+    const refrigerio =
+        registro.horarioPrincipal
+        ?.refrigerio;
+
+
+    if(
+        !refrigerio
+        ?.habilitado
+    ){
+
+        return "";
+
+    }
+
+
+    const calculo =
+        registro.calculoAsistencia
+        ||
+        {};
+
+
+    const ajuste =
+        registro.ajusteAsistencia
+        ||
+        null;
+
+
+    let clase =
+        "normal";
+
+
+    let titulo =
+        "Refrigerio";
+
+
+    let detalle =
+        "";
+
+
+    /*
+        Refrigerio automático.
+    */
+
+    if(
+        calculo.refrigerioAutomatico
+    ){
+
+        clase =
+            "automatico";
+
+
+        titulo =
+            "Automático";
+
+
+        detalle =
+            `${
+                calculo.minutosRefrigerioDescontados
+                ||
+                refrigerio.duracionMinutos
+                ||
+                0
+            } min descontados`;
+
+    }
+
+
+    /*
+        Decisión para refrigerio sin marcaciones.
+    */
+
+    else if(
+        ajuste?.tratamientoRefrigerio ===
+        "LABORADO"
+
+        &&
+
+        calculo.advertencias
+        ?.some(
+            advertencia=>
+
+                advertencia.codigo ===
+                "REFRIGERIO_SIN_MARCACIONES"
+
+                ||
+
+                advertencia.codigo ===
+                "REFRIGERIO_INCOMPLETO"
+
+        )
+    ){
+
+        clase =
+            "trabajado";
+
+
+        titulo =
+            "Considerado trabajado";
+
+
+        detalle =
+            "0 min descontados";
+
+    }
+
+
+    else if(
+        ajuste?.tratamientoRefrigerio ===
+        "DESCONTAR_PROGRAMADO"
+
+        &&
+
+        calculo.advertencias
+        ?.some(
+            advertencia=>
+
+                advertencia.codigo ===
+                "REFRIGERIO_SIN_MARCACIONES"
+
+                ||
+
+                advertencia.codigo ===
+                "REFRIGERIO_INCOMPLETO"
+
+        )
+    ){
+
+        clase =
+            "descontado";
+
+
+        titulo =
+            "Refrigerio descontado";
+
+
+        detalle =
+            `${
+                calculo.minutosRefrigerioDescontados
+                ||
+                refrigerio.duracionMinutos
+                ||
+                0
+            } min descontados`;
+
+    }
+
+
+    /*
+        Refrigerio corto con decisión.
+    */
+
+    else if(
+        calculo.minutosRefrigerioNoUsado > 0
+    ){
+
+        if(
+            ajuste?.tratamientoRefrigerioCorto ===
+            "CONSIDERAR_REAL"
+        ){
+
+            clase =
+                "trabajado";
+
+
+            titulo =
+                "Tiempo real considerado";
+
+
+            detalle =
+                `${
+                    calculo.minutosRefrigerioDescontados
+                    ||
+                    0
+                } min descontados`;
+
+        }
+        else{
+
+            clase =
+                "descontado";
+
+
+            titulo =
+                "Duración completa descontada";
+
+
+            detalle =
+                `${
+                    calculo.minutosRefrigerioDescontados
+                    ||
+                    refrigerio.duracionMinutos
+                    ||
+                    0
+                } min descontados`;
+
+        }
+
+    }
+
+
+    /*
+        Refrigerio excedido.
+    */
+
+    else if(
+        calculo.minutosExcesoRefrigerio > 0
+    ){
+
+        clase =
+            "exceso";
+
+
+        titulo =
+            "Refrigerio excedido";
+
+
+        detalle =
+            `${
+                calculo.minutosRefrigerioDescontados
+                ||
+                0
+            } min descontados`;
+
+    }
+
+
+    /*
+        Refrigerio completo y normal.
+    */
+
+    else if(
+        calculo.refrigerioCompleto
+    ){
+
+        clase =
+            "normal";
+
+
+        titulo =
+            "Refrigerio registrado";
+
+
+        detalle =
+            `${
+                calculo.minutosRefrigerioDescontados
+                ||
+                0
+            } min descontados`;
+
+    }
+
+
+    /*
+        Sin marcaciones y todavía sin decisión.
+
+        Se muestra el comportamiento predeterminado.
+    */
+
+    else{
+
+        clase =
+            "pendiente";
+
+
+        titulo =
+            "Sin decisión guardada";
+
+
+        detalle =
+            "Por defecto se considera trabajado";
+
+    }
+
+
+    return `
+        <div class="estado-refrigerio-resumen ${clase}">
+
+            <i class="bi ${
+                obtenerIconoEstadoRefrigerio(
+                    clase
+                )
+            }"></i>
+
+            <div>
+
+                <strong>
+                    ${escaparHTML(titulo)}
+                </strong>
+
+                <span>
+                    ${escaparHTML(detalle)}
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+/*=====================================================
+ICONO DEL ESTADO DEL REFRIGERIO
+=====================================================*/
+
+function obtenerIconoEstadoRefrigerio(
+    clase
+){
+
+    const iconos = {
+
+        automatico:
+            "bi-cpu",
+
+        trabajado:
+            "bi-briefcase",
+
+        descontado:
+            "bi-dash-circle",
+
+        exceso:
+            "bi-exclamation-triangle",
+
+        pendiente:
+            "bi-question-circle",
+
+        normal:
+            "bi-cup-hot"
+
+    };
+
+
+    return iconos[clase]
+    ||
+    "bi-cup-hot";
 
 }
 
