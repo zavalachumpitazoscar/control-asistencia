@@ -326,6 +326,12 @@ function mostrarSecciones(){
         );
 
 
+    const requiereDecision =
+        mostrarSinMarcaciones
+        ||
+        mostrarCorto;
+
+
     if(seccionSinMarcaciones){
 
         seccionSinMarcaciones.hidden =
@@ -342,17 +348,46 @@ function mostrarSecciones(){
     }
 
 
+    /*
+        El motivo solo es necesario cuando existe
+        una decisión que guardar.
+    */
+
+    const seccionMotivo =
+        inputMotivo
+        ?.closest(
+            ".seccion-formulario"
+        );
+
+
+    if(seccionMotivo){
+
+        seccionMotivo.hidden =
+            !requiereDecision;
+
+    }
+
+
     if(btnGuardar){
 
-        btnGuardar.disabled =
-            !mostrarSinMarcaciones
-            &&
-            !mostrarCorto;
+        btnGuardar.hidden =
+            !requiereDecision;
+
+    }
+
+
+    if(btnCancelar){
+
+        btnCancelar.textContent =
+            requiereDecision
+            ?
+            "Cancelar"
+            :
+            "Cerrar";
 
     }
 
 }
-
 
 /*=====================================================
 ADVERTENCIAS DE REFRIGERIO
