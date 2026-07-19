@@ -34,6 +34,11 @@ import {
 }
 from "./asistencia/ajuste-refrigerio-asistencia.js";
 
+import {
+    iniciarAprobacionHorasExtraAsistencia
+}
+from "./asistencia/aprobar-horas-extra-asistencia.js";
+
 /*=====================================================
 INICIAR MÓDULO DE ASISTENCIA
 =====================================================*/
@@ -58,4 +63,6 @@ iniciarAjusteRefrigerioAsistencia();
 iniciarFechaAsistencia();
 
 iniciarImportacionMarcaciones();
+
+iniciarAprobacionHorasExtraAsistencia();
 }
