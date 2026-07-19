@@ -386,7 +386,23 @@ function clasificarHorario(
     "MARCACION";
 
 
-    const inicioRefrigerio =
+let inicioRefrigerio =
+    marcaciones.find(
+        marcacion=>
+
+            marcacion.tipoInterpretado ===
+            "INICIO_REFRIGERIO"
+
+            &&
+
+            !marcacion.esAutomatica
+
+    );
+
+
+if(!inicioRefrigerio){
+
+    inicioRefrigerio =
         marcaciones.find(
             marcacion=>
 
@@ -401,6 +417,57 @@ function clasificarHorario(
                 )
 
         );
+
+}
+
+
+    if(
+    inicioRefrigerio
+    &&
+    !inicioRefrigerio.horarioInterpretadoId
+){
+
+    inicioRefrigerio.horarioInterpretadoId =
+        horario.id;
+
+}
+
+
+let finRefrigerio =
+    marcaciones.find(
+        marcacion=>
+
+            marcacion.tipoInterpretado ===
+            "FIN_REFRIGERIO"
+
+            &&
+
+            !marcacion.esAutomatica
+
+    );
+
+
+if(!finRefrigerio){
+
+    finRefrigerio =
+        marcaciones.find(
+            marcacion=>
+
+                !marcacion.tipoInterpretado
+
+                &&
+
+                marcacion.minutosJornada >
+                inicioRefrigerio.minutosJornada
+
+                &&
+
+                marcacion.minutosJornada <
+                rango.salidaDesde
+
+        );
+
+}
 
 
 if(!inicioRefrigerio){
