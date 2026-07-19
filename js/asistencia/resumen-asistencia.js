@@ -166,6 +166,88 @@ export function iniciarResumenAsistencia(){
 );
 
 
+cuerpoResumen.addEventListener(
+    "click",
+    evento=>{
+
+        const boton =
+            evento.target.closest(
+                '[data-accion="gestionar-ajuste-refrigerio"]'
+            );
+
+
+        if(!boton){
+
+            return;
+
+        }
+
+
+        const colaboradorId =
+            boton.dataset.colaboradorId;
+
+
+        const registro =
+            registrosResumen.find(
+                item=>
+
+                    item.colaboradorId ===
+                    colaboradorId
+
+            );
+
+
+        if(!registro){
+
+            return;
+
+        }
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "asistencia:gestionar-ajuste-refrigerio",
+                {
+                    detail:{
+
+                        colaboradorId,
+
+                        colaboradorNombre:
+                            registro.nombre,
+
+                        fecha:
+                            fechaResumenSeleccionada,
+
+                        horario:
+                            registro.horarioPrincipal,
+
+                        clasificacion:
+                            registro.clasificacion,
+
+                        calculoAsistencia:
+                            registro.calculoAsistencia,
+
+                        advertencias:
+                            registro.advertencias,
+
+                        ajusteAsistencia:
+                            registro.ajusteAsistencia,
+
+                        tratamientoRefrigerio:
+                            registro.tratamientoRefrigerio,
+
+                        tratamientoRefrigerioCorto:
+                            registro.tratamientoRefrigerioCorto
+
+                    }
+                }
+            )
+        );
+
+    }
+);
+
+
 document.addEventListener(
     "asistencia:ajuste-diario-actualizado",
     evento=>{
@@ -2598,32 +2680,90 @@ function crearJornadaHTML(
 
             </span>
 
-            ${
-                registro.advertencias
-                ?.length > 0
-                ?
-                `
-                    <small
-                        class="contador-advertencias-jornada"
-                        title="${escaparHTML(
-                            registro.advertencias
-                            .map(item=>item.mensaje)
-                            .join(" | ")
-                        )}"
-                    >
+${
+    tieneAdvertenciaRefrigerio(
+        registro
+    )
+    ?
+    `
+        <button
+            type="button"
+            class="btn-ajustar-refrigerio"
+            data-accion="ajustar-refrigerio"
+            data-colaborador-id="${escaparHTML(
+                registro.colaboradorId
+            )}"
+            title="Revisar tratamiento del refrigerio"
+        >
 
-                        <i class="bi bi-exclamation-triangle"></i>
+            <i class="bi bi-exclamation-triangle"></i>
 
-                        ${registro.advertencias.length}
+            Revisar refrigerio
 
-                    </small>
-                `
-                :
-                ""
-            }
+        </button>
+    `
+    :
+    registro.advertencias?.length > 0
+    ?
+    `
+<button
+    type="button"
+    class="contador-advertencias-jornada"
+    data-accion="gestionar-ajuste-refrigerio"
+    data-colaborador-id="${escaparHTML(
+        registro.colaboradorId
+    )}"
+    title="Revisar advertencias"
+>
+
+    <i class="bi bi-exclamation-triangle"></i>
+
+    ${registro.advertencias.length}
+
+    <span>
+        Revisar
+    </span>
+
+</button>
+    `
+    :
+    ""
+}
 
         </div>
     `;
+
+}
+
+
+function tieneAdvertenciaRefrigerio(
+    registro
+){
+
+    const codigosRefrigerio = [
+
+        "REFRIGERIO_SIN_MARCACIONES",
+
+        "REFRIGERIO_INCOMPLETO",
+
+        "REFRIGERIO_CORTO",
+
+        "REFRIGERIO_EXCESIVO"
+
+    ];
+
+
+    return registro.advertencias
+    ?.some(
+        advertencia=>
+
+            codigosRefrigerio.includes(
+                advertencia.codigo
+            )
+
+    )
+    ||
+    false;
 
 }
 
