@@ -24,6 +24,11 @@ import {
 }
 from "./asistencia/editar-dia-asistencia.js";
 
+import {
+    iniciarMarcacionManualAsistencia
+}
+from "./asistencia/marcacion-manual-asistencia.js";
+
 /*=====================================================
 INICIAR MÓDULO DE ASISTENCIA
 =====================================================*/
