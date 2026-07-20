@@ -3040,6 +3040,46 @@ function crearInicioRefrigerioHTML(
         ?.inicioRefrigerio;
 
 
+    const tienePermisoCompleto =
+    registro.permisoDia
+    &&
+    (
+        registro.permisoDia.tipoDuracion ||
+        "DIA_COMPLETO"
+    ) ===
+    "DIA_COMPLETO";
+
+
+if(
+    tienePermisoCompleto
+    &&
+    !marcacion
+){
+
+    return `
+        <div class="marcacion-no-requerida">
+
+            <i class="bi bi-calendar-check"></i>
+
+            <div>
+
+                <strong>
+                    No requerido
+                </strong>
+
+                <span>
+                    Permiso completo
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+    
+
     if(!marcacion){
 
         return crearBotonRefrigerioFaltante(
@@ -3088,6 +3128,46 @@ function crearFinRefrigerioHTML(
         registro.clasificacion
         ?.finRefrigerio;
 
+
+    const tienePermisoCompleto =
+    registro.permisoDia
+    &&
+    (
+        registro.permisoDia.tipoDuracion ||
+        "DIA_COMPLETO"
+    ) ===
+    "DIA_COMPLETO";
+
+
+if(
+    tienePermisoCompleto
+    &&
+    !marcacion
+){
+
+    return `
+        <div class="marcacion-no-requerida">
+
+            <i class="bi bi-calendar-check"></i>
+
+            <div>
+
+                <strong>
+                    No requerido
+                </strong>
+
+                <span>
+                    Permiso completo
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+    
 
     if(!marcacion){
 
