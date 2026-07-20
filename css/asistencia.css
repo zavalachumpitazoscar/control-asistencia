@@ -4003,9 +4003,23 @@ JORNADA JUSTIFICADA POR PERMISO
 
 .jornada-asistencia.permiso-justificado{
 
-    background:#f5f3ff;
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:3px;
+
+    min-width:150px;
+
+    padding:8px 10px;
 
     border:1px solid #ddd6fe;
+
+    border-radius:10px;
+
+    background:#f5f3ff;
 
 }
 
@@ -4014,11 +4028,32 @@ JORNADA JUSTIFICADA POR PERMISO
 
     color:#6d28d9;
 
+    font-size:11px;
+
+    font-weight:800;
+
+    line-height:1.25;
+
 }
 
 
 .jornada-asistencia.permiso-justificado span{
 
     color:#7c3aed;
+
+    font-size:9px;
+
+    font-weight:700;
+
+}
+
+
+.jornada-asistencia.permiso-justificado small{
+
+    color:#64748b;
+
+    font-size:8px;
+
+    line-height:1.25;
 
 }
