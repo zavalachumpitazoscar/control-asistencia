@@ -2878,14 +2878,11 @@ if(
                 </strong>
 
                 <span>
-                    Retorno autorizado
+                    Fin del permiso
                 </span>
 
                 <small>
-                    ${escaparHTML(
-                        registro.entrada
-                        .permisoNombre
-                    )}
+                    Inicia refrigerio
                 </small>
 
             </div>
@@ -3274,13 +3271,13 @@ function crearSalidaHTML(
 
 
 
-    if(
+if(
     registro.salida
     ?.esCubiertaPorPermiso
 ){
 
     return `
-        <div class="btn-horario-resumen correcta permiso-virtual">
+        <div class="marcacion-permiso-virtual">
 
             <i class="bi bi-briefcase"></i>
 
@@ -3295,14 +3292,11 @@ function crearSalidaHTML(
                 </strong>
 
                 <span>
-                    Fin de primera mitad
+                    Inicio del permiso
                 </span>
 
                 <small>
-                    Cubierto por ${escaparHTML(
-                        registro.salida
-                        .permisoNombre
-                    )}
+                    Después del refrigerio
                 </small>
 
             </div>
@@ -4978,26 +4972,26 @@ function obtenerLimiteMitadJornada(
     ){
 
         if(
-            mitadDia ===
-            "PRIMERA_MITAD"
-        ){
+    mitadDia ===
+    "PRIMERA_MITAD"
+){
 
-            /*
-                La persona comienza a trabajar cuando
-                termina el refrigerio.
-            */
+    /*
+        El permiso de primera mitad termina
+        cuando comienza el refrigerio.
+    */
 
-            return finRefrigerio;
+    return inicioRefrigerio;
 
-        }
+}
 
 
-        /*
-            Si tiene permiso en la segunda mitad,
-            deja de trabajar cuando inicia el refrigerio.
-        */
+/*
+    El permiso de segunda mitad comienza
+    cuando termina el refrigerio.
+*/
 
-        return inicioRefrigerio;
+return finRefrigerio;
 
     }
 
