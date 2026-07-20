@@ -1737,13 +1737,13 @@ const calculoAsistencia =
     cuando no existen marcaciones reales.
 */
 
-const esPermisoDiaCompleto =
-    permisoDia
-    &&
-    (
-        permisoDia.tipoDuracion ||
-        "DIA_COMPLETO"
-    ) ===
+/*
+    Aplicar permiso aprobado según su duración.
+*/
+
+const tipoDuracionPermiso =
+    permisoDia?.tipoDuracion
+    ||
     "DIA_COMPLETO";
 
 
@@ -1751,11 +1751,98 @@ const noTieneMarcaciones =
     marcaciones.length === 0;
 
 
+const jornadaProgramada =
+    calculoAsistencia
+    .minutosJornadaProgramada
+    ||
+    0;
+
+
+let minutosJustificadosPermiso = 0;
+
 let minutosComputablesPermiso = 0;
 
 
+/*
+    Calcular la duración cubierta por el permiso.
+*/
+
+if(permisoDia){
+
+    if(
+        tipoDuracionPermiso ===
+        "DIA_COMPLETO"
+    ){
+
+        minutosJustificadosPermiso =
+            jornadaProgramada;
+
+    }
+    else if(
+        tipoDuracionPermiso ===
+        "MEDIO_DIA"
+    ){
+
+        minutosJustificadosPermiso =
+            Math.round(
+                jornadaProgramada /
+                2
+            );
+
+    }
+    else if(
+        tipoDuracionPermiso ===
+        "HORAS"
+    ){
+
+        const inicioPermiso =
+            convertirHoraAMinutos(
+                permisoDia.horaInicio
+            );
+
+
+        const finPermiso =
+            convertirHoraAMinutos(
+                permisoDia.horaFin
+            );
+
+
+        minutosJustificadosPermiso =
+            Math.min(
+
+                jornadaProgramada,
+
+                Math.max(
+                    0,
+                    finPermiso -
+                    inicioPermiso
+                )
+
+            );
+
+    }
+
+
+    if(
+        permisoDia.computaComoLaborado ===
+        true
+    ){
+
+        minutosComputablesPermiso =
+            minutosJustificadosPermiso;
+
+    }
+
+}
+
+
+/*
+    Si no existen marcaciones, el permiso aprobado
+    reemplaza el estado AUSENTE.
+*/
+
 if(
-    esPermisoDiaCompleto
+    permisoDia
     &&
     noTieneMarcaciones
 ){
@@ -1764,28 +1851,28 @@ if(
 
 
     if(
-        permisoDia.computaComoLaborado ===
-        true
+        tipoDuracionPermiso ===
+        "DIA_COMPLETO"
     ){
 
         estado =
-            "PERMISO_COMPUTABLE";
-
-
-        minutosComputablesPermiso =
-            calculoAsistencia
-            .minutosJornadaProgramada
-            ||
-            0;
+            permisoDia.computaComoLaborado ===
+            true
+            ?
+            "PERMISO_COMPUTABLE"
+            :
+            "AUSENCIA_JUSTIFICADA";
 
     }
-    else if(
-        permisoDia.justificaAusencia ===
-        true
-    ){
+    else{
 
         estado =
-            "AUSENCIA_JUSTIFICADA";
+            permisoDia.computaComoLaborado ===
+            true
+            ?
+            "PERMISO_PARCIAL_COMPUTABLE"
+            :
+            "AUSENCIA_PARCIAL_JUSTIFICADA";
 
     }
 
@@ -1885,9 +1972,13 @@ ajusteAsistencia,
             calculoAsistencia
             .minutosTrabajados,
         
-        minutosComputablesPermiso,
+tipoDuracionPermiso,
 
-        aprobacionHorasExtra,
+minutosJustificadosPermiso,
+
+minutosComputablesPermiso,
+
+aprobacionHorasExtra,
 
         permisoDia,
 
@@ -4494,6 +4585,12 @@ function obtenerClaseEstado(
             "permiso",
 
         AUSENCIA_JUSTIFICADA:
+            "permiso",
+
+        PERMISO_PARCIAL_COMPUTABLE:
+            "permiso",
+
+        AUSENCIA_PARCIAL_JUSTIFICADA:
             "permiso"
 
     };
@@ -4510,21 +4607,39 @@ function obtenerTextoEstado(
     registro = null
 ){
 
-    if(
-        estado === "PERMISO_COMPUTABLE"
+if(
+    estado === "PERMISO_COMPUTABLE"
+    ||
+    estado === "AUSENCIA_JUSTIFICADA"
+    ||
+    estado === "PERMISO_PARCIAL_COMPUTABLE"
+    ||
+    estado === "AUSENCIA_PARCIAL_JUSTIFICADA"
+){
+
+    const nombrePermiso =
+        registro
+        ?.permisoDia
+        ?.tipoPermisoNombre
         ||
-        estado === "AUSENCIA_JUSTIFICADA"
-    ){
+        "Permiso aprobado";
 
-        return (
-            registro
-            ?.permisoDia
-            ?.tipoPermisoNombre
-            ||
-            "Permiso aprobado"
-        );
 
-    }
+    const esParcial =
+        estado ===
+        "PERMISO_PARCIAL_COMPUTABLE"
+        ||
+        estado ===
+        "AUSENCIA_PARCIAL_JUSTIFICADA";
+
+
+    return esParcial
+        ?
+        `${nombrePermiso} parcial`
+        :
+        nombrePermiso;
+
+}
 
 
     const textos = {
