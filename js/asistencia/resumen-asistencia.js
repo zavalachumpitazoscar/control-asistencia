@@ -1700,6 +1700,74 @@ if(tieneLimiteVirtualPermiso){
 }
 
 
+    /*
+    Permiso por horas situado dentro de la jornada.
+
+    Si no fue necesario crear entrada o salida virtual,
+    descontamos el intervalo del permiso de las horas
+    realmente trabajadas.
+*/
+
+let minutosPermisoDentroTrabajo = 0;
+
+
+if(
+    permisoDia
+    &&
+    permisoDia.tipoDuracion ===
+    "HORAS"
+    &&
+    !tieneLimiteVirtualPermiso
+    &&
+    calculoAsistencia.calculable
+){
+
+    minutosPermisoDentroTrabajo =
+        calcularMinutosPermisoDentroTrabajo({
+
+            permiso:
+                permisoDia,
+
+            horario:
+                horarioPrincipal,
+
+            clasificacion
+
+        });
+
+
+    calculoAsistencia.minutosTrabajados =
+        Math.max(
+
+            0,
+
+            calculoAsistencia
+            .minutosTrabajados
+            -
+            minutosPermisoDentroTrabajo
+
+        );
+
+
+    calculoAsistencia.minutosJornadaCumplida =
+        Math.max(
+
+            0,
+
+            calculoAsistencia
+            .minutosJornadaCumplida
+            -
+            minutosPermisoDentroTrabajo
+
+        );
+
+
+    calculoAsistencia.jornadaCompleta =
+        false;
+
+}
+
+
     const calculoHorasExtra =
     calcularHorasExtraAsistencia({
 
@@ -1979,6 +2047,66 @@ if(tieneLimiteCubiertoPorPermiso){
 
 }
 
+
+    const tieneLimiteCubiertoPorPermiso =
+    Boolean(
+        entrada?.esCubiertaPorPermiso
+        ||
+        salida?.esCubiertaPorPermiso
+    );
+
+
+if(tieneLimiteCubiertoPorPermiso){
+
+    estado =
+        "PRESENTE_CON_PERMISO";
+
+    tardanzaMinutos = 0;
+
+}
+
+
+/*
+    Permiso por horas con entrada y salida.
+
+    Si está ubicado dentro de la jornada, conserva
+    una tardanza real que haya ocurrido antes del permiso.
+*/
+
+if(
+    permisoDia
+    &&
+    tipoDuracionPermiso ===
+    "HORAS"
+    &&
+    entrada
+    &&
+    salida
+){
+
+    if(tardanzaMinutos > 0){
+
+        estado =
+            "TARDANZA_CON_PERMISO";
+
+    }
+    else{
+
+        estado =
+            "PRESENTE_CON_PERMISO";
+
+    }
+
+}
+
+
+return {
+
+    colaboradorId:
+        colaborador.id,
+
+    // Continúa aquí todo lo que ya tienes.
+
     
 
     return {
@@ -2079,6 +2207,8 @@ tipoDuracionPermiso,
 minutosJustificadosPermiso,
 
 minutosComputablesPermiso,
+
+minutosPermisoDentroTrabajo,
 
 aprobacionHorasExtra,
 
@@ -5896,6 +6026,187 @@ function calcularMinutosPermisoPorHoras({
 
 }
 
+
+
+/*=====================================================
+PERMISO POR HORAS DENTRO DEL TRAMO TRABAJADO
+=====================================================*/
+
+function calcularMinutosPermisoDentroTrabajo({
+
+    permiso,
+    horario,
+    clasificacion
+
+}){
+
+    if(
+        !permiso
+        ||
+        !horario
+        ||
+        !clasificacion?.entrada
+        ||
+        !clasificacion?.salida
+    ){
+
+        return 0;
+
+    }
+
+
+    let entradaReal =
+        Number(
+            clasificacion
+            .entrada
+            .minutosJornada
+        );
+
+
+    let salidaReal =
+        Number(
+            clasificacion
+            .salida
+            .minutosJornada
+        );
+
+
+    let inicioPermiso =
+        convertirHoraAMinutos(
+            permiso.horaInicio
+        );
+
+
+    let finPermiso =
+        convertirHoraAMinutos(
+            permiso.horaFin
+        );
+
+
+    const entradaProgramada =
+        convertirHoraAMinutos(
+            horario.entrada
+            ?.programada
+        );
+
+
+    if(
+        horario.cruzaMedianoche
+    ){
+
+        if(
+            salidaReal <=
+            entradaReal
+        ){
+
+            salidaReal += 1440;
+
+        }
+
+
+        if(
+            inicioPermiso <
+            entradaProgramada
+        ){
+
+            inicioPermiso += 1440;
+
+        }
+
+
+        if(
+            finPermiso <=
+            entradaProgramada
+        ){
+
+            finPermiso += 1440;
+
+        }
+
+    }
+
+
+    const inicioAplicable =
+        Math.max(
+            entradaReal,
+            inicioPermiso
+        );
+
+
+    const finAplicable =
+        Math.min(
+            salidaReal,
+            finPermiso
+        );
+
+
+    let minutos =
+        Math.max(
+            0,
+            finAplicable -
+            inicioAplicable
+        );
+
+
+    /*
+        Restamos el solapamiento con refrigerio,
+        porque ese tiempo ya se descontó previamente.
+    */
+
+    const inicioRefrigerio =
+        clasificacion
+        ?.inicioRefrigerio
+        ?.minutosJornada;
+
+
+    const finRefrigerio =
+        clasificacion
+        ?.finRefrigerio
+        ?.minutosJornada;
+
+
+    if(
+        Number.isFinite(
+            inicioRefrigerio
+        )
+        &&
+        Number.isFinite(
+            finRefrigerio
+        )
+    ){
+
+        const solapamientoRefrigerio =
+            Math.max(
+
+                0,
+
+                Math.min(
+                    finAplicable,
+                    finRefrigerio
+                )
+                -
+                Math.max(
+                    inicioAplicable,
+                    inicioRefrigerio
+                )
+
+            );
+
+
+        minutos -=
+            solapamientoRefrigerio;
+
+    }
+
+
+    return Math.max(
+        0,
+        minutos
+    );
+
+}
+
+
 /*=====================================================
 CONVERTIR MINUTOS A HORA
 =====================================================*/
@@ -6059,6 +6370,9 @@ function obtenerClaseEstado(
         PRESENTE_CON_PERMISO:
             "permiso",
 
+        TARDANZA_CON_PERMISO:
+            "tardanza",
+
     };
 
 
@@ -6121,6 +6435,24 @@ if(
         `${nombrePermiso} parcial`
         :
         nombrePermiso;
+
+}
+
+
+    if(
+    estado ===
+    "TARDANZA_CON_PERMISO"
+){
+
+    const nombrePermiso =
+        registro
+        ?.permisoDia
+        ?.tipoPermisoNombre
+        ||
+        "Permiso";
+
+
+    return `Tardanza · ${nombrePermiso}`;
 
 }
 
