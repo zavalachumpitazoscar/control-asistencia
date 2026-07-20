@@ -1638,6 +1638,54 @@ const calculoAsistencia =
     });
 
 
+    /*
+    Cuando un extremo de la jornada está cubierto
+    por un permiso parcial, no representa tardanza
+    ni salida anticipada.
+*/
+
+const tieneLimiteVirtualPermiso =
+    Boolean(
+        clasificacion.entrada
+        ?.esCubiertaPorPermiso
+        ||
+        clasificacion.salida
+        ?.esCubiertaPorPermiso
+    );
+
+
+if(tieneLimiteVirtualPermiso){
+
+    calculoAsistencia
+    .minutosLlegadaPosterior = 0;
+
+    calculoAsistencia
+    .minutosTardanza = 0;
+
+    calculoAsistencia
+    .minutosSalidaAnticipada = 0;
+
+
+    /*
+        La parte efectivamente cumplida se toma
+        de las horas reales trabajadas.
+    */
+
+    calculoAsistencia
+    .minutosJornadaCumplida =
+        Math.min(
+
+            calculoAsistencia
+            .minutosJornadaProgramada,
+
+            calculoAsistencia
+            .minutosTrabajados
+
+        );
+
+}
+
+
     const calculoHorasExtra =
     calcularHorasExtraAsistencia({
 
@@ -1800,11 +1848,20 @@ if(permisoDia){
         "MEDIO_DIA"
     ){
 
-        minutosJustificadosPermiso =
-            Math.round(
-                jornadaProgramada /
-                2
-            );
+minutosJustificadosPermiso =
+    calcularMinutosPermisoMedioDia({
+
+        horario:
+            horarioPrincipal,
+
+        clasificacion,
+
+        mitadDia:
+            permisoDia.mitadDia,
+
+        jornadaProgramada
+
+    });
 
     }
     else if(
@@ -2800,13 +2857,13 @@ function crearEntradaHTML(
     }
 
 
-    if(
+if(
     registro.entrada
     ?.esCubiertaPorPermiso
 ){
 
     return `
-        <div class="btn-horario-resumen correcta permiso-virtual">
+        <div class="marcacion-permiso-virtual">
 
             <i class="bi bi-briefcase"></i>
 
@@ -2821,11 +2878,11 @@ function crearEntradaHTML(
                 </strong>
 
                 <span>
-                    Inicio de segunda mitad
+                    Retorno autorizado
                 </span>
 
                 <small>
-                    Cubierto por ${escaparHTML(
+                    ${escaparHTML(
                         registro.entrada
                         .permisoNombre
                     )}
@@ -3758,6 +3815,32 @@ function crearTardanzaHTML(
         `;
 
     }
+
+    /*
+    Una entrada virtual cubierta por permiso
+    no representa una llegada tardía.
+*/
+
+if(
+    registro.entrada
+    ?.esCubiertaPorPermiso
+){
+
+    return `
+        <div class="detalle-tardanza sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                Cubierta por permiso
+            </span>
+
+        </div>
+    `;
+
+}
 
 
     const calculo =
@@ -4716,11 +4799,16 @@ function aplicarLimiteVirtualPermisoParcial({
     }
 
 
-    const limiteMitad =
-        obtenerLimiteMitadJornada(
-            horario,
-            clasificacion
-        );
+const limiteMitad =
+    obtenerLimiteMitadJornada(
+
+        horario,
+
+        clasificacion,
+
+        permiso.mitadDia
+
+    );
 
 
     if(!Number.isFinite(limiteMitad)){
@@ -4825,24 +4913,25 @@ function aplicarLimiteVirtualPermisoParcial({
 
 
 /*=====================================================
-OBTENER PUNTO MEDIO REAL DE LA JORNADA
+OBTENER LÍMITE DEL PERMISO DE MEDIO DÍA
 =====================================================*/
 
 function obtenerLimiteMitadJornada(
 
     horario,
-    clasificacion
+    clasificacion,
+    mitadDia
 
 ){
 
-    const entrada =
+    const entradaProgramada =
         convertirHoraAMinutos(
             horario.entrada
             ?.programada
         );
 
 
-    let salida =
+    let salidaProgramada =
         convertirHoraAMinutos(
             horario.salida
             ?.programada
@@ -4852,10 +4941,11 @@ function obtenerLimiteMitadJornada(
     if(
         horario.cruzaMedianoche
         ||
-        salida <= entrada
+        salidaProgramada <=
+        entradaProgramada
     ){
 
-        salida += 1440;
+        salidaProgramada += 1440;
 
     }
 
@@ -4872,7 +4962,122 @@ function obtenerLimiteMitadJornada(
         ?.minutosJornada;
 
 
-    const intervalos = [];
+    /*
+        Si existe refrigerio, este divide naturalmente
+        la primera y segunda mitad de la jornada.
+    */
+
+    if(
+        Number.isFinite(
+            inicioRefrigerio
+        )
+        &&
+        Number.isFinite(
+            finRefrigerio
+        )
+    ){
+
+        if(
+            mitadDia ===
+            "PRIMERA_MITAD"
+        ){
+
+            /*
+                La persona comienza a trabajar cuando
+                termina el refrigerio.
+            */
+
+            return finRefrigerio;
+
+        }
+
+
+        /*
+            Si tiene permiso en la segunda mitad,
+            deja de trabajar cuando inicia el refrigerio.
+        */
+
+        return inicioRefrigerio;
+
+    }
+
+
+    /*
+        Solo si no existe refrigerio utilizamos
+        el punto medio matemático.
+    */
+
+    return Math.round(
+        entradaProgramada
+        +
+        (
+            salidaProgramada -
+            entradaProgramada
+        )
+        /
+        2
+    );
+
+}
+
+
+
+/*=====================================================
+MINUTOS CUBIERTOS POR PERMISO DE MEDIO DÍA
+=====================================================*/
+
+function calcularMinutosPermisoMedioDia({
+
+    horario,
+    clasificacion,
+    mitadDia,
+    jornadaProgramada
+
+}){
+
+    if(!horario){
+
+        return 0;
+
+    }
+
+
+    const entradaProgramada =
+        convertirHoraAMinutos(
+            horario.entrada
+            ?.programada
+        );
+
+
+    let salidaProgramada =
+        convertirHoraAMinutos(
+            horario.salida
+            ?.programada
+        );
+
+
+    if(
+        horario.cruzaMedianoche
+        ||
+        salidaProgramada <=
+        entradaProgramada
+    ){
+
+        salidaProgramada += 1440;
+
+    }
+
+
+    const inicioRefrigerio =
+        clasificacion
+        ?.inicioRefrigerio
+        ?.minutosJornada;
+
+
+    const finRefrigerio =
+        clasificacion
+        ?.finRefrigerio
+        ?.minutosJornada;
 
 
     if(
@@ -4883,100 +5088,37 @@ function obtenerLimiteMitadJornada(
         Number.isFinite(
             finRefrigerio
         )
-        &&
-        inicioRefrigerio > entrada
-        &&
-        finRefrigerio < salida
     ){
 
-        intervalos.push(
-            [
-                entrada,
-                inicioRefrigerio
-            ],
-            [
-                finRefrigerio,
-                salida
-            ]
-        );
-
-    }
-    else{
-
-        intervalos.push(
-            [
-                entrada,
-                salida
-            ]
-        );
-
-    }
-
-
-    const minutosLaborables =
-        intervalos.reduce(
-            (
-                total,
-                intervalo
-            )=>
-
-                total +
-                Math.max(
-                    0,
-                    intervalo[1] -
-                    intervalo[0]
-                ),
-
-            0
-        );
-
-
-    const mitad =
-        minutosLaborables /
-        2;
-
-
-    let acumulado = 0;
-
-
-    for(const intervalo of intervalos){
-
-        const duracion =
-            intervalo[1] -
-            intervalo[0];
-
-
         if(
-            acumulado +
-            duracion >=
-            mitad
+            mitadDia ===
+            "PRIMERA_MITAD"
         ){
 
-            return Math.round(
-                intervalo[0] +
-                (
-                    mitad -
-                    acumulado
-                )
+            return Math.max(
+                0,
+                inicioRefrigerio -
+                entradaProgramada
             );
 
         }
 
 
-        acumulado +=
-            duracion;
+        return Math.max(
+            0,
+            salidaProgramada -
+            finRefrigerio
+        );
 
     }
 
 
-    return entrada +
-        Math.round(
-            minutosLaborables /
-            2
-        );
+    return Math.round(
+        jornadaProgramada /
+        2
+    );
 
 }
-
 
 /*=====================================================
 CONVERTIR MINUTOS A HORA
