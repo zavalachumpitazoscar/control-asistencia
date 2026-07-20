@@ -4057,3 +4057,67 @@ JORNADA JUSTIFICADA POR PERMISO
     line-height:1.25;
 
 }
+
+
+.marcacion-permiso-virtual{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    min-width:105px;
+
+    padding:7px 8px;
+
+    border-radius:9px;
+
+    background:#eff6ff;
+
+    color:#1d4ed8;
+
+}
+
+
+.marcacion-permiso-virtual > i{
+
+    flex-shrink:0;
+
+    font-size:13px;
+
+}
+
+
+.marcacion-permiso-virtual > div{
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-width:0;
+
+}
+
+
+.marcacion-permiso-virtual strong{
+
+    font-size:11px;
+
+}
+
+
+.marcacion-permiso-virtual span,
+.marcacion-permiso-virtual small{
+
+    overflow:hidden;
+
+    font-size:8px;
+
+    line-height:1.25;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+
+}
