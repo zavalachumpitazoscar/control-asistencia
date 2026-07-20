@@ -3357,24 +3357,48 @@ if(
         true
     ){
 
-        return `
-            <div class="jornada-asistencia permiso-justificado">
+       const jornadaProgramada =
+    registro.minutosJornadaProgramada
+    ||
+    0;
 
-                <strong>
-                    ${formatearDuracionCorta(
-                        minutosJustificados
-                    )}
-                    justificadas
-                </strong>
 
-                <span>
-                    0 h trabajadas · ${escaparHTML(
-                        nombrePermiso
-                    )}
-                </span>
+const minutosCubiertos =
+    Math.min(
+        jornadaProgramada,
+        minutosJustificados
+    );
 
-            </div>
-        `;
+
+return `
+    <div class="jornada-asistencia permiso-justificado">
+
+        <strong>
+            ${formatearDuracionCorta(
+                minutosCubiertos
+            )}
+            de
+            ${formatearDuracionCorta(
+                jornadaProgramada
+            )}
+            cubiertas
+        </strong>
+
+        <span>
+            ${formatearDuracionCorta(
+                minutosJustificados
+            )}
+            justificadas
+        </span>
+
+        <small>
+            0 h trabajadas · ${escaparHTML(
+                nombrePermiso
+            )}
+        </small>
+
+    </div>
+`;
 
     }
 
