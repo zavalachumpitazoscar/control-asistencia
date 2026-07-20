@@ -3995,3 +3995,30 @@ button.horas-extra-resumen.revision:hover{
     background:#f5f3ff;
 
 }
+
+
+/*======================================
+JORNADA JUSTIFICADA POR PERMISO
+======================================*/
+
+.jornada-asistencia.permiso-justificado{
+
+    background:#f5f3ff;
+
+    border:1px solid #ddd6fe;
+
+}
+
+
+.jornada-asistencia.permiso-justificado strong{
+
+    color:#6d28d9;
+
+}
+
+
+.jornada-asistencia.permiso-justificado span{
+
+    color:#7c3aed;
+
+}
