@@ -1915,19 +1915,20 @@ minutosJustificadosPermiso =
     reemplaza el estado AUSENTE.
 */
 
-if(
-    permisoDia
-    &&
-    noTieneMarcaciones
-){
+/*
+    Un permiso aprobado de día completo tiene prioridad
+    aunque existan marcaciones accidentales.
+*/
 
-    tardanzaMinutos = 0;
-
+if(permisoDia){
 
     if(
         tipoDuracionPermiso ===
         "DIA_COMPLETO"
     ){
+
+        tardanzaMinutos = 0;
+
 
         estado =
             permisoDia.computaComoLaborado ===
@@ -1938,7 +1939,10 @@ if(
             "AUSENCIA_JUSTIFICADA";
 
     }
-    else{
+    else if(noTieneMarcaciones){
+
+        tardanzaMinutos = 0;
+
 
         estado =
             permisoDia.computaComoLaborado ===
@@ -2818,6 +2822,50 @@ function crearEntradaHTML(
     registro
 ){
 
+
+const tienePermisoCompleto =
+    registro.permisoDia
+    &&
+    (
+        registro.permisoDia.tipoDuracion ||
+        "DIA_COMPLETO"
+    ) ===
+    "DIA_COMPLETO";
+
+
+if(
+    tienePermisoCompleto
+    &&
+    !registro.entrada
+){
+
+    return `
+        <div class="marcacion-no-requerida">
+
+            <i class="bi bi-calendar-check"></i>
+
+            <div>
+
+                <strong>
+                    No requerida
+                </strong>
+
+                <span>
+                    ${escaparHTML(
+                        registro.permisoDia
+                        .tipoPermisoNombre
+                        ||
+                        "Permiso aprobado"
+                    )}
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
     /*
         Si no existe entrada mostramos el botón
         para agregarla manualmente.
@@ -3231,6 +3279,49 @@ function crearSalidaHTML(
     registro
 ){
 
+const tienePermisoCompleto =
+    registro.permisoDia
+    &&
+    (
+        registro.permisoDia.tipoDuracion ||
+        "DIA_COMPLETO"
+    ) ===
+    "DIA_COMPLETO";
+
+
+if(
+    tienePermisoCompleto
+    &&
+    !registro.salida
+){
+
+    return `
+        <div class="marcacion-no-requerida">
+
+            <i class="bi bi-calendar-check"></i>
+
+            <div>
+
+                <strong>
+                    No requerida
+                </strong>
+
+                <span>
+                    ${escaparHTML(
+                        registro.permisoDia
+                        .tipoPermisoNombre
+                        ||
+                        "Permiso aprobado"
+                    )}
+                </span>
+
+            </div>
+
+        </div>
+    `;
+
+}
+    
     /*
         Si no existe una salida, mostramos
         el botón para agregarla.
@@ -3464,7 +3555,12 @@ const sinMarcaciones =
 if(
     permiso
     &&
-    sinMarcaciones
+    (
+        tipoDuracionPermiso ===
+        "DIA_COMPLETO"
+        ||
+        sinMarcaciones
+    )
 ){
 
     const nombrePermiso =
@@ -3551,6 +3647,7 @@ const minutosCubiertos =
     );
 
 
+        
 return `
     <div class="jornada-asistencia permiso-justificado">
 
@@ -3578,9 +3675,45 @@ return `
             )}
         </small>
 
+        ${
+            tipoDuracionPermiso ===
+            "DIA_COMPLETO"
+            &&
+            registro.cantidadMarcaciones > 0
+            ?
+            `
+                <small class="permiso-marcacion-advertencia">
+
+                    <i class="bi bi-exclamation-triangle"></i>
+
+                    ${registro.cantidadMarcaciones}
+
+                    marcación${
+                        registro.cantidadMarcaciones === 1
+                        ?
+                        ""
+                        :
+                        "es"
+                    }
+
+                    registrada${
+                        registro.cantidadMarcaciones === 1
+                        ?
+                        ""
+                        :
+                        "s"
+                    }
+
+                    durante el permiso
+
+                </small>
+            `
+            :
+            ""
+        }
+
     </div>
 `;
-
     }
 
 }
@@ -4780,6 +4913,22 @@ const tieneLimiteVirtual =
         ?.esCubiertaPorPermiso
     );
 
+
+const tienePermisoCompleto =
+    registro.permisoDia
+    &&
+    (
+        registro.permisoDia.tipoDuracion ||
+        "DIA_COMPLETO"
+    ) ===
+    "DIA_COMPLETO";
+
+
+if(tienePermisoCompleto){
+
+    return "0 h";
+
+}
 
 if(
     registro.cantidadMarcaciones ===
