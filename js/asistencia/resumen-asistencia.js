@@ -1730,6 +1730,68 @@ const calculoAsistencia =
     }
 
 
+    /*
+    Aplicar permiso aprobado de día completo.
+
+    El permiso reemplaza el estado AUSENTE únicamente
+    cuando no existen marcaciones reales.
+*/
+
+const esPermisoDiaCompleto =
+    permisoDia
+    &&
+    (
+        permisoDia.tipoDuracion ||
+        "DIA_COMPLETO"
+    ) ===
+    "DIA_COMPLETO";
+
+
+const noTieneMarcaciones =
+    marcaciones.length === 0;
+
+
+let minutosComputablesPermiso = 0;
+
+
+if(
+    esPermisoDiaCompleto
+    &&
+    noTieneMarcaciones
+){
+
+    tardanzaMinutos = 0;
+
+
+    if(
+        permisoDia.computaComoLaborado ===
+        true
+    ){
+
+        estado =
+            "PERMISO_COMPUTABLE";
+
+
+        minutosComputablesPermiso =
+            calculoAsistencia
+            .minutosJornadaProgramada
+            ||
+            0;
+
+    }
+    else if(
+        permisoDia.justificaAusencia ===
+        true
+    ){
+
+        estado =
+            "AUSENCIA_JUSTIFICADA";
+
+    }
+
+}
+    
+
     return {
 
         colaboradorId:
@@ -1822,6 +1884,8 @@ ajusteAsistencia,
         minutosTrabajados:
             calculoAsistencia
             .minutosTrabajados,
+        
+        minutosComputablesPermiso,
 
         aprobacionHorasExtra,
 
@@ -2032,7 +2096,10 @@ function crearFilaResumen(
 
                 <span class="estado-asistencia ${obtenerClaseEstado(registro.estado)}">
 
-                    ${obtenerTextoEstado(registro.estado)}
+                    ${obtenerTextoEstado(
+                    registro.estado,
+                    registro
+                    )}
 
                 </span>
 
@@ -3106,6 +3173,80 @@ JORNADA
 function crearJornadaHTML(
     registro
 ){
+
+    const permiso =
+    registro.permisoDia;
+
+
+const esPermisoDiaCompleto =
+    permiso
+    &&
+    (
+        permiso.tipoDuracion ||
+        "DIA_COMPLETO"
+    ) ===
+    "DIA_COMPLETO";
+
+
+const sinMarcaciones =
+    registro.cantidadMarcaciones === 0;
+
+
+if(
+    esPermisoDiaCompleto
+    &&
+    sinMarcaciones
+){
+
+    const nombrePermiso =
+        permiso.tipoPermisoNombre
+        ||
+        "Permiso aprobado";
+
+
+    if(
+        permiso.computaComoLaborado ===
+        true
+    ){
+
+        return `
+            <div class="jornada-asistencia completa">
+
+                <strong>
+                    ${formatearDuracionCorta(
+                        registro.minutosComputablesPermiso
+                    )}
+                </strong>
+
+                <span>
+                    Computable por ${escaparHTML(
+                        nombrePermiso
+                    )}
+                </span>
+
+            </div>
+        `;
+
+    }
+
+
+    return `
+        <div class="jornada-asistencia incompleta">
+
+            <strong>
+                0 h
+            </strong>
+
+            <span>
+                Ausencia justificada por ${escaparHTML(
+                    nombrePermiso
+                )}
+            </span>
+
+        </div>
+    `;
+
+}
 
     if(!registro.horarioPrincipal){
 
@@ -4347,6 +4488,12 @@ function obtenerClaseEstado(
             "tardanza",
 
         SIN_HORARIO:
+            "permiso",
+
+        PERMISO_COMPUTABLE:
+            "permiso",
+
+        AUSENCIA_JUSTIFICADA:
             "permiso"
 
     };
@@ -4359,8 +4506,26 @@ function obtenerClaseEstado(
 
 
 function obtenerTextoEstado(
-    estado
+    estado,
+    registro = null
 ){
+
+    if(
+        estado === "PERMISO_COMPUTABLE"
+        ||
+        estado === "AUSENCIA_JUSTIFICADA"
+    ){
+
+        return (
+            registro
+            ?.permisoDia
+            ?.tipoPermisoNombre
+            ||
+            "Permiso aprobado"
+        );
+
+    }
+
 
     const textos = {
 
@@ -4377,7 +4542,13 @@ function obtenerTextoEstado(
             "Incompleto",
 
         SIN_HORARIO:
-            "Sin horario"
+            "Sin horario",
+
+        PERMISO_COMPUTABLE:
+            "Permiso computable",
+
+        AUSENCIA_JUSTIFICADA:
+            "Ausencia justificada"
 
     };
 
@@ -4386,7 +4557,6 @@ function obtenerTextoEstado(
     estado;
 
 }
-
 
 function asignarContador(
     id,
