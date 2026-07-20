@@ -3265,26 +3265,23 @@ function crearJornadaHTML(
     registro
 ){
 
-    const permiso =
+const permiso =
     registro.permisoDia;
 
 
-const esPermisoDiaCompleto =
-    permiso
-    &&
-    (
-        permiso.tipoDuracion ||
-        "DIA_COMPLETO"
-    ) ===
+const tipoDuracionPermiso =
+    permiso?.tipoDuracion
+    ||
     "DIA_COMPLETO";
 
 
 const sinMarcaciones =
-    registro.cantidadMarcaciones === 0;
+    registro.cantidadMarcaciones ===
+    0;
 
 
 if(
-    esPermisoDiaCompleto
+    permiso
     &&
     sinMarcaciones
 ){
@@ -3295,22 +3292,51 @@ if(
         "Permiso aprobado";
 
 
+    const minutosJustificados =
+        registro.minutosJustificadosPermiso
+        ||
+        0;
+
+
+    const minutosComputables =
+        registro.minutosComputablesPermiso
+        ||
+        0;
+
+
+    const esDiaCompleto =
+        tipoDuracionPermiso ===
+        "DIA_COMPLETO";
+
+
+    /*
+        Permiso que sí computa para la jornada:
+        vacaciones, permiso con goce, comisión, etc.
+    */
+
     if(
         permiso.computaComoLaborado ===
         true
     ){
 
         return `
-            <div class="jornada-asistencia completa">
+            <div class="jornada-asistencia ${
+                esDiaCompleto
+                ?
+                "completa"
+                :
+                "incompleta"
+            }">
 
                 <strong>
                     ${formatearDuracionCorta(
-                        registro.minutosComputablesPermiso
+                        minutosComputables
                     )}
+                    computables
                 </strong>
 
                 <span>
-                    Computable por ${escaparHTML(
+                    0 h trabajadas · ${escaparHTML(
                         nombrePermiso
                     )}
                 </span>
@@ -3321,21 +3347,36 @@ if(
     }
 
 
-    return `
-        <div class="jornada-asistencia incompleta">
+    /*
+        Permiso que justifica la ausencia,
+        pero no representa horas trabajadas.
+    */
 
-            <strong>
-                0 h
-            </strong>
+    if(
+        permiso.justificaAusencia ===
+        true
+    ){
 
-            <span>
-                Ausencia justificada por ${escaparHTML(
-                    nombrePermiso
-                )}
-            </span>
+        return `
+            <div class="jornada-asistencia permiso-justificado">
 
-        </div>
-    `;
+                <strong>
+                    ${formatearDuracionCorta(
+                        minutosJustificados
+                    )}
+                    justificadas
+                </strong>
+
+                <span>
+                    0 h trabajadas · ${escaparHTML(
+                        nombrePermiso
+                    )}
+                </span>
+
+            </div>
+        `;
+
+    }
 
 }
 
