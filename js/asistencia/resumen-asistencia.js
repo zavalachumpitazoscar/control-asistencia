@@ -723,18 +723,19 @@ async function cargarResumenAsistencia(
 
     try{
 
-        const [
-            colaboradores,
-            marcaciones,
-            asignaciones,
-            horarios,
-            excepciones,
-            sucursales,
-            areas,
-            subareas,
-            ajustesAsistencia,
-            aprobacionesHorasExtra
-        ] = await Promise.all([
+const [
+    colaboradores,
+    marcaciones,
+    asignaciones,
+    horarios,
+    excepciones,
+    sucursales,
+    areas,
+    subareas,
+    ajustesAsistencia,
+    aprobacionesHorasExtra,
+    permisos
+] = await Promise.all([
 
             consultarColeccionEmpresa(
                 "colaboradores",
@@ -781,10 +782,15 @@ async function cargarResumenAsistencia(
                 empresaId
             ),
 
-            consultarColeccionEmpresa(
-                "aprobacionesHorasExtra",
-                empresaId
-            )
+consultarColeccionEmpresa(
+    "aprobacionesHorasExtra",
+    empresaId
+),
+
+consultarColeccionEmpresa(
+    "permisos",
+    empresaId
+)
         ]);
 
 
@@ -826,7 +832,9 @@ async function cargarResumenAsistencia(
 
                 ajustesAsistencia,
 
-                aprobacionesHorasExtra
+                aprobacionesHorasExtra,
+
+                permisos
 
             });
 
@@ -907,7 +915,8 @@ function construirRegistrosResumen({
     horarios,
     excepciones,
     ajustesAsistencia,
-    aprobacionesHorasExtra
+    aprobacionesHorasExtra,
+    permisos
 
 }){
 
@@ -1023,6 +1032,37 @@ function construirRegistrosResumen({
     ||
     null;
 
+
+        const permisoDia =
+    permisos.find(
+        permiso=>
+
+            permiso.colaboradorId ===
+            colaborador.id
+
+            &&
+
+            String(
+                permiso.estado ||
+                ""
+            )
+            .toUpperCase() ===
+            "APROBADO"
+
+            &&
+
+            permiso.fechaInicio <=
+            fecha
+
+            &&
+
+            permiso.fechaFin >=
+            fecha
+
+    )
+    ||
+    null;
+
 return construirRegistroColaborador(
 
     colaborador,
@@ -1033,7 +1073,9 @@ return construirRegistroColaborador(
 
     ajusteAsistencia,
 
-    aprobacionHorasExtra
+    aprobacionHorasExtra,
+
+    permisoDia
 
 );
 
@@ -1451,7 +1493,8 @@ function construirRegistroColaborador(
     horarios,
     marcaciones,
     ajusteAsistencia,
-    aprobacionHorasExtra
+    aprobacionHorasExtra,
+    permisoDia
 ){
 
     const nombres =
@@ -1781,6 +1824,9 @@ ajusteAsistencia,
             .minutosTrabajados,
 
         aprobacionHorasExtra,
+
+        permisoDia,
+
 
     };
 
