@@ -2914,6 +2914,40 @@ if(
     ?.esCubiertaPorPermiso
 ){
 
+    const entradaVirtual =
+        registro.entrada;
+
+
+    const nombrePermiso =
+        entradaVirtual.permisoNombre
+        ||
+        registro.permisoDia
+        ?.tipoPermisoNombre
+        ||
+        "Permiso aprobado";
+
+
+    const esPermisoPorHoras =
+        entradaVirtual.tipoDuracionPermiso ===
+        "HORAS";
+
+
+    const rangoPermiso =
+        esPermisoPorHoras
+        ?
+        `${
+            formatearHora(
+                entradaVirtual.horaInicioPermiso
+            )
+        }–${
+            formatearHora(
+                entradaVirtual.horaFinPermiso
+            )
+        }`
+        :
+        "";
+
+
     return `
         <div class="marcacion-permiso-virtual">
 
@@ -2924,17 +2958,29 @@ if(
                 <strong>
                     ${formatearHora(
                         obtenerHoraMarcacion(
-                            registro.entrada
+                            entradaVirtual
                         )
                     )}
                 </strong>
 
                 <span>
-                    Fin del permiso
+                    Fin de ${escaparHTML(
+                        nombrePermiso
+                    )}
                 </span>
 
                 <small>
-                    Inicia refrigerio
+
+                    ${
+                        esPermisoPorHoras
+                        ?
+                        `Permiso ${escaparHTML(
+                            rangoPermiso
+                        )}`
+                        :
+                        "Inicia refrigerio"
+                    }
+
                 </small>
 
             </div>
@@ -3451,14 +3497,38 @@ if(
     ?.esCubiertaPorPermiso
 ){
 
+    const salidaVirtual =
+        registro.salida;
+
+
     const nombrePermiso =
-        registro.salida
-        .permisoNombre
+        salidaVirtual.permisoNombre
         ||
         registro.permisoDia
         ?.tipoPermisoNombre
         ||
         "Permiso aprobado";
+
+
+    const esPermisoPorHoras =
+        salidaVirtual.tipoDuracionPermiso ===
+        "HORAS";
+
+
+    const rangoPermiso =
+        esPermisoPorHoras
+        ?
+        `${
+            formatearHora(
+                salidaVirtual.horaInicioPermiso
+            )
+        }–${
+            formatearHora(
+                salidaVirtual.horaFinPermiso
+            )
+        }`
+        :
+        "";
 
 
     return `
@@ -3471,7 +3541,7 @@ if(
                 <strong>
                     ${formatearHora(
                         obtenerHoraMarcacion(
-                            registro.salida
+                            salidaVirtual
                         )
                     )}
                 </strong>
@@ -3483,7 +3553,17 @@ if(
                 </span>
 
                 <small>
-                    Después del refrigerio
+
+                    ${
+                        esPermisoPorHoras
+                        ?
+                        `Permiso ${escaparHTML(
+                            rangoPermiso
+                        )}`
+                        :
+                        "Después del refrigerio"
+                    }
+
                 </small>
 
             </div>
