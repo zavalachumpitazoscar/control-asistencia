@@ -3276,6 +3276,16 @@ if(
     ?.esCubiertaPorPermiso
 ){
 
+    const nombrePermiso =
+        registro.salida
+        .permisoNombre
+        ||
+        registro.permisoDia
+        ?.tipoPermisoNombre
+        ||
+        "Permiso aprobado";
+
+
     return `
         <div class="marcacion-permiso-virtual">
 
@@ -3292,7 +3302,9 @@ if(
                 </strong>
 
                 <span>
-                    Inicio del permiso
+                    Inicio de ${escaparHTML(
+                        nombrePermiso
+                    )}
                 </span>
 
                 <small>
@@ -3724,6 +3736,43 @@ completa
                 }
 
             </span>
+
+            ${
+    registro.permisoDia
+    ?
+    `
+        <small class="detalle-permiso-jornada">
+
+            ${formatearDuracionCorta(
+                registro.minutosJustificadosPermiso
+                ||
+                0
+            )}
+
+            ${
+                registro.permisoDia
+                .computaComoLaborado ===
+                true
+                ?
+                "computables"
+                :
+                "justificadas"
+            }
+
+            ·
+
+            ${escaparHTML(
+                registro.permisoDia
+                .tipoPermisoNombre
+                ||
+                "Permiso"
+            )}
+
+        </small>
+    `
+    :
+    ""
+}
 
 
             ${crearDetalleDescuentoJornada(registro)}
@@ -5305,6 +5354,23 @@ function obtenerTextoEstado(
     estado,
     registro = null
 ){
+
+if(
+    estado ===
+    "PRESENTE_CON_PERMISO"
+){
+
+    const nombrePermiso =
+        registro
+        ?.permisoDia
+        ?.tipoPermisoNombre
+        ||
+        "Permiso";
+
+
+    return `Presente · ${nombrePermiso}`;
+
+}
 
 if(
     estado === "PERMISO_COMPUTABLE"
