@@ -3608,6 +3608,12 @@ const cumplidaReal =
     0;
 
 
+const minutosCubiertosPermiso =
+    registro.minutosJustificadosPermiso
+    ||
+    0;
+
+
 const cumplida =
     Math.min(
 
@@ -3615,11 +3621,7 @@ const cumplida =
 
         cumplidaReal
         +
-        (
-            registro.minutosComputablesPermiso
-            ||
-            0
-        )
+        minutosCubiertosPermiso
 
     );
 
@@ -3708,11 +3710,17 @@ const completa =
             <span>
 
                 ${
-                    completa
-                    ?
-                    "Jornada cumplida"
-                    :
-                    "Jornada incompleta"
+completa
+?
+(
+    registro.permisoDia
+    ?
+    "Jornada cubierta"
+    :
+    "Jornada cumplida"
+)
+:
+"Jornada incompleta"
                 }
 
             </span>
@@ -4776,21 +4784,28 @@ function aplicarLimiteVirtualPermisoParcial({
 
 }){
 
-    if(
-        !permiso
-        ||
-        !horario
-        ||
-        permiso.tipoDuracion !==
-        "MEDIO_DIA"
-        ||
+if(
+    !permiso
+    ||
+    !horario
+    ||
+    permiso.tipoDuracion !==
+    "MEDIO_DIA"
+    ||
+    (
         permiso.computaComoLaborado !==
         true
-    ){
 
-        return;
+        &&
 
-    }
+        permiso.justificaAusencia !==
+        true
+    )
+){
+
+    return;
+
+}
 
 
 const limiteMitad =
