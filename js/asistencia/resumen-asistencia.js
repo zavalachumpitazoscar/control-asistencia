@@ -1583,6 +1583,18 @@ function construirRegistroColaborador(
 
         });
 
+    aplicarLimiteVirtualPermisoParcial({
+
+    permiso:
+        permisoDia,
+
+    horario:
+        horarioPrincipal,
+
+    clasificacion
+
+});
+
 
     const entrada =
         clasificacion.entrada;
@@ -1645,9 +1657,14 @@ const calculoAsistencia =
         "SIN_HORARIO";
 
 
-    let tardanzaMinutos =
-        calculoAsistencia
-        .minutosTardanza;
+let tardanzaMinutos =
+    clasificacion.entrada
+    ?.esCubiertaPorPermiso
+    ?
+    0
+    :
+    calculoAsistencia
+    .minutosTardanza;
 
 
     /*
@@ -1877,6 +1894,26 @@ if(
     }
 
 }
+
+
+
+    const tieneLimiteCubiertoPorPermiso =
+    Boolean(
+        entrada?.esCubiertaPorPermiso
+        ||
+        salida?.esCubiertaPorPermiso
+    );
+
+
+if(tieneLimiteCubiertoPorPermiso){
+
+    estado =
+        "PRESENTE_CON_PERMISO";
+
+    tardanzaMinutos = 0;
+
+}
+
     
 
     return {
@@ -2763,6 +2800,46 @@ function crearEntradaHTML(
     }
 
 
+    if(
+    registro.entrada
+    ?.esCubiertaPorPermiso
+){
+
+    return `
+        <div class="btn-horario-resumen correcta permiso-virtual">
+
+            <i class="bi bi-briefcase"></i>
+
+            <div>
+
+                <strong>
+                    ${formatearHora(
+                        obtenerHoraMarcacion(
+                            registro.entrada
+                        )
+                    )}
+                </strong>
+
+                <span>
+                    Inicio de segunda mitad
+                </span>
+
+                <small>
+                    Cubierto por ${escaparHTML(
+                        registro.entrada
+                        .permisoNombre
+                    )}
+                </small>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+    
+
     /*
         La clase debe definirse antes de construir
         el HTML que la utiliza.
@@ -3139,6 +3216,47 @@ function crearSalidaHTML(
     }
 
 
+
+    if(
+    registro.salida
+    ?.esCubiertaPorPermiso
+){
+
+    return `
+        <div class="btn-horario-resumen correcta permiso-virtual">
+
+            <i class="bi bi-briefcase"></i>
+
+            <div>
+
+                <strong>
+                    ${formatearHora(
+                        obtenerHoraMarcacion(
+                            registro.salida
+                        )
+                    )}
+                </strong>
+
+                <span>
+                    Fin de primera mitad
+                </span>
+
+                <small>
+                    Cubierto por ${escaparHTML(
+                        registro.salida
+                        .permisoNombre
+                    )}
+                </small>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+    
     /*
         Si la salida sí existe, mostramos
         la hora como botón editable.
@@ -3433,10 +3551,26 @@ return `
         0;
 
 
-    const cumplida =
-        registro.minutosJornadaCumplida
-        ||
-        0;
+const cumplidaReal =
+    registro.minutosJornadaCumplida
+    ||
+    0;
+
+
+const cumplida =
+    Math.min(
+
+        programada,
+
+        cumplidaReal
+        +
+        (
+            registro.minutosComputablesPermiso
+            ||
+            0
+        )
+
+    );
 
 
     const advertenciasRefrigerio =
@@ -3495,8 +3629,9 @@ return `
     }
 
 
-    const completa =
-        calculo.jornadaCompleta;
+const completa =
+    cumplida >=
+    programada;
 
 
     return `
@@ -4502,14 +4637,26 @@ function formatearMinutosTrabajados(
     registro
 ){
 
-    if(
-        registro.cantidadMarcaciones ===
-        1
-    ){
+const tieneLimiteVirtual =
+    Boolean(
+        registro.entrada
+        ?.esCubiertaPorPermiso
+        ||
+        registro.salida
+        ?.esCubiertaPorPermiso
+    );
 
-        return "Incompleto";
 
-    }
+if(
+    registro.cantidadMarcaciones ===
+    1
+    &&
+    !tieneLimiteVirtual
+){
+
+    return "Incompleto";
+
+}
 
 
     if(
@@ -4535,6 +4682,339 @@ function formatearMinutosTrabajados(
 
 
     return `${horas} h ${minutos} min`;
+
+}
+
+
+
+/*=====================================================
+APLICAR LÍMITE VIRTUAL POR PERMISO DE MEDIO DÍA
+=====================================================*/
+
+function aplicarLimiteVirtualPermisoParcial({
+
+    permiso,
+    horario,
+    clasificacion
+
+}){
+
+    if(
+        !permiso
+        ||
+        !horario
+        ||
+        permiso.tipoDuracion !==
+        "MEDIO_DIA"
+        ||
+        permiso.computaComoLaborado !==
+        true
+    ){
+
+        return;
+
+    }
+
+
+    const limiteMitad =
+        obtenerLimiteMitadJornada(
+            horario,
+            clasificacion
+        );
+
+
+    if(!Number.isFinite(limiteMitad)){
+
+        return;
+
+    }
+
+
+    const marcadorVirtual = {
+
+        id:null,
+
+        hora:
+            convertirMinutosAHoraResumen(
+                limiteMitad
+            ),
+
+        minutosJornada:
+            limiteMitad,
+
+        origen:
+            "PERMISO",
+
+        estado:
+            "VIRTUAL",
+
+        esCubiertaPorPermiso:
+            true,
+
+        permisoId:
+            permiso.id,
+
+        permisoNombre:
+            permiso.tipoPermisoNombre
+            ||
+            "Permiso aprobado"
+
+    };
+
+
+    /*
+        Primera mitad cubierta:
+        el límite virtual funciona como entrada
+        para comenzar la segunda mitad trabajada.
+    */
+
+    if(
+        permiso.mitadDia ===
+        "PRIMERA_MITAD"
+        &&
+        !clasificacion.entrada
+        &&
+        clasificacion.salida
+    ){
+
+        clasificacion.entrada = {
+
+            ...marcadorVirtual,
+
+            tipo:
+                "ENTRADA",
+
+            tipoInterpretado:
+                "ENTRADA"
+
+        };
+
+    }
+
+
+    /*
+        Segunda mitad cubierta:
+        el límite virtual funciona como salida
+        de la primera mitad trabajada.
+    */
+
+    if(
+        permiso.mitadDia ===
+        "SEGUNDA_MITAD"
+        &&
+        clasificacion.entrada
+        &&
+        !clasificacion.salida
+    ){
+
+        clasificacion.salida = {
+
+            ...marcadorVirtual,
+
+            tipo:
+                "SALIDA",
+
+            tipoInterpretado:
+                "SALIDA"
+
+        };
+
+    }
+
+}
+
+
+/*=====================================================
+OBTENER PUNTO MEDIO REAL DE LA JORNADA
+=====================================================*/
+
+function obtenerLimiteMitadJornada(
+
+    horario,
+    clasificacion
+
+){
+
+    const entrada =
+        convertirHoraAMinutos(
+            horario.entrada
+            ?.programada
+        );
+
+
+    let salida =
+        convertirHoraAMinutos(
+            horario.salida
+            ?.programada
+        );
+
+
+    if(
+        horario.cruzaMedianoche
+        ||
+        salida <= entrada
+    ){
+
+        salida += 1440;
+
+    }
+
+
+    const inicioRefrigerio =
+        clasificacion
+        ?.inicioRefrigerio
+        ?.minutosJornada;
+
+
+    const finRefrigerio =
+        clasificacion
+        ?.finRefrigerio
+        ?.minutosJornada;
+
+
+    const intervalos = [];
+
+
+    if(
+        Number.isFinite(
+            inicioRefrigerio
+        )
+        &&
+        Number.isFinite(
+            finRefrigerio
+        )
+        &&
+        inicioRefrigerio > entrada
+        &&
+        finRefrigerio < salida
+    ){
+
+        intervalos.push(
+            [
+                entrada,
+                inicioRefrigerio
+            ],
+            [
+                finRefrigerio,
+                salida
+            ]
+        );
+
+    }
+    else{
+
+        intervalos.push(
+            [
+                entrada,
+                salida
+            ]
+        );
+
+    }
+
+
+    const minutosLaborables =
+        intervalos.reduce(
+            (
+                total,
+                intervalo
+            )=>
+
+                total +
+                Math.max(
+                    0,
+                    intervalo[1] -
+                    intervalo[0]
+                ),
+
+            0
+        );
+
+
+    const mitad =
+        minutosLaborables /
+        2;
+
+
+    let acumulado = 0;
+
+
+    for(const intervalo of intervalos){
+
+        const duracion =
+            intervalo[1] -
+            intervalo[0];
+
+
+        if(
+            acumulado +
+            duracion >=
+            mitad
+        ){
+
+            return Math.round(
+                intervalo[0] +
+                (
+                    mitad -
+                    acumulado
+                )
+            );
+
+        }
+
+
+        acumulado +=
+            duracion;
+
+    }
+
+
+    return entrada +
+        Math.round(
+            minutosLaborables /
+            2
+        );
+
+}
+
+
+/*=====================================================
+CONVERTIR MINUTOS A HORA
+=====================================================*/
+
+function convertirMinutosAHoraResumen(
+    minutosTotales
+){
+
+    const minutosNormalizados =
+        (
+            Math.round(
+                minutosTotales
+            )
+            %
+            1440
+            +
+            1440
+        )
+        %
+        1440;
+
+
+    const horas =
+        Math.floor(
+            minutosNormalizados /
+            60
+        );
+
+
+    const minutos =
+        minutosNormalizados %
+        60;
+
+
+    return `${String(horas).padStart(2,"0")}:${String(
+        minutos
+    ).padStart(2,"0")}`;
 
 }
 
@@ -4656,7 +5136,10 @@ function obtenerClaseEstado(
             "permiso",
 
         AUSENCIA_PARCIAL_JUSTIFICADA:
-            "permiso"
+            "permiso",
+
+        PRESENTE_CON_PERMISO:
+            "permiso",
 
     };
 
@@ -4728,7 +5211,10 @@ if(
             "Permiso computable",
 
         AUSENCIA_JUSTIFICADA:
-            "Ausencia justificada"
+            "Ausencia justificada",
+
+        PRESENTE_CON_PERMISO:
+            "Presente con permiso",
 
     };
 
