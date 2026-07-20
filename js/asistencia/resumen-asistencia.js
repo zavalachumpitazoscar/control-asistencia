@@ -1595,6 +1595,20 @@ function construirRegistroColaborador(
 
 });
 
+    aplicarLimiteVirtualPermisoHoras({
+
+    permiso:
+        permisoDia,
+
+    horario:
+        horarioPrincipal,
+
+    clasificacion
+
+});
+
+    
+
 
     const entrada =
         clasificacion.entrada;
@@ -1869,30 +1883,20 @@ minutosJustificadosPermiso =
         "HORAS"
     ){
 
-        const inicioPermiso =
-            convertirHoraAMinutos(
-                permisoDia.horaInicio
-            );
+minutosJustificadosPermiso =
+    calcularMinutosPermisoPorHoras({
 
+        permiso:
+            permisoDia,
 
-        const finPermiso =
-            convertirHoraAMinutos(
-                permisoDia.horaFin
-            );
+        horario:
+            horarioPrincipal,
 
+        clasificacion,
 
-        minutosJustificadosPermiso =
-            Math.min(
+        jornadaProgramada
 
-                jornadaProgramada,
-
-                Math.max(
-                    0,
-                    finPermiso -
-                    inicioPermiso
-                )
-
-            );
+    });
 
     }
 
@@ -5200,6 +5204,238 @@ const limiteMitad =
 
 
 /*=====================================================
+APLICAR LÍMITE VIRTUAL POR PERMISO DE HORAS
+=====================================================*/
+
+function aplicarLimiteVirtualPermisoHoras({
+
+    permiso,
+    horario,
+    clasificacion
+
+}){
+
+    if(
+        !permiso
+        ||
+        !horario
+        ||
+        permiso.tipoDuracion !==
+        "HORAS"
+        ||
+        (
+            permiso.computaComoLaborado !==
+            true
+
+            &&
+
+            permiso.justificaAusencia !==
+            true
+        )
+    ){
+
+        return;
+
+    }
+
+
+    const entradaProgramada =
+        convertirHoraAMinutos(
+            horario.entrada
+            ?.programada
+        );
+
+
+    let salidaProgramada =
+        convertirHoraAMinutos(
+            horario.salida
+            ?.programada
+        );
+
+
+    let inicioPermiso =
+        convertirHoraAMinutos(
+            permiso.horaInicio
+        );
+
+
+    let finPermiso =
+        convertirHoraAMinutos(
+            permiso.horaFin
+        );
+
+
+    if(
+        horario.cruzaMedianoche
+        ||
+        salidaProgramada <=
+        entradaProgramada
+    ){
+
+        salidaProgramada += 1440;
+
+
+        if(
+            inicioPermiso <
+            entradaProgramada
+        ){
+
+            inicioPermiso += 1440;
+
+        }
+
+
+        if(
+            finPermiso <=
+            entradaProgramada
+        ){
+
+            finPermiso += 1440;
+
+        }
+
+    }
+
+
+    const permisoEmpiezaConJornada =
+        inicioPermiso <=
+        entradaProgramada;
+
+
+    const permisoTerminaConJornada =
+        finPermiso >=
+        salidaProgramada;
+
+
+    const nombrePermiso =
+        permiso.tipoPermisoNombre
+        ||
+        "Permiso aprobado";
+
+
+    /*
+        Permiso al inicio:
+        su término funciona como entrada virtual.
+    */
+
+    if(
+        permisoEmpiezaConJornada
+        &&
+        !clasificacion.entrada
+        &&
+        clasificacion.salida
+    ){
+
+        clasificacion.entrada = {
+
+            id:null,
+
+            tipo:
+                "ENTRADA",
+
+            tipoInterpretado:
+                "ENTRADA",
+
+            hora:
+                convertirMinutosAHoraResumen(
+                    finPermiso
+                ),
+
+            minutosJornada:
+                finPermiso,
+
+            origen:
+                "PERMISO",
+
+            estado:
+                "VIRTUAL",
+
+            esCubiertaPorPermiso:
+                true,
+
+            tipoDuracionPermiso:
+                "HORAS",
+
+            permisoId:
+                permiso.id,
+
+            permisoNombre:
+                nombrePermiso,
+
+            horaInicioPermiso:
+                permiso.horaInicio,
+
+            horaFinPermiso:
+                permiso.horaFin
+
+        };
+
+    }
+
+
+    /*
+        Permiso al final:
+        su inicio funciona como salida virtual.
+    */
+
+    if(
+        permisoTerminaConJornada
+        &&
+        clasificacion.entrada
+        &&
+        !clasificacion.salida
+    ){
+
+        clasificacion.salida = {
+
+            id:null,
+
+            tipo:
+                "SALIDA",
+
+            tipoInterpretado:
+                "SALIDA",
+
+            hora:
+                convertirMinutosAHoraResumen(
+                    inicioPermiso
+                ),
+
+            minutosJornada:
+                inicioPermiso,
+
+            origen:
+                "PERMISO",
+
+            estado:
+                "VIRTUAL",
+
+            esCubiertaPorPermiso:
+                true,
+
+            tipoDuracionPermiso:
+                "HORAS",
+
+            permisoId:
+                permiso.id,
+
+            permisoNombre:
+                nombrePermiso,
+
+            horaInicioPermiso:
+                permiso.horaInicio,
+
+            horaFinPermiso:
+                permiso.horaFin
+
+        };
+
+    }
+
+}
+
+
+/*=====================================================
 OBTENER LÍMITE DEL PERMISO DE MEDIO DÍA
 =====================================================*/
 
@@ -5403,6 +5639,179 @@ function calcularMinutosPermisoMedioDia({
     return Math.round(
         jornadaProgramada /
         2
+    );
+
+}
+
+
+/*=====================================================
+MINUTOS CUBIERTOS POR PERMISO DE HORAS
+=====================================================*/
+
+function calcularMinutosPermisoPorHoras({
+
+    permiso,
+    horario,
+    clasificacion,
+    jornadaProgramada
+
+}){
+
+    if(
+        !permiso
+        ||
+        !horario
+    ){
+
+        return 0;
+
+    }
+
+
+    const entradaProgramada =
+        convertirHoraAMinutos(
+            horario.entrada
+            ?.programada
+        );
+
+
+    let salidaProgramada =
+        convertirHoraAMinutos(
+            horario.salida
+            ?.programada
+        );
+
+
+    let inicioPermiso =
+        convertirHoraAMinutos(
+            permiso.horaInicio
+        );
+
+
+    let finPermiso =
+        convertirHoraAMinutos(
+            permiso.horaFin
+        );
+
+
+    if(
+        horario.cruzaMedianoche
+        ||
+        salidaProgramada <=
+        entradaProgramada
+    ){
+
+        salidaProgramada += 1440;
+
+
+        if(
+            inicioPermiso <
+            entradaProgramada
+        ){
+
+            inicioPermiso += 1440;
+
+        }
+
+
+        if(
+            finPermiso <=
+            entradaProgramada
+        ){
+
+            finPermiso += 1440;
+
+        }
+
+    }
+
+
+    /*
+        Limitamos el permiso al horario programado.
+    */
+
+    const inicioAplicable =
+        Math.max(
+            entradaProgramada,
+            inicioPermiso
+        );
+
+
+    const finAplicable =
+        Math.min(
+            salidaProgramada,
+            finPermiso
+        );
+
+
+    let minutosCubiertos =
+        Math.max(
+            0,
+            finAplicable -
+            inicioAplicable
+        );
+
+
+    /*
+        Si el permiso coincide con el refrigerio,
+        ese tiempo no se contabiliza dos veces.
+    */
+
+    const inicioRefrigerio =
+        clasificacion
+        ?.inicioRefrigerio
+        ?.minutosJornada;
+
+
+    const finRefrigerio =
+        clasificacion
+        ?.finRefrigerio
+        ?.minutosJornada;
+
+
+    if(
+        Number.isFinite(
+            inicioRefrigerio
+        )
+        &&
+        Number.isFinite(
+            finRefrigerio
+        )
+    ){
+
+        const solapamientoRefrigerio =
+            Math.max(
+
+                0,
+
+                Math.min(
+                    finAplicable,
+                    finRefrigerio
+                )
+                -
+                Math.max(
+                    inicioAplicable,
+                    inicioRefrigerio
+                )
+
+            );
+
+
+        minutosCubiertos -=
+            solapamientoRefrigerio;
+
+    }
+
+
+    return Math.min(
+
+        jornadaProgramada,
+
+        Math.max(
+            0,
+            minutosCubiertos
+        )
+
     );
 
 }
