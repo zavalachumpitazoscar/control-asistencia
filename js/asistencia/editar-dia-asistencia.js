@@ -52,7 +52,14 @@ let excepciones = [];
 let horariosSeleccionados =
     new Set();
 
-let moduloIniciado = false;
+/*
+    El evento global se registra una sola vez.
+
+    Los eventos del modal se registran nuevamente
+    porque su HTML cambia al cambiar de pestaña.
+*/
+
+let eventoEditarDiaRegistrado = false;
 
 
 /*=====================================================
@@ -60,13 +67,6 @@ INICIAR EDITOR
 =====================================================*/
 
 export function iniciarEditarDiaAsistencia(){
-
-    if(moduloIniciado){
-
-        return;
-
-    }
-
 
     modal =
         document.getElementById(
@@ -132,9 +132,14 @@ export function iniciarEditarDiaAsistencia(){
     }
 
 
-    moduloIniciado =
-        true;
+/*
+    Este evento pertenece a document y permanece
+    aunque la vista de Asistencia sea reemplazada.
 
+    Por eso se registra una sola vez.
+*/
+
+if(!eventoEditarDiaRegistrado){
 
     document.addEventListener(
         "asistencia:editar-horario-dia",
@@ -146,6 +151,12 @@ export function iniciarEditarDiaAsistencia(){
 
         }
     );
+
+
+    eventoEditarDiaRegistrado =
+        true;
+
+}
 
 
     btnCerrar?.addEventListener(
