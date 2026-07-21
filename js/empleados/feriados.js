@@ -4092,6 +4092,40 @@ async function guardarDescansoSustitutorioFirestore(){
 
     }
 
+    const coincideConOtroFeriado =
+    feriadosEmpresa.some(
+        feriado=>
+
+            String(
+                feriado.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() ===
+            "ACTIVO"
+
+            &&
+
+            feriado.fechaInicio <=
+            fechaDescanso
+
+            &&
+
+            feriado.fechaFin >=
+            fechaDescanso
+
+    );
+
+
+if(coincideConOtroFeriado){
+
+    mostrarAdvertencia(
+        "La fecha seleccionada corresponde a otro feriado. Selecciona un día laborable."
+    );
+
+    return;
+
+}
+
 
     if(
         fechaDescanso <=
