@@ -1277,7 +1277,7 @@ async function sincronizarFeriadosOficiales2026(){
                 `${empresaId}_${feriado.codigo}`
                 .replaceAll("/","-");
 
-            const referenciaFeriado =
+let referenciaFeriado =
     doc(
         db,
         "feriados",
@@ -1285,11 +1285,49 @@ async function sincronizarFeriadosOficiales2026(){
     );
 
 
-const documentoExistente =
+let documentoExistente =
     await getDoc(
         referenciaFeriado
     );
 
+
+/*
+    Compatibilidad con el identificador anterior
+    utilizado para Año Nuevo.
+*/
+
+if(
+    !documentoExistente.exists()
+    &&
+    feriado.codigo ===
+    "PE-2026-01-01"
+){
+
+    const referenciaAnterior =
+        doc(
+            db,
+            "feriados",
+            `${empresaId}_PE-01-01`
+        );
+
+
+    const documentoAnterior =
+        await getDoc(
+            referenciaAnterior
+        );
+
+
+    if(documentoAnterior.exists()){
+
+        referenciaFeriado =
+            referenciaAnterior;
+
+        documentoExistente =
+            documentoAnterior;
+
+    }
+
+}
 
 /*
     Si ya existe, conservamos toda su configuración:
@@ -1297,6 +1335,53 @@ const documentoExistente =
 */
 
 if(documentoExistente.exists()){
+
+    const datosExistentes =
+        documentoExistente.data();
+
+
+    const esFeriadoNacional =
+        feriado.tipo ===
+        "FERIADO_NACIONAL";
+
+
+    /*
+        Actualizamos únicamente el tratamiento inicial
+        pendiente de los feriados nacionales.
+
+        No modificamos excepciones, regla general,
+        estado ni otras decisiones del cliente.
+    */
+
+    if(
+        esFeriadoNacional
+        &&
+        (
+            !datosExistentes.tratamientoTrabajo
+            ||
+            datosExistentes.tratamientoTrabajo ===
+            "PENDIENTE"
+        )
+    ){
+
+        await updateDoc(
+            referenciaFeriado,
+            {
+
+                tratamientoTrabajo:
+                    "PAGO_ADICIONAL",
+
+                descansoRemunerado:
+                    true,
+
+                fechaActualizacion:
+                    serverTimestamp()
+
+            }
+        );
+
+    }
+
 
     continue;
 
@@ -1355,8 +1440,12 @@ await setDoc(
                         ? "POR_CONFIGURAR"
                         : "TODOS_DESCANSAN",
 
-                    tratamientoTrabajo:
-                        "PENDIENTE",
+tratamientoTrabajo:
+    esDiaNoLaborable
+    ?
+    "PENDIENTE"
+    :
+    "PAGO_ADICIONAL",
 
                     noRegistrarFalta:true,
 
