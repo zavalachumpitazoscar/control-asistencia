@@ -2564,11 +2564,105 @@ function renderizarResumenAsistencia(){
                     subareaId;
 
 
-                const coincideEstado =
-                    !estado
-                    ||
-                    registro.estado ===
-                    estado;
+const estadosConPermiso = [
+
+    "PERMISO_COMPUTABLE",
+
+    "AUSENCIA_JUSTIFICADA",
+
+    "PERMISO_PARCIAL_COMPUTABLE",
+
+    "AUSENCIA_PARCIAL_JUSTIFICADA",
+
+    "PRESENTE_CON_PERMISO",
+
+    "TARDANZA_CON_PERMISO"
+
+];
+
+
+const estadosPresentes = [
+
+    "PRESENTE",
+
+    "TRABAJO_EN_FERIADO"
+
+];
+
+
+const estadosTardanza = [
+
+    "TARDANZA",
+
+    "TARDANZA_CON_PERMISO"
+
+];
+
+
+const estadosIncompletos = [
+
+    "INCOMPLETO",
+
+    "FERIADO_PENDIENTE"
+
+];
+
+
+let coincideEstado =
+    !estado;
+
+
+if(
+    estado ===
+    "CON_PERMISO"
+){
+
+    coincideEstado =
+        estadosConPermiso.includes(
+            registro.estado
+        );
+
+}
+else if(
+    estado ===
+    "PRESENTE"
+){
+
+    coincideEstado =
+        estadosPresentes.includes(
+            registro.estado
+        );
+
+}
+else if(
+    estado ===
+    "TARDANZA"
+){
+
+    coincideEstado =
+        estadosTardanza.includes(
+            registro.estado
+        );
+
+}
+else if(
+    estado ===
+    "INCOMPLETO"
+){
+
+    coincideEstado =
+        estadosIncompletos.includes(
+            registro.estado
+        );
+
+}
+else if(estado){
+
+    coincideEstado =
+        registro.estado ===
+        estado;
+
+}
 
 
                 return (
