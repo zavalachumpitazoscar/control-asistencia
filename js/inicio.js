@@ -255,36 +255,80 @@ window.location.href =
 });
 
 
-async function cargarVista(vista){
+async function cargarVista(
+    vista
+){
 
     try{
 
-const ruta =
-    `vistas/${vista}.html`;
+        const tabsEmpleados = [
+
+            "colaboradores",
+
+            "horarios",
+
+            "permisos",
+
+            "feriados"
+
+        ];
 
 
-const respuesta =
-    await fetch(
-        ruta
-    );
+        const esTabEmpleados =
+            tabsEmpleados.includes(
+                vista
+            );
 
 
-if(!respuesta.ok){
+        /*
+            Las pestañas internas primero cargan
+            la vista principal de Empleados.
+        */
 
-    throw new Error(
-        `No se pudo cargar ${ruta}. Estado HTTP: ${respuesta.status}`
-    );
+        const vistaPrincipal =
+            esTabEmpleados
+            ?
+            "empleados"
+            :
+            vista;
 
-}
+
+        const tabInicial =
+            esTabEmpleados
+            ?
+            vista
+            :
+            "colaboradores";
 
 
-const html =
-    await respuesta.text();
+        const ruta =
+            `vistas/${vistaPrincipal}.html`;
+
+
+        const respuesta =
+            await fetch(
+                ruta
+            );
+
+
+        if(!respuesta.ok){
+
+            throw new Error(
+                `No se pudo cargar ${ruta}. Estado HTTP: ${respuesta.status}`
+            );
+
+        }
+
+
+        const html =
+            await respuesta.text();
+
 
         contenedor.innerHTML =
-        html;
+            html;
 
-        switch(vista){
+
+        switch(vistaPrincipal){
 
             case "compañia":
 
@@ -292,11 +336,15 @@ const html =
 
             break;
 
+
             case "empleados":
 
-                iniciarEmpleados();
+                iniciarEmpleados(
+                    tabInicial
+                );
 
             break;
+
 
             case "asistencia":
 
@@ -304,18 +352,22 @@ const html =
 
             break;
 
-
         }
 
     }
     catch(error){
 
-        contenedor.innerHTML=
+        contenedor.innerHTML =
         `
-        <h2>Vista no encontrada</h2>
+            <h2>
+                Vista no encontrada
+            </h2>
         `;
 
-        console.error(error);
+
+        console.error(
+            error
+        );
 
     }
 
