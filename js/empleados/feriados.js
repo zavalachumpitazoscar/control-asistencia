@@ -435,6 +435,12 @@ let guardarDescansoSustitutorio;
 
 let colaboradorDescansoSeleccionado = null;
 
+let anularDescansoSustitutorio;
+
+let descansosSustitutoriosFeriado = [];
+
+let descansoSustitutorioSeleccionado = null;
+
 
 
 /*=====================================================
@@ -881,6 +887,11 @@ guardarDescansoSustitutorio =
         "guardarDescansoSustitutorio"
     );
 
+anularDescansoSustitutorio =
+    document.getElementById(
+        "anularDescansoSustitutorio"
+    );
+
 }
 
 
@@ -1117,6 +1128,11 @@ function registrarEventosFeriados(){
         cerrarListadoColaboradores
     );
 
+    registrarCierrePorFondo(
+    modalDescansoSustitutorio,
+    cerrarModalDescansoSustitutorio
+);
+
 
     if(cerrarDescansoSustitutorio){
 
@@ -1138,6 +1154,13 @@ if(guardarDescansoSustitutorio){
 
     guardarDescansoSustitutorio.onclick =
         guardarDescansoSustitutorioFirestore;
+
+}
+
+if(anularDescansoSustitutorio){
+
+    anularDescansoSustitutorio.onclick =
+        anularDescansoSustitutorioFirestore;
 
 }
 
@@ -1189,25 +1212,28 @@ CARGAR ORGANIZACIÓN
 
 async function cargarDatosOrganizacion(){
 
-    const consultas = [
+const consultas = [
 
-        obtenerColeccionEmpresa("colaboradores"),
+    obtenerColeccionEmpresa("colaboradores"),
 
-        obtenerColeccionEmpresa("sucursales"),
+    obtenerColeccionEmpresa("sucursales"),
 
-        obtenerColeccionEmpresa("areas"),
+    obtenerColeccionEmpresa("areas"),
 
-        obtenerColeccionEmpresa("subareas")
+    obtenerColeccionEmpresa("subareas"),
 
-    ];
+    obtenerColeccionEmpresa("descansosSustitutoriosFeriados")
+
+];
 
 
-    const [
-        colaboradoresResultado,
-        sucursalesResultado,
-        areasResultado,
-        subareasResultado
-    ] = await Promise.all(consultas);
+const [
+    colaboradoresResultado,
+    sucursalesResultado,
+    areasResultado,
+    subareasResultado,
+    descansosResultado
+] = await Promise.all(consultas);
 
 
     colaboradoresFeriado =
@@ -1221,6 +1247,9 @@ async function cargarDatosOrganizacion(){
 
     subareasFeriado =
         subareasResultado;
+
+    descansosSustitutoriosFeriado =
+    descansosResultado;
 
 }
 
@@ -3402,6 +3431,32 @@ function renderizarTablaColaboradores(){
             const colaborador =
                 item.colaborador;
 
+
+            const descansoAsignado =
+    descansosSustitutoriosFeriado.find(
+        descanso=>
+
+            descanso.feriadoId ===
+            feriadoSeleccionado.id
+
+            &&
+
+            descanso.colaboradorId ===
+            colaborador.id
+
+            &&
+
+            String(
+                descanso.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() ===
+            "ACTIVO"
+
+    )
+    ||
+    null;
+
             const sucursalId =
                 colaborador.organizacion?.sucursalId ||
                 colaborador.sucursalId;
@@ -3488,13 +3543,17 @@ function renderizarTablaColaboradores(){
 
                         </span>
 
-                        ${
+${
     item.resultado ===
     "TRABAJA"
 
     &&
 
     (
+        descansoAsignado
+
+        ||
+
         feriadoSeleccionado
         .tratamientoTrabajo ===
         "DESCANSO_SUSTITUTORIO"
@@ -3513,9 +3572,24 @@ function renderizarTablaColaboradores(){
             data-colaborador-id="${escaparHTML(
                 colaborador.id
             )}"
+            data-descanso-id="${escaparHTML(
+                descansoAsignado?.id
+                ||
+                ""
+            )}"
         >
             <i class="bi bi-calendar-plus"></i>
-            Registrar descanso
+
+            ${
+                descansoAsignado
+                ?
+                `Reprogramar: ${escaparHTML(
+                    descansoAsignado.fechaDescanso
+                )}`
+                :
+                "Registrar descanso"
+            }
+
         </button>
     `
     :
@@ -3546,12 +3620,22 @@ function renderizarTablaColaboradores(){
                     boton.dataset.colaboradorId
             );
 
+        const descanso =
+    descansosSustitutoriosFeriado.find(
+        item=>
+            item.id ===
+            boton.dataset.descansoId
+    )
+    ||
+    null;
+
 
         if(colaborador){
 
-            abrirDescansoSustitutorio(
-                colaborador
-            );
+abrirDescansoSustitutorio(
+    colaborador,
+    descanso
+);
 
         }
 
@@ -3896,7 +3980,8 @@ ABRIR DESCANSO SUSTITUTORIO
 =====================================================*/
 
 function abrirDescansoSustitutorio(
-    colaborador
+    colaborador,
+    descansoExistente = null
 ){
 
     if(
@@ -3938,6 +4023,9 @@ function abrirDescansoSustitutorio(
 
     colaboradorDescansoSeleccionado =
         colaborador;
+
+    descansoSustitutorioSeleccionado =
+    descansoExistente;
 
 
     feriadoTrabajadoId.value =
@@ -3989,13 +4077,40 @@ function abrirDescansoSustitutorio(
         fechaMinima;
 
 
-    fechaDescansoSustitutorio.value =
-        fechaMinima;
+fechaDescansoSustitutorio.value =
+    descansoExistente
+    ?.fechaDescanso
+    ||
+    fechaMinima;
 
 
-    observacionDescansoSustitutorio.value =
-        "";
+observacionDescansoSustitutorio.value =
+    descansoExistente
+    ?.observacion
+    ||
+    "";
 
+
+anularDescansoSustitutorio.style.display =
+    descansoExistente
+    ?
+    "inline-flex"
+    :
+    "none";
+
+
+guardarDescansoSustitutorio.innerHTML =
+    descansoExistente
+    ?
+    `
+        <i class="bi bi-check-lg"></i>
+        Guardar cambios
+    `
+    :
+    `
+        <i class="bi bi-check-lg"></i>
+        Guardar descanso
+    `;
 
     modalDescansoSustitutorio.classList.add(
         "activo"
@@ -4017,6 +4132,9 @@ function cerrarModalDescansoSustitutorio(){
     );
 
 
+    descansoSustitutorioSeleccionado =
+    null;
+    
     colaboradorDescansoSeleccionado =
         null;
 
@@ -4051,6 +4169,14 @@ function cerrarModalDescansoSustitutorio(){
             "";
 
     }
+
+    if(anularDescansoSustitutorio){
+
+    anularDescansoSustitutorio.style.display =
+        "none";
+
+}
+    
 
 }
 
@@ -4152,6 +4278,19 @@ if(coincideConOtroFeriado){
             "-"
         );
 
+    const referenciaDescanso =
+    doc(
+        db,
+        "descansosSustitutoriosFeriados",
+        idDocumento
+    );
+
+
+const documentoDescanso =
+    await getDoc(
+        referenciaDescanso
+    );
+
 
     const datos = {
 
@@ -4196,45 +4335,70 @@ if(coincideConOtroFeriado){
         estado:
             "ACTIVO",
 
-        creadoPor:
-            auth.currentUser?.uid
-            ||
-            null,
-
-        fechaCreacion:
-            serverTimestamp(),
+actualizadoPor:
+    auth.currentUser?.uid
+    ||
+    null,
 
         fechaActualizacion:
             serverTimestamp()
 
     };
 
+if(!documentoDescanso.exists()){
+
+    datos.creadoPor =
+        auth.currentUser?.uid
+        ||
+        null;
+
+    datos.fechaCreacion =
+        serverTimestamp();
+
+}
+
 
     guardarDescansoSustitutorio.disabled =
         true;
 
+    const estabaEditando =
+    Boolean(
+        descansoSustitutorioSeleccionado
+    );
+    
 
     try{
 
-        await setDoc(
-            doc(
-                db,
-                "descansosSustitutoriosFeriados",
-                idDocumento
-            ),
-            datos,
-            {
-                merge:true
-            }
-        );
+await setDoc(
+    referenciaDescanso,
+    datos,
+    {
+        merge:true
+    }
+);
+
+ /*
+        Volver a cargar los descansos para que
+        la tabla muestre el registro actualizado.
+    */
+
+    await cargarDatosOrganizacion();
 
 
-        cerrarModalDescansoSustitutorio();
+    cerrarModalDescansoSustitutorio();
 
 
-        await mostrarExito(
-            "Descanso sustitutorio registrado correctamente."
-        );
+    renderizarTablaColaboradores();
+
+
+
+await mostrarExito(
+    estabaEditando
+    ?
+    "Descanso sustitutorio actualizado correctamente."
+    :
+    "Descanso sustitutorio registrado correctamente."
+);
 
     }
     catch(error){
@@ -4254,6 +4418,105 @@ if(coincideConOtroFeriado){
 
         guardarDescansoSustitutorio.disabled =
             false;
+
+    }
+
+}
+
+async function anularDescansoSustitutorioFirestore(){
+
+    if(!descansoSustitutorioSeleccionado){
+
+        return;
+
+    }
+
+
+    const confirmacion =
+        await Swal.fire({
+
+            title:
+                "¿Anular descanso sustitutorio?",
+
+            text:
+                "La fecha volverá a calcularse como un día normal de asistencia.",
+
+            icon:
+                "warning",
+
+            showCancelButton:
+                true,
+
+            confirmButtonText:
+                "Sí, anular",
+
+            cancelButtonText:
+                "Cancelar",
+
+            confirmButtonColor:
+                "#dc2626"
+
+        });
+
+
+    if(!confirmacion.isConfirmed){
+
+        return;
+
+    }
+
+
+    try{
+
+        await updateDoc(
+            doc(
+                db,
+                "descansosSustitutoriosFeriados",
+                descansoSustitutorioSeleccionado.id
+            ),
+            {
+
+                estado:
+                    "ANULADO",
+
+                anuladoPor:
+                    auth.currentUser?.uid
+                    ||
+                    null,
+
+                fechaAnulacion:
+                    serverTimestamp(),
+
+                fechaActualizacion:
+                    serverTimestamp()
+
+            }
+        );
+
+
+        cerrarModalDescansoSustitutorio();
+
+        await cargarDatosOrganizacion();
+
+        renderizarTablaColaboradores();
+
+
+        await mostrarExito(
+            "Descanso sustitutorio anulado."
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "Error anulando descanso sustitutorio:",
+            error
+        );
+
+
+        mostrarError(
+            "No se pudo anular el descanso sustitutorio."
+        );
 
     }
 
