@@ -3,7 +3,9 @@ import { iniciarHorarios } from "./empleados/horarios.js";
 import { iniciarPermisos } from "./empleados/permisos.js";
 import { iniciarFeriados } from "./empleados/feriados.js";
 
-export function iniciarEmpleados(){
+export function iniciarEmpleados(
+    tabInicial = "colaboradores"
+){
 
     const botones =
     document.querySelectorAll(".tab");
@@ -32,10 +34,28 @@ export function iniciarEmpleados(){
     });
 
 
-    // Al abrir Empleados se carga Colaboradores
+/*
+    Marcar como activa la pestaña solicitada.
+*/
 
-    cargarTab("colaboradores");
+botones.forEach(boton=>{
 
+    boton.classList.toggle(
+        "activo",
+        boton.dataset.tab ===
+        tabInicial
+    );
+
+});
+
+
+/*
+    Cargar la pestaña solicitada.
+*/
+
+cargarTab(
+    tabInicial
+);
 }
 
 
