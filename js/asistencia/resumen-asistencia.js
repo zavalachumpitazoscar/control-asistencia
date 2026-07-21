@@ -2258,54 +2258,104 @@ if(
     tardanzaMinutos = 0;
 
 }
-else if(
+/*
+    Feriado todavía pendiente de configuración.
+*/
+
+if(
     feriadoDia
     &&
     aplicacionFeriado ===
-    "DESCANSA"
+    "PENDIENTE"
+){
+
+    estado =
+        "FERIADO_PENDIENTE";
+
+    tardanzaMinutos = 0;
+
+}
+
+
+/*
+    Feriado ya configurado.
+
+    Si existen marcaciones, se identifica como trabajo
+    en feriado sin importar si el colaborador estaba
+    configurado mediante regla general o excepción.
+*/
+
+else if(
+    feriadoDia
+    &&
+    (
+        aplicacionFeriado ===
+        "DESCANSA"
+
+        ||
+
+        aplicacionFeriado ===
+        "TRABAJA"
+    )
 ){
 
     const tieneMarcacionesReales =
         marcaciones.length > 0;
 
 
-if(
-    tieneMarcacionesReales
-    &&
-    feriadoDia
-    .identificarFeriadoLaborado !==
-    false
-){
+    if(
+        tieneMarcacionesReales
 
-    const tieneEntradaReal =
-        Boolean(
-            entrada
-            &&
-            !entrada.esCubiertaPorPermiso
-        );
-
-
-    const tieneSalidaReal =
-        Boolean(
-            salida
-            &&
-            !salida.esCubiertaPorPermiso
-        );
-
-
-    estado =
-        tieneEntradaReal
         &&
-        tieneSalidaReal
-        ?
-        "TRABAJO_EN_FERIADO"
-        :
-        "TRABAJO_EN_FERIADO_INCOMPLETO";
 
-}
+        feriadoDia
+        .identificarFeriadoLaborado !==
+        false
+    ){
+
+        const tieneEntradaReal =
+            Boolean(
+                entrada
+                &&
+                !entrada.esCubiertaPorPermiso
+            );
+
+
+        const tieneSalidaReal =
+            Boolean(
+                salida
+                &&
+                !salida.esCubiertaPorPermiso
+            );
+
+
+        estado =
+            tieneEntradaReal
+            &&
+            tieneSalidaReal
+            ?
+            "TRABAJO_EN_FERIADO"
+            :
+            "TRABAJO_EN_FERIADO_INCOMPLETO";
+
+    }
+
+
+    /*
+        Si debía descansar y no trabajó,
+        corresponde descanso por feriado.
+    */
+
     else if(
-        !tieneMarcacionesReales
+        aplicacionFeriado ===
+        "DESCANSA"
+
         &&
+
+        !tieneMarcacionesReales
+
+        &&
+
         feriadoDia
         .noRegistrarFalta !==
         false
@@ -2317,25 +2367,24 @@ if(
     }
 
 
-    /*
-        Un día de descanso por feriado
-        no genera tardanza.
-    */
+    if(
+        estado === "FERIADO"
 
-if(
-    estado === "FERIADO"
-    ||
-    estado === "TRABAJO_EN_FERIADO"
-    ||
-    estado === "TRABAJO_EN_FERIADO_INCOMPLETO"
-){
+        ||
 
-    tardanzaMinutos = 0;
+        estado === "TRABAJO_EN_FERIADO"
+
+        ||
+
+        estado ===
+        "TRABAJO_EN_FERIADO_INCOMPLETO"
+    ){
+
+        tardanzaMinutos = 0;
+
+    }
 
 }
-
-}
-
 
     
 return {
