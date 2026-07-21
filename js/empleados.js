@@ -75,6 +75,14 @@ async function cargarTab(tab){
 
         );
 
+        if(!respuesta.ok){
+
+    throw new Error(
+        `No se pudo cargar la pestaña ${tab}. Estado HTTP: ${respuesta.status}`
+    );
+
+}
+
 
         const html =
         await respuesta.text();
