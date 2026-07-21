@@ -3334,13 +3334,32 @@ function colaboradorEsExcepcion(
 LISTADO DE COLABORADORES
 =====================================================*/
 
-function abrirListadoColaboradores(){
+async function abrirListadoColaboradores(){
 
-    if(!feriadoSeleccionado) return;
+    if(!feriadoSeleccionado){
+
+        return;
+
+    }
+
+
+    /*
+        Recargar colaboradores, organización y descansos
+        antes de construir el listado.
+    */
+
+    await cargarDatosOrganizacion();
+
+
+    console.log(
+        "Colaboradores cargados para feriado:",
+        colaboradoresFeriado.length
+    );
 
 
     tituloColaboradoresFeriado.textContent =
         feriadoSeleccionado.nombre;
+
 
     subtituloColaboradoresFeriado.textContent =
         obtenerTextoRangoFechas(
@@ -3349,9 +3368,15 @@ function abrirListadoColaboradores(){
         );
 
 
-    buscarColaboradorFeriado.value = "";
+    buscarColaboradorFeriado.value =
+        "";
 
-    filtroResultadoFeriado.value = "";
+
+    filtroResultadoFeriado.value =
+        "";
+
+
+    renderizarTablaColaboradores();
 
 
     modalColaboradoresFeriado.classList.add(
