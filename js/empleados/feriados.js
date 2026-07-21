@@ -3630,7 +3630,10 @@ function renderizarTablaColaboradores(){
         `
             <button
                 type="button"
-                class="btn-registrar-descanso-sustitutorio"
+                class="
+    btn-registrar-descanso-sustitutorio
+    ${descansoAsignado ? "tiene-descanso" : ""}
+"
                 data-colaborador-id="${escaparHTML(
                     colaborador.id
                 )}"
@@ -4364,6 +4367,56 @@ if(
 
 }
 
+
+/*
+    Evitar que el colaborador tenga más de un descanso
+    sustitutorio activo en la misma fecha.
+*/
+
+const descansoDuplicado =
+    descansosSustitutoriosFeriado.find(
+        descanso=>
+
+            descanso.empresaId ===
+            empresaId
+
+            &&
+
+            descanso.colaboradorId ===
+            colaborador.id
+
+            &&
+
+            descanso.fechaDescanso ===
+            fechaDescanso
+
+            &&
+
+            String(
+                descanso.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() ===
+            "ACTIVO"
+
+            &&
+
+            descanso.id !==
+            descansoSustitutorioSeleccionado?.id
+    );
+
+
+if(descansoDuplicado){
+
+    mostrarAdvertencia(
+        "El colaborador ya tiene otro descanso sustitutorio registrado en esta fecha."
+    );
+
+    return;
+
+}
+
+    
 
     const idDocumento =
         `${empresaId}_${feriadoSeleccionado.id}_${colaborador.id}`
