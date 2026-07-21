@@ -956,48 +956,204 @@ function construirRegistrosResumen({
             fecha
         );
 
-    /*
-    Buscar un feriado activo que incluya
-    la fecha seleccionada.
-*/
 
-const feriadoDia =
-    feriados.find(
-        feriado=>
+    const feriadoDia =
+        feriados.find(
+            feriado=>
 
-            String(
-                feriado.estado ||
+                String(
+                    feriado.estado ||
+                    "ACTIVO"
+                )
+                .toUpperCase() ===
                 "ACTIVO"
-            )
-            .toUpperCase() ===
-            "ACTIVO"
 
-            &&
+                &&
 
-            feriado.fechaInicio <=
-            fecha
+                feriado.fechaInicio <=
+                fecha
 
-            &&
+                &&
 
-            feriado.fechaFin >=
-            fecha
+                feriado.fechaFin >=
+                fecha
 
-    )
-    ||
-    null;
+        )
+        ||
+        null;
 
 
     return colaboradores
-    .filter(colaborador=>
+    .filter(
+        colaborador=>
 
-        String(
-            colaborador.estado ||
-            "ACTIVO"
-        )
-        .toUpperCase() !==
-        "INACTIVO"
-
+            String(
+                colaborador.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() !==
+            "INACTIVO"
     )
+    .map(colaborador=>{
+
+        const horarioIds =
+            obtenerHorariosEfectivos({
+
+                colaboradorId:
+                    colaborador.id,
+
+                fecha,
+
+                asignaciones,
+
+                excepciones
+
+            });
+
+
+        const horariosDia =
+            horarioIds
+            .map(
+                id=>
+                    horariosPorId.get(id)
+            )
+            .filter(Boolean);
+
+
+        const marcacionesDia =
+            marcacionesPorColaborador.get(
+                colaborador.id
+            )
+            ||
+            [];
+
+
+        const ajusteAsistencia =
+            ajustesAsistencia.find(
+                ajuste=>
+
+                    ajuste.colaboradorId ===
+                    colaborador.id
+
+                    &&
+
+                    ajuste.fecha ===
+                    fecha
+
+                    &&
+
+                    String(
+                        ajuste.estado ||
+                        "ACTIVO"
+                    )
+                    .toUpperCase() !==
+                    "INACTIVO"
+            )
+            ||
+            null;
+
+
+        const aprobacionHorasExtra =
+            aprobacionesHorasExtra.find(
+                aprobacion=>
+
+                    aprobacion.colaboradorId ===
+                    colaborador.id
+
+                    &&
+
+                    aprobacion.fecha ===
+                    fecha
+
+                    &&
+
+                    String(
+                        aprobacion.estado ||
+                        "ACTIVO"
+                    )
+                    .toUpperCase() !==
+                    "INACTIVO"
+            )
+            ||
+            null;
+
+
+        const permisoDia =
+            permisos.find(
+                permiso=>
+
+                    permiso.colaboradorId ===
+                    colaborador.id
+
+                    &&
+
+                    String(
+                        permiso.estado ||
+                        ""
+                    )
+                    .toUpperCase() ===
+                    "APROBADO"
+
+                    &&
+
+                    permiso.fechaInicio <=
+                    fecha
+
+                    &&
+
+                    permiso.fechaFin >=
+                    fecha
+            )
+            ||
+            null;
+
+
+        const descansoSustitutorioDia =
+            descansosSustitutorios.find(
+                descanso=>
+
+                    descanso.colaboradorId ===
+                    colaborador.id
+
+                    &&
+
+                    descanso.fechaDescanso ===
+                    fecha
+
+                    &&
+
+                    String(
+                        descanso.estado ||
+                        "ACTIVO"
+                    )
+                    .toUpperCase() ===
+                    "ACTIVO"
+            )
+            ||
+            null;
+
+
+        return construirRegistroColaborador(
+
+            colaborador,
+
+            horariosDia,
+
+            marcacionesDia,
+
+            ajusteAsistencia,
+
+            aprobacionHorasExtra,
+
+            permisoDia,
+
+            feriadoDia,
+
+            descansoSustitutorioDia
+
+        );
+
+    })
     .sort(
         (
             primero,
@@ -1008,7 +1164,6 @@ const feriadoDia =
                 segundo.nombre,
                 "es"
             )
-
     );
 
 }
@@ -1553,226 +1708,6 @@ const aplicacionFeriado =
 
     const salida =
         clasificacion.salida;
-
-
-        .map(colaborador=>{
-
-        const horarioIds =
-            obtenerHorariosEfectivos({
-
-                colaboradorId:
-                    colaborador.id,
-
-                fecha,
-
-                asignaciones,
-
-                excepciones
-
-            });
-
-
-        const horariosDia =
-            horarioIds
-            .map(id=>
-                horariosPorId.get(id)
-            )
-            .filter(Boolean);
-
-
-        const marcacionesDia =
-            marcacionesPorColaborador.get(
-                colaborador.id
-            )
-            ||
-            [];
-
-        const ajusteAsistencia =
-    ajustesAsistencia.find(
-        ajuste=>
-
-            ajuste.colaboradorId ===
-            colaborador.id
-
-            &&
-
-            ajuste.fecha ===
-            fecha
-
-            &&
-
-            String(
-                ajuste.estado ||
-                "ACTIVO"
-            )
-            .toUpperCase() !==
-            "INACTIVO"
-
-    )
-    ||
-    null;
-
-
-        const aprobacionHorasExtra =
-    aprobacionesHorasExtra.find(
-        aprobacion=>
-
-            aprobacion.colaboradorId ===
-            colaborador.id
-
-            &&
-
-            aprobacion.fecha ===
-            fecha
-
-            &&
-
-            String(
-                aprobacion.estado ||
-                "ACTIVO"
-            )
-            .toUpperCase() !==
-            "INACTIVO"
-
-    )
-    ||
-    null;
-
-
-        const permisoDia =
-    permisos.find(
-        permiso=>
-
-            permiso.colaboradorId ===
-            colaborador.id
-
-            &&
-
-            String(
-                permiso.estado ||
-                ""
-            )
-            .toUpperCase() ===
-            "APROBADO"
-
-            &&
-
-            permiso.fechaInicio <=
-            fecha
-
-            &&
-
-            permiso.fechaFin >=
-            fecha
-
-    )
-    ||
-    null;
-
-
-        const descansoSustitutorioDia =
-    descansosSustitutorios.find(
-        descanso=>
-
-            descanso.colaboradorId ===
-            colaborador.id
-
-            &&
-
-            descanso.fechaDescanso ===
-            fecha
-
-            &&
-
-            String(
-                descanso.estado ||
-                "ACTIVO"
-            )
-            .toUpperCase() ===
-            "ACTIVO"
-
-    )
-    ||
-    null;
-
-        /*
-    Aplicar descanso sustitutorio.
-
-    No se aplica si la misma fecha también corresponde
-    a un feriado activo, porque el feriado tiene prioridad.
-*/
-
-if(
-    descansoSustitutorioDia
-    &&
-    !feriadoDia
-){
-
-    const tieneMarcacionesReales =
-        marcaciones.length > 0;
-
-
-    if(!tieneMarcacionesReales){
-
-        estado =
-            "DESCANSO_SUSTITUTORIO";
-
-    }
-    else{
-
-        const tieneEntradaReal =
-            Boolean(
-                entrada
-                &&
-                !entrada.esCubiertaPorPermiso
-            );
-
-
-        const tieneSalidaReal =
-            Boolean(
-                salida
-                &&
-                !salida.esCubiertaPorPermiso
-            );
-
-
-        estado =
-            tieneEntradaReal
-            &&
-            tieneSalidaReal
-            ?
-            "DESCANSO_SUSTITUTORIO_TRABAJADO"
-            :
-            "DESCANSO_SUSTITUTORIO_INCOMPLETO";
-
-    }
-
-
-    tardanzaMinutos = 0;
-
-}
-
-return construirRegistroColaborador(
-
-    colaborador,
-
-    horariosDia,
-
-    marcacionesDia,
-
-    ajusteAsistencia,
-
-    aprobacionHorasExtra,
-
-    permisoDia,
-
-    feriadoDia,
-
-    descansoSustitutorioDia
-
-);
-
-    })
     
     /*
         Calculamos horas trabajadas, refrigerio,
@@ -2238,29 +2173,8 @@ if(
 }
 
 
-
 /*
-    Aplicar el resultado del feriado.
-
-    El feriado tiene prioridad sobre un permiso
-    cuando al colaborador le corresponde descansar.
-*/
-
-if(
-    feriadoDia
-    &&
-    aplicacionFeriado ===
-    "PENDIENTE"
-){
-
-    estado =
-        "FERIADO_PENDIENTE";
-
-    tardanzaMinutos = 0;
-
-}
-/*
-    Feriado todavía pendiente de configuración.
+    Aplicar feriado pendiente de configuración.
 */
 
 if(
@@ -2279,11 +2193,7 @@ if(
 
 
 /*
-    Feriado ya configurado.
-
-    Si existen marcaciones, se identifica como trabajo
-    en feriado sin importar si el colaborador estaba
-    configurado mediante regla general o excepción.
+    Aplicar un feriado ya configurado.
 */
 
 else if(
@@ -2340,13 +2250,6 @@ else if(
             "TRABAJO_EN_FERIADO_INCOMPLETO";
 
     }
-
-
-    /*
-        Si debía descansar y no trabajó,
-        corresponde descanso por feriado.
-    */
-
     else if(
         aplicacionFeriado ===
         "DESCANSA"
@@ -2369,11 +2272,13 @@ else if(
 
 
     if(
-        estado === "FERIADO"
+        estado ===
+        "FERIADO"
 
         ||
 
-        estado === "TRABAJO_EN_FERIADO"
+        estado ===
+        "TRABAJO_EN_FERIADO"
 
         ||
 
@@ -2387,6 +2292,64 @@ else if(
 
 }
 
+
+/*
+    Aplicar descanso sustitutorio.
+
+    El feriado de la propia fecha tiene prioridad
+    sobre el descanso sustitutorio.
+*/
+
+if(
+    descansoSustitutorioDia
+    &&
+    !feriadoDia
+){
+
+    const tieneMarcacionesReales =
+        marcaciones.length > 0;
+
+
+    if(!tieneMarcacionesReales){
+
+        estado =
+            "DESCANSO_SUSTITUTORIO";
+
+    }
+    else{
+
+        const tieneEntradaReal =
+            Boolean(
+                entrada
+                &&
+                !entrada.esCubiertaPorPermiso
+            );
+
+
+        const tieneSalidaReal =
+            Boolean(
+                salida
+                &&
+                !salida.esCubiertaPorPermiso
+            );
+
+
+        estado =
+            tieneEntradaReal
+            &&
+            tieneSalidaReal
+            ?
+            "DESCANSO_SUSTITUTORIO_TRABAJADO"
+            :
+            "DESCANSO_SUSTITUTORIO_INCOMPLETO";
+
+    }
+
+
+    tardanzaMinutos = 0;
+
+}
+    
     
 return {
 
