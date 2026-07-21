@@ -4,6 +4,11 @@ import {
 }
 from "../firebase-config.js";
 
+import {
+    clasificarMarcaciones
+}
+from "./clasificar-marcaciones.js";
+
 
 import {
     collection,
@@ -69,6 +74,12 @@ let moduloFeriadosIniciado = false;
 let asignacionesHorariosFeriado = [];
 
 let excepcionesHorariosFeriado = [];
+
+let horariosCatalogoFeriado = [];
+
+let marcacionesFeriado = [];
+
+let diasTrabajadosFeriadoSeleccionado = [];
 
 
 
@@ -422,6 +433,8 @@ let cerrarDescansoSustitutorio;
 let cancelarDescansoSustitutorio;
 
 let feriadoTrabajadoId;
+
+let fechaFeriadoTrabajado;
 
 let colaboradorDescansoId;
 
@@ -849,6 +862,10 @@ feriadoTrabajadoId =
         "feriadoTrabajadoId"
     );
 
+fechaFeriadoTrabajado =
+    document.getElementById(
+        "fechaFeriadoTrabajado"
+    );
 
 colaboradorDescansoId =
     document.getElementById(
@@ -1236,7 +1253,19 @@ const consultas = [
 
     obtenerColeccionEmpresa(
         "excepcionesHorarios"
-    )
+    ),
+
+    obtenerColeccionEmpresa(
+    "excepcionesHorarios"
+),
+
+obtenerColeccionEmpresa(
+    "horarios"
+),
+
+obtenerColeccionEmpresa(
+    "marcaciones"
+)
 
 ];
 
@@ -1248,7 +1277,9 @@ const [
     subareasResultado,
     descansosResultado,
     asignacionesResultado,
-    excepcionesHorariosResultado
+    excepcionesHorariosResultado,
+    horariosResultado,
+    marcacionesResultado
 ] = await Promise.all(consultas);
 
 
@@ -1274,6 +1305,11 @@ const [
 excepcionesHorariosFeriado =
     excepcionesHorariosResultado;
 
+    horariosCatalogoFeriado =
+    horariosResultado;
+
+marcacionesFeriado =
+    marcacionesResultado;
 }
 
 
