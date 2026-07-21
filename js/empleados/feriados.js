@@ -1107,10 +1107,10 @@ function registrarEventosFeriados(){
 
 
     buscarColaboradorFeriado.oninput =
-        renderizarTablaColaboradores;
+        ;
 
     filtroResultadoFeriado.onchange =
-        renderizarTablaColaboradores;
+        ;
 
 
     registrarCierrePorFondo(
@@ -2655,12 +2655,19 @@ async function guardarFormularioFeriado(){
                 colaboradores:[]
             },
 
-        actualizadoPor:
-            auth.currentUser?.uid ||
-            null,
+actualizadoPor:
+    auth.currentUser?.uid
+    ||
+    null,
 
-        fechaActualizacion:
-            serverTimestamp()
+anuladoPor:
+    null,
+
+fechaAnulacion:
+    null,
+
+fechaActualizacion:
+    serverTimestamp()
 
     };
 
@@ -2693,9 +2700,10 @@ async function guardarFormularioFeriado(){
 
                     ...datos,
 
-                    creadoPor:
-                        auth.currentUser?.uid ||
-                        null,
+actualizadoPor:
+    auth.currentUser?.uid
+    ||
+    null,
 
                     fechaCreacion:
                         serverTimestamp()
@@ -3346,7 +3354,7 @@ function abrirListadoColaboradores(){
     filtroResultadoFeriado.value = "";
 
 
-    renderizarTablaColaboradores();
+    ();
 
 
     modalColaboradoresFeriado.classList.add(
@@ -3528,76 +3536,80 @@ function renderizarTablaColaboradores(){
 
                     </td>
 
-                    <td>
+<td>
 
-                        <span class="feriado-tratamiento-badge">
+    <span class="feriado-tratamiento-badge">
 
-                            ${
-                                item.resultado === "TRABAJA"
-                                ? obtenerTextoTratamiento(
-                                    feriadoSeleccionado
-                                    .tratamientoTrabajo
-                                )
-                                : "No corresponde"
-                            }
+        ${
+            item.resultado ===
+            "TRABAJA"
+            ?
+            obtenerTextoTratamiento(
+                feriadoSeleccionado
+                .tratamientoTrabajo
+            )
+            :
+            "No corresponde"
+        }
 
-                        </span>
+    </span>
 
-${
-    item.resultado ===
-    "TRABAJA"
 
-    &&
+    ${
+        item.resultado ===
+        "TRABAJA"
 
-    (
-        descansoAsignado
+        &&
 
-        ||
+        (
+            descansoAsignado
 
-        feriadoSeleccionado
-        .tratamientoTrabajo ===
-        "DESCANSO_SUSTITUTORIO"
+            ||
 
-        ||
+            feriadoSeleccionado
+            .tratamientoTrabajo ===
+            "DESCANSO_SUSTITUTORIO"
 
-        feriadoSeleccionado
-        .tratamientoTrabajo ===
-        "PAGO_Y_DESCANSO"
-    )
-    ?
-    `
-        <button
-            type="button"
-            class="btn-registrar-descanso-sustitutorio"
-            data-colaborador-id="${escaparHTML(
-                colaborador.id
-            )}"
-            data-descanso-id="${escaparHTML(
-                descansoAsignado?.id
-                ||
-                ""
-            )}"
-        >
-            <i class="bi bi-calendar-plus"></i>
+            ||
 
-            ${
-                descansoAsignado
-                ?
-                `Reprogramar: ${escaparHTML(
-                    descansoAsignado.fechaDescanso
-                )}`
-                :
-                "Registrar descanso"
-            }
+            feriadoSeleccionado
+            .tratamientoTrabajo ===
+            "PAGO_Y_DESCANSO"
+        )
+        ?
+        `
+            <button
+                type="button"
+                class="btn-registrar-descanso-sustitutorio"
+                data-colaborador-id="${escaparHTML(
+                    colaborador.id
+                )}"
+                data-descanso-id="${escaparHTML(
+                    descansoAsignado?.id
+                    ||
+                    ""
+                )}"
+            >
 
-        </button>
-    `
-    :
-    ""
-}
+                <i class="bi bi-calendar-plus"></i>
 
-                    </td>
+                ${
+                    descansoAsignado
+                    ?
+                    `Reprogramar: ${escaparHTML(
+                        descansoAsignado.fechaDescanso
+                    )}`
+                    :
+                    "Registrar descanso"
+                }
 
+            </button>
+        `
+        :
+        ""
+    }
+
+</td>
                 </tr>
             `;
 
@@ -4357,7 +4369,6 @@ if(!documentoDescanso.exists()){
 
 }
 
-
     guardarDescansoSustitutorio.disabled =
         true;
 
@@ -4365,7 +4376,11 @@ if(!documentoDescanso.exists()){
     Boolean(
         descansoSustitutorioSeleccionado
     );
-    
+
+    const estabaEditando =
+    Boolean(
+        descansoSustitutorioSeleccionado
+    );
 
     try{
 
