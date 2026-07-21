@@ -3354,9 +3354,6 @@ function abrirListadoColaboradores(){
     filtroResultadoFeriado.value = "";
 
 
-    ();
-
-
     modalColaboradoresFeriado.classList.add(
         "activo"
     );
