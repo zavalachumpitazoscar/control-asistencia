@@ -3647,74 +3647,75 @@ function renderizarTablaColaboradores(){
 
 
     ${
-    item.resultado ===
-    "TRABAJA"
+        item.resultado ===
+        "TRABAJA"
 
-    &&
-
-    (
-        descansoAsignado
-
-        ||
+        &&
 
         (
-            diasTrabajadosCompletos.length > 0
+            descansoAsignado
 
-            &&
+            ||
 
             (
-                feriadoSeleccionado
-                .tratamientoTrabajo ===
-                "DESCANSO_SUSTITUTORIO"
+                diasTrabajadosCompletos.length > 0
 
-                ||
+                &&
 
-                feriadoSeleccionado
-                .tratamientoTrabajo ===
-                "PAGO_Y_DESCANSO"
+                (
+                    feriadoSeleccionado
+                    .tratamientoTrabajo ===
+                    "DESCANSO_SUSTITUTORIO"
+
+                    ||
+
+                    feriadoSeleccionado
+                    .tratamientoTrabajo ===
+                    "PAGO_Y_DESCANSO"
+                )
             )
         )
-    )
-    ?
-    `
-        <button
-            type="button"
-            class="
-                btn-registrar-descanso-sustitutorio
+        ?
+        `
+            <button
+                type="button"
+                class="
+                    btn-registrar-descanso-sustitutorio
+                    ${
+                        descansoAsignado
+                        ?
+                        "tiene-descanso"
+                        :
+                        ""
+                    }
+                "
+                data-colaborador-id="${escaparHTML(
+                    colaborador.id
+                )}"
+                data-descanso-id="${escaparHTML(
+                    descansoAsignado?.id ||
+                    ""
+                )}"
+            >
+
+                <i class="bi bi-calendar-plus"></i>
+
                 ${
                     descansoAsignado
                     ?
-                    "tiene-descanso"
+                    `Reprogramar: ${escaparHTML(
+                        descansoAsignado.fechaDescanso
+                    )}`
                     :
-                    ""
+                    "Registrar descanso"
                 }
-            "
-            data-colaborador-id="${escaparHTML(
-                colaborador.id
-            )}"
-            data-descanso-id="${escaparHTML(
-                descansoAsignado?.id ||
-                ""
-            )}"
-        >
 
-            <i class="bi bi-calendar-plus"></i>
+            </button>
+        `
+        :
+        ""
+    }
 
-            ${
-                descansoAsignado
-                ?
-                `Reprogramar: ${escaparHTML(
-                    descansoAsignado.fechaDescanso
-                )}`
-                :
-                "Registrar descanso"
-            }
-
-        </button>
-    `
-    :
-    ""
-}
 </td>
                 </tr>
             `;
