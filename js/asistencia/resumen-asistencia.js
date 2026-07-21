@@ -5066,6 +5066,29 @@ if(
     `;
 
 }
+
+
+if(
+    registro.estado ===
+    "TRABAJO_EN_FERIADO_INCOMPLETO"
+){
+
+    return `
+        <div class="detalle-tardanza sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                Marcación incompleta
+            </span>
+
+        </div>
+    `;
+
+}
+
     
 
     if(
