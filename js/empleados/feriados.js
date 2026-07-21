@@ -7,7 +7,7 @@ from "../firebase-config.js";
 import {
     clasificarMarcaciones
 }
-from "./clasificar-marcaciones.js";
+from "../asistencia/clasificar-marcaciones.js";
 
 
 import {
