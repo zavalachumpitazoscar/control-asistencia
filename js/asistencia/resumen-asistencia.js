@@ -2048,24 +2048,6 @@ if(tieneLimiteCubiertoPorPermiso){
 }
 
 
-    const tieneLimiteCubiertoPorPermiso =
-    Boolean(
-        entrada?.esCubiertaPorPermiso
-        ||
-        salida?.esCubiertaPorPermiso
-    );
-
-
-if(tieneLimiteCubiertoPorPermiso){
-
-    estado =
-        "PRESENTE_CON_PERMISO";
-
-    tardanzaMinutos = 0;
-
-}
-
-
 /*
     Permiso por horas con entrada y salida.
 
