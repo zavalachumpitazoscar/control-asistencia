@@ -1106,12 +1106,12 @@ function registrarEventosFeriados(){
         cerrarListadoColaboradores;
 
 
-    buscarColaboradorFeriado.oninput =
-        ;
+buscarColaboradorFeriado.oninput =
+    renderizarTablaColaboradores;
 
-    filtroResultadoFeriado.onchange =
-        ;
 
+filtroResultadoFeriado.onchange =
+    renderizarTablaColaboradores;
 
     registrarCierrePorFondo(
         modalFeriado,
@@ -4344,16 +4344,22 @@ const documentoDescanso =
             .value
             .trim(),
 
-        estado:
-            "ACTIVO",
+estado:
+    "ACTIVO",
 
 actualizadoPor:
     auth.currentUser?.uid
     ||
     null,
 
-        fechaActualizacion:
-            serverTimestamp()
+anuladoPor:
+    null,
+
+fechaAnulacion:
+    null,
+
+fechaActualizacion:
+    serverTimestamp()
 
     };
 
@@ -4371,11 +4377,6 @@ if(!documentoDescanso.exists()){
 
     guardarDescansoSustitutorio.disabled =
         true;
-
-    const estabaEditando =
-    Boolean(
-        descansoSustitutorioSeleccionado
-    );
 
     const estabaEditando =
     Boolean(
