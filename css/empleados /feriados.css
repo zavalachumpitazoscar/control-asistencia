@@ -3745,3 +3745,77 @@ MÓVIL PEQUEÑO
     }
 
 }
+
+
+/*=====================================================
+BOTÓN DESCANSO SUSTITUTORIO
+=====================================================*/
+
+.btn-registrar-descanso-sustitutorio {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    margin-top: 8px;
+    padding: 7px 10px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    cursor: pointer;
+    white-space: nowrap;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.btn-registrar-descanso-sustitutorio:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+}
+
+
+.btn-registrar-descanso-sustitutorio:active {
+    transform: translateY(1px);
+}
+
+
+.btn-registrar-descanso-sustitutorio:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.2);
+    outline-offset: 2px;
+}
+
+
+.btn-registrar-descanso-sustitutorio i {
+    font-size: 13px;
+}
+
+
+/* Botón cuando ya existe un descanso */
+
+.btn-registrar-descanso-sustitutorio.tiene-descanso {
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+    color: #7c3aed;
+}
+
+
+.btn-registrar-descanso-sustitutorio.tiene-descanso:hover {
+    background: #ede9fe;
+    border-color: #c4b5fd;
+    color: #6d28d9;
+}
