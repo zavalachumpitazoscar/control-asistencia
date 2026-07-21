@@ -1583,6 +1583,23 @@ function construirRegistroColaborador(
         "";
 
 
+
+    /*
+    Determinar cómo se aplica el feriado
+    al colaborador actual.
+*/
+
+const aplicacionFeriado =
+    determinarAplicacionFeriado({
+
+        feriado:
+            feriadoDia,
+
+        colaborador
+
+    });
+
+    
     /*
         Seleccionamos el primer horario del día
         como horario principal para el resumen.
@@ -2124,6 +2141,84 @@ if(
 
 }
 
+
+
+/*
+    Aplicar el resultado del feriado.
+
+    El feriado tiene prioridad sobre un permiso
+    cuando al colaborador le corresponde descansar.
+*/
+
+if(
+    feriadoDia
+    &&
+    aplicacionFeriado ===
+    "PENDIENTE"
+){
+
+    estado =
+        "FERIADO_PENDIENTE";
+
+    tardanzaMinutos = 0;
+
+}
+else if(
+    feriadoDia
+    &&
+    aplicacionFeriado ===
+    "DESCANSA"
+){
+
+    const tieneMarcacionesReales =
+        marcaciones.length > 0;
+
+
+    if(
+        tieneMarcacionesReales
+        &&
+        feriadoDia
+        .identificarFeriadoLaborado !==
+        false
+    ){
+
+        estado =
+            "TRABAJO_EN_FERIADO";
+
+    }
+    else if(
+        !tieneMarcacionesReales
+        &&
+        feriadoDia
+        .noRegistrarFalta !==
+        false
+    ){
+
+        estado =
+            "FERIADO";
+
+    }
+
+
+    /*
+        Un día de descanso por feriado
+        no genera tardanza.
+    */
+
+    if(
+        estado === "FERIADO"
+        ||
+        estado === "TRABAJO_EN_FERIADO"
+    ){
+
+        tardanzaMinutos = 0;
+
+    }
+
+}
+
+
+    
 return {
 
         colaboradorId:
@@ -2231,10 +2326,162 @@ permisoDia,
 
 feriadoDia,
 
+aplicacionFeriado,
+
 
     };
 
 }
+
+
+/*=====================================================
+DETERMINAR APLICACIÓN DEL FERIADO
+=====================================================*/
+
+function determinarAplicacionFeriado({
+
+    feriado,
+    colaborador
+
+}){
+
+    /*
+        Si la fecha no tiene un feriado activo,
+        no se aplica ninguna regla especial.
+    */
+
+    if(!feriado){
+
+        return null;
+
+    }
+
+
+    const reglaGeneral =
+        feriado.reglaGeneral ||
+        "POR_CONFIGURAR";
+
+
+    /*
+        Mientras el feriado no esté configurado,
+        no asumimos que el colaborador descansa
+        ni que trabaja.
+    */
+
+    if(
+        reglaGeneral ===
+        "POR_CONFIGURAR"
+    ){
+
+        return "PENDIENTE";
+
+    }
+
+
+    const excepciones =
+        feriado.excepciones ||
+        {};
+
+
+    const sucursalId =
+        colaborador.organizacion
+        ?.sucursalId
+        ||
+        colaborador.sucursalId
+        ||
+        "";
+
+
+    const areaId =
+        colaborador.organizacion
+        ?.areaId
+        ||
+        colaborador.areaId
+        ||
+        "";
+
+
+    const subareaId =
+        colaborador.organizacion
+        ?.subareaId
+        ||
+        colaborador.subareaId
+        ||
+        "";
+
+
+    const esExcepcion =
+        (
+            excepciones.sucursales ||
+            []
+        ).includes(
+            sucursalId
+        )
+
+        ||
+
+        (
+            excepciones.areas ||
+            []
+        ).includes(
+            areaId
+        )
+
+        ||
+
+        (
+            excepciones.subareas ||
+            []
+        ).includes(
+            subareaId
+        )
+
+        ||
+
+        (
+            excepciones.colaboradores ||
+            []
+        ).includes(
+            colaborador.id
+        );
+
+
+    /*
+        Primero aplicamos la regla general.
+    */
+
+    let resultado =
+        reglaGeneral ===
+        "TODOS_DESCANSAN"
+        ?
+        "DESCANSA"
+        :
+        "TRABAJA";
+
+
+    /*
+        Las excepciones invierten la regla:
+        - si todos descansan, la excepción trabaja;
+        - si todos trabajan, la excepción descansa.
+    */
+
+    if(esExcepcion){
+
+        resultado =
+            resultado ===
+            "DESCANSA"
+            ?
+            "TRABAJA"
+            :
+            "DESCANSA";
+
+    }
+
+
+    return resultado;
+
+}
+
 
 
 /*=====================================================
@@ -3847,6 +4094,121 @@ JORNADA
 function crearJornadaHTML(
     registro
 ){
+
+/*
+    Jornada durante un feriado.
+*/
+
+if(
+    registro.estado ===
+    "FERIADO"
+){
+
+    const nombreFeriado =
+        registro.feriadoDia
+        ?.nombre
+        ||
+        "Feriado";
+
+
+    return `
+        <div class="jornada-asistencia completa">
+
+            <strong>
+                Descanso por feriado
+            </strong>
+
+            <span>
+                ${escaparHTML(
+                    nombreFeriado
+                )}
+            </span>
+
+            <small>
+                No registra falta
+            </small>
+
+        </div>
+    `;
+
+}
+
+if(
+    registro.estado ===
+    "TRABAJO_EN_FERIADO"
+){
+
+    const nombreFeriado =
+        registro.feriadoDia
+        ?.nombre
+        ||
+        "Feriado";
+
+
+    const minutosTrabajados =
+        registro.minutosTrabajados
+        ||
+        0;
+
+
+    return `
+        <div class="jornada-asistencia completa">
+
+            <strong>
+                ${formatearDuracionCorta(
+                    minutosTrabajados
+                )}
+                trabajadas
+            </strong>
+
+            <span>
+                Trabajo en feriado
+            </span>
+
+            <small>
+                ${escaparHTML(
+                    nombreFeriado
+                )}
+            </small>
+
+        </div>
+    `;
+
+}
+
+if(
+    registro.estado ===
+    "FERIADO_PENDIENTE"
+){
+
+    const nombreFeriado =
+        registro.feriadoDia
+        ?.nombre
+        ||
+        "Feriado";
+
+
+    return `
+        <div class="jornada-asistencia incompleta">
+
+            <strong>
+                Por configurar
+            </strong>
+
+            <span>
+                Define quién descansa o trabaja
+            </span>
+
+            <small>
+                ${escaparHTML(
+                    nombreFeriado
+                )}
+            </small>
+
+        </div>
+    `;
+
+}
 
 const permiso =
     registro.permisoDia;
@@ -6390,6 +6752,21 @@ function obtenerClaseEstado(
         TARDANZA_CON_PERMISO:
             "tardanza",
 
+        PRESENTE_CON_PERMISO:
+            "permiso",
+
+        TARDANZA_CON_PERMISO:
+            "tardanza",
+
+        FERIADO:
+            "permiso",
+
+        TRABAJO_EN_FERIADO:
+            "presente",
+
+        FERIADO_PENDIENTE:
+            "tardanza", 
+
     };
 
 
@@ -6403,6 +6780,47 @@ function obtenerTextoEstado(
     estado,
     registro = null
 ){
+
+if(
+    estado === "FERIADO"
+    ||
+    estado === "TRABAJO_EN_FERIADO"
+    ||
+    estado === "FERIADO_PENDIENTE"
+){
+
+    const nombreFeriado =
+        registro
+        ?.feriadoDia
+        ?.nombre
+        ||
+        "Feriado";
+
+
+    if(
+        estado ===
+        "TRABAJO_EN_FERIADO"
+    ){
+
+        return `Trabajó en feriado · ${nombreFeriado}`;
+
+    }
+
+
+    if(
+        estado ===
+        "FERIADO_PENDIENTE"
+    ){
+
+        return `Feriado por configurar · ${nombreFeriado}`;
+
+    }
+
+
+    return nombreFeriado;
+
+}
+    
 
 if(
     estado ===
