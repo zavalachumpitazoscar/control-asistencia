@@ -1721,13 +1721,46 @@
         Día feriado trabajado
     </label>
 
-    <select id="fechaFeriadoTrabajado">
+<div class="feriado-campo feriado-campo-dia-trabajado">
 
-        <option value="">
-            Selecciona el día trabajado
-        </option>
+    <label for="fechaFeriadoTrabajado">
 
-    </select>
+        <span>
+            Día feriado trabajado
+        </span>
+
+        <span class="feriado-campo-obligatorio">
+            *
+        </span>
+
+    </label>
+
+    <div class="feriado-select-con-icono">
+
+        <i class="bi bi-calendar-check"></i>
+
+        <select id="fechaFeriadoTrabajado">
+
+            <option value="">
+                Selecciona el día trabajado
+            </option>
+
+        </select>
+
+        <i class="bi bi-chevron-down feriado-select-flecha"></i>
+
+    </div>
+
+    <small class="feriado-campo-ayuda">
+
+        <i class="bi bi-info-circle"></i>
+
+        Solo aparecen los días del feriado que tienen
+        entrada y salida completas.
+
+    </small>
+
+</div>
 
     <small>
         Solo se muestran los días del feriado con entrada y salida completas.
