@@ -3336,6 +3336,11 @@ LISTADO DE COLABORADORES
 
 async function abrirListadoColaboradores(){
 
+    console.log(
+        "ABRIENDO LISTADO DE COLABORADORES"
+    );
+
+    
     if(!feriadoSeleccionado){
 
         return;
