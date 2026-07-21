@@ -2764,6 +2764,37 @@ function crearFilaResumen(
 }
 
 
+function obtenerTextoTratamientoFeriado(
+    tratamiento
+){
+
+    const textos = {
+
+        PENDIENTE:
+            "Tratamiento pendiente de definir",
+
+        PAGO_ADICIONAL:
+            "Corresponde pago adicional",
+
+        DESCANSO_SUSTITUTORIO:
+            "Corresponde descanso sustitutorio",
+
+        PAGO_Y_DESCANSO:
+            "Corresponde pago adicional y descanso",
+
+        JORNADA_NORMAL:
+            "Se considera jornada normal"
+
+    };
+
+
+    return textos[tratamiento]
+    ||
+    "Tratamiento pendiente de definir";
+
+}
+
+
 
 /*=====================================================
 HORAS EXTRA
@@ -2772,6 +2803,90 @@ HORAS EXTRA
 function crearHorasExtraHTML(
     registro
 ){
+
+/*
+    Descanso por feriado sin trabajo.
+*/
+
+if(
+    registro.estado ===
+    "FERIADO"
+){
+
+    return `
+        <div class="horas-extra-resumen sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                No corresponde
+            </span>
+
+            <small>
+                Descanso por feriado
+            </small>
+
+        </div>
+    `;
+
+}
+
+
+/*
+    Trabajo realizado durante un feriado.
+*/
+
+if(
+    registro.estado ===
+    "TRABAJO_EN_FERIADO"
+){
+
+    const tratamiento =
+        registro.feriadoDia
+        ?.tratamientoTrabajo
+        ||
+        "PENDIENTE";
+
+
+    const clase =
+        tratamiento ===
+        "PENDIENTE"
+        ?
+        "pendiente"
+        :
+        "aprobada";
+
+
+    return `
+        <div class="horas-extra-resumen ${clase}">
+
+            <strong>
+                ${formatearDuracionCorta(
+                    registro.minutosTrabajados
+                    ||
+                    0
+                )}
+            </strong>
+
+            <span>
+                Trabajo en feriado
+            </span>
+
+            <small>
+                ${escaparHTML(
+                    obtenerTextoTratamientoFeriado(
+                        tratamiento
+                    )
+                )}
+            </small>
+
+        </div>
+    `;
+
+}
+    
 
     const calculo =
         registro.calculoHorasExtra;
@@ -5447,8 +5562,14 @@ function actualizarContadores(
     registros
 ){
 
+    /*
+        Colaboradores que tenían una jornada
+        programada para la fecha.
+    */
+
     asignarContador(
         "totalProgramadosAsistencia",
+
         registros.filter(
             registro=>
                 registro.horarios.length > 0
@@ -5456,49 +5577,129 @@ function actualizarContadores(
     );
 
 
+    /*
+        Presentes normales y quienes trabajaron
+        durante un feriado.
+    */
+
+    const estadosPresentes = [
+
+        "PRESENTE",
+
+        "TRABAJO_EN_FERIADO"
+
+    ];
+
+
     asignarContador(
         "totalPresentesAsistencia",
+
         registros.filter(
             registro=>
-                registro.estado === "PRESENTE"
-        ).length
-    );
-
-
-    asignarContador(
-        "totalTardanzasAsistencia",
-        registros.filter(
-            registro=>
-                registro.estado === "TARDANZA"
-        ).length
-    );
-
-
-    asignarContador(
-        "totalAusentesAsistencia",
-        registros.filter(
-            registro=>
-                registro.estado === "AUSENTE"
+                estadosPresentes.includes(
+                    registro.estado
+                )
         ).length
     );
 
 
     /*
-        Los permisos se integrarán cuando crucemos
-        la colección de permisos aprobados.
+        Tardanzas normales y tardanzas
+        acompañadas de un permiso.
+    */
+
+    const estadosTardanza = [
+
+        "TARDANZA",
+
+        "TARDANZA_CON_PERMISO"
+
+    ];
+
+
+    asignarContador(
+        "totalTardanzasAsistencia",
+
+        registros.filter(
+            registro=>
+                estadosTardanza.includes(
+                    registro.estado
+                )
+        ).length
+    );
+
+
+    /*
+        Solo corresponde ausencia cuando realmente
+        debía trabajar y no existe permiso aplicable.
     */
 
     asignarContador(
-        "totalPermisosAsistencia",
-        0
+        "totalAusentesAsistencia",
+
+        registros.filter(
+            registro=>
+                registro.estado ===
+                "AUSENTE"
+        ).length
     );
+
+
+    /*
+        Permisos completos y parciales.
+    */
+
+    const estadosPermiso = [
+
+        "PERMISO_COMPUTABLE",
+
+        "AUSENCIA_JUSTIFICADA",
+
+        "PERMISO_PARCIAL_COMPUTABLE",
+
+        "AUSENCIA_PARCIAL_JUSTIFICADA",
+
+        "PRESENTE_CON_PERMISO",
+
+        "TARDANZA_CON_PERMISO"
+
+    ];
+
+
+    asignarContador(
+        "totalPermisosAsistencia",
+
+        registros.filter(
+            registro=>
+                estadosPermiso.includes(
+                    registro.estado
+                )
+        ).length
+    );
+
+
+    /*
+        Marcaciones incompletas o un feriado
+        que todavía necesita configuración.
+    */
+
+    const estadosIncompletos = [
+
+        "INCOMPLETO",
+
+        "FERIADO_PENDIENTE"
+
+    ];
 
 
     asignarContador(
         "totalIncompletosAsistencia",
+
         registros.filter(
             registro=>
-                registro.estado === "INCOMPLETO"
+                estadosIncompletos.includes(
+                    registro.estado
+                )
         ).length
     );
 
