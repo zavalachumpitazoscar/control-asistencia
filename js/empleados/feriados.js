@@ -1255,10 +1255,6 @@ const consultas = [
         "excepcionesHorarios"
     ),
 
-    obtenerColeccionEmpresa(
-    "excepcionesHorarios"
-),
-
 obtenerColeccionEmpresa(
     "horarios"
 ),
