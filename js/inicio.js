@@ -259,13 +259,27 @@ async function cargarVista(vista){
 
     try{
 
-        const respuesta =
-        await fetch(
-        `vistas/${vista}.html`
-        );
+const ruta =
+    `vistas/${vista}.html`;
 
-        const html =
-        await respuesta.text();
+
+const respuesta =
+    await fetch(
+        ruta
+    );
+
+
+if(!respuesta.ok){
+
+    throw new Error(
+        `No se pudo cargar ${ruta}. Estado HTTP: ${respuesta.status}`
+    );
+
+}
+
+
+const html =
+    await respuesta.text();
 
         contenedor.innerHTML =
         html;
