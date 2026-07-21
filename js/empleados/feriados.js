@@ -3530,9 +3530,13 @@ function renderizarTablaColaboradores(){
         colaborador
     );
 
+/*
+    Todos los descansos activos del colaborador
+    correspondientes al feriado seleccionado.
+*/
 
-            const descansoAsignado =
-    descansosSustitutoriosFeriado.find(
+const descansosAsignados =
+    descansosSustitutoriosFeriado.filter(
         descanso=>
 
             descanso.feriadoId ===
@@ -3551,11 +3555,150 @@ function renderizarTablaColaboradores(){
             )
             .toUpperCase() ===
             "ACTIVO"
+    );
 
-    )
+
+/*
+    Días trabajados que todavía no tienen
+    descanso sustitutorio registrado.
+*/
+
+const diasPendientesDescanso =
+    diasTrabajadosCompletos.filter(
+        fechaTrabajada=>
+
+            !descansosAsignados.some(
+                descanso=>
+
+                    descanso.fechaFeriadoTrabajado ===
+                    fechaTrabajada
+            )
+    );
+
+
+const tratamientoPermiteDescanso =
+    feriadoSeleccionado
+    .tratamientoTrabajo ===
+    "DESCANSO_SUSTITUTORIO"
+
     ||
-    null;
 
+    feriadoSeleccionado
+    .tratamientoTrabajo ===
+    "PAGO_Y_DESCANSO";
+
+
+/*
+    Botones para descansos ya registrados.
+*/
+
+const botonesDescansosExistentes =
+    descansosAsignados
+    .map(
+        descanso=>
+        `
+            <button
+                type="button"
+                class="
+                    btn-registrar-descanso-sustitutorio
+                    tiene-descanso
+                "
+                data-colaborador-id="${escaparHTML(
+                    colaborador.id
+                )}"
+                data-descanso-id="${escaparHTML(
+                    descanso.id
+                )}"
+                data-fecha-trabajada="${escaparHTML(
+                    descanso.fechaFeriadoTrabajado ||
+                    ""
+                )}"
+            >
+
+                <i class="bi bi-calendar-check"></i>
+
+                <span>
+
+                    ${
+                        descanso.fechaFeriadoTrabajado
+                        ?
+                        `${escaparHTML(
+                            formatearFechaDiaMesFeriado(
+                                descanso.fechaFeriadoTrabajado
+                            )
+                        )} → `
+                        :
+                        ""
+                    }
+
+                    Reprogramar:
+                    ${escaparHTML(
+                        formatearFechaDiaMesFeriado(
+                            descanso.fechaDescanso
+                        )
+                    )}
+
+                </span>
+
+            </button>
+        `
+    )
+    .join("");
+
+
+/*
+    Botones para días trabajados pendientes.
+*/
+
+const botonesDescansosPendientes =
+    tratamientoPermiteDescanso
+    ?
+    diasPendientesDescanso
+    .map(
+        fechaTrabajada=>
+        `
+            <button
+                type="button"
+                class="btn-registrar-descanso-sustitutorio"
+                data-colaborador-id="${escaparHTML(
+                    colaborador.id
+                )}"
+                data-descanso-id=""
+                data-fecha-trabajada="${escaparHTML(
+                    fechaTrabajada
+                )}"
+            >
+
+                <i class="bi bi-calendar-plus"></i>
+
+                <span>
+                    ${escaparHTML(
+                        formatearFechaDiaMesFeriado(
+                            fechaTrabajada
+                        )
+                    )}
+                    → Registrar descanso
+                </span>
+
+            </button>
+        `
+    )
+    .join("")
+    :
+    "";
+
+
+const botonesDescansoSustitutorio =
+    `
+        <div class="feriado-descansos-acciones">
+
+            ${botonesDescansosExistentes}
+
+            ${botonesDescansosPendientes}
+
+        </div>
+    `;
+            
             const sucursalId =
                 colaborador.organizacion?.sucursalId ||
                 colaborador.sucursalId;
@@ -3626,7 +3769,6 @@ function renderizarTablaColaboradores(){
                         </span>
 
                     </td>
-
 <td>
 
     <span class="feriado-tratamiento-badge">
@@ -3653,65 +3795,20 @@ function renderizarTablaColaboradores(){
         &&
 
         (
-            descansoAsignado
+            descansosAsignados.length > 0
 
             ||
 
             (
-                diasTrabajadosCompletos.length > 0
+                diasPendientesDescanso.length > 0
 
                 &&
 
-                (
-                    feriadoSeleccionado
-                    .tratamientoTrabajo ===
-                    "DESCANSO_SUSTITUTORIO"
-
-                    ||
-
-                    feriadoSeleccionado
-                    .tratamientoTrabajo ===
-                    "PAGO_Y_DESCANSO"
-                )
+                tratamientoPermiteDescanso
             )
         )
         ?
-        `
-            <button
-                type="button"
-                class="
-                    btn-registrar-descanso-sustitutorio
-                    ${
-                        descansoAsignado
-                        ?
-                        "tiene-descanso"
-                        :
-                        ""
-                    }
-                "
-                data-colaborador-id="${escaparHTML(
-                    colaborador.id
-                )}"
-                data-descanso-id="${escaparHTML(
-                    descansoAsignado?.id ||
-                    ""
-                )}"
-            >
-
-                <i class="bi bi-calendar-plus"></i>
-
-                ${
-                    descansoAsignado
-                    ?
-                    `Reprogramar: ${escaparHTML(
-                        descansoAsignado.fechaDescanso
-                    )}`
-                    :
-                    "Registrar descanso"
-                }
-
-            </button>
-        `
+        botonesDescansoSustitutorio
         :
         ""
     }
@@ -3753,7 +3850,9 @@ function renderizarTablaColaboradores(){
 
 abrirDescansoSustitutorio(
     colaborador,
-    descanso
+    descanso,
+    boton.dataset.fechaTrabajada ||
+    ""
 );
 
         }
@@ -4100,7 +4199,8 @@ ABRIR DESCANSO SUSTITUTORIO
 
 function abrirDescansoSustitutorio(
     colaborador,
-    descansoExistente = null
+    descansoExistente = null,
+    fechaTrabajadaInicial = ""
 ){
 
     if(
@@ -4208,7 +4308,13 @@ fechaFeriadoTrabajado.innerHTML =
 fechaFeriadoTrabajado.value =
     descansoExistente
     ?.fechaFeriadoTrabajado
+
     ||
+
+    fechaTrabajadaInicial
+
+    ||
+
     (
         diasTrabajadosFeriadoSeleccionado
         .length ===
@@ -5814,6 +5920,32 @@ function obtenerTiempoMarcacionFeriado(
 
 }
 
+
+function formatearFechaDiaMesFeriado(
+    fechaISO
+){
+
+    if(!fechaISO){
+
+        return "Sin fecha";
+
+    }
+
+
+    return new Intl.DateTimeFormat(
+        "es-PE",
+        {
+            day:"2-digit",
+            month:"2-digit"
+        }
+    )
+    .format(
+        convertirFechaLocal(
+            fechaISO
+        )
+    );
+
+}
 
 
 /*=====================================================
