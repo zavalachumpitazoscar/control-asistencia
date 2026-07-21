@@ -66,6 +66,10 @@ let cancelarEscuchaFeriados = null;
 
 let moduloFeriadosIniciado = false;
 
+let asignacionesHorariosFeriado = [];
+
+let excepcionesHorariosFeriado = [];
+
 
 
 /*=====================================================
@@ -1222,7 +1226,17 @@ const consultas = [
 
     obtenerColeccionEmpresa("subareas"),
 
-    obtenerColeccionEmpresa("descansosSustitutoriosFeriados")
+    obtenerColeccionEmpresa(
+        "descansosSustitutoriosFeriados"
+    ),
+
+    obtenerColeccionEmpresa(
+        "asignacionesHorarios"
+    ),
+
+    obtenerColeccionEmpresa(
+        "excepcionesHorarios"
+    )
 
 ];
 
@@ -1232,7 +1246,9 @@ const [
     sucursalesResultado,
     areasResultado,
     subareasResultado,
-    descansosResultado
+    descansosResultado,
+    asignacionesResultado,
+    excepcionesHorariosResultado
 ] = await Promise.all(consultas);
 
 
@@ -1250,6 +1266,13 @@ const [
 
     descansosSustitutoriosFeriado =
     descansosResultado;
+
+    asignacionesHorariosFeriado =
+    asignacionesResultado;
+
+
+excepcionesHorariosFeriado =
+    excepcionesHorariosResultado;
 
 }
 
@@ -4310,6 +4333,38 @@ if(coincideConOtroFeriado){
         colaboradorDescansoSeleccionado;
 
 
+    const horariosFechaDescanso =
+    obtenerHorariosEfectivosDescanso({
+
+        colaboradorId:
+            colaborador.id,
+
+        fecha:
+            fechaDescanso,
+
+        asignaciones:
+            asignacionesHorariosFeriado,
+
+        excepciones:
+            excepcionesHorariosFeriado
+
+    });
+
+
+if(
+    horariosFechaDescanso.length ===
+    0
+){
+
+    mostrarAdvertencia(
+        "La fecha seleccionada no corresponde a un día laborable del colaborador. Elige una fecha en la que tenga horario asignado."
+    );
+
+    return;
+
+}
+
+
     const idDocumento =
         `${empresaId}_${feriadoSeleccionado.id}_${colaborador.id}`
         .replaceAll(
@@ -4612,6 +4667,58 @@ function sumarDiasFechaISO(
 
 }
 
+
+/*=====================================================
+SUMAR DÍAS A UNA FECHA ISO
+=====================================================*/
+
+function sumarDiasFechaISO(
+    fechaISO,
+    cantidadDias
+){
+    // Código que ya tienes...
+}
+
+
+/*=====================================================
+OBTENER HORARIOS EFECTIVOS PARA EL DESCANSO
+=====================================================*/
+
+function obtenerHorariosEfectivosDescanso({
+    colaboradorId,
+    fecha,
+    asignaciones,
+    excepciones
+}){
+    // Pega aquí todo el contenido de esta función.
+}
+
+
+function obtenerHorariosAsignacionDescanso(
+    asignacion,
+    fecha
+){
+    // Pega aquí todo el contenido de esta función.
+}
+
+
+function obtenerHorariosSemanalesDescanso(
+    asignacion,
+    fecha
+){
+    // Pega aquí todo el contenido de esta función.
+}
+
+
+/*=====================================================
+OBTENER INICIALES
+=====================================================*/
+
+function obtenerInicialesFeriado(
+    nombre
+){
+    // Código que ya tienes...
+}
 
 /*=====================================================
 OBTENER INICIALES
