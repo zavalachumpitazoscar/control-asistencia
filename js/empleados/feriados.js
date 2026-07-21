@@ -4621,104 +4621,7 @@ async function anularDescansoSustitutorioFirestore(){
 }
 
 
-/*=====================================================
-SUMAR DÍAS A UNA FECHA ISO
-=====================================================*/
 
-function sumarDiasFechaISO(
-    fechaISO,
-    cantidadDias
-){
-
-    const fecha =
-        new Date(
-            `${fechaISO}T12:00:00`
-        );
-
-
-    fecha.setDate(
-        fecha.getDate()
-        +
-        cantidadDias
-    );
-
-
-    return [
-
-        fecha.getFullYear(),
-
-        String(
-            fecha.getMonth() + 1
-        )
-        .padStart(
-            2,
-            "0"
-        ),
-
-        String(
-            fecha.getDate()
-        )
-        .padStart(
-            2,
-            "0"
-        )
-
-    ].join("-");
-
-}
-
-
-/*=====================================================
-SUMAR DÍAS A UNA FECHA ISO
-=====================================================*/
-
-function sumarDiasFechaISO(
-    fechaISO,
-    cantidadDias
-){
-    // Código que ya tienes...
-}
-
-
-/*=====================================================
-OBTENER HORARIOS EFECTIVOS PARA EL DESCANSO
-=====================================================*/
-
-function obtenerHorariosEfectivosDescanso({
-    colaboradorId,
-    fecha,
-    asignaciones,
-    excepciones
-}){
-    // Pega aquí todo el contenido de esta función.
-}
-
-
-function obtenerHorariosAsignacionDescanso(
-    asignacion,
-    fecha
-){
-    // Pega aquí todo el contenido de esta función.
-}
-
-
-function obtenerHorariosSemanalesDescanso(
-    asignacion,
-    fecha
-){
-    // Pega aquí todo el contenido de esta función.
-}
-
-
-/*=====================================================
-OBTENER INICIALES
-=====================================================*/
-
-function obtenerInicialesFeriado(
-    nombre
-){
-    // Código que ya tienes...
-}
 
 /*=====================================================
 OBTENER INICIALES
@@ -4960,6 +4863,375 @@ function convertirFechaLocal(
         mes - 1,
         dia
     );
+
+}
+
+
+/*=====================================================
+SUMAR DÍAS A UNA FECHA ISO
+=====================================================*/
+
+function sumarDiasFechaISO(
+    fechaISO,
+    cantidadDias
+){
+
+    const fecha =
+        convertirFechaLocal(
+            fechaISO
+        );
+
+
+    fecha.setDate(
+        fecha.getDate() +
+        cantidadDias
+    );
+
+
+    return formarFechaISO(
+
+        fecha.getFullYear(),
+
+        fecha.getMonth() + 1,
+
+        fecha.getDate()
+
+    );
+
+}
+
+
+
+/*=====================================================
+OBTENER HORARIOS EFECTIVOS DEL DESCANSO
+=====================================================*/
+
+function obtenerHorariosEfectivosDescanso({
+
+    colaboradorId,
+    fecha,
+    asignaciones,
+    excepciones
+
+}){
+
+    let horarioIds = [];
+
+
+    asignaciones
+    .filter(
+        asignacion=>
+
+            String(
+                asignacion.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() !==
+            "INACTIVO"
+
+            &&
+
+            Array.isArray(
+                asignacion.colaboradorIds
+            )
+
+            &&
+
+            asignacion.colaboradorIds.includes(
+                colaboradorId
+            )
+    )
+    .forEach(asignacion=>{
+
+        horarioIds.push(
+            ...obtenerHorariosAsignacionDescanso(
+                asignacion,
+                fecha
+            )
+        );
+
+    });
+
+
+    horarioIds = [
+
+        ...new Set(
+            horarioIds.filter(Boolean)
+        )
+
+    ];
+
+
+    const excepcion =
+        excepciones.find(
+            item=>
+
+                item.colaboradorId ===
+                colaboradorId
+
+                &&
+
+                item.fecha ===
+                fecha
+
+                &&
+
+                String(
+                    item.estado ||
+                    "ACTIVO"
+                )
+                .toUpperCase() !==
+                "INACTIVO"
+        );
+
+
+    if(!excepcion){
+
+        return horarioIds;
+
+    }
+
+
+    if(
+        excepcion.tipo ===
+        "SIN_HORARIO"
+    ){
+
+        return [];
+
+    }
+
+
+    if(
+        excepcion.tipo ===
+        "REEMPLAZAR"
+    ){
+
+        return [
+
+            ...new Set(
+                (
+                    excepcion.horarioIds ||
+                    []
+                )
+                .filter(Boolean)
+            )
+
+        ];
+
+    }
+
+
+    if(
+        excepcion.tipo ===
+        "AGREGAR"
+    ){
+
+        return [
+
+            ...new Set([
+
+                ...horarioIds,
+
+                ...(
+                    excepcion.horarioIds ||
+                    []
+                )
+
+            ].filter(Boolean))
+
+        ];
+
+    }
+
+
+    return horarioIds;
+
+}
+
+
+
+/*=====================================================
+OBTENER HORARIOS DE UNA ASIGNACIÓN
+=====================================================*/
+
+function obtenerHorariosAsignacionDescanso(
+    asignacion,
+    fecha
+){
+
+    if(
+        asignacion.tipoAsignacion ===
+        "DIARIA"
+    ){
+
+        return (
+            asignacion.fechaInicio ===
+            fecha
+        )
+        ?
+        [
+            asignacion.horarioId
+        ].filter(Boolean)
+        :
+        [];
+
+    }
+
+
+    if(
+        asignacion.tipoAsignacion ===
+        "MENSUAL"
+    ){
+
+        return (
+            asignacion.programacion ||
+            []
+        )
+        .filter(
+            item=>
+                item.fecha ===
+                fecha
+        )
+        .map(
+            item=>
+                item.horarioId
+        )
+        .filter(Boolean);
+
+    }
+
+
+    if(
+        asignacion.tipoAsignacion ===
+        "SEMANAL"
+    ){
+
+        return obtenerHorariosSemanalesDescanso(
+            asignacion,
+            fecha
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+
+/*=====================================================
+OBTENER HORARIOS DE ASIGNACIÓN SEMANAL
+=====================================================*/
+
+function obtenerHorariosSemanalesDescanso(
+    asignacion,
+    fecha
+){
+
+    if(
+        !asignacion.fechaInicio
+
+        ||
+
+        !asignacion.fechaFin
+
+        ||
+
+        fecha <
+        asignacion.fechaInicio
+
+        ||
+
+        fecha >
+        asignacion.fechaFin
+    ){
+
+        return [];
+
+    }
+
+
+    const inicio =
+        convertirFechaLocal(
+            asignacion.fechaInicio
+        );
+
+
+    const seleccionada =
+        convertirFechaLocal(
+            fecha
+        );
+
+
+    const diferenciaDias =
+        Math.floor(
+            (
+                seleccionada -
+                inicio
+            )
+            /
+            86400000
+        );
+
+
+    const numeroSemana =
+        Math.floor(
+            diferenciaDias /
+            7
+        );
+
+
+    const intervalo =
+        Number(
+            asignacion.intervaloSemanas ||
+            1
+        );
+
+
+    if(
+        numeroSemana %
+        intervalo !==
+        0
+    ){
+
+        return [];
+
+    }
+
+
+    const nombresDias = [
+
+        "domingo",
+        "lunes",
+        "martes",
+        "miercoles",
+        "jueves",
+        "viernes",
+        "sabado"
+
+    ];
+
+
+    const nombreDia =
+        nombresDias[
+            seleccionada.getDay()
+        ];
+
+
+    const horarioIds =
+        asignacion.programacionSemanal
+        ?.[nombreDia];
+
+
+    return Array.isArray(
+        horarioIds
+    )
+    ?
+    horarioIds.filter(Boolean)
+    :
+    [];
 
 }
 
