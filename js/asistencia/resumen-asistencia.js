@@ -947,6 +947,36 @@ function construirRegistrosResumen({
             fecha
         );
 
+    /*
+    Buscar un feriado activo que incluya
+    la fecha seleccionada.
+*/
+
+const feriadoDia =
+    feriados.find(
+        feriado=>
+
+            String(
+                feriado.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() ===
+            "ACTIVO"
+
+            &&
+
+            feriado.fechaInicio <=
+            fecha
+
+            &&
+
+            feriado.fechaFin >=
+            fecha
+
+    )
+    ||
+    null;
+
 
     return colaboradores
     .filter(colaborador=>
@@ -1085,7 +1115,9 @@ return construirRegistroColaborador(
 
     aprobacionHorasExtra,
 
-    permisoDia
+    permisoDia,
+
+    feriadoDia
 
 );
 
@@ -1504,7 +1536,8 @@ function construirRegistroColaborador(
     marcaciones,
     ajusteAsistencia,
     aprobacionHorasExtra,
-    permisoDia
+    permisoDia,
+    feriadoDia
 ){
 
     const nombres =
@@ -2194,7 +2227,9 @@ minutosPermisoDentroTrabajo,
 
 aprobacionHorasExtra,
 
-        permisoDia,
+permisoDia,
+
+feriadoDia,
 
 
     };
