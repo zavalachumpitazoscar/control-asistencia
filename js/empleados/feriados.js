@@ -4221,6 +4221,13 @@ fechaFeriadoTrabajado.value =
         ""
     );
 
+
+    fechaFeriadoTrabajado.disabled =
+    Boolean(
+        descansoExistente
+        ?.fechaFeriadoTrabajado
+    );
+
     if(
     !descansoExistente
 
@@ -4405,6 +4412,13 @@ if(fechaFeriadoTrabajado){
         `;
 
 }
+
+if(fechaFeriadoTrabajado){
+
+    fechaFeriadoTrabajado.disabled =
+        false;
+
+}
     
 
 }
@@ -4430,11 +4444,26 @@ async function guardarDescansoSustitutorioFirestore(){
 
     }
 
+    const fechaTrabajada =
+    fechaFeriadoTrabajado.value;
 
     const fechaDescanso =
         fechaDescansoSustitutorio.value;
 
 
+    if(!fechaTrabajada){
+
+    mostrarAdvertencia(
+        "Selecciona el día feriado que fue trabajado."
+    );
+
+    fechaFeriadoTrabajado.focus();
+
+    return;
+
+}
+
+    
     if(!fechaDescanso){
 
         mostrarAdvertencia(
@@ -4446,6 +4475,45 @@ async function guardarDescansoSustitutorioFirestore(){
         return;
 
     }
+
+
+    if(
+    fechaTrabajada <
+    feriadoSeleccionado.fechaInicio
+
+    ||
+
+    fechaTrabajada >
+    feriadoSeleccionado.fechaFin
+){
+
+    mostrarAdvertencia(
+        "El día trabajado seleccionado no pertenece al periodo del feriado."
+    );
+
+    return;
+
+}
+
+
+    if(
+    !diasTrabajadosFeriadoSeleccionado
+    .includes(
+        fechaTrabajada
+    )
+
+    &&
+
+    !descansoSustitutorioSeleccionado
+){
+
+    mostrarAdvertencia(
+        "El día seleccionado no tiene una entrada y una salida completas."
+    );
+
+    return;
+
+}
 
     const coincideConOtroFeriado =
     feriadosEmpresa.some(
@@ -4533,6 +4601,54 @@ if(
 
 
 /*
+    No puede registrarse dos veces el mismo
+    día feriado trabajado.
+*/
+
+const descansoMismoFeriado =
+    descansosSustitutoriosFeriado.find(
+        descanso=>
+
+            descanso.colaboradorId ===
+            colaborador.id
+
+            &&
+
+            descanso.feriadoId ===
+            feriadoSeleccionado.id
+
+            &&
+
+            descanso.fechaFeriadoTrabajado ===
+            fechaTrabajada
+
+            &&
+
+            String(
+                descanso.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() ===
+            "ACTIVO"
+
+            &&
+
+            descanso.id !==
+            descansoSustitutorioSeleccionado?.id
+    );
+
+
+if(descansoMismoFeriado){
+
+    mostrarAdvertencia(
+        "Este día feriado trabajado ya tiene un descanso sustitutorio registrado."
+    );
+
+    return;
+
+}
+
+/*
     Evitar que el colaborador tenga más de un descanso
     sustitutorio activo en la misma fecha.
 */
@@ -4582,12 +4698,23 @@ if(descansoDuplicado){
 
     
 
-    const idDocumento =
-        `${empresaId}_${feriadoSeleccionado.id}_${colaborador.id}`
-        .replaceAll(
-            "/",
-            "-"
-        );
+/*
+    Los registros anteriores conservan su ID.
+
+    Los registros nuevos incluyen la fecha trabajada
+    para permitir un descanso por cada día del feriado.
+*/
+
+const idDocumento =
+    descansoSustitutorioSeleccionado?.id
+
+    ||
+
+    `${empresaId}_${feriadoSeleccionado.id}_${colaborador.id}_${fechaTrabajada}`
+    .replaceAll(
+        "/",
+        "-"
+    );
 
     const referenciaDescanso =
     doc(
@@ -4618,6 +4745,9 @@ const documentoDescanso =
 
         fechaFeriadoFin:
             feriadoSeleccionado.fechaFin,
+
+        fechaFeriadoTrabajado:
+    fechaTrabajada,
 
         colaboradorId:
             colaborador.id,
