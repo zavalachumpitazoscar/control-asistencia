@@ -69,8 +69,6 @@ let excepcionesSeleccionadas = {
 
 let cancelarEscuchaFeriados = null;
 
-let moduloFeriadosIniciado = false;
-
 let asignacionesHorariosFeriado = [];
 
 let excepcionesHorariosFeriado = [];
@@ -517,13 +515,15 @@ export async function iniciarFeriados(){
     cargarSelectorAnios();
 
 
-    if(!moduloFeriadosIniciado){
+/*
+    La vista de feriados se vuelve a insertar cada vez
+    que se cambia de pestaña.
 
-        registrarEventosFeriados();
+    Por eso debemos registrar los eventos sobre los
+    nuevos elementos HTML en cada inicialización.
+*/
 
-        moduloFeriadosIniciado = true;
-
-    }
+registrarEventosFeriados();
 
 
     await cargarDatosOrganizacion();
