@@ -22,6 +22,7 @@ from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 
 
+
 /*=====================================================
 ESTADO DEL MÓDULO
 =====================================================*/
@@ -408,6 +409,33 @@ let filtroResultadoFeriado;
 let tablaColaboradoresFeriado;
 
 
+/* DESCANSO SUSTITUTORIO */
+
+let modalDescansoSustitutorio;
+
+let cerrarDescansoSustitutorio;
+
+let cancelarDescansoSustitutorio;
+
+let feriadoTrabajadoId;
+
+let colaboradorDescansoId;
+
+let avatarColaboradorDescanso;
+
+let nombreColaboradorDescanso;
+
+let documentoColaboradorDescanso;
+
+let fechaDescansoSustitutorio;
+
+let observacionDescansoSustitutorio;
+
+let guardarDescansoSustitutorio;
+
+let colaboradorDescansoSeleccionado = null;
+
+
 
 /*=====================================================
 INICIAR FERIADOS
@@ -788,6 +816,71 @@ function obtenerElementosFeriados(){
     tablaColaboradoresFeriado =
         document.getElementById("tablaColaboradoresFeriado");
 
+    modalDescansoSustitutorio =
+    document.getElementById(
+        "modalDescansoSustitutorio"
+    );
+
+
+cerrarDescansoSustitutorio =
+    document.getElementById(
+        "cerrarDescansoSustitutorio"
+    );
+
+
+cancelarDescansoSustitutorio =
+    document.getElementById(
+        "cancelarDescansoSustitutorio"
+    );
+
+
+feriadoTrabajadoId =
+    document.getElementById(
+        "feriadoTrabajadoId"
+    );
+
+
+colaboradorDescansoId =
+    document.getElementById(
+        "colaboradorDescansoId"
+    );
+
+
+avatarColaboradorDescanso =
+    document.getElementById(
+        "avatarColaboradorDescanso"
+    );
+
+
+nombreColaboradorDescanso =
+    document.getElementById(
+        "nombreColaboradorDescanso"
+    );
+
+
+documentoColaboradorDescanso =
+    document.getElementById(
+        "documentoColaboradorDescanso"
+    );
+
+
+fechaDescansoSustitutorio =
+    document.getElementById(
+        "fechaDescansoSustitutorio"
+    );
+
+
+observacionDescansoSustitutorio =
+    document.getElementById(
+        "observacionDescansoSustitutorio"
+    );
+
+
+guardarDescansoSustitutorio =
+    document.getElementById(
+        "guardarDescansoSustitutorio"
+    );
+
 }
 
 
@@ -1023,6 +1116,30 @@ function registrarEventosFeriados(){
         modalColaboradoresFeriado,
         cerrarListadoColaboradores
     );
+
+
+    if(cerrarDescansoSustitutorio){
+
+    cerrarDescansoSustitutorio.onclick =
+        cerrarModalDescansoSustitutorio;
+
+}
+
+
+if(cancelarDescansoSustitutorio){
+
+    cancelarDescansoSustitutorio.onclick =
+        cerrarModalDescansoSustitutorio;
+
+}
+
+
+if(guardarDescansoSustitutorio){
+
+    guardarDescansoSustitutorio.onclick =
+        guardarDescansoSustitutorioFirestore;
+
+}
 
 }
 
@@ -3371,6 +3488,40 @@ function renderizarTablaColaboradores(){
 
                         </span>
 
+                        ${
+    item.resultado ===
+    "TRABAJA"
+
+    &&
+
+    (
+        feriadoSeleccionado
+        .tratamientoTrabajo ===
+        "DESCANSO_SUSTITUTORIO"
+
+        ||
+
+        feriadoSeleccionado
+        .tratamientoTrabajo ===
+        "PAGO_Y_DESCANSO"
+    )
+    ?
+    `
+        <button
+            type="button"
+            class="btn-registrar-descanso-sustitutorio"
+            data-colaborador-id="${escaparHTML(
+                colaborador.id
+            )}"
+        >
+            <i class="bi bi-calendar-plus"></i>
+            Registrar descanso
+        </button>
+    `
+    :
+    ""
+}
+
                     </td>
 
                 </tr>
@@ -3378,6 +3529,35 @@ function renderizarTablaColaboradores(){
 
         })
         .join("");
+
+
+    tablaColaboradoresFeriado
+.querySelectorAll(
+    ".btn-registrar-descanso-sustitutorio"
+)
+.forEach(boton=>{
+
+    boton.onclick = ()=>{
+
+        const colaborador =
+            colaboradoresFeriado.find(
+                item=>
+                    item.id ===
+                    boton.dataset.colaboradorId
+            );
+
+
+        if(colaborador){
+
+            abrirDescansoSustitutorio(
+                colaborador
+            );
+
+        }
+
+    };
+
+});
 
 }
 
@@ -3711,7 +3891,417 @@ function obtenerDescripcionRegla(
 
 }
 
+/*=====================================================
+ABRIR DESCANSO SUSTITUTORIO
+=====================================================*/
 
+function abrirDescansoSustitutorio(
+    colaborador
+){
+
+    if(
+        !feriadoSeleccionado
+        ||
+        !colaborador
+    ){
+
+        return;
+
+    }
+
+
+    const tratamiento =
+        feriadoSeleccionado
+        .tratamientoTrabajo
+        ||
+        "PENDIENTE";
+
+
+    if(
+        tratamiento !==
+        "DESCANSO_SUSTITUTORIO"
+
+        &&
+
+        tratamiento !==
+        "PAGO_Y_DESCANSO"
+    ){
+
+        mostrarAdvertencia(
+            "Este feriado no está configurado con descanso sustitutorio."
+        );
+
+        return;
+
+    }
+
+
+    colaboradorDescansoSeleccionado =
+        colaborador;
+
+
+    feriadoTrabajadoId.value =
+        feriadoSeleccionado.id;
+
+
+    colaboradorDescansoId.value =
+        colaborador.id;
+
+
+    const nombre =
+        obtenerNombreColaborador(
+            colaborador
+        );
+
+
+    const documento =
+        obtenerDocumentoColaborador(
+            colaborador
+        );
+
+
+    avatarColaboradorDescanso.textContent =
+        obtenerInicialesFeriado(
+            nombre
+        );
+
+
+    nombreColaboradorDescanso.textContent =
+        nombre;
+
+
+    documentoColaboradorDescanso.textContent =
+        documento
+        ?
+        `Documento: ${documento}`
+        :
+        "Sin documento";
+
+
+    const fechaMinima =
+        sumarDiasFechaISO(
+            feriadoSeleccionado.fechaFin,
+            1
+        );
+
+
+    fechaDescansoSustitutorio.min =
+        fechaMinima;
+
+
+    fechaDescansoSustitutorio.value =
+        fechaMinima;
+
+
+    observacionDescansoSustitutorio.value =
+        "";
+
+
+    modalDescansoSustitutorio.classList.add(
+        "activo"
+    );
+
+}
+
+
+/*=====================================================
+CERRAR DESCANSO SUSTITUTORIO
+=====================================================*/
+
+function cerrarModalDescansoSustitutorio(){
+
+    modalDescansoSustitutorio
+    ?.classList
+    .remove(
+        "activo"
+    );
+
+
+    colaboradorDescansoSeleccionado =
+        null;
+
+
+    if(feriadoTrabajadoId){
+
+        feriadoTrabajadoId.value =
+            "";
+
+    }
+
+
+    if(colaboradorDescansoId){
+
+        colaboradorDescansoId.value =
+            "";
+
+    }
+
+
+    if(fechaDescansoSustitutorio){
+
+        fechaDescansoSustitutorio.value =
+            "";
+
+    }
+
+
+    if(observacionDescansoSustitutorio){
+
+        observacionDescansoSustitutorio.value =
+            "";
+
+    }
+
+}
+
+
+/*=====================================================
+GUARDAR DESCANSO SUSTITUTORIO
+=====================================================*/
+
+async function guardarDescansoSustitutorioFirestore(){
+
+    if(
+        !feriadoSeleccionado
+        ||
+        !colaboradorDescansoSeleccionado
+    ){
+
+        mostrarAdvertencia(
+            "No se encontró el feriado o colaborador."
+        );
+
+        return;
+
+    }
+
+
+    const fechaDescanso =
+        fechaDescansoSustitutorio.value;
+
+
+    if(!fechaDescanso){
+
+        mostrarAdvertencia(
+            "Selecciona la fecha del descanso sustitutorio."
+        );
+
+        fechaDescansoSustitutorio.focus();
+
+        return;
+
+    }
+
+
+    if(
+        fechaDescanso <=
+        feriadoSeleccionado.fechaFin
+    ){
+
+        mostrarAdvertencia(
+            "El descanso sustitutorio debe ser posterior al feriado trabajado."
+        );
+
+        return;
+
+    }
+
+
+    const colaborador =
+        colaboradorDescansoSeleccionado;
+
+
+    const idDocumento =
+        `${empresaId}_${feriadoSeleccionado.id}_${colaborador.id}`
+        .replaceAll(
+            "/",
+            "-"
+        );
+
+
+    const datos = {
+
+        empresaId,
+
+        feriadoId:
+            feriadoSeleccionado.id,
+
+        feriadoNombre:
+            feriadoSeleccionado.nombre,
+
+        fechaFeriadoInicio:
+            feriadoSeleccionado.fechaInicio,
+
+        fechaFeriadoFin:
+            feriadoSeleccionado.fechaFin,
+
+        colaboradorId:
+            colaborador.id,
+
+        colaboradorNombre:
+            obtenerNombreColaborador(
+                colaborador
+            ),
+
+        colaboradorDocumento:
+            obtenerDocumentoColaborador(
+                colaborador
+            ),
+
+        fechaDescanso,
+
+        tratamiento:
+            feriadoSeleccionado
+            .tratamientoTrabajo,
+
+        observacion:
+            observacionDescansoSustitutorio
+            .value
+            .trim(),
+
+        estado:
+            "ACTIVO",
+
+        creadoPor:
+            auth.currentUser?.uid
+            ||
+            null,
+
+        fechaCreacion:
+            serverTimestamp(),
+
+        fechaActualizacion:
+            serverTimestamp()
+
+    };
+
+
+    guardarDescansoSustitutorio.disabled =
+        true;
+
+
+    try{
+
+        await setDoc(
+            doc(
+                db,
+                "descansosSustitutoriosFeriados",
+                idDocumento
+            ),
+            datos,
+            {
+                merge:true
+            }
+        );
+
+
+        cerrarModalDescansoSustitutorio();
+
+
+        await mostrarExito(
+            "Descanso sustitutorio registrado correctamente."
+        );
+
+    }
+    catch(error){
+
+        console.error(
+            "Error guardando descanso sustitutorio:",
+            error
+        );
+
+
+        mostrarError(
+            "No se pudo guardar el descanso sustitutorio."
+        );
+
+    }
+    finally{
+
+        guardarDescansoSustitutorio.disabled =
+            false;
+
+    }
+
+}
+
+
+/*=====================================================
+SUMAR DÍAS A UNA FECHA ISO
+=====================================================*/
+
+function sumarDiasFechaISO(
+    fechaISO,
+    cantidadDias
+){
+
+    const fecha =
+        new Date(
+            `${fechaISO}T12:00:00`
+        );
+
+
+    fecha.setDate(
+        fecha.getDate()
+        +
+        cantidadDias
+    );
+
+
+    return [
+
+        fecha.getFullYear(),
+
+        String(
+            fecha.getMonth() + 1
+        )
+        .padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            fecha.getDate()
+        )
+        .padStart(
+            2,
+            "0"
+        )
+
+    ].join("-");
+
+}
+
+
+/*=====================================================
+OBTENER INICIALES
+=====================================================*/
+
+function obtenerInicialesFeriado(
+    nombre
+){
+
+    return String(
+        nombre ||
+        ""
+    )
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(
+        0,
+        2
+    )
+    .map(
+        palabra=>
+            palabra.charAt(0)
+            .toUpperCase()
+    )
+    .join("")
+    ||
+    "--";
+
+}
 
 function obtenerTextoTratamiento(
     tratamiento
