@@ -2174,18 +2174,40 @@ else if(
         marcaciones.length > 0;
 
 
-    if(
-        tieneMarcacionesReales
+if(
+    tieneMarcacionesReales
+    &&
+    feriadoDia
+    .identificarFeriadoLaborado !==
+    false
+){
+
+    const tieneEntradaReal =
+        Boolean(
+            entrada
+            &&
+            !entrada.esCubiertaPorPermiso
+        );
+
+
+    const tieneSalidaReal =
+        Boolean(
+            salida
+            &&
+            !salida.esCubiertaPorPermiso
+        );
+
+
+    estado =
+        tieneEntradaReal
         &&
-        feriadoDia
-        .identificarFeriadoLaborado !==
-        false
-    ){
+        tieneSalidaReal
+        ?
+        "TRABAJO_EN_FERIADO"
+        :
+        "TRABAJO_EN_FERIADO_INCOMPLETO";
 
-        estado =
-            "TRABAJO_EN_FERIADO";
-
-    }
+}
     else if(
         !tieneMarcacionesReales
         &&
@@ -2205,15 +2227,17 @@ else if(
         no genera tardanza.
     */
 
-    if(
-        estado === "FERIADO"
-        ||
-        estado === "TRABAJO_EN_FERIADO"
-    ){
+if(
+    estado === "FERIADO"
+    ||
+    estado === "TRABAJO_EN_FERIADO"
+    ||
+    estado === "TRABAJO_EN_FERIADO_INCOMPLETO"
+){
 
-        tardanzaMinutos = 0;
+    tardanzaMinutos = 0;
 
-    }
+}
 
 }
 
@@ -2603,6 +2627,8 @@ const estadosIncompletos = [
 
     "INCOMPLETO",
 
+    "TRABAJO_EN_FERIADO_INCOMPLETO",
+
     "FERIADO_PENDIENTE"
 
 ];
@@ -2927,7 +2953,32 @@ if(
 
 }
 
+if(
+    registro.estado ===
+    "TRABAJO_EN_FERIADO_INCOMPLETO"
+){
 
+    return `
+        <div class="horas-extra-resumen sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                Sin cálculo
+            </span>
+
+            <small>
+                Marcación incompleta en feriado
+            </small>
+
+        </div>
+    `;
+
+}
+
+    
 /*
     Trabajo realizado durante un feriado.
 */
@@ -4437,6 +4488,42 @@ if(
 
 }
 
+
+if(
+    registro.estado ===
+    "TRABAJO_EN_FERIADO_INCOMPLETO"
+){
+
+    const nombreFeriado =
+        registro.feriadoDia
+        ?.nombre
+        ||
+        "Feriado";
+
+
+    return `
+        <div class="jornada-asistencia incompleta">
+
+            <strong>
+                Marcación incompleta
+            </strong>
+
+            <span>
+                Trabajo en feriado
+            </span>
+
+            <small>
+                ${escaparHTML(
+                    nombreFeriado
+                )}
+            </small>
+
+        </div>
+    `;
+
+}
+
+    
 if(
     registro.estado ===
     "TRABAJO_EN_FERIADO"
@@ -5777,13 +5864,15 @@ function actualizarContadores(
         que todavía necesita configuración.
     */
 
-    const estadosIncompletos = [
+const estadosIncompletos = [
 
-        "INCOMPLETO",
+    "INCOMPLETO",
 
-        "FERIADO_PENDIENTE"
+    "TRABAJO_EN_FERIADO_INCOMPLETO",
 
-    ];
+    "FERIADO_PENDIENTE"
+
+];
 
 
     asignarContador(
@@ -7179,6 +7268,9 @@ function obtenerClaseEstado(
         FERIADO_PENDIENTE:
             "tardanza", 
 
+        TRABAJO_EN_FERIADO_INCOMPLETO:
+            "tardanza",
+
     };
 
 
@@ -7197,6 +7289,8 @@ if(
     estado === "FERIADO"
     ||
     estado === "TRABAJO_EN_FERIADO"
+    ||
+    estado === "TRABAJO_EN_FERIADO_INCOMPLETO"
     ||
     estado === "FERIADO_PENDIENTE"
 ){
@@ -7217,6 +7311,15 @@ if(
         return `Trabajó en feriado · ${nombreFeriado}`;
 
     }
+
+    if(
+    estado ===
+    "TRABAJO_EN_FERIADO_INCOMPLETO"
+){
+
+    return `Trabajo en feriado incompleto · ${nombreFeriado}`;
+
+}
 
 
     if(
