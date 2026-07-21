@@ -1231,52 +1231,66 @@ function cargarSelectorAnios(){
 CARGAR ORGANIZACIÓN
 =====================================================*/
 
+/*=====================================================
+CARGAR ORGANIZACIÓN
+=====================================================*/
+
 async function cargarDatosOrganizacion(){
 
-const consultas = [
+    const consultas = [
 
-    obtenerColeccionEmpresa("colaboradores"),
+        obtenerColeccionEmpresa(
+            "colaboradores"
+        ),
 
-    obtenerColeccionEmpresa("sucursales"),
+        obtenerColeccionEmpresa(
+            "sucursales"
+        ),
 
-    obtenerColeccionEmpresa("areas"),
+        obtenerColeccionEmpresa(
+            "areas"
+        ),
 
-    obtenerColeccionEmpresa("subareas"),
+        obtenerColeccionEmpresa(
+            "subareas"
+        ),
 
-    obtenerColeccionEmpresa(
-        "descansosSustitutoriosFeriados"
-    ),
+        obtenerColeccionEmpresa(
+            "descansosSustitutoriosFeriados"
+        ),
 
-    obtenerColeccionEmpresa(
-        "asignacionesHorarios"
-    ),
+        obtenerColeccionEmpresa(
+            "asignacionesHorarios"
+        ),
 
-    obtenerColeccionEmpresa(
-        "excepcionesHorarios"
-    ),
+        obtenerColeccionEmpresa(
+            "excepcionesHorarios"
+        ),
 
-obtenerColeccionEmpresa(
-    "horarios"
-),
+        obtenerColeccionEmpresa(
+            "horarios"
+        ),
 
-obtenerColeccionEmpresa(
-    "marcaciones"
-)
+        obtenerColeccionEmpresa(
+            "marcaciones"
+        )
 
-];
+    ];
 
 
-const [
-    colaboradoresResultado,
-    sucursalesResultado,
-    areasResultado,
-    subareasResultado,
-    descansosResultado,
-    asignacionesResultado,
-    excepcionesHorariosResultado,
-    horariosResultado,
-    marcacionesResultado
-] = await Promise.all(consultas);
+    const [
+        colaboradoresResultado,
+        sucursalesResultado,
+        areasResultado,
+        subareasResultado,
+        descansosResultado,
+        asignacionesResultado,
+        excepcionesHorariosResultado,
+        horariosResultado,
+        marcacionesResultado
+    ] = await Promise.all(
+        consultas
+    );
 
 
     colaboradoresFeriado =
@@ -1292,22 +1306,21 @@ const [
         subareasResultado;
 
     descansosSustitutoriosFeriado =
-    descansosResultado;
+        descansosResultado;
 
     asignacionesHorariosFeriado =
-    asignacionesResultado;
+        asignacionesResultado;
 
-
-excepcionesHorariosFeriado =
-    excepcionesHorariosResultado;
+    excepcionesHorariosFeriado =
+        excepcionesHorariosResultado;
 
     horariosCatalogoFeriado =
-    horariosResultado;
+        horariosResultado;
 
-marcacionesFeriado =
-    marcacionesResultado;
+    marcacionesFeriado =
+        marcacionesResultado;
+
 }
-
 
 
 async function obtenerColeccionEmpresa(
