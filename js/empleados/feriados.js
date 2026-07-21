@@ -3525,6 +3525,11 @@ function renderizarTablaColaboradores(){
             const colaborador =
                 item.colaborador;
 
+            const diasTrabajadosCompletos =
+    obtenerDiasTrabajadosCompletosFeriado(
+        colaborador
+    );
+
 
             const descansoAsignado =
     descansosSustitutoriosFeriado.find(
@@ -3642,19 +3647,34 @@ function renderizarTablaColaboradores(){
 
 
     ${
-        item.resultado ===
-        "TRABAJA"
+item.resultado ===
+"TRABAJA"
+
+&&
+
+(
+    descansoAsignado
+
+    ||
+
+    (
+        diasTrabajadosCompletos.length > 0
 
         &&
 
         (
-            descansoAsignado
+            feriadoSeleccionado
+            .tratamientoTrabajo ===
+            "DESCANSO_SUSTITUTORIO"
 
             ||
 
             feriadoSeleccionado
             .tratamientoTrabajo ===
-            "DESCANSO_SUSTITUTORIO"
+            "PAGO_Y_DESCANSO"
+        )
+    )
+)
 
             ||
 
@@ -4128,6 +4148,100 @@ function abrirDescansoSustitutorio(
     descansoSustitutorioSeleccionado =
     descansoExistente;
 
+    diasTrabajadosFeriadoSeleccionado =
+    obtenerDiasTrabajadosCompletosFeriado(
+        colaborador
+    );
+
+
+/*
+    Si estamos editando un registro anterior,
+    conservamos también su fecha trabajada.
+*/
+
+if(
+    descansoExistente
+    ?.fechaFeriadoTrabajado
+
+    &&
+
+    !diasTrabajadosFeriadoSeleccionado
+    .includes(
+        descansoExistente
+        .fechaFeriadoTrabajado
+    )
+){
+
+    diasTrabajadosFeriadoSeleccionado.push(
+        descansoExistente
+        .fechaFeriadoTrabajado
+    );
+
+}
+
+
+fechaFeriadoTrabajado.innerHTML =
+    `
+        <option value="">
+            Selecciona el día trabajado
+        </option>
+
+        ${
+            diasTrabajadosFeriadoSeleccionado
+            .map(
+                fecha=>
+                `
+                    <option value="${escaparHTML(
+                        fecha
+                    )}">
+                        ${escaparHTML(
+                            formatearFechaCortaFeriado(
+                                fecha
+                            )
+                        )}
+                    </option>
+                `
+            )
+            .join("")
+        }
+    `;
+
+
+fechaFeriadoTrabajado.value =
+    descansoExistente
+    ?.fechaFeriadoTrabajado
+    ||
+    (
+        diasTrabajadosFeriadoSeleccionado
+        .length ===
+        1
+        ?
+        diasTrabajadosFeriadoSeleccionado[0]
+        :
+        ""
+    );
+
+    if(
+    !descansoExistente
+
+    &&
+
+    diasTrabajadosFeriadoSeleccionado
+    .length ===
+    0
+){
+
+    mostrarAdvertencia(
+        "No se encontró ningún día del feriado con entrada y salida completas para este colaborador."
+    );
+
+    colaboradorDescansoSeleccionado =
+        null;
+
+    return;
+
+}
+
 
     feriadoTrabajadoId.value =
         feriadoSeleccionado.id;
@@ -4275,6 +4389,20 @@ function cerrarModalDescansoSustitutorio(){
 
     anularDescansoSustitutorio.style.display =
         "none";
+
+}
+
+diasTrabajadosFeriadoSeleccionado = [];
+
+
+if(fechaFeriadoTrabajado){
+
+    fechaFeriadoTrabajado.innerHTML =
+        `
+            <option value="">
+                Selecciona el día trabajado
+            </option>
+        `;
 
 }
     
@@ -5324,6 +5452,266 @@ function obtenerHorariosSemanalesDescanso(
 
 }
 
+
+/*=====================================================
+OBTENER FECHAS DE UN PERIODO
+=====================================================*/
+
+function obtenerFechasPeriodoFeriado(
+    fechaInicio,
+    fechaFin
+){
+
+    const fechas = [];
+
+    let fechaActual =
+        convertirFechaLocal(
+            fechaInicio
+        );
+
+    const fechaLimite =
+        convertirFechaLocal(
+            fechaFin
+        );
+
+
+    while(
+        fechaActual <=
+        fechaLimite
+    ){
+
+        fechas.push(
+            formarFechaISO(
+                fechaActual.getFullYear(),
+                fechaActual.getMonth() + 1,
+                fechaActual.getDate()
+            )
+        );
+
+
+        fechaActual.setDate(
+            fechaActual.getDate() + 1
+        );
+
+    }
+
+
+    return fechas;
+
+}
+
+
+
+/*=====================================================
+OBTENER DÍAS REALMENTE TRABAJADOS
+=====================================================*/
+
+function obtenerDiasTrabajadosCompletosFeriado(
+    colaborador
+){
+
+    if(
+        !feriadoSeleccionado ||
+        !colaborador
+    ){
+
+        return [];
+
+    }
+
+
+    const fechasFeriado =
+        obtenerFechasPeriodoFeriado(
+            feriadoSeleccionado.fechaInicio,
+            feriadoSeleccionado.fechaFin
+        );
+
+
+    return fechasFeriado.filter(
+        fecha=>{
+
+            const horarioIds =
+                obtenerHorariosEfectivosDescanso({
+
+                    colaboradorId:
+                        colaborador.id,
+
+                    fecha,
+
+                    asignaciones:
+                        asignacionesHorariosFeriado,
+
+                    excepciones:
+                        excepcionesHorariosFeriado
+
+                });
+
+
+            const horariosDia =
+                horarioIds
+                .map(
+                    horarioId=>
+                        horariosCatalogoFeriado.find(
+                            horario=>
+                                horario.id ===
+                                horarioId
+                        )
+                )
+                .filter(Boolean);
+
+
+            const marcacionesDia =
+                marcacionesFeriado
+                .filter(
+                    marcacion=>
+
+                        marcacion.colaboradorId ===
+                        colaborador.id
+
+                        &&
+
+                        marcacion.fecha ===
+                        fecha
+
+                        &&
+
+                        String(
+                            marcacion.estado ||
+                            "VALIDA"
+                        )
+                        .toUpperCase() ===
+                        "VALIDA"
+                )
+                .sort(
+                    (
+                        primera,
+                        segunda
+                    )=>
+
+                        obtenerTiempoMarcacionFeriado(
+                            primera
+                        )
+                        -
+                        obtenerTiempoMarcacionFeriado(
+                            segunda
+                        )
+                );
+
+
+            if(
+                marcacionesDia.length ===
+                0
+            ){
+
+                return false;
+
+            }
+
+
+            const clasificacion =
+                clasificarMarcaciones({
+
+                    marcaciones:
+                        marcacionesDia,
+
+                    horarios:
+                        horariosDia,
+
+                    fecha
+
+                });
+
+
+            const tieneEntradaReal =
+                Boolean(
+                    clasificacion.entrada
+
+                    &&
+
+                    !clasificacion
+                    .entrada
+                    .esCubiertaPorPermiso
+                );
+
+
+            const tieneSalidaReal =
+                Boolean(
+                    clasificacion.salida
+
+                    &&
+
+                    !clasificacion
+                    .salida
+                    .esCubiertaPorPermiso
+                );
+
+
+            return (
+                tieneEntradaReal &&
+                tieneSalidaReal
+            );
+
+        }
+    );
+
+}
+
+
+
+/*=====================================================
+TIEMPO DE UNA MARCACIÓN
+=====================================================*/
+
+function obtenerTiempoMarcacionFeriado(
+    marcacion
+){
+
+    if(
+        marcacion.fechaHora
+        ?.toMillis
+    ){
+
+        return marcacion
+            .fechaHora
+            .toMillis();
+
+    }
+
+
+    return new Date(
+        marcacion.fechaHoraISO ||
+        `${marcacion.fecha}T${marcacion.hora}`
+    )
+    .getTime();
+
+}
+
+
+
+/*=====================================================
+FORMATEAR FECHA CORTA
+=====================================================*/
+
+function formatearFechaCortaFeriado(
+    fechaISO
+){
+
+    return new Intl.DateTimeFormat(
+        "es-PE",
+        {
+            weekday:"long",
+            day:"2-digit",
+            month:"2-digit",
+            year:"numeric"
+        }
+    )
+    .format(
+        convertirFechaLocal(
+            fechaISO
+        )
+    );
+
+}
 
 
 function obtenerTextoRangoFechas(
