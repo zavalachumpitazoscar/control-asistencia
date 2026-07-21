@@ -3212,6 +3212,48 @@ function crearHorarioHTML(
 }
 
 
+
+/*=====================================================
+MARCACIÓN NO REQUERIDA POR FERIADO
+=====================================================*/
+
+function crearMarcacionFeriadoNoRequerida(
+    registro,
+    texto = "No requerida"
+){
+
+    return `
+        <div class="marcacion-no-requerida">
+
+            <i class="bi bi-calendar-event"></i>
+
+            <div>
+
+                <strong>
+                    ${escaparHTML(texto)}
+                </strong>
+
+                <span>
+                    Descanso por feriado
+                </span>
+
+                <small>
+                    ${escaparHTML(
+                        registro.feriadoDia
+                        ?.nombre
+                        ||
+                        "Feriado"
+                    )}
+                </small>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+
 /*=====================================================
 HTML ENTRADA
 =====================================================*/
@@ -3220,6 +3262,19 @@ function crearEntradaHTML(
     registro
 ){
 
+
+if(
+    registro.estado ===
+    "FERIADO"
+){
+
+    return crearMarcacionFeriadoNoRequerida(
+        registro,
+        "No requerida"
+    );
+
+}
+    
 
 const tienePermisoCompleto =
     registro.permisoDia
@@ -3802,6 +3857,18 @@ HTML SALIDA
 function crearSalidaHTML(
     registro
 ){
+
+if(
+    registro.estado ===
+    "FERIADO"
+){
+
+    return crearMarcacionFeriadoNoRequerida(
+        registro,
+        "No requerida"
+    );
+
+}
 
 const tienePermisoCompleto =
     registro.permisoDia
@@ -4654,6 +4721,28 @@ DETALLE DE TARDANZA
 function crearTardanzaHTML(
     registro
 ){
+
+if(
+    registro.estado ===
+    "FERIADO"
+){
+
+    return `
+        <div class="detalle-tardanza sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                Descanso por feriado
+            </span>
+
+        </div>
+    `;
+
+}
+    
 
     if(
         !registro.horarioPrincipal
