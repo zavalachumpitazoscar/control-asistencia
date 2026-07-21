@@ -735,7 +735,8 @@ const [
     ajustesAsistencia,
     aprobacionesHorasExtra,
     permisos,
-    feriados
+    feriados,
+    descansosSustitutorios
 ] = await Promise.all([
 
             consultarColeccionEmpresa(
@@ -796,6 +797,11 @@ consultarColeccionEmpresa(
 consultarColeccionEmpresa(
     "feriados",
     empresaId
+),
+
+consultarColeccionEmpresa(
+    "descansosSustitutoriosFeriados",
+    empresaId
 )
 
 ]);
@@ -843,7 +849,9 @@ consultarColeccionEmpresa(
 
                 permisos,
 
-                feriados
+                feriados,
+
+                descansosSustitutorios
 
             });
 
@@ -926,7 +934,8 @@ function construirRegistrosResumen({
     ajustesAsistencia,
     aprobacionesHorasExtra,
     permisos,
-    feriados
+    feriados,
+    descansosSustitutorios
 
 }){
 
@@ -1103,6 +1112,89 @@ const feriadoDia =
     ||
     null;
 
+
+        const descansoSustitutorioDia =
+    descansosSustitutorios.find(
+        descanso=>
+
+            descanso.colaboradorId ===
+            colaborador.id
+
+            &&
+
+            descanso.fechaDescanso ===
+            fecha
+
+            &&
+
+            String(
+                descanso.estado ||
+                "ACTIVO"
+            )
+            .toUpperCase() ===
+            "ACTIVO"
+
+    )
+    ||
+    null;
+
+        /*
+    Aplicar descanso sustitutorio.
+
+    No se aplica si la misma fecha también corresponde
+    a un feriado activo, porque el feriado tiene prioridad.
+*/
+
+if(
+    descansoSustitutorioDia
+    &&
+    !feriadoDia
+){
+
+    const tieneMarcacionesReales =
+        marcaciones.length > 0;
+
+
+    if(!tieneMarcacionesReales){
+
+        estado =
+            "DESCANSO_SUSTITUTORIO";
+
+    }
+    else{
+
+        const tieneEntradaReal =
+            Boolean(
+                entrada
+                &&
+                !entrada.esCubiertaPorPermiso
+            );
+
+
+        const tieneSalidaReal =
+            Boolean(
+                salida
+                &&
+                !salida.esCubiertaPorPermiso
+            );
+
+
+        estado =
+            tieneEntradaReal
+            &&
+            tieneSalidaReal
+            ?
+            "DESCANSO_SUSTITUTORIO_TRABAJADO"
+            :
+            "DESCANSO_SUSTITUTORIO_INCOMPLETO";
+
+    }
+
+
+    tardanzaMinutos = 0;
+
+}
+
 return construirRegistroColaborador(
 
     colaborador,
@@ -1117,7 +1209,9 @@ return construirRegistroColaborador(
 
     permisoDia,
 
-    feriadoDia
+    feriadoDia,
+
+    descansoSustitutorioDia
 
 );
 
@@ -1537,7 +1631,8 @@ function construirRegistroColaborador(
     ajusteAsistencia,
     aprobacionHorasExtra,
     permisoDia,
-    feriadoDia
+    feriadoDia,
+    descansoSustitutorioDia
 ){
 
     const nombres =
@@ -2351,6 +2446,8 @@ permisoDia,
 feriadoDia,
 
 aplicacionFeriado,
+
+descansoSustitutorioDia,
 
 
     };
