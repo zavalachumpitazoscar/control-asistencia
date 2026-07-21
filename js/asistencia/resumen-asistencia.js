@@ -3519,6 +3519,20 @@ function crearInicioRefrigerioHTML(
     registro
 ){
 
+
+if(
+    registro.estado ===
+    "FERIADO"
+){
+
+    return crearMarcacionFeriadoNoRequerida(
+        registro,
+        "No requerido"
+    );
+
+}
+    
+
     const refrigerio =
         registro.horarioPrincipal
         ?.refrigerio;
@@ -3608,6 +3622,20 @@ function crearFinRefrigerioHTML(
     registro
 ){
 
+
+if(
+    registro.estado ===
+    "FERIADO"
+){
+
+    return crearMarcacionFeriadoNoRequerida(
+        registro,
+        "No requerido"
+    );
+
+}
+
+    
     const refrigerio =
         registro.horarioPrincipal
         ?.refrigerio;
