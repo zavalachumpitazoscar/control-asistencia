@@ -2730,6 +2730,16 @@ const estadosIncompletos = [
 
 ];
 
+const estadosDescansoSustitutorio = [
+
+    "DESCANSO_SUSTITUTORIO",
+
+    "DESCANSO_SUSTITUTORIO_TRABAJADO",
+
+    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
+
+];
+
 
 let coincideEstado =
     !estado;
@@ -2775,6 +2785,17 @@ else if(
 
     coincideEstado =
         estadosIncompletos.includes(
+            registro.estado
+        );
+
+}
+else if(
+    estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    coincideEstado =
+        estadosDescansoSustitutorio.includes(
             registro.estado
         );
 
@@ -6206,7 +6227,9 @@ function actualizarContadores(
 
         "PRESENTE",
 
-        "TRABAJO_EN_FERIADO"
+        "TRABAJO_EN_FERIADO",
+
+        "DESCANSO_SUSTITUTORIO_TRABAJADO"
 
     ];
 
@@ -6308,6 +6331,8 @@ const estadosIncompletos = [
     "INCOMPLETO",
 
     "TRABAJO_EN_FERIADO_INCOMPLETO",
+
+    "DESCANSO_SUSTITUTORIO_INCOMPLETO",
 
     "FERIADO_PENDIENTE"
 
