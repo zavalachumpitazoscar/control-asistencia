@@ -734,7 +734,8 @@ const [
     subareas,
     ajustesAsistencia,
     aprobacionesHorasExtra,
-    permisos
+    permisos,
+    feriados
 ] = await Promise.all([
 
             consultarColeccionEmpresa(
@@ -790,8 +791,14 @@ consultarColeccionEmpresa(
 consultarColeccionEmpresa(
     "permisos",
     empresaId
+),
+
+consultarColeccionEmpresa(
+    "feriados",
+    empresaId
 )
-        ]);
+
+]);
 
 
         cargarOpcionesFiltro(
@@ -834,7 +841,9 @@ consultarColeccionEmpresa(
 
                 aprobacionesHorasExtra,
 
-                permisos
+                permisos,
+
+                feriados
 
             });
 
@@ -916,7 +925,8 @@ function construirRegistrosResumen({
     excepciones,
     ajustesAsistencia,
     aprobacionesHorasExtra,
-    permisos
+    permisos,
+    feriados
 
 }){
 
