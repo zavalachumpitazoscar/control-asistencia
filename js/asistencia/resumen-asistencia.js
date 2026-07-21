@@ -2081,17 +2081,7 @@ if(
 
 }
 
-
 return {
-
-    colaboradorId:
-        colaborador.id,
-
-    // Continúa aquí todo lo que ya tienes.
-
-    
-
-    return {
 
         colaboradorId:
             colaborador.id,
