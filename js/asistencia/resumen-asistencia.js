@@ -3021,6 +3021,87 @@ function crearHorasExtraHTML(
     registro
 ){
 
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    return `
+        <div class="horas-extra-resumen sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                No corresponde
+            </span>
+
+            <small>
+                Descanso sustitutorio
+            </small>
+
+        </div>
+    `;
+
+}
+
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO_TRABAJADO"
+){
+
+    return `
+        <div class="horas-extra-resumen revision">
+
+            <strong>
+                ${formatearDuracionCorta(
+                    registro.minutosTrabajados
+                    ||
+                    0
+                )}
+            </strong>
+
+            <span>
+                Descanso trabajado
+            </span>
+
+            <small>
+                Requiere reprogramar el descanso
+            </small>
+
+        </div>
+    `;
+
+}
+
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
+){
+
+    return `
+        <div class="horas-extra-resumen sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                Sin cálculo
+            </span>
+
+            <small>
+                Marcación incompleta
+            </small>
+
+        </div>
+    `;
+
+}
+
 /*
     Descanso por feriado sin trabajo.
 */
@@ -3610,6 +3691,43 @@ function crearMarcacionFeriadoNoRequerida(
 
 }
 
+function crearMarcacionDescansoSustitutorio(
+    registro,
+    texto = "No requerida"
+){
+
+    return `
+        <div class="marcacion-no-requerida">
+
+            <i class="bi bi-calendar2-check"></i>
+
+            <div>
+
+                <strong>
+                    ${escaparHTML(texto)}
+                </strong>
+
+                <span>
+                    Descanso sustitutorio
+                </span>
+
+                <small>
+                    Por ${escaparHTML(
+                        registro
+                        .descansoSustitutorioDia
+                        ?.feriadoNombre
+                        ||
+                        "feriado trabajado"
+                    )}
+                </small>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
 
 /*=====================================================
 HTML ENTRADA
@@ -3619,6 +3737,17 @@ function crearEntradaHTML(
     registro
 ){
 
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    return crearMarcacionDescansoSustitutorio(
+        registro,
+        "No requerida"
+    );
+
+}
 
 if(
     registro.estado ===
@@ -3876,6 +4005,18 @@ function crearInicioRefrigerioHTML(
     registro
 ){
 
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    return crearMarcacionDescansoSustitutorio(
+        registro,
+        "No requerido"
+    );
+
+}
+
 
 if(
     registro.estado ===
@@ -3978,6 +4119,18 @@ FIN DEL REFRIGERIO
 function crearFinRefrigerioHTML(
     registro
 ){
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    return crearMarcacionDescansoSustitutorio(
+        registro,
+        "No requerido"
+    );
+
+}
 
 
 if(
@@ -4243,6 +4396,19 @@ function crearSalidaHTML(
     registro
 ){
 
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    return crearMarcacionDescansoSustitutorio(
+        registro,
+        "No requerida"
+    );
+
+}
+
+    
 if(
     registro.estado ===
     "FERIADO"
@@ -4691,6 +4857,94 @@ if(
                 ${escaparHTML(
                     nombreFeriado
                 )}
+            </small>
+
+        </div>
+    `;
+
+}
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    return `
+        <div class="jornada-asistencia completa">
+
+            <strong>
+                Descanso sustitutorio
+            </strong>
+
+            <span>
+                Jornada cubierta
+            </span>
+
+            <small>
+                Por ${escaparHTML(
+                    registro
+                    .descansoSustitutorioDia
+                    ?.feriadoNombre
+                    ||
+                    "feriado trabajado"
+                )}
+            </small>
+
+        </div>
+    `;
+
+}
+
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO_TRABAJADO"
+){
+
+    return `
+        <div class="jornada-asistencia incompleta">
+
+            <strong>
+                ${formatearDuracionCorta(
+                    registro.minutosTrabajados
+                    ||
+                    0
+                )}
+                trabajadas
+            </strong>
+
+            <span>
+                Descanso sustitutorio trabajado
+            </span>
+
+            <small>
+                Debe reprogramarse el descanso
+            </small>
+
+        </div>
+    `;
+
+}
+
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
+){
+
+    return `
+        <div class="jornada-asistencia incompleta">
+
+            <strong>
+                Marcación incompleta
+            </strong>
+
+            <span>
+                Descanso sustitutorio trabajado
+            </span>
+
+            <small>
+                Debe revisarse y reprogramarse
             </small>
 
         </div>
@@ -5157,6 +5411,71 @@ if(
 
             <span>
                 Descanso por feriado
+            </span>
+
+        </div>
+    `;
+
+}
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    return `
+        <div class="detalle-tardanza sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                Descanso sustitutorio
+            </span>
+
+        </div>
+    `;
+
+}
+
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO_TRABAJADO"
+){
+
+    return `
+        <div class="detalle-tardanza sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                Descanso trabajado
+            </span>
+
+        </div>
+    `;
+
+}
+
+
+if(
+    registro.estado ===
+    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
+){
+
+    return `
+        <div class="detalle-tardanza sin-dato">
+
+            <strong>
+                —
+            </strong>
+
+            <span>
+                Marcación incompleta
             </span>
 
         </div>
@@ -7391,6 +7710,15 @@ function obtenerClaseEstado(
         TRABAJO_EN_FERIADO_INCOMPLETO:
             "tardanza",
 
+        DESCANSO_SUSTITUTORIO:
+            "permiso",
+
+        DESCANSO_SUSTITUTORIO_TRABAJADO:
+            "tardanza",
+
+        DESCANSO_SUSTITUTORIO_INCOMPLETO:
+            "tardanza",
+
     };
 
 
@@ -7404,6 +7732,35 @@ function obtenerTextoEstado(
     estado,
     registro = null
 ){
+
+if(
+    estado ===
+    "DESCANSO_SUSTITUTORIO"
+){
+
+    return "Descanso sustitutorio";
+
+}
+
+
+if(
+    estado ===
+    "DESCANSO_SUSTITUTORIO_TRABAJADO"
+){
+
+    return "Descanso sustitutorio trabajado";
+
+}
+
+
+if(
+    estado ===
+    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
+){
+
+    return "Descanso sustitutorio incompleto";
+
+}
 
 if(
     estado === "FERIADO"
