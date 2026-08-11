@@ -161,6 +161,8 @@ function acumular(mapa, r, fecha) {
       minutosJornadaCumplida: 0,
       minutosAusencia: 0,
       minutosJustificados: 0,
+      minutosExtraGenerados: 0,
+      minutosExtraPendientes: 0,
       minutosExtraAprobados: 0,
       detalles: [],
     });
@@ -177,10 +179,18 @@ function acumular(mapa, r, fecha) {
   t.minutosTrabajados += numero(r.minutosTrabajados);
   t.minutosJustificados += numero(r.minutosJustificadosPermiso);
   t.minutosAusencia += calcularMinutosAusencia(r);
+  const extraGenerada = numero(r.calculoHorasExtra?.minutosExtraTotal);
+  const decisionExtra = String(aprobacion?.decision || "").toUpperCase();
   const extra =
-    String(aprobacion?.decision || "").toUpperCase() === "APROBADO"
+    decisionExtra === "APROBADO"
       ? numero(aprobacion.minutosAprobados)
       : 0;
+  const extraPendiente =
+    extraGenerada > 0 && !["APROBADO", "RECHAZADO"].includes(decisionExtra)
+      ? extraGenerada
+      : 0;
+  t.minutosExtraGenerados += extraGenerada;
+  t.minutosExtraPendientes += extraPendiente;
   t.minutosExtraAprobados += extra;
   t.detalles.push({
     fecha,
@@ -200,12 +210,23 @@ function acumular(mapa, r, fecha) {
     ausencia: calcularMinutosAusencia(r),
     salidaAnticipada: numero(r.calculoAsistencia?.minutosSalidaAnticipada),
     excesoRefrigerio: numero(r.calculoAsistencia?.minutosExcesoRefrigerio),
+    extraGenerada,
+    extraPendiente,
     extra,
     marcaciones: r.clasificacion?.todas || [],
   });
 }
 
 function calcularMinutosAusencia(registro) {
+  const estado = String(registro.estado || "").toUpperCase();
+  const noGeneraAusencia =
+    estado.startsWith("FERIADO") ||
+    estado.startsWith("TRABAJO_EN_FERIADO") ||
+    estado.startsWith("DESCANSO_SUSTITUTORIO") ||
+    estado === "SIN_HORARIO";
+
+  if (noGeneraAusencia) return 0;
+
   const asignados = numero(registro.minutosJornadaProgramada);
   const cumplidos = Math.min(
     asignados,
@@ -235,7 +256,7 @@ function renderizarResumen() {
   cuerpoResumen.innerHTML = filtrados
     .map(
       (r) =>
-        `<tr><td class="mensual-colaborador"><div class="mensual-avatar">${iniciales(r.nombre)}</div><div><strong>${html(r.nombre)}</strong><small>${html(r.documento || "Sin documento")}</small></div></td><td>${r.diasProgramados}</td><td>${r.asistencias}</td><td>${valorContador(r.tardanzas, "advertencia")}</td><td>${valorContador(r.ausencias, "peligro")}</td><td>${valorContador(r.permisos, "informacion")}</td><td>${minutos(r.minutosAsignados)}</td><td>${minutos(r.minutosJornadaCumplida)}</td><td>${minutos(r.minutosTrabajados)}</td><td>${minutos(r.minutosJustificados)}</td><td>${minutos(r.minutosExtraAprobados)}</td><td><button type="button" class="btn-ver-detalle-periodo" data-accion="ver-detalle-periodo" data-colaborador-id="${html(r.colaboradorId)}"><i class="bi bi-eye"></i> Ver detalle</button></td></tr>`,
+        `<tr><td class="mensual-colaborador"><div class="mensual-avatar">${iniciales(r.nombre)}</div><div><strong>${html(r.nombre)}</strong><small>${html(r.documento || "Sin documento")}</small></div></td><td>${r.diasProgramados}</td><td>${r.asistencias}</td><td>${valorContador(r.tardanzas, "advertencia")}</td><td>${valorContador(r.ausencias, "peligro")}</td><td>${valorContador(r.permisos, "informacion")}</td><td>${minutos(r.minutosAsignados)}</td><td>${minutos(r.minutosJornadaCumplida)}</td><td>${minutos(r.minutosTrabajados)}</td><td>${minutos(r.minutosAusencia)}</td><td>${minutos(r.minutosJustificados)}</td><td>${minutos(r.minutosExtraGenerados)}</td><td>${minutos(r.minutosExtraPendientes)}</td><td>${minutos(r.minutosExtraAprobados)}</td><td><button type="button" class="btn-ver-detalle-periodo" data-accion="ver-detalle-periodo" data-colaborador-id="${html(r.colaboradorId)}"><i class="bi bi-eye"></i> Ver detalle</button></td></tr>`,
     )
     .join("");
 }
@@ -252,7 +273,7 @@ function abrirDetalle(id) {
     r.detalles
       .map(
         (d) =>
-          `<tr><td><strong>${formatearFecha(d.fecha)}</strong></td><td>${etiquetaEstado(d.estado)}</td>${celdaMarcacion(d.entrada, d.marcaciones, "ENTRADA")}${celdaMarcacion(d.refrigerioInicio, d.marcaciones, "INICIO_REFRIGERIO")}${celdaMarcacion(d.refrigerioFin, d.marcaciones, "FIN_REFRIGERIO")}${celdaMarcacion(d.salida, d.marcaciones, "SALIDA")}<td>${d.tardanza ? `${d.tardanza} min` : "—"}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td></tr>`,
+          `<tr><td><strong>${formatearFecha(d.fecha)}</strong></td><td>${etiquetaEstado(d.estado)}</td>${celdaMarcacion(d.entrada, d.marcaciones, "ENTRADA")}${celdaMarcacion(d.refrigerioInicio, d.marcaciones, "INICIO_REFRIGERIO")}${celdaMarcacion(d.refrigerioFin, d.marcaciones, "FIN_REFRIGERIO")}${celdaMarcacion(d.salida, d.marcaciones, "SALIDA")}<td>${d.tardanza ? `${d.tardanza} min` : "—"}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.ausencia)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extraGenerada)}</td><td>${minutos(d.extraPendiente)}</td><td>${minutos(d.extra)}</td></tr>`,
       )
       .join("");
   modal.style.display = "flex";
@@ -485,7 +506,10 @@ function agregarHojaResumen(XLSX, libro, filas) {
     "Horas asignadas": minutosExcel(r.minutosAsignados),
     "Jornada cumplida": minutosExcel(r.minutosJornadaCumplida),
     "Horas trabajadas": minutosExcel(r.minutosTrabajados),
+    "Horas de ausencia": minutosExcel(r.minutosAusencia),
     "Horas justificadas": minutosExcel(r.minutosJustificados),
+    "Horas extra generadas": minutosExcel(r.minutosExtraGenerados),
+    "Horas extra pendientes": minutosExcel(r.minutosExtraPendientes),
     "Horas extra aprobadas": minutosExcel(r.minutosExtraAprobados),
   }));
   agregarHoja(XLSX, libro, "Resumen", datos);
@@ -521,6 +545,8 @@ function agregarHojaHorasTrabajadas(XLSX, libro, filas) {
       "Exceso de refrigerio": minutosExcel(d.excesoRefrigerio),
       "Ausencia no justificada": minutosExcel(d.ausencia),
       "Horas justificadas": minutosExcel(d.justificados),
+      "Horas extra generadas": minutosExcel(d.extraGenerada),
+      "Horas extra pendientes": minutosExcel(d.extraPendiente),
       "Horas extra aprobadas": minutosExcel(d.extra),
     })),
   );
@@ -539,8 +565,11 @@ function agregarHojaSimplificada(XLSX, libro, r) {
     Asignado: minutosExcel(d.asignados),
     Jornada: minutosExcel(d.jornadaCumplida),
     Trabajado: minutosExcel(d.trabajados),
+    Ausencia: minutosExcel(d.ausencia),
     Tardanza: minutosExcel(d.tardanza),
     Justificado: minutosExcel(d.justificados),
+    "Extra generada": minutosExcel(d.extraGenerada),
+    "Extra pendiente": minutosExcel(d.extraPendiente),
     "Extra aprobada": minutosExcel(d.extra),
   }));
   datos.push({
@@ -554,8 +583,11 @@ function agregarHojaSimplificada(XLSX, libro, r) {
     Asignado: minutosExcel(r.minutosAsignados),
     Jornada: minutosExcel(r.minutosJornadaCumplida),
     Trabajado: minutosExcel(r.minutosTrabajados),
+    Ausencia: minutosExcel(r.minutosAusencia),
     Tardanza: "",
     Justificado: minutosExcel(r.minutosJustificados),
+    "Extra generada": minutosExcel(r.minutosExtraGenerados),
+    "Extra pendiente": minutosExcel(r.minutosExtraPendientes),
     "Extra aprobada": minutosExcel(r.minutosExtraAprobados),
   });
   agregarHoja(XLSX, libro, nombreHoja(r.nombre), datos);
@@ -648,7 +680,7 @@ function tablaPdfResumen(filas) {
   const cuerpo = filas
     .map(
       (r, indice) =>
-        `<tr><td>${indice + 1}</td><td class="texto-izquierda"><strong>${html(r.nombre)}</strong><small>${html(r.documento || "Sin documento")}</small></td><td>${r.diasProgramados}</td><td>${r.asistencias}</td><td>${r.tardanzas}</td><td>${r.ausencias}</td><td>${r.permisos}</td><td>${minutos(r.minutosAsignados)}</td><td>${minutos(r.minutosJornadaCumplida)}</td><td>${minutos(r.minutosTrabajados)}</td><td>${minutos(r.minutosJustificados)}</td><td>${minutos(r.minutosExtraAprobados)}</td></tr>`,
+        `<tr><td>${indice + 1}</td><td class="texto-izquierda"><strong>${html(r.nombre)}</strong><small>${html(r.documento || "Sin documento")}</small></td><td>${r.diasProgramados}</td><td>${r.asistencias}</td><td>${r.tardanzas}</td><td>${r.ausencias}</td><td>${r.permisos}</td><td>${minutos(r.minutosAsignados)}</td><td>${minutos(r.minutosJornadaCumplida)}</td><td>${minutos(r.minutosTrabajados)}</td><td>${minutos(r.minutosAusencia)}</td><td>${minutos(r.minutosJustificados)}</td><td>${minutos(r.minutosExtraGenerados)}</td><td>${minutos(r.minutosExtraPendientes)}</td><td>${minutos(r.minutosExtraAprobados)}</td></tr>`,
     )
     .join("");
   const totales = filas.reduce(
@@ -656,15 +688,18 @@ function tablaPdfResumen(filas) {
       asignado: a.asignado + r.minutosAsignados,
       jornada: a.jornada + r.minutosJornadaCumplida,
       trabajado: a.trabajado + r.minutosTrabajados,
+      ausencia: a.ausencia + r.minutosAusencia,
       justificado: a.justificado + r.minutosJustificados,
+      extraGenerada: a.extraGenerada + r.minutosExtraGenerados,
+      extraPendiente: a.extraPendiente + r.minutosExtraPendientes,
       extra: a.extra + r.minutosExtraAprobados,
     }),
-    { asignado: 0, jornada: 0, trabajado: 0, justificado: 0, extra: 0 },
+    { asignado: 0, jornada: 0, trabajado: 0, ausencia: 0, justificado: 0, extraGenerada: 0, extraPendiente: 0, extra: 0 },
   );
   return hojaReporte({
     titulo: "Resumen general de asistencia",
     subtitulo: `${filas.length} colaboradores consolidados`,
-    contenido: `<div class="reporte-tabla-marco"><table><thead><tr><th>N.º</th><th>Colaborador</th><th>Días<br>programados</th><th>Asistencias</th><th>Tardanzas</th><th>Ausencias</th><th>Permisos</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Justificado</th><th>Extra</th></tr></thead><tbody>${cuerpo}</tbody><tfoot><tr><th colspan="7">Totales del período</th><th>${minutos(totales.asignado)}</th><th>${minutos(totales.jornada)}</th><th>${minutos(totales.trabajado)}</th><th>${minutos(totales.justificado)}</th><th>${minutos(totales.extra)}</th></tr></tfoot></table></div>`,
+    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>N.º</th><th>Colaborador</th><th>Días<br>programados</th><th>Asistencias</th><th>Tardanzas</th><th>Ausencias<br>(días)</th><th>Permisos</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Ausencia<br>(horas)</th><th>Justificado</th><th>Extra<br>generada</th><th>Extra<br>pendiente</th><th>Extra<br>aprobada</th></tr></thead><tbody>${cuerpo}</tbody><tfoot><tr><th colspan="7">Totales del período</th><th>${minutos(totales.asignado)}</th><th>${minutos(totales.jornada)}</th><th>${minutos(totales.trabajado)}</th><th>${minutos(totales.ausencia)}</th><th>${minutos(totales.justificado)}</th><th>${minutos(totales.extraGenerada)}</th><th>${minutos(totales.extraPendiente)}</th><th>${minutos(totales.extra)}</th></tr></tfoot></table></div>`,
   });
 }
 
@@ -681,14 +716,14 @@ function tablaPdfHorasTrabajadas(filas) {
     .flatMap((r) =>
       r.detalles.map(
         (d) =>
-          `<tr><td>${html(r.documento || "—")}</td><td class="texto-izquierda"><strong>${html(r.nombre)}</strong></td><td>${formatearFecha(d.fecha)}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.salidaAnticipada)}</td><td>${minutos(d.excesoRefrigerio)}</td><td>${minutos(d.ausencia)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
+          `<tr><td>${html(r.documento || "—")}</td><td class="texto-izquierda"><strong>${html(r.nombre)}</strong></td><td>${formatearFecha(d.fecha)}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.salidaAnticipada)}</td><td>${minutos(d.excesoRefrigerio)}</td><td>${minutos(d.ausencia)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extraGenerada)}</td><td>${minutos(d.extraPendiente)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
       ),
     )
     .join("");
   return hojaReporte({
     titulo: "Reporte de horas trabajadas",
     subtitulo: "Detalle diario de todos los colaboradores",
-    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Documento</th><th>Colaborador</th><th>Fecha</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Salida<br>anticipada</th><th>Exceso<br>refrigerio</th><th>Ausencia</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div>`,
+    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Documento</th><th>Colaborador</th><th>Fecha</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Salida<br>anticipada</th><th>Exceso<br>refrigerio</th><th>Ausencia</th><th>Justificado</th><th>Extra<br>generada</th><th>Extra<br>pendiente</th><th>Extra<br>aprobada</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div>`,
   });
 }
 
@@ -699,7 +734,7 @@ function seccionPdfSimplificada(r) {
       const filas = semana
         .map(
           (d) =>
-            `<tr><td class="texto-izquierda"><strong>${nombreDia(d.fecha)}</strong><small>${formatearFecha(d.fecha)}</small></td><td><strong>${html(d.horario)}</strong></td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
+          `<tr><td class="texto-izquierda"><strong>${nombreDia(d.fecha)}</strong><small>${formatearFecha(d.fecha)}</small></td><td><strong>${html(d.horario)}</strong></td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.ausencia)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extraGenerada)}</td><td>${minutos(d.extraPendiente)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
         )
         .join("");
       const total = semana.reduce(
@@ -707,21 +742,24 @@ function seccionPdfSimplificada(r) {
           asignado: a.asignado + d.asignados,
           jornada: a.jornada + d.jornadaCumplida,
           trabajado: a.trabajado + d.trabajados,
+          ausencia: a.ausencia + d.ausencia,
           tardanza: a.tardanza + d.tardanza,
           justificado: a.justificado + d.justificados,
+          extraGenerada: a.extraGenerada + d.extraGenerada,
+          extraPendiente: a.extraPendiente + d.extraPendiente,
           extra: a.extra + d.extra,
         }),
-        { asignado: 0, jornada: 0, trabajado: 0, tardanza: 0, justificado: 0, extra: 0 },
+        { asignado: 0, jornada: 0, trabajado: 0, ausencia: 0, tardanza: 0, justificado: 0, extraGenerada: 0, extraPendiente: 0, extra: 0 },
       );
-      return `${filas}<tr class="resumen-semana"><th colspan="6">Resumen · Semana ${indice + 1}</th><th>${minutos(total.asignado)}</th><th>${minutos(total.jornada)}</th><th>${minutos(total.trabajado)}</th><th>${minutos(total.tardanza)}</th><th>${minutos(total.justificado)}</th><th>${minutos(total.extra)}</th><th></th></tr>`;
+      return `${filas}<tr class="resumen-semana"><th colspan="6">Resumen · Semana ${indice + 1}</th><th>${minutos(total.asignado)}</th><th>${minutos(total.jornada)}</th><th>${minutos(total.trabajado)}</th><th>${minutos(total.ausencia)}</th><th>${minutos(total.tardanza)}</th><th>${minutos(total.justificado)}</th><th>${minutos(total.extraGenerada)}</th><th>${minutos(total.extraPendiente)}</th><th>${minutos(total.extra)}</th><th></th></tr>`;
     })
     .join("");
-  const resumen = `<div class="reporte-resumen-final"><div><span>Horas asignadas</span><strong>${minutos(r.minutosAsignados)}</strong></div><div><span>Jornada cumplida</span><strong>${minutos(r.minutosJornadaCumplida)}</strong></div><div><span>Horas trabajadas</span><strong>${minutos(r.minutosTrabajados)}</strong></div><div><span>Horas justificadas</span><strong>${minutos(r.minutosJustificados)}</strong></div><div><span>Horas extra</span><strong>${minutos(r.minutosExtraAprobados)}</strong></div><div><span>Asistencias</span><strong>${r.asistencias}</strong></div><div><span>Tardanzas</span><strong>${r.tardanzas}</strong></div><div><span>Ausencias</span><strong>${r.ausencias}</strong></div></div>`;
+  const resumen = `<div class="reporte-resumen-final"><div><span>Horas asignadas</span><strong>${minutos(r.minutosAsignados)}</strong></div><div><span>Jornada cumplida</span><strong>${minutos(r.minutosJornadaCumplida)}</strong></div><div><span>Horas trabajadas</span><strong>${minutos(r.minutosTrabajados)}</strong></div><div><span>Horas de ausencia</span><strong>${minutos(r.minutosAusencia)}</strong></div><div><span>Horas justificadas</span><strong>${minutos(r.minutosJustificados)}</strong></div><div><span>Extra generada</span><strong>${minutos(r.minutosExtraGenerados)}</strong></div><div><span>Extra pendiente</span><strong>${minutos(r.minutosExtraPendientes)}</strong></div><div><span>Extra aprobada</span><strong>${minutos(r.minutosExtraAprobados)}</strong></div><div><span>Asistencias</span><strong>${r.asistencias}</strong></div><div><span>Tardanzas</span><strong>${r.tardanzas}</strong></div><div><span>Ausencias</span><strong>${r.ausencias}</strong></div></div>`;
   return hojaReporte({
     titulo: "Planilla individual de asistencia",
     subtitulo: "Detalle diario organizado por semanas",
     colaborador: r,
-    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div><h2 class="titulo-resumen-reporte">Resumen general</h2>${resumen}`,
+    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Ausencia</th><th>Tardanza</th><th>Justificado</th><th>Extra<br>generada</th><th>Extra<br>pendiente</th><th>Extra<br>aprobada</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div><h2 class="titulo-resumen-reporte">Resumen general</h2>${resumen}`,
   });
 }
 
