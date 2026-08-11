@@ -114,7 +114,10 @@ async function cargarResumenPeriodo(forzar = false) {
       companias[0] ||
       null;
     const fechas = obtenerFechas(fechaDesde.value, fechaHasta.value),
-      consolidado = new Map();
+      consolidado = new Map(),
+      colaboradoresPorId = new Map(
+        colaboradores.map((colaborador) => [colaborador.id, colaborador]),
+      );
     fechas.forEach((fecha) => {
       construirRegistrosResumen({
         fecha,
@@ -128,7 +131,20 @@ async function cargarResumenPeriodo(forzar = false) {
         permisos,
         feriados,
         descansosSustitutorios,
-      }).forEach((r) => acumular(consolidado, r, fecha));
+      }).forEach((r) => {
+        const colaborador = colaboradoresPorId.get(r.colaboradorId) || {};
+        acumular(
+          consolidado,
+          {
+            ...r,
+            organizacion: colaborador.organizacion || {},
+            sucursal: colaborador.organizacion?.sucursal || colaborador.sucursal || "",
+            area: colaborador.organizacion?.area || colaborador.area || "",
+            subarea: colaborador.organizacion?.subarea || colaborador.subarea || "",
+          },
+          fecha,
+        );
+      });
     });
     registrosPeriodo = [...consolidado.values()].sort((a, b) =>
       a.nombre.localeCompare(b.nombre, "es"),
@@ -151,6 +167,9 @@ function acumular(mapa, r, fecha) {
       colaboradorId: r.colaboradorId,
       nombre: r.nombre,
       documento: r.documento,
+      sucursal: r.sucursal || r.organizacion?.sucursal || "",
+      area: r.area || r.organizacion?.area || "",
+      subarea: r.subarea || r.organizacion?.subarea || "",
       diasProgramados: 0,
       asistencias: 0,
       tardanzas: 0,
@@ -476,7 +495,10 @@ function mensajeSinDatos() {
 
 async function exportarExcel(tipo, filas, colaboradorId) {
   try {
-    const XLSX = await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
+    const moduloXlsx = await import(
+      "https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/+esm"
+    );
+    const XLSX = moduloXlsx.default || moduloXlsx;
     const libro = XLSX.utils.book_new();
     if (tipo === "RESUMEN") agregarHojaResumen(XLSX, libro, filas);
     if (tipo === "HORAS_TRABAJADAS")
@@ -498,6 +520,9 @@ function agregarHojaResumen(XLSX, libro, filas) {
   const datos = filas.map((r) => ({
     Colaborador: r.nombre,
     Documento: r.documento || "",
+    Sucursal: r.sucursal || "",
+    "Área": r.area || "",
+    "Subárea": r.subarea || "",
     "Días programados": r.diasProgramados,
     Asistencias: r.asistencias,
     Tardanzas: r.tardanzas,
@@ -531,6 +556,9 @@ function agregarHojaHorasTrabajadas(XLSX, libro, filas) {
     r.detalles.map((d) => ({
       Documento: r.documento || "",
       Colaborador: r.nombre,
+      Sucursal: r.sucursal || "",
+      "Área": r.area || "",
+      "Subárea": r.subarea || "",
       Fecha: formatearFecha(d.fecha),
       Estado: etiquetaPlano(d.estado),
       Entrada: horaMarcacion(d.entrada),
@@ -554,43 +582,174 @@ function agregarHojaHorasTrabajadas(XLSX, libro, filas) {
 }
 
 function agregarHojaSimplificada(XLSX, libro, r) {
-  const datos = r.detalles.map((d) => ({
-    Fecha: formatearFecha(d.fecha),
-    Horario: d.horario,
-    Estado: etiquetaPlano(d.estado),
-    Entrada: horaMarcacion(d.entrada),
-    "Inicio refrigerio": horaMarcacion(d.refrigerioInicio),
-    "Fin refrigerio": horaMarcacion(d.refrigerioFin),
-    Salida: horaMarcacion(d.salida),
-    Asignado: minutosExcel(d.asignados),
-    Jornada: minutosExcel(d.jornadaCumplida),
-    Trabajado: minutosExcel(d.trabajados),
-    Ausencia: minutosExcel(d.ausencia),
-    Tardanza: minutosExcel(d.tardanza),
-    Justificado: minutosExcel(d.justificados),
-    "Extra generada": minutosExcel(d.extraGenerada),
-    "Extra pendiente": minutosExcel(d.extraPendiente),
-    "Extra aprobada": minutosExcel(d.extra),
-  }));
-  datos.push({
-    Fecha: "TOTALES",
-    Horario: "",
-    Estado: "",
-    Entrada: "",
-    "Inicio refrigerio": "",
-    "Fin refrigerio": "",
-    Salida: "",
-    Asignado: minutosExcel(r.minutosAsignados),
-    Jornada: minutosExcel(r.minutosJornadaCumplida),
-    Trabajado: minutosExcel(r.minutosTrabajados),
-    Ausencia: minutosExcel(r.minutosAusencia),
-    Tardanza: "",
-    Justificado: minutosExcel(r.minutosJustificados),
-    "Extra generada": minutosExcel(r.minutosExtraGenerados),
-    "Extra pendiente": minutosExcel(r.minutosExtraPendientes),
-    "Extra aprobada": minutosExcel(r.minutosExtraAprobados),
+  const empresa = obtenerDatosEmpresa();
+  const encabezados = [
+    "FECHA", "HORARIO", "ENTRADA", "INICIO\nREFRIGERIO", "FIN\nREFRIGERIO",
+    "SALIDA", "ASIGNADO", "JORNADA", "TRABAJADO", "AUSENCIA", "TARDANZA",
+    "JUSTIFICADO", "EXTRA\nGENERADA", "EXTRA\nPENDIENTE", "EXTRA\nAPROBADA", "ESTADO",
+  ];
+  const filas = [
+    ["PLANILLA INDIVIDUAL DE ASISTENCIA"],
+    [empresa.razonSocial],
+    ["Detalle diario organizado por semanas"],
+    [],
+    ["EMPRESA", "", empresa.razonSocial, "", "RUC", "", empresa.ruc, "", "COLABORADOR", "", r.nombre, "", "DOCUMENTO", "", r.documento || "—", ""],
+    ["SUCURSAL", "", r.sucursal || "—", "", "ÁREA", "", r.area || "—", "", "SUBÁREA", "", r.subarea || "—", "", "PERÍODO", "", `${formatearFecha(fechaDesde.value)} al ${formatearFecha(fechaHasta.value)}`, ""],
+    [],
+    encabezados,
+  ];
+  const filasSemana = [];
+  agruparPorSemana(r.detalles).forEach((semana, indice) => {
+    semana.forEach((d) => {
+      filas.push([
+        `${nombreDia(d.fecha)}\n${formatearFecha(d.fecha)}`,
+        d.horario,
+        horaMarcacion(d.entrada),
+        horaMarcacion(d.refrigerioInicio),
+        horaMarcacion(d.refrigerioFin),
+        horaMarcacion(d.salida),
+        minutosExcel(d.asignados),
+        minutosExcel(d.jornadaCumplida),
+        minutosExcel(d.trabajados),
+        minutosExcel(d.ausencia),
+        minutosExcel(d.tardanza),
+        minutosExcel(d.justificados),
+        minutosExcel(d.extraGenerada),
+        minutosExcel(d.extraPendiente),
+        minutosExcel(d.extra),
+        etiquetaPlano(d.estado),
+      ]);
+    });
+    const total = totalizarSemana(semana);
+    const filaSubtotal = filas.length;
+    filas.push([
+      `RESUMEN · SEMANA ${indice + 1}`, "", "", "", "", "",
+      minutosExcel(total.asignado), minutosExcel(total.jornada),
+      minutosExcel(total.trabajado), minutosExcel(total.ausencia),
+      minutosExcel(total.tardanza), minutosExcel(total.justificado),
+      minutosExcel(total.extraGenerada), minutosExcel(total.extraPendiente),
+      minutosExcel(total.extra), "",
+    ]);
+    filasSemana.push(filaSubtotal);
   });
-  agregarHoja(XLSX, libro, nombreHoja(r.nombre), datos);
+  const filaTotal = filas.length;
+  filas.push([
+    "TOTAL GENERAL", "", "", "", "", "",
+    minutosExcel(r.minutosAsignados), minutosExcel(r.minutosJornadaCumplida),
+    minutosExcel(r.minutosTrabajados), minutosExcel(r.minutosAusencia), "",
+    minutosExcel(r.minutosJustificados), minutosExcel(r.minutosExtraGenerados),
+    minutosExcel(r.minutosExtraPendientes), minutosExcel(r.minutosExtraAprobados), "",
+  ]);
+
+  const hoja = XLSX.utils.aoa_to_sheet(filas);
+  hoja["!merges"] = [
+    rangoCombinado(0, 0, 0, 15), rangoCombinado(1, 0, 1, 15),
+    rangoCombinado(2, 0, 2, 15),
+    ...[0, 4, 8, 12].flatMap((columna) => [
+      rangoCombinado(4, columna, 4, columna + 1),
+      rangoCombinado(4, columna + 2, 4, columna + 3),
+      rangoCombinado(5, columna, 5, columna + 1),
+      rangoCombinado(5, columna + 2, 5, columna + 3),
+    ]),
+    ...filasSemana.map((fila) => rangoCombinado(fila, 0, fila, 5)),
+    rangoCombinado(filaTotal, 0, filaTotal, 5),
+  ];
+  aplicarEstiloPlanillaExcel(XLSX, hoja, filas.length, filasSemana, filaTotal);
+  anexarHojaUnica(XLSX, libro, hoja, nombreHoja(r.nombre));
+}
+
+function totalizarSemana(semana) {
+  return semana.reduce(
+    (a, d) => ({
+      asignado: a.asignado + numero(d.asignados),
+      jornada: a.jornada + numero(d.jornadaCumplida),
+      trabajado: a.trabajado + numero(d.trabajados),
+      ausencia: a.ausencia + numero(d.ausencia),
+      tardanza: a.tardanza + numero(d.tardanza),
+      justificado: a.justificado + numero(d.justificados),
+      extraGenerada: a.extraGenerada + numero(d.extraGenerada),
+      extraPendiente: a.extraPendiente + numero(d.extraPendiente),
+      extra: a.extra + numero(d.extra),
+    }),
+    { asignado: 0, jornada: 0, trabajado: 0, ausencia: 0, tardanza: 0, justificado: 0, extraGenerada: 0, extraPendiente: 0, extra: 0 },
+  );
+}
+
+function obtenerDatosEmpresa() {
+  return {
+    razonSocial:
+      datosEmpresaReporte?.empresa?.razonSocial ||
+      datosEmpresaReporte?.razonSocial ||
+      sessionStorage.getItem("razonSocial") ||
+      sessionStorage.getItem("nombreEmpresa") ||
+      "CONTROL DE ASISTENCIA",
+    ruc:
+      datosEmpresaReporte?.empresa?.ruc ||
+      datosEmpresaReporte?.ruc ||
+      sessionStorage.getItem("rucEmpresa") ||
+      "—",
+  };
+}
+
+function rangoCombinado(filaInicio, columnaInicio, filaFin, columnaFin) {
+  return {
+    s: { r: filaInicio, c: columnaInicio },
+    e: { r: filaFin, c: columnaFin },
+  };
+}
+
+function aplicarEstiloPlanillaExcel(XLSX, hoja, totalFilas, filasSemana, filaTotal) {
+  const azul = "1E3A8A";
+  const azulClaro = "DBEAFE";
+  const borde = "CBD5E1";
+  const texto = "1E293B";
+  const aplicar = (direccion, estilo) => {
+    if (!hoja[direccion]) hoja[direccion] = { t: "s", v: "" };
+    hoja[direccion].s = estilo;
+  };
+  const rango = (filaDesde, filaHasta, colDesde, colHasta, estilo) => {
+    for (let f = filaDesde; f <= filaHasta; f++)
+      for (let c = colDesde; c <= colHasta; c++)
+        aplicar(XLSX.utils.encode_cell({ r: f, c }), estilo);
+  };
+  rango(0, 0, 0, 15, { font: { bold: true, sz: 18, color: "0F172A" }, alignment: { horizontal: "left", vertical: "center" }, border: { bottom: { style: "medium", color: { rgb: "3158E8" } } } });
+  rango(1, 1, 0, 15, { font: { bold: true, sz: 10, color: "3158E8" }, alignment: { horizontal: "left" } });
+  rango(2, 2, 0, 15, { font: { sz: 9, color: "64748B" }, alignment: { horizontal: "left" } });
+  [4, 5].forEach((fila) => {
+    [0, 4, 8, 12].forEach((col) => {
+      rango(fila, fila, col, col + 1, { fill: { fgColor: { rgb: "EFF6FF" } }, font: { bold: true, sz: 8, color: "64748B" }, alignment: { vertical: "center" }, border: bordesExcel(borde) });
+      rango(fila, fila, col + 2, col + 3, { fill: { fgColor: { rgb: "F8FAFC" } }, font: { bold: true, sz: 9, color: azul }, alignment: { vertical: "center", wrapText: true }, border: bordesExcel(borde) });
+    });
+  });
+  rango(7, 7, 0, 15, { fill: { fgColor: { rgb: azul } }, font: { bold: true, sz: 8, color: "FFFFFF" }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: bordesExcel("FFFFFF") });
+  rango(8, totalFilas - 1, 0, 15, { font: { sz: 8, color: texto }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: bordesExcel("D9E2EF") });
+  for (let fila = 8; fila < totalFilas; fila++) {
+    if ((fila - 8) % 2 === 1 && !filasSemana.includes(fila) && fila !== filaTotal)
+      rango(fila, fila, 0, 15, { fill: { fgColor: { rgb: "F8FAFC" } }, font: { sz: 8, color: texto }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: bordesExcel("D9E2EF") });
+  }
+  filasSemana.forEach((fila) => rango(fila, fila, 0, 15, { fill: { fgColor: { rgb: azulClaro } }, font: { bold: true, sz: 8, color: azul }, alignment: { horizontal: "center", vertical: "center" }, border: bordesExcel("B9D3F5") }));
+  rango(filaTotal, filaTotal, 0, 15, { fill: { fgColor: { rgb: azul } }, font: { bold: true, sz: 9, color: "FFFFFF" }, alignment: { horizontal: "center", vertical: "center" }, border: bordesExcel("FFFFFF") });
+  hoja["!cols"] = [13, 18, 11, 13, 13, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 24].map((wch) => ({ wch }));
+  hoja["!rows"] = Array.from({ length: totalFilas }, (_, fila) => ({ hpt: fila === 0 ? 30 : fila === 7 ? 32 : [4, 5].includes(fila) ? 28 : fila === 3 || fila === 6 ? 8 : 22 }));
+  hoja["!freeze"] = { xSplit: 0, ySplit: 8, topLeftCell: "A9" };
+  hoja["!autofilter"] = { ref: `A8:P${totalFilas}` };
+  hoja["!pageSetup"] = { orientation: "landscape", fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
+  hoja["!margins"] = { left: 0.25, right: 0.25, top: 0.4, bottom: 0.4, header: 0.15, footer: 0.15 };
+  hoja["!sheetView"] = [{ showGridLines: false }];
+}
+
+function bordesExcel(color) {
+  const borde = { style: "thin", color: { rgb: color } };
+  return { top: borde, bottom: borde, left: borde, right: borde };
+}
+
+function anexarHojaUnica(XLSX, libro, hoja, nombre) {
+  const base = nombreHoja(nombre);
+  let definitivo = base;
+  let correlativo = 2;
+  while (libro.SheetNames.includes(definitivo))
+    definitivo = `${base.slice(0, 27)} ${correlativo++}`;
+  XLSX.utils.book_append_sheet(libro, hoja, definitivo);
 }
 
 function agregarHojaDetalle(XLSX, libro, r) {
@@ -615,12 +774,11 @@ function agregarHoja(XLSX, libro, nombre, datos) {
   const filas = datos.length ? datos : [{ Información: "Sin datos" }];
   const columnas = Object.keys(filas[0]);
   const ultimaColumna = Math.max(0, columnas.length - 1);
+  const empresa = obtenerDatosEmpresa();
   const hoja = XLSX.utils.aoa_to_sheet([
     [nombre.toUpperCase()],
-    [
-      `Período: ${formatearFecha(fechaDesde.value)} al ${formatearFecha(fechaHasta.value)}`,
-    ],
-    [`Generado: ${new Date().toLocaleString("es-PE")}`],
+    [`${empresa.razonSocial} · RUC ${empresa.ruc}`],
+    [`Período: ${formatearFecha(fechaDesde.value)} al ${formatearFecha(fechaHasta.value)} · Generado: ${new Date().toLocaleString("es-PE")}`],
     [],
     [],
   ]);
@@ -663,6 +821,38 @@ function agregarHoja(XLSX, libro, nombre, datos) {
     header: 0.2,
     footer: 0.2,
   };
+  const azul = "1E3A8A";
+  for (let columna = 0; columna <= ultimaColumna; columna++) {
+    const encabezado = hoja[XLSX.utils.encode_cell({ r: 5, c: columna })];
+    if (encabezado)
+      encabezado.s = {
+        fill: { fgColor: { rgb: azul } },
+        font: { bold: true, color: "FFFFFF", sz: 9 },
+        alignment: { horizontal: "center", vertical: "center", wrapText: true },
+        border: bordesExcel("FFFFFF"),
+      };
+  }
+  for (let fila = 6; fila < 6 + filas.length; fila++)
+    for (let columna = 0; columna <= ultimaColumna; columna++) {
+      const celda = hoja[XLSX.utils.encode_cell({ r: fila, c: columna })];
+      if (celda)
+        celda.s = {
+          fill: { fgColor: { rgb: fila % 2 ? "F8FAFC" : "FFFFFF" } },
+          font: { color: "1E293B", sz: 8 },
+          alignment: { vertical: "center", wrapText: true },
+          border: bordesExcel("D9E2EF"),
+        };
+    }
+  [0, 1, 2].forEach((fila) => {
+    const celda = hoja[XLSX.utils.encode_cell({ r: fila, c: 0 })];
+    if (celda)
+      celda.s = {
+        font: { bold: fila < 2, sz: fila === 0 ? 16 : 9, color: fila === 0 ? "0F172A" : fila === 1 ? "3158E8" : "64748B" },
+        alignment: { vertical: "center" },
+        border: fila === 0 ? { bottom: { style: "medium", color: { rgb: "3158E8" } } } : {},
+      };
+  });
+  hoja["!sheetView"] = [{ showGridLines: false }];
   const base = nombreHoja(nombre);
   let definitivo = base;
   let correlativo = 2;
@@ -764,22 +954,12 @@ function seccionPdfSimplificada(r) {
 }
 
 function hojaReporte({ titulo, subtitulo, contenido, colaborador }) {
-  const empresa = html(
-    datosEmpresaReporte?.empresa?.razonSocial ||
-      datosEmpresaReporte?.razonSocial ||
-      sessionStorage.getItem("razonSocial") ||
-      sessionStorage.getItem("nombreEmpresa") ||
-      "CONTROL DE ASISTENCIA",
-  );
-  const ruc = html(
-    datosEmpresaReporte?.empresa?.ruc ||
-      datosEmpresaReporte?.ruc ||
-      sessionStorage.getItem("rucEmpresa") ||
-      "—",
-  );
+  const datosEmpresa = obtenerDatosEmpresa();
+  const empresa = html(datosEmpresa.razonSocial);
+  const ruc = html(datosEmpresa.ruc);
   const datosColaborador = colaborador
-    ? `<div><span>Colaborador</span><strong>${html(colaborador.nombre)}</strong></div><div><span>Documento</span><strong>${html(colaborador.documento || "—")}</strong></div>`
-    : "";
+    ? `<div><span>Colaborador</span><strong>${html(colaborador.nombre)}</strong></div><div><span>Documento</span><strong>${html(colaborador.documento || "—")}</strong></div><div><span>Sucursal</span><strong>${html(colaborador.sucursal || "—")}</strong></div><div><span>Área</span><strong>${html(colaborador.area || "—")}</strong></div><div><span>Subárea</span><strong>${html(colaborador.subarea || "—")}</strong></div>`
+    : `<div><span>Sucursal</span><strong>Varias</strong></div><div><span>Área</span><strong>Varias</strong></div><div><span>Subárea</span><strong>Varias</strong></div>`;
   return `<section class="hoja reporte-documento"><header class="reporte-cabecera"><div class="reporte-marca"><span class="reporte-logo"><i class="bi bi-calendar2-check"></i></span><div><small>${empresa}</small><h1>${html(titulo)}</h1><p>${html(subtitulo)}</p></div></div><div class="reporte-sello"><span>Generado</span><strong>${new Date().toLocaleDateString("es-PE")}</strong></div></header><div class="reporte-datos"><div><span>Empresa</span><strong>${empresa}</strong></div><div><span>RUC</span><strong>${ruc}</strong></div>${datosColaborador}<div><span>Período desde</span><strong>${formatearFecha(fechaDesde.value)}</strong></div><div><span>Hasta</span><strong>${formatearFecha(fechaHasta.value)}</strong></div></div>${contenido}<footer class="reporte-pie-documento"><span>Reporte generado por el sistema de control de asistencia</span><span>${formatearFecha(fechaDesde.value)} — ${formatearFecha(fechaHasta.value)}</span></footer></section>`;
 }
 
