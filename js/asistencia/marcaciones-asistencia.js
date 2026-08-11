@@ -220,4 +220,3 @@ function escaparHTML(valor) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
