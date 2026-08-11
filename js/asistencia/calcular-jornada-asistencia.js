@@ -199,6 +199,20 @@ export function calcularJornadaAsistencia({
         !salida
     ){
 
+        calcularTrabajoParcialConHorario({
+
+            resultado,
+
+            horario,
+
+            clasificacion,
+
+            entradaProgramada,
+
+            salidaProgramada
+
+        });
+
         resultado.advertencias.push({
 
             codigo:
@@ -406,6 +420,151 @@ export function calcularJornadaAsistencia({
 
 
     return resultado;
+
+}
+
+
+/*=====================================================
+CALCULAR TRAMOS CERRADOS DE UNA MARCACIÓN INCOMPLETA
+=====================================================*/
+
+function calcularTrabajoParcialConHorario({
+
+    resultado,
+    horario,
+    clasificacion,
+    entradaProgramada,
+    salidaProgramada
+
+}){
+
+    const entrada =
+        clasificacion?.entrada || null;
+
+    const salida =
+        clasificacion?.salida || null;
+
+    const inicioRefrigerio =
+        clasificacion?.inicioRefrigerio || null;
+
+    const finRefrigerio =
+        clasificacion?.finRefrigerio || null;
+
+    const tramos = [];
+
+    /*
+        Solo se reconocen intervalos cuyos dos extremos
+        están registrados. Nunca se inventa una salida.
+    */
+
+    if(entrada && inicioRefrigerio){
+
+        tramos.push([
+            obtenerMinutosMarcacion(entrada),
+            obtenerMinutosMarcacion(inicioRefrigerio)
+        ]);
+
+    }
+
+    if(finRefrigerio && salida){
+
+        tramos.push([
+            obtenerMinutosMarcacion(finRefrigerio),
+            obtenerMinutosMarcacion(salida)
+        ]);
+
+    }
+
+    if(!tramos.length){
+
+        return;
+
+    }
+
+    const normalizar = minutos=>{
+
+        if(
+            horario.cruzaMedianoche
+            &&
+            minutos <= entradaProgramada
+        ){
+
+            return minutos + 1440;
+
+        }
+
+        return minutos;
+
+    };
+
+    const minutosTrabajados =
+        tramos.reduce((total, [desde, hasta])=>{
+
+            const inicio = normalizar(desde);
+
+            let fin = normalizar(hasta);
+
+            if(fin < inicio){
+
+                fin += 1440;
+
+            }
+
+            return total + Math.max(0, fin - inicio);
+
+        }, 0);
+
+    resultado.calculable = true;
+
+    resultado.minutosTranscurridos =
+        minutosTrabajados;
+
+    resultado.minutosTrabajados =
+        minutosTrabajados;
+
+    resultado.minutosJornadaCumplida =
+        Math.min(
+            resultado.minutosJornadaProgramada,
+            minutosTrabajados
+        );
+
+    resultado.minutosLlegadaPosterior =
+        entrada
+        ?
+        Math.max(
+            0,
+            normalizar(
+                obtenerMinutosMarcacion(entrada)
+            ) - entradaProgramada
+        )
+        :
+        0;
+
+    resultado.minutosTardanza =
+        Math.max(
+            0,
+            resultado.minutosLlegadaPosterior -
+            resultado.toleranciaMinutos
+        );
+
+    resultado.minutosSalidaAnticipada =
+        salida
+        ?
+        Math.max(
+            0,
+            salidaProgramada -
+            normalizar(
+                obtenerMinutosMarcacion(salida)
+            )
+        )
+        :
+        Math.max(
+            0,
+            resultado.minutosJornadaProgramada -
+            resultado.minutosJornadaCumplida
+        );
+
+    resultado.jornadaCompleta = false;
 
 }
 
