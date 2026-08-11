@@ -16,6 +16,8 @@ let btnDiaSiguienteAsistencia;
 
 let btnHoyAsistencia;
 
+let selectoresFechaAsistencia = [];
+
 
 /*=====================================================
 INICIAR FECHA
@@ -42,6 +44,11 @@ export function iniciarFechaAsistencia(){
         document.getElementById(
             "btnHoyAsistencia"
         );
+
+    selectoresFechaAsistencia = [
+        document.getElementById("selectorFechaAsistencia"),
+        document.getElementById("selectorFechaMarcaciones")
+    ].filter(Boolean);
 
 
     if(!fechaActualAsistencia){
@@ -87,6 +94,25 @@ export function iniciarFechaAsistencia(){
     }
 
 
+    selectoresFechaAsistencia.forEach(selector=>{
+
+        selector.addEventListener("change", ()=>{
+
+            const fechaElegida =
+                convertirFechaISOALocal(selector.value);
+
+            if(!fechaElegida){
+                return;
+            }
+
+            fechaSeleccionada = fechaElegida;
+            actualizarFechaAsistencia();
+
+        });
+
+    });
+
+
     actualizarFechaAsistencia();
 
 }
@@ -125,6 +151,13 @@ ACTUALIZAR FECHA
 
 function actualizarFechaAsistencia(){
 
+    const fechaISO =
+        obtenerFechaISO(fechaSeleccionada);
+
+    selectoresFechaAsistencia.forEach(selector=>{
+        selector.value = fechaISO;
+    });
+
     fechaActualAsistencia.textContent =
         new Intl.DateTimeFormat(
             "es-PE",
@@ -147,9 +180,7 @@ function actualizarFechaAsistencia(){
                 detail:{
 
                     fecha:
-                        obtenerFechaISO(
-                            fechaSeleccionada
-                        ),
+                        fechaISO,
 
                     fechaObjeto:
                         new Date(
@@ -160,6 +191,36 @@ function actualizarFechaAsistencia(){
             }
         )
     );
+
+}
+
+
+/*=====================================================
+CONVERTIR FECHA ISO SIN DESFASE DE ZONA HORARIA
+=====================================================*/
+
+function convertirFechaISOALocal(valor){
+
+    const partes = String(valor || "")
+        .split("-")
+        .map(Number);
+
+    if(
+        partes.length !== 3 ||
+        partes.some(parte=>!Number.isInteger(parte))
+    ){
+        return null;
+    }
+
+    const fecha = new Date(
+        partes[0],
+        partes[1] - 1,
+        partes[2]
+    );
+
+    return Number.isNaN(fecha.getTime())
+        ? null
+        : normalizarFecha(fecha);
 
 }
 
