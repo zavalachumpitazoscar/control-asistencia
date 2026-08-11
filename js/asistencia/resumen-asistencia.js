@@ -894,7 +894,7 @@ consultarColeccionEmpresa(
 CONSULTAR COLECCIÓN
 =====================================================*/
 
-async function consultarColeccionEmpresa(
+export async function consultarColeccionEmpresa(
     nombreColeccion,
     empresaId
 ){
@@ -937,7 +937,7 @@ async function consultarColeccionEmpresa(
 CONSTRUIR REGISTROS
 =====================================================*/
 
-function construirRegistrosResumen({
+export function construirRegistrosResumen({
 
     fecha,
     colaboradores,
@@ -1163,7 +1163,9 @@ function construirRegistrosResumen({
 
             feriadoDia,
 
-            descansoSustitutorioDia
+            descansoSustitutorioDia,
+
+            fecha
 
         );
 
@@ -1583,7 +1585,8 @@ function construirRegistroColaborador(
     aprobacionHorasExtra,
     permisoDia,
     feriadoDia,
-    descansoSustitutorioDia
+    descansoSustitutorioDia,
+    fecha
 ){
 
     const nombres =
@@ -1684,8 +1687,7 @@ const aplicacionFeriado =
 
             horarios,
 
-            fecha:
-                fechaResumenSeleccionada
+            fecha
 
         });
 
