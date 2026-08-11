@@ -308,7 +308,7 @@ function configurarModalDescarga() {
 function actualizarTipoDescarga() {
   const tipo = document.getElementById("tipoDescargaReporteAsistencia")?.value;
   const grupo = document.getElementById("grupoColaboradorDescargaReporte");
-  if (grupo) grupo.hidden = tipo !== "INDIVIDUAL";
+  if (grupo) grupo.hidden = tipo !== "SIMPLIFICADO_INDIVIDUAL";
 }
 
 async function generarDescargaReporte() {
@@ -326,12 +326,14 @@ async function exportarExcel(tipo, filas, colaboradorId) {
     const XLSX = await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
     const libro = XLSX.utils.book_new();
     if (tipo === "RESUMEN") agregarHojaResumen(XLSX, libro, filas);
-    if (tipo === "MARCACIONES") agregarHojaMarcaciones(XLSX, libro, filas);
-    if (tipo === "INDIVIDUAL") {
+    if (tipo === "HORAS_TRABAJADAS")
+      agregarHojaHorasTrabajadas(XLSX, libro, filas);
+    if (tipo === "SIMPLIFICADO_INDIVIDUAL") {
       const r = filas.find((x) => x.colaboradorId === colaboradorId);
-      if (r) agregarHojaDetalle(XLSX, libro, r);
+      if (r) agregarHojaSimplificada(XLSX, libro, r);
     }
-    if (tipo === "TODOS") filas.forEach((r) => agregarHojaDetalle(XLSX, libro, r));
+    if (tipo === "SIMPLIFICADO_TODOS")
+      filas.forEach((r) => agregarHojaSimplificada(XLSX, libro, r));
     XLSX.writeFile(libro, `reporte-asistencia-${fechaDesde.value}-a-${fechaHasta.value}.xlsx`);
   } catch (error) {
     console.error("No se pudo generar Excel:", error);
@@ -368,6 +370,60 @@ function agregarHojaMarcaciones(XLSX, libro, filas) {
   agregarHoja(XLSX, libro, "Marcaciones", datos);
 }
 
+function agregarHojaHorasTrabajadas(XLSX, libro, filas) {
+  const datos = filas.flatMap((r) =>
+    r.detalles.map((d) => ({
+      Documento: r.documento || "",
+      Colaborador: r.nombre,
+      Fecha: formatearFecha(d.fecha),
+      Estado: etiquetaPlano(d.estado),
+      Entrada: horaMarcacion(d.entrada),
+      "Inicio refrigerio": horaMarcacion(d.refrigerioInicio),
+      "Fin refrigerio": horaMarcacion(d.refrigerioFin),
+      Salida: horaMarcacion(d.salida),
+      "Horas asignadas": minutosExcel(d.asignados),
+      "Jornada cumplida": minutosExcel(d.jornadaCumplida),
+      "Horas trabajadas": minutosExcel(d.trabajados),
+      Tardanza: minutosExcel(d.tardanza),
+      "Horas justificadas": minutosExcel(d.justificados),
+      "Horas extra aprobadas": minutosExcel(d.extra),
+    })),
+  );
+  agregarHoja(XLSX, libro, "Horas trabajadas", datos);
+}
+
+function agregarHojaSimplificada(XLSX, libro, r) {
+  const datos = r.detalles.map((d) => ({
+    Fecha: formatearFecha(d.fecha),
+    Estado: etiquetaPlano(d.estado),
+    Entrada: horaMarcacion(d.entrada),
+    "Inicio refrigerio": horaMarcacion(d.refrigerioInicio),
+    "Fin refrigerio": horaMarcacion(d.refrigerioFin),
+    Salida: horaMarcacion(d.salida),
+    Asignado: minutosExcel(d.asignados),
+    Jornada: minutosExcel(d.jornadaCumplida),
+    Trabajado: minutosExcel(d.trabajados),
+    Tardanza: minutosExcel(d.tardanza),
+    Justificado: minutosExcel(d.justificados),
+    "Extra aprobada": minutosExcel(d.extra),
+  }));
+  datos.push({
+    Fecha: "TOTALES",
+    Estado: "",
+    Entrada: "",
+    "Inicio refrigerio": "",
+    "Fin refrigerio": "",
+    Salida: "",
+    Asignado: minutosExcel(r.minutosAsignados),
+    Jornada: minutosExcel(r.minutosJornadaCumplida),
+    Trabajado: minutosExcel(r.minutosTrabajados),
+    Tardanza: "",
+    Justificado: minutosExcel(r.minutosJustificados),
+    "Extra aprobada": minutosExcel(r.minutosExtraAprobados),
+  });
+  agregarHoja(XLSX, libro, nombreHoja(r.nombre), datos);
+}
+
 function agregarHojaDetalle(XLSX, libro, r) {
   const datos = r.detalles.map((d) => ({
     Fecha: formatearFecha(d.fecha),
@@ -389,6 +445,12 @@ function agregarHojaDetalle(XLSX, libro, r) {
 function agregarHoja(XLSX, libro, nombre, datos) {
   const hoja = XLSX.utils.json_to_sheet(datos.length ? datos : [{ Información: "Sin datos" }]);
   hoja["!cols"] = Object.keys(datos[0] || { Información: "" }).map((clave) => ({ wch: Math.max(12, Math.min(32, clave.length + 5)) }));
+  const ultimaColumna = Math.max(0, Object.keys(datos[0] || { Información: "" }).length - 1);
+  const ultimaFila = Math.max(0, datos.length);
+  hoja["!autofilter"] = {
+    ref: `A1:${XLSX.utils.encode_col(ultimaColumna)}${ultimaFila + 1}`,
+  };
+  hoja["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2" };
   const base = nombreHoja(nombre);
   let definitivo = base;
   let correlativo = 2;
@@ -401,12 +463,13 @@ function agregarHoja(XLSX, libro, nombre, datos) {
 function exportarPdf(tipo, filas, colaboradorId) {
   let contenido = "";
   if (tipo === "RESUMEN") contenido = tablaPdfResumen(filas);
-  if (tipo === "MARCACIONES") contenido = tablaPdfMarcaciones(filas);
-  if (tipo === "INDIVIDUAL") {
+  if (tipo === "HORAS_TRABAJADAS") contenido = tablaPdfHorasTrabajadas(filas);
+  if (tipo === "SIMPLIFICADO_INDIVIDUAL") {
     const r = filas.find((x) => x.colaboradorId === colaboradorId);
-    contenido = r ? seccionPdfDetalle(r) : "";
+    contenido = r ? seccionPdfSimplificada(r) : "";
   }
-  if (tipo === "TODOS") contenido = filas.map(seccionPdfDetalle).join("");
+  if (tipo === "SIMPLIFICADO_TODOS")
+    contenido = filas.map(seccionPdfSimplificada).join("");
   abrirImpresion(contenido);
 }
 
@@ -423,6 +486,28 @@ function tablaPdfMarcaciones(filas) {
   return `<h1>Listado completo de marcaciones</h1>${periodoPdf()}<table><thead><tr><th>Colaborador</th><th>Documento</th><th>Fecha</th><th>Hora</th><th>Tipo</th></tr></thead><tbody>${cuerpo}</tbody></table>`;
 }
 
+function tablaPdfHorasTrabajadas(filas) {
+  const cuerpo = filas
+    .flatMap((r) =>
+      r.detalles.map(
+        (d) =>
+          `<tr><td>${html(r.documento || "")}</td><td>${html(r.nombre)}</td><td>${formatearFecha(d.fecha)}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td>${html(etiquetaPlano(d.estado))}</td></tr>`,
+      ),
+    )
+    .join("");
+  return `<h1>Reporte de horas trabajadas</h1>${periodoPdf()}<table><thead><tr><th>Documento</th><th>Colaborador</th><th>Fecha</th><th>Entrada</th><th>Ref. inicio</th><th>Ref. fin</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table>`;
+}
+
+function seccionPdfSimplificada(r) {
+  const cuerpo = r.detalles
+    .map(
+      (d) =>
+        `<tr><td>${formatearFecha(d.fecha)}</td><td>${html(etiquetaPlano(d.estado))}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td></tr>`,
+    )
+    .join("");
+  return `<section class="hoja"><h1>Reporte de asistencia simplificado</h1><p><strong>${html(r.nombre)}</strong> · ${html(r.documento || "Sin documento")}</p>${periodoPdf()}<table><thead><tr><th>Fecha</th><th>Estado</th><th>Entrada</th><th>Ref. inicio</th><th>Ref. fin</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th></tr></thead><tbody>${cuerpo}</tbody><tfoot><tr><th colspan="6">TOTALES</th><th>${minutos(r.minutosAsignados)}</th><th>${minutos(r.minutosJornadaCumplida)}</th><th>${minutos(r.minutosTrabajados)}</th><th>—</th><th>${minutos(r.minutosJustificados)}</th><th>${minutos(r.minutosExtraAprobados)}</th></tr></tfoot></table></section>`;
+}
+
 function seccionPdfDetalle(r) {
   const cuerpo = r.detalles.map((d) => `<tr><td>${formatearFecha(d.fecha)}</td><td>${html(etiquetaPlano(d.estado))}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.extra)}</td></tr>`).join("");
   return `<section class="hoja"><h1>${html(r.nombre)}</h1><p>${html(r.documento || "Sin documento")}</p>${periodoPdf()}<table><thead><tr><th>Fecha</th><th>Estado</th><th>Entrada</th><th>Ref. inicio</th><th>Ref. fin</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Extra</th></tr></thead><tbody>${cuerpo}</tbody></table></section>`;
@@ -431,7 +516,7 @@ function seccionPdfDetalle(r) {
 function abrirImpresion(contenido) {
   const ventana = window.open("", "_blank");
   if (!ventana) return alert("Permite las ventanas emergentes para generar el PDF.");
-  ventana.document.write(`<!doctype html><html><head><title>Reporte de asistencia</title><style>@page{size:landscape;margin:10mm}body{font-family:Arial;color:#172033}h1{font-size:18px;margin:0 0 4px}p{margin:3px 0;color:#64748b}.hoja{break-after:page}.hoja:last-child{break-after:auto}table{width:100%;margin-top:12px;border-collapse:collapse;font-size:9px}th,td{padding:6px;border:1px solid #94a3b8;text-align:left}th{background:#e2e8f0}small{color:#64748b}</style></head><body>${contenido}<script>window.onload=()=>window.print()<\/script></body></html>`);
+  ventana.document.write(`<!doctype html><html><head><title>Reporte de asistencia</title><style>@page{size:landscape;margin:9mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#172033;margin:0}h1{font-size:18px;text-transform:uppercase;color:#1e3a8a;margin:0;padding:0 0 7px;border-bottom:3px solid #2563eb}p{margin:7px 0;color:#475569}.hoja{break-after:page}.hoja:last-child{break-after:auto}table{width:100%;margin-top:10px;border-collapse:collapse;font-size:8px}th,td{padding:5px;border:1px solid #94a3b8;text-align:center}th{background:#dbeafe;color:#1e3a8a;font-weight:700}tbody tr:nth-child(even){background:#f8fafc}tfoot th{background:#e2e8f0;color:#172033}small{color:#64748b}</style></head><body>${contenido}<script>window.onload=()=>window.print()<\/script></body></html>`);
   ventana.document.close();
 }
 
@@ -609,3 +694,4 @@ function html(v) {
   e.textContent = String(v ?? "");
   return e.innerHTML;
 }
+
