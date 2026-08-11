@@ -664,25 +664,48 @@
           <span>Colaborador</span>
           <select id="colaboradorDescargaReporteAsistencia"></select>
         </label>
-        <fieldset>
-          <legend>Formato</legend>
-          <label class="opcion-formato-reporte">
-            <input type="radio" name="formatoDescargaReporte" value="EXCEL" checked />
-            <i class="bi bi-file-earmark-spreadsheet"></i>
-            <span><strong>Excel</strong><small>Libro .xlsx con hojas organizadas</small></span>
-          </label>
-          <label class="opcion-formato-reporte">
-            <input type="radio" name="formatoDescargaReporte" value="PDF" />
-            <i class="bi bi-file-earmark-pdf"></i>
-            <span><strong>PDF</strong><small>Vista lista para imprimir o guardar</small></span>
-          </label>
-        </fieldset>
+        <div class="aviso-vista-previa-reporte">
+          <i class="bi bi-eye"></i>
+          <div>
+            <strong>Primero revisa el reporte</strong>
+            <small>La descarga solo se iniciará cuando la confirmes desde la vista previa.</small>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-asistencia-secundario" id="btnCancelarDescargaReporteAsistencia">Cancelar</button>
         <button type="button" class="btn-asistencia-exportar descargar" id="btnGenerarDescargaReporteAsistencia">
-          <i class="bi bi-download"></i> Generar reporte
+          <i class="bi bi-eye"></i> Ver vista previa
         </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalVistaPreviaReporteAsistencia" class="modal" aria-hidden="true">
+    <div class="modal-contenido modal-vista-previa-reporte">
+      <div class="vista-previa-reporte-barra">
+        <div>
+          <span class="asistencia-seccion-etiqueta">Vista previa</span>
+          <h3 id="tituloVistaPreviaReporteAsistencia">Reporte de asistencia</h3>
+          <p id="descripcionVistaPreviaReporteAsistencia">Revisa el contenido antes de descargar.</p>
+        </div>
+        <button type="button" class="btn-cerrar-modal" id="btnCerrarVistaPreviaReporteAsistencia" aria-label="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="vista-previa-reporte-lienzo" id="contenidoVistaPreviaReporteAsistencia"></div>
+      <div class="vista-previa-reporte-pie">
+        <button type="button" class="btn-asistencia-secundario" id="btnVolverConfiguracionReporteAsistencia">
+          <i class="bi bi-arrow-left"></i> Cambiar reporte
+        </button>
+        <div>
+          <button type="button" class="btn-descarga-final excel" id="btnDescargarExcelVistaPrevia">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Descargar Excel
+          </button>
+          <button type="button" class="btn-descarga-final pdf" id="btnDescargarPdfVistaPrevia">
+            <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
+          </button>
+        </div>
       </div>
     </div>
   </div>
