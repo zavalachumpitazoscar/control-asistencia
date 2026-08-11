@@ -471,6 +471,66 @@ CONTENIDO
 
 }
 
+.asistencia-selector-mes{
+    min-width:210px;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    align-items:center;
+    column-gap:10px;
+    padding:11px 14px;
+    border:1px solid #dbe4f0;
+    border-radius:14px;
+    background:#fff;
+}
+
+.asistencia-selector-mes i{
+    grid-row:1 / 3;
+    color:#2563eb;
+    font-size:20px;
+}
+
+.asistencia-selector-mes span{
+    color:#64748b;
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+}
+
+.asistencia-selector-mes input{
+    min-width:155px;
+    border:0;
+    outline:0;
+    color:#1e3a8a;
+    background:transparent;
+    font:700 13px inherit;
+    cursor:pointer;
+}
+
+.asistencia-filtros-mensuales{
+    margin-bottom:16px;
+    padding:16px;
+    border:1px solid #e2e8f0;
+    border-radius:16px;
+    background:#fff;
+}
+
+.asistencia-tabla-mensual td:not(:first-child),
+.asistencia-tabla-mensual th:not(:first-child){
+    text-align:center;
+    white-space:nowrap;
+}
+
+.asistencia-tabla-mensual .mensual-colaborador strong,
+.asistencia-tabla-mensual .mensual-colaborador small{
+    display:block;
+}
+
+.asistencia-tabla-mensual .mensual-colaborador small{
+    margin-top:3px;
+    color:#64748b;
+    font-size:10px;
+}
+
 
 .asistencia-resumen-mensual{
 
