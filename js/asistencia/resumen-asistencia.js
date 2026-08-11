@@ -907,6 +907,8 @@ function construirRegistroColaborador(
 
     calculoAsistencia,
 
+    permisoDia,
+
     tratamientoRefrigerioCorto,
   });
 
@@ -4418,4 +4420,3 @@ function escaparHTML(valor) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
