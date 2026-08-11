@@ -942,3 +942,4 @@ function convertirHoraAMinutos(
     minutos;
 
 }
+
