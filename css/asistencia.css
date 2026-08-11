@@ -3755,6 +3755,9 @@ JORNADA JUSTIFICADA POR PERMISO
 .btn-asistencia-exportar.pdf {
   background: #c43d3d;
 }
+.btn-asistencia-exportar.descargar {
+  background: #4f46e5;
+}
 .btn-asistencia-exportar:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -3857,6 +3860,108 @@ JORNADA JUSTIFICADA POR PERMISO
   justify-content: center;
   padding: 16px;
   background: rgba(15, 23, 42, 0.58);
+}
+#modalDescargaReporteAsistencia {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.58);
+}
+.modal-descarga-reporte {
+  width: min(560px, 96vw);
+  overflow: hidden;
+}
+#modalDescargaReporteAsistencia .modal-header,
+#modalDescargaReporteAsistencia .modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+#modalDescargaReporteAsistencia .modal-footer {
+  justify-content: flex-end;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 0;
+}
+#modalDescargaReporteAsistencia .modal-header h3 {
+  margin: 3px 0;
+}
+#modalDescargaReporteAsistencia .modal-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 11px;
+}
+#modalDescargaReporteAsistencia .btn-cerrar-modal {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 9px;
+  background: #f1f5f9;
+  cursor: pointer;
+}
+.descarga-reporte-cuerpo {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+.descarga-reporte-cuerpo > label {
+  display: grid;
+  gap: 7px;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
+.descarga-reporte-cuerpo select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #fff;
+}
+.descarga-reporte-cuerpo fieldset {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.descarga-reporte-cuerpo legend {
+  grid-column: 1 / -1;
+  margin-bottom: 7px;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
+.opcion-formato-reporte {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.opcion-formato-reporte i {
+  color: #4f46e5;
+  font-size: 20px;
+}
+.opcion-formato-reporte span {
+  display: grid;
+  gap: 2px;
+}
+.opcion-formato-reporte small {
+  color: #64748b;
+  font-size: 9px;
 }
 #modalDetallePeriodoAsistencia .modal-header {
   display: flex;
