@@ -20,6 +20,11 @@ import {
 from "./asistencia/resumen-asistencia.js";
 
 import {
+    iniciarMarcacionesAsistencia
+}
+from "./asistencia/marcaciones-asistencia.js";
+
+import {
     iniciarEditarDiaAsistencia
 }
 from "./asistencia/editar-dia-asistencia.js";
@@ -53,6 +58,8 @@ export async function iniciarAsistencia(){
 iniciarNavegacionAsistencia();
 
 iniciarResumenAsistencia();
+
+iniciarMarcacionesAsistencia();
 
 iniciarEditarDiaAsistencia();
 
