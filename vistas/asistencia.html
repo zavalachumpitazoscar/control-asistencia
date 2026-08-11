@@ -778,39 +778,51 @@
                 <h3>Resumen por colaborador</h3>
                 <p>Consulta jornadas, asistencias, tardanzas, permisos y horas acumuladas del mes.</p>
             </div>
-            <div class="asistencia-periodo-provisional">
-                <i class="bi bi-calendar-month"></i><span>Mes de consulta</span><strong>Agosto 2026</strong>
+            <label class="asistencia-selector-mes">
+                <i class="bi bi-calendar-month"></i>
+                <span>Mes de consulta</span>
+                <input type="month" id="selectorMesAsistencia">
+            </label>
+        </div>
+
+        <div class="asistencia-filtros asistencia-filtros-mensuales">
+            <div class="asistencia-buscador">
+                <i class="bi bi-search"></i>
+                <input type="text" id="buscarResumenMensualAsistencia" placeholder="Buscar colaborador o documento...">
             </div>
+            <button type="button" class="btn-asistencia-secundario" id="btnActualizarResumenMensual">
+                <i class="bi bi-arrow-clockwise"></i> Actualizar mes
+            </button>
         </div>
 
         <div class="asistencia-resumen asistencia-resumen-mensual">
             <div class="asistencia-resumen-card">
                 <div class="resumen-card-icono programados"><i class="bi bi-calendar2-week"></i></div>
-                <div><span>Días programados</span><strong>—</strong><small>Total del periodo</small></div>
+                <div><span>Días programados</span><strong id="totalDiasProgramadosMensual">—</strong><small>Total del periodo</small></div>
             </div>
             <div class="asistencia-resumen-card">
                 <div class="resumen-card-icono presentes"><i class="bi bi-person-check"></i></div>
-                <div><span>Asistencias</span><strong>—</strong><small>Jornadas cumplidas</small></div>
+                <div><span>Asistencias</span><strong id="totalAsistenciasMensual">—</strong><small>Jornadas con presencia</small></div>
             </div>
             <div class="asistencia-resumen-card">
                 <div class="resumen-card-icono tardanzas"><i class="bi bi-clock-history"></i></div>
-                <div><span>Tardanzas</span><strong>—</strong><small>Fuera de tolerancia</small></div>
+                <div><span>Tardanzas</span><strong id="totalTardanzasMensual">—</strong><small>Fuera de tolerancia</small></div>
             </div>
             <div class="asistencia-resumen-card">
                 <div class="resumen-card-icono ausentes"><i class="bi bi-person-x"></i></div>
-                <div><span>Ausencias</span><strong>—</strong><small>Sin permiso aprobado</small></div>
+                <div><span>Ausencias</span><strong id="totalAusenciasMensual">—</strong><small>Sin permiso aprobado</small></div>
             </div>
         </div>
 
         <div class="asistencia-tabla-card">
             <div class="asistencia-tabla-header">
-                <div><h3>Detalle mensual</h3><p>Se habilitará después de validar el historial de marcaciones.</p></div>
-                <span class="asistencia-estado-desarrollo"><i class="bi bi-tools"></i> Próxima etapa</span>
+                <div><h3>Detalle mensual</h3><p id="descripcionResumenMensual">Consolidado de jornadas calculadas con las reglas de asistencia.</p></div>
+                <span class="asistencia-estado-desarrollo listo"><i class="bi bi-check-circle"></i> Cálculo sincronizado</span>
             </div>
             <div class="asistencia-tabla-contenedor">
                 <table class="asistencia-tabla asistencia-tabla-mensual">
                     <thead><tr><th>Colaborador</th><th>Días programados</th><th>Asistencias</th><th>Tardanzas</th><th>Ausencias</th><th>Permisos</th><th>Horas trabajadas</th><th>Horas justificadas</th><th>Horas extra aprobadas</th></tr></thead>
-                    <tbody><tr><td colspan="9" class="asistencia-tabla-vacia">El resumen mensual se calculará con los datos reales de cada jornada.</td></tr></tbody>
+                    <tbody id="cuerpoResumenMensualAsistencia"><tr><td colspan="9" class="asistencia-tabla-vacia">Selecciona un mes para calcular el resumen.</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -2121,3 +2133,4 @@
 
     
 </section>
+
