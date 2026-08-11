@@ -80,6 +80,16 @@
         <button
             type="button"
             class="asistencia-tab"
+            data-tab="mensual"
+        >
+            <i class="bi bi-calendar3"></i>
+            <span>Resumen mensual</span>
+        </button>
+
+
+        <button
+            type="button"
+            class="asistencia-tab"
             data-tab="marcaciones"
         >
 
@@ -103,10 +113,6 @@
             <span>
                 Incidencias
             </span>
-
-            <small class="asistencia-tab-contador">
-                3
-            </small>
 
         </button>
 
@@ -148,7 +154,10 @@
          CONTENIDO DE RESUMEN DIARIO
     ========================================== -->
 
-    <div class="asistencia-contenido">
+    <div
+        class="asistencia-contenido asistencia-panel-tab activo"
+        data-contenido-tab="resumen"
+    >
 
 
         <!-- =====================================
@@ -752,6 +761,122 @@
 
     </div>
 
+
+
+    <!-- RESUMEN MENSUAL -->
+
+    <div class="asistencia-panel-tab" data-contenido-tab="mensual">
+        <div class="asistencia-seccion-cabecera">
+            <div>
+                <span class="asistencia-seccion-etiqueta">Consolidado mensual</span>
+                <h3>Resumen por colaborador</h3>
+                <p>Consulta jornadas, asistencias, tardanzas, permisos y horas acumuladas del mes.</p>
+            </div>
+            <div class="asistencia-periodo-provisional">
+                <i class="bi bi-calendar-month"></i><span>Mes de consulta</span><strong>Agosto 2026</strong>
+            </div>
+        </div>
+
+        <div class="asistencia-resumen asistencia-resumen-mensual">
+            <div class="asistencia-resumen-card">
+                <div class="resumen-card-icono programados"><i class="bi bi-calendar2-week"></i></div>
+                <div><span>Días programados</span><strong>—</strong><small>Total del periodo</small></div>
+            </div>
+            <div class="asistencia-resumen-card">
+                <div class="resumen-card-icono presentes"><i class="bi bi-person-check"></i></div>
+                <div><span>Asistencias</span><strong>—</strong><small>Jornadas cumplidas</small></div>
+            </div>
+            <div class="asistencia-resumen-card">
+                <div class="resumen-card-icono tardanzas"><i class="bi bi-clock-history"></i></div>
+                <div><span>Tardanzas</span><strong>—</strong><small>Fuera de tolerancia</small></div>
+            </div>
+            <div class="asistencia-resumen-card">
+                <div class="resumen-card-icono ausentes"><i class="bi bi-person-x"></i></div>
+                <div><span>Ausencias</span><strong>—</strong><small>Sin permiso aprobado</small></div>
+            </div>
+        </div>
+
+        <div class="asistencia-tabla-card">
+            <div class="asistencia-tabla-header">
+                <div><h3>Detalle mensual</h3><p>Se habilitará después de validar el historial de marcaciones.</p></div>
+                <span class="asistencia-estado-desarrollo"><i class="bi bi-tools"></i> Próxima etapa</span>
+            </div>
+            <div class="asistencia-tabla-contenedor">
+                <table class="asistencia-tabla asistencia-tabla-mensual">
+                    <thead><tr><th>Colaborador</th><th>Días programados</th><th>Asistencias</th><th>Tardanzas</th><th>Ausencias</th><th>Permisos</th><th>Horas trabajadas</th><th>Horas justificadas</th><th>Horas extra aprobadas</th></tr></thead>
+                    <tbody><tr><td colspan="9" class="asistencia-tabla-vacia">El resumen mensual se calculará con los datos reales de cada jornada.</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MARCACIONES -->
+
+    <div class="asistencia-panel-tab" data-contenido-tab="marcaciones">
+        <div class="asistencia-seccion-cabecera">
+            <div>
+                <span class="asistencia-seccion-etiqueta">Historial del día</span>
+                <h3>Marcaciones registradas</h3>
+                <p>Muestra cada registro importado o agregado manualmente para la fecha seleccionada.</p>
+            </div>
+            <span class="asistencia-estado-desarrollo listo"><i class="bi bi-check-circle"></i> Datos sincronizados</span>
+        </div>
+
+        <div class="asistencia-filtros asistencia-filtros-marcaciones">
+            <div class="asistencia-selector-fecha">
+                <button type="button" class="btn-fecha-navegacion" id="btnDiaAnteriorMarcaciones" title="Día anterior"><i class="bi bi-chevron-left"></i></button>
+                <div class="asistencia-fecha-actual"><span>Fecha seleccionada</span><strong id="fechaActualMarcaciones">—</strong></div>
+                <button type="button" class="btn-fecha-navegacion" id="btnDiaSiguienteMarcaciones" title="Día siguiente"><i class="bi bi-chevron-right"></i></button>
+                <button type="button" class="btn-asistencia-hoy" id="btnHoyMarcaciones">Hoy</button>
+            </div>
+            <div class="asistencia-buscador">
+                <i class="bi bi-search"></i><input type="text" id="buscarMarcacionesAsistencia" placeholder="Buscar colaborador o documento...">
+            </div>
+        </div>
+
+        <div class="asistencia-tabla-card">
+            <div class="asistencia-tabla-header">
+                <div><h3>Historial de marcaciones</h3><p>Una fila por cada hora registrada, ordenada cronológicamente.</p></div>
+            </div>
+            <div class="asistencia-tabla-contenedor">
+                <table class="asistencia-tabla asistencia-tabla-marcaciones">
+                    <thead><tr><th>Colaborador</th><th>Documento</th><th>Fecha</th><th>Hora</th><th>Tipo</th><th>Origen</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="cuerpoMarcacionesAsistencia"><tr><td colspan="8" class="asistencia-tabla-vacia">Cargando marcaciones...</td></tr></tbody>
+                </table>
+            </div>
+            <div class="asistencia-tabla-footer">
+                <span id="informacionMarcacionesAsistencia">Mostrando 0 marcaciones</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SECCIONES EN PREPARACIÓN -->
+
+    <div class="asistencia-panel-tab" data-contenido-tab="incidencias">
+        <div class="asistencia-vista-provisional">
+            <div class="asistencia-vista-provisional-icono advertencia"><i class="bi bi-exclamation-triangle"></i></div>
+            <h3>Incidencias</h3>
+            <p>No hay incidencias disponibles. Aquí se revisarán faltas, tardanzas, marcaciones incompletas e inconsistencias.</p>
+        </div>
+    </div>
+
+    <div class="asistencia-panel-tab" data-contenido-tab="regularizaciones">
+        <div class="asistencia-vista-provisional">
+            <div class="asistencia-vista-provisional-icono regularizacion"><i class="bi bi-pencil-square"></i></div>
+            <h3>Regularizaciones</h3>
+            <p>Esta sección permitirá justificar y corregir registros, conservando siempre la marcación original.</p>
+        </div>
+    </div>
+
+    <div class="asistencia-panel-tab" data-contenido-tab="cierres">
+        <div class="asistencia-vista-provisional">
+            <div class="asistencia-vista-provisional-icono cierre"><i class="bi bi-lock"></i></div>
+            <h3>Cierres</h3>
+            <p>Esta sección permitirá revisar y cerrar periodos mensuales para evitar modificaciones posteriores.</p>
+        </div>
+    </div>
 
 
     <!--======================================
