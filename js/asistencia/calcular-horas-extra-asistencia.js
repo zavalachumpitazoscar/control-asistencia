@@ -7,6 +7,7 @@ export function calcularHorasExtraAsistencia({
     horario,
     clasificacion,
     calculoAsistencia,
+    permisoDia = null,
     tratamientoRefrigerioCorto =
         "NO_CONSIDERAR_EXTRA"
 
@@ -28,6 +29,20 @@ export function calcularHorasExtraAsistencia({
         detalles:[]
 
     };
+
+
+    if(
+        permisoDia
+        &&
+        (
+            permisoDia.tipoDuracion ||
+            "DIA_COMPLETO"
+        ) === "DIA_COMPLETO"
+    ){
+
+        return resultado;
+
+    }
 
 
     if(
@@ -261,3 +276,4 @@ function convertirHoraAMinutos(
     minutos;
 
 }
+
