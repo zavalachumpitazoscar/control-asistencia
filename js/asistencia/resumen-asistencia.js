@@ -1,35 +1,17 @@
 import {
-    collection,
-    query,
-    where,
-    getDocs
-}
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+  collection,
+  query,
+  where,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+import { db } from "../firebase-config.js";
 
+import { clasificarMarcaciones } from "./clasificar-marcaciones.js";
 
-import {
-    db
-}
-from "../firebase-config.js";
+import { calcularJornadaAsistencia } from "./calcular-jornada-asistencia.js";
 
-import {
-    clasificarMarcaciones
-}
-from "./clasificar-marcaciones.js";
-
-
-import {
-    calcularJornadaAsistencia
-}
-from "./calcular-jornada-asistencia.js";
-
-import {
-    calcularHorasExtraAsistencia
-}
-from "./calcular-horas-extra-asistencia.js";
-
-
+import { calcularHorasExtraAsistencia } from "./calcular-horas-extra-asistencia.js";
 
 /*=====================================================
 VARIABLES
@@ -53,1761 +35,833 @@ let filtroEstado;
 
 let btnLimpiarFiltros;
 
-
 /*=====================================================
 INICIAR RESUMEN
 =====================================================*/
 
-export function iniciarResumenAsistencia(){
+export function iniciarResumenAsistencia() {
+  cuerpoResumen = document.getElementById("cuerpoResumenAsistencia");
 
-    cuerpoResumen =
-        document.getElementById(
-            "cuerpoResumenAsistencia"
-        );
+  buscarResumen = document.getElementById("buscarResumenAsistencia");
 
-    buscarResumen =
-        document.getElementById(
-            "buscarResumenAsistencia"
-        );
+  filtroSucursal = document.getElementById("filtroSucursalAsistencia");
 
-    filtroSucursal =
-        document.getElementById(
-            "filtroSucursalAsistencia"
-        );
+  filtroArea = document.getElementById("filtroAreaAsistencia");
 
-    filtroArea =
-        document.getElementById(
-            "filtroAreaAsistencia"
-        );
+  filtroSubarea = document.getElementById("filtroSubareaAsistencia");
 
-    filtroSubarea =
-        document.getElementById(
-            "filtroSubareaAsistencia"
-        );
+  filtroEstado = document.getElementById("filtroEstadoAsistencia");
 
-    filtroEstado =
-        document.getElementById(
-            "filtroEstadoAsistencia"
-        );
+  btnLimpiarFiltros = document.getElementById("btnLimpiarFiltrosAsistencia");
 
-    btnLimpiarFiltros =
-        document.getElementById(
-            "btnLimpiarFiltrosAsistencia"
-        );
+  if (!cuerpoResumen) {
+    console.warn("No se encontró cuerpoResumenAsistencia.");
 
+    return;
+  }
 
-    if(!cuerpoResumen){
+  buscarResumen?.addEventListener("input", renderizarResumenAsistencia);
 
-        console.warn(
-            "No se encontró cuerpoResumenAsistencia."
-        );
+  filtroSucursal?.addEventListener("change", renderizarResumenAsistencia);
 
-        return;
+  filtroArea?.addEventListener("change", renderizarResumenAsistencia);
 
+  filtroSubarea?.addEventListener("change", renderizarResumenAsistencia);
+
+  filtroEstado?.addEventListener("change", renderizarResumenAsistencia);
+
+  btnLimpiarFiltros?.addEventListener("click", limpiarFiltrosAsistencia);
+
+  document.addEventListener("asistencia:cambio-fecha", (evento) => {
+    fechaResumenSeleccionada = evento.detail.fecha;
+
+    cargarResumenAsistencia(fechaResumenSeleccionada);
+  });
+
+  document.addEventListener("asistencia:horario-dia-actualizado", () => {
+    if (fechaResumenSeleccionada) {
+      cargarResumenAsistencia(fechaResumenSeleccionada);
+    }
+  });
+
+  document.addEventListener("asistencia:horas-extra-actualizadas", (evento) => {
+    if (evento.detail?.fecha === fechaResumenSeleccionada) {
+      cargarResumenAsistencia(fechaResumenSeleccionada);
+    }
+  });
+
+  cuerpoResumen.addEventListener("click", (evento) => {
+    const boton = evento.target.closest(
+      '[data-accion="gestionar-ajuste-refrigerio"]',
+    );
+
+    if (!boton) {
+      return;
     }
 
+    const colaboradorId = boton.dataset.colaboradorId;
 
-    buscarResumen?.addEventListener(
-        "input",
-        renderizarResumenAsistencia
+    const registro = registrosResumen.find(
+      (item) => item.colaboradorId === colaboradorId,
     );
 
-
-    filtroSucursal?.addEventListener(
-        "change",
-        renderizarResumenAsistencia
-    );
-
-
-    filtroArea?.addEventListener(
-        "change",
-        renderizarResumenAsistencia
-    );
-
-
-    filtroSubarea?.addEventListener(
-        "change",
-        renderizarResumenAsistencia
-    );
-
-
-    filtroEstado?.addEventListener(
-        "change",
-        renderizarResumenAsistencia
-    );
-
-
-    btnLimpiarFiltros?.addEventListener(
-        "click",
-        limpiarFiltrosAsistencia
-    );
-
-
-    document.addEventListener(
-        "asistencia:cambio-fecha",
-        evento=>{
-
-            fechaResumenSeleccionada =
-                evento.detail.fecha;
-
-            cargarResumenAsistencia(
-                fechaResumenSeleccionada
-            );
-
-        }
-    );
-
-    document.addEventListener(
-    "asistencia:horario-dia-actualizado",
-    ()=>{
-
-        if(fechaResumenSeleccionada){
-
-            cargarResumenAsistencia(
-                fechaResumenSeleccionada
-            );
-
-        }
-
+    if (!registro) {
+      return;
     }
-);
 
+    document.dispatchEvent(
+      new CustomEvent("asistencia:gestionar-ajuste-refrigerio", {
+        detail: {
+          colaboradorId,
 
+          colaboradorNombre: registro.nombre,
 
-document.addEventListener(
-    "asistencia:horas-extra-actualizadas",
-    evento=>{
+          fecha: fechaResumenSeleccionada,
 
-        if(
-            evento.detail?.fecha ===
-            fechaResumenSeleccionada
-        ){
+          horario: registro.horarioPrincipal,
 
-            cargarResumenAsistencia(
-                fechaResumenSeleccionada
-            );
+          clasificacion: registro.clasificacion,
 
-        }
+          calculoAsistencia: registro.calculoAsistencia,
 
-    }
-);
+          advertencias: registro.advertencias,
 
-    
-cuerpoResumen.addEventListener(
-    "click",
-    evento=>{
+          ajusteAsistencia: registro.ajusteAsistencia,
 
-        const boton =
-            evento.target.closest(
-                '[data-accion="gestionar-ajuste-refrigerio"]'
-            );
+          tratamientoRefrigerio: registro.tratamientoRefrigerio,
 
+          tratamientoRefrigerioCorto: registro.tratamientoRefrigerioCorto,
+        },
+      }),
+    );
+  });
 
-        if(!boton){
-
-            return;
-
-        }
-
-
-        const colaboradorId =
-            boton.dataset.colaboradorId;
-
-
-        const registro =
-            registrosResumen.find(
-                item=>
-
-                    item.colaboradorId ===
-                    colaboradorId
-
-            );
-
-
-        if(!registro){
-
-            return;
-
-        }
-
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "asistencia:gestionar-ajuste-refrigerio",
-                {
-                    detail:{
-
-                        colaboradorId,
-
-                        colaboradorNombre:
-                            registro.nombre,
-
-                        fecha:
-                            fechaResumenSeleccionada,
-
-                        horario:
-                            registro.horarioPrincipal,
-
-                        clasificacion:
-                            registro.clasificacion,
-
-                        calculoAsistencia:
-                            registro.calculoAsistencia,
-
-                        advertencias:
-                            registro.advertencias,
-
-                        ajusteAsistencia:
-                            registro.ajusteAsistencia,
-
-                        tratamientoRefrigerio:
-                            registro.tratamientoRefrigerio,
-
-                        tratamientoRefrigerioCorto:
-                            registro.tratamientoRefrigerioCorto
-
-                    }
-                }
-            )
-        );
-
-    }
-);
-
-
-document.addEventListener(
+  document.addEventListener(
     "asistencia:ajuste-diario-actualizado",
-    evento=>{
-
-        const fechaActualizada =
-            evento.detail?.fecha;
-
-
-        if(
-            fechaResumenSeleccionada
-            &&
-            fechaActualizada ===
-            fechaResumenSeleccionada
-        ){
-
-            cargarResumenAsistencia(
-                fechaResumenSeleccionada
-            );
-
-        }
-
-    }
-);
-
-    
-
-cuerpoResumen.addEventListener(
-    "click",
-    evento=>{
-
-        const boton =
-            evento.target.closest(
-                '[data-accion="editar-marcacion-existente"]'
-            );
-
-
-        if(!boton){
-
-            return;
-
-        }
-
-
-        const colaboradorId =
-            boton.dataset.colaboradorId;
-
-
-        const marcacionId =
-            boton.dataset.marcacionId;
-
-
-        const tipo =
-            boton.dataset.tipoMarcacion;
-
-
-        const registro =
-            registrosResumen.find(
-                item=>
-
-                    item.colaboradorId ===
-                    colaboradorId
-
-            );
-
-
-        const marcacion =
-            registro
-            ?.clasificacion
-            ?.todas
-            ?.find(
-                item=>
-
-                    item.id ===
-                    marcacionId
-
-            );
-
-
-        if(
-            !registro
-            ||
-            !marcacion
-            ||
-            !marcacionId
-        ){
-
-            Swal.fire({
-
-                icon:"warning",
-
-                title:"Marcación no editable",
-
-                text:
-                    "No se encontró el registro original de esta marcación.",
-
-                confirmButtonColor:
-                    "#2563eb"
-
-            });
-
-            return;
-
-        }
-
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "asistencia:editar-marcacion-existente",
-                {
-                    detail:{
-
-                        colaboradorId,
-
-                        colaboradorNombre:
-                            registro.nombre,
-
-                        fecha:
-                            fechaResumenSeleccionada,
-
-                        tipo,
-
-                        marcacion,
-
-                        horarioId:
-                            registro.horarioPrincipal
-                            ?.id
-                            ||
-                            null,
-
-                        horario:
-                            registro.horarioPrincipal
-                            ||
-                            null,
-
-                        entradaActual:
-                            registro.entrada
-                            ||
-                            null,
-
-                        salidaActual:
-                            registro.salida
-                            ||
-                            null,
-
-                        inicioRefrigerioActual:
-                            registro.clasificacion
-                            ?.inicioRefrigerio
-                            ||
-                            null,
-
-                        finRefrigerioActual:
-                            registro.clasificacion
-                            ?.finRefrigerio
-                            ||
-                            null,
-
-                        refrigerio:
-                            registro.horarioPrincipal
-                            ?.refrigerio
-                            ||
-                            null
-
-                    }
-                }
-            )
-        );
-
-    }
-);
-
-cuerpoResumen.addEventListener(
-    "click",
-    evento=>{
-
-        const boton =
-            evento.target.closest(
-                '[data-accion="gestionar-horas-extra"]'
-            );
-
-
-        if(!boton){
-
-            return;
-
-        }
-
-
-        const colaboradorId =
-            boton.dataset.colaboradorId;
-
-
-        const registro =
-            registrosResumen.find(
-                item=>
-
-                    item.colaboradorId ===
-                    colaboradorId
-
-            );
-
-
-        if(!registro){
-
-            return;
-
-        }
-
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "asistencia:gestionar-horas-extra",
-                {
-                    detail:{
-
-                        colaboradorId,
-
-                        colaboradorNombre:
-                            registro.nombre,
-
-                        fecha:
-                            fechaResumenSeleccionada,
-
-                        calculoHorasExtra:
-                            registro.calculoHorasExtra,
-
-                        aprobacionHorasExtra:
-                            registro.aprobacionHorasExtra
-                            ||
-                            null
-
-                    }
-                }
-            )
-        );
-
-    }
-);
-
-    
-
-    cuerpoResumen.addEventListener(
-    "click",
-    evento=>{
-
-        const boton =
-            evento.target.closest(
-                '[data-accion="agregar-marcacion-manual"]'
-            );
-
-
-        if(!boton){
-
-            return;
-
-        }
-
-
-        const colaboradorId =
-            boton.dataset.colaboradorId;
-
-
-        const tipo =
-            boton.dataset.tipoMarcacion;
-
-
-        const registro =
-            registrosResumen.find(
-                item=>
-
-                    item.colaboradorId ===
-                    colaboradorId
-
-            );
-
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "asistencia:agregar-marcacion-manual",
-                {
-                    detail:{
-
-                        colaboradorId,
-
-                        colaboradorNombre:
-                            registro?.nombre ||
-                            "Colaborador",
-
-                        fecha:
-                            fechaResumenSeleccionada,
-
-                        tipo,
-
-                        horarioId:
-                            registro
-                            ?.horarioPrincipal
-                            ?.id
-                            ||
-                            null,
-
-                        horario:
-                            registro
-                            ?.horarioPrincipal
-                            ||
-                            null,
-
-                        entradaActual:
-                            registro?.entrada
-                            ||
-                            null,
-
-                        salidaActual:
-                            registro?.salida
-                            ||
-                            null,
-
-                        inicioRefrigerioActual:
-    registro?.clasificacion
-    ?.inicioRefrigerio
-    ||
-    null,
-
-finRefrigerioActual:
-    registro?.clasificacion
-    ?.finRefrigerio
-    ||
-    null,
-
-refrigerio:
-    registro?.horarioPrincipal
-    ?.refrigerio
-    ||
-    null,
-
-                    }
-                }
-            )
-        );
-
-    }
-);
-
-
-document.addEventListener(
-    "asistencia:marcacion-manual-registrada",
-    ()=>{
-
-        if(fechaResumenSeleccionada){
-
-            cargarResumenAsistencia(
-                fechaResumenSeleccionada
-            );
-
-        }
-
-    }
-);
-    
-
-    document.addEventListener(
-        "asistencia:marcaciones-importadas",
-        ()=>{
-
-            if(fechaResumenSeleccionada){
-
-                cargarResumenAsistencia(
-                    fechaResumenSeleccionada
-                );
-
-            }
-
-        }
+    (evento) => {
+      const fechaActualizada = evento.detail?.fecha;
+
+      if (
+        fechaResumenSeleccionada &&
+        fechaActualizada === fechaResumenSeleccionada
+      ) {
+        cargarResumenAsistencia(fechaResumenSeleccionada);
+      }
+    },
+  );
+
+  cuerpoResumen.addEventListener("click", (evento) => {
+    const boton = evento.target.closest(
+      '[data-accion="editar-marcacion-existente"]',
     );
 
-    cuerpoResumen.addEventListener(
-    "click",
-    evento=>{
-
-        const boton =
-            evento.target.closest(
-                '[data-accion="editar-horario-dia"]'
-            );
-
-
-        if(!boton){
-
-            return;
-
-        }
-
-
-        const colaboradorId =
-            boton.dataset.colaboradorId;
-
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "asistencia:editar-horario-dia",
-                {
-                    detail:{
-
-                        colaboradorId,
-
-                        fecha:
-                            fechaResumenSeleccionada
-
-                    }
-                }
-            )
-        );
-
+    if (!boton) {
+      return;
     }
-);
 
+    const colaboradorId = boton.dataset.colaboradorId;
+
+    const marcacionId = boton.dataset.marcacionId;
+
+    const tipo = boton.dataset.tipoMarcacion;
+
+    const registro = registrosResumen.find(
+      (item) => item.colaboradorId === colaboradorId,
+    );
+
+    const marcacion = registro?.clasificacion?.todas?.find(
+      (item) => item.id === marcacionId,
+    );
+
+    if (!registro || !marcacion || !marcacionId) {
+      Swal.fire({
+        icon: "warning",
+
+        title: "Marcación no editable",
+
+        text: "No se encontró el registro original de esta marcación.",
+
+        confirmButtonColor: "#2563eb",
+      });
+
+      return;
+    }
+
+    document.dispatchEvent(
+      new CustomEvent("asistencia:editar-marcacion-existente", {
+        detail: {
+          colaboradorId,
+
+          colaboradorNombre: registro.nombre,
+
+          fecha: fechaResumenSeleccionada,
+
+          tipo,
+
+          marcacion,
+
+          horarioId: registro.horarioPrincipal?.id || null,
+
+          horario: registro.horarioPrincipal || null,
+
+          entradaActual: registro.entrada || null,
+
+          salidaActual: registro.salida || null,
+
+          inicioRefrigerioActual:
+            registro.clasificacion?.inicioRefrigerio || null,
+
+          finRefrigerioActual: registro.clasificacion?.finRefrigerio || null,
+
+          refrigerio: registro.horarioPrincipal?.refrigerio || null,
+        },
+      }),
+    );
+  });
+
+  cuerpoResumen.addEventListener("click", (evento) => {
+    const boton = evento.target.closest(
+      '[data-accion="gestionar-horas-extra"]',
+    );
+
+    if (!boton) {
+      return;
+    }
+
+    const colaboradorId = boton.dataset.colaboradorId;
+
+    const registro = registrosResumen.find(
+      (item) => item.colaboradorId === colaboradorId,
+    );
+
+    if (!registro) {
+      return;
+    }
+
+    document.dispatchEvent(
+      new CustomEvent("asistencia:gestionar-horas-extra", {
+        detail: {
+          colaboradorId,
+
+          colaboradorNombre: registro.nombre,
+
+          fecha: fechaResumenSeleccionada,
+
+          calculoHorasExtra: registro.calculoHorasExtra,
+
+          aprobacionHorasExtra: registro.aprobacionHorasExtra || null,
+        },
+      }),
+    );
+  });
+
+  cuerpoResumen.addEventListener("click", (evento) => {
+    const boton = evento.target.closest(
+      '[data-accion="agregar-marcacion-manual"]',
+    );
+
+    if (!boton) {
+      return;
+    }
+
+    const colaboradorId = boton.dataset.colaboradorId;
+
+    const tipo = boton.dataset.tipoMarcacion;
+
+    const registro = registrosResumen.find(
+      (item) => item.colaboradorId === colaboradorId,
+    );
+
+    document.dispatchEvent(
+      new CustomEvent("asistencia:agregar-marcacion-manual", {
+        detail: {
+          colaboradorId,
+
+          colaboradorNombre: registro?.nombre || "Colaborador",
+
+          fecha: fechaResumenSeleccionada,
+
+          tipo,
+
+          horarioId: registro?.horarioPrincipal?.id || null,
+
+          horario: registro?.horarioPrincipal || null,
+
+          entradaActual: registro?.entrada || null,
+
+          salidaActual: registro?.salida || null,
+
+          inicioRefrigerioActual:
+            registro?.clasificacion?.inicioRefrigerio || null,
+
+          finRefrigerioActual: registro?.clasificacion?.finRefrigerio || null,
+
+          refrigerio: registro?.horarioPrincipal?.refrigerio || null,
+        },
+      }),
+    );
+  });
+
+  document.addEventListener("asistencia:marcacion-manual-registrada", () => {
+    if (fechaResumenSeleccionada) {
+      cargarResumenAsistencia(fechaResumenSeleccionada);
+    }
+  });
+
+  document.addEventListener("asistencia:marcaciones-importadas", () => {
+    if (fechaResumenSeleccionada) {
+      cargarResumenAsistencia(fechaResumenSeleccionada);
+    }
+  });
+
+  cuerpoResumen.addEventListener("click", (evento) => {
+    const boton = evento.target.closest('[data-accion="editar-horario-dia"]');
+
+    if (!boton) {
+      return;
+    }
+
+    const colaboradorId = boton.dataset.colaboradorId;
+
+    document.dispatchEvent(
+      new CustomEvent("asistencia:editar-horario-dia", {
+        detail: {
+          colaboradorId,
+
+          fecha: fechaResumenSeleccionada,
+        },
+      }),
+    );
+  });
 }
-
 
 /*=====================================================
 CARGAR RESUMEN
 =====================================================*/
 
-async function cargarResumenAsistencia(
-    fecha
-){
+async function cargarResumenAsistencia(fecha) {
+  const empresaId = sessionStorage.getItem("empresaId");
 
-    const empresaId =
-        sessionStorage.getItem(
-            "empresaId"
-        );
+  if (!empresaId) {
+    mostrarMensajeTabla("No se encontró la empresa activa.");
 
+    return;
+  }
 
-    if(!empresaId){
+  mostrarMensajeTabla("Cargando resumen de asistencia...");
 
-        mostrarMensajeTabla(
-            "No se encontró la empresa activa."
-        );
+  try {
+    const [
+      colaboradores,
+      marcaciones,
+      asignaciones,
+      horarios,
+      excepciones,
+      sucursales,
+      areas,
+      subareas,
+      ajustesAsistencia,
+      aprobacionesHorasExtra,
+      permisos,
+      feriados,
+      descansosSustitutorios,
+    ] = await Promise.all([
+      consultarColeccionEmpresa("colaboradores", empresaId),
 
-        return;
+      consultarColeccionEmpresa("marcaciones", empresaId),
 
-    }
+      consultarColeccionEmpresa("asignacionesHorarios", empresaId),
 
+      consultarColeccionEmpresa("horarios", empresaId),
 
-    mostrarMensajeTabla(
-        "Cargando resumen de asistencia..."
+      consultarColeccionEmpresa("excepcionesHorarios", empresaId),
+
+      consultarColeccionEmpresa("sucursales", empresaId),
+
+      consultarColeccionEmpresa("areas", empresaId),
+
+      consultarColeccionEmpresa("subareas", empresaId),
+
+      consultarColeccionEmpresa("ajustesAsistenciaDiaria", empresaId),
+
+      consultarColeccionEmpresa("aprobacionesHorasExtra", empresaId),
+
+      consultarColeccionEmpresa("permisos", empresaId),
+
+      consultarColeccionEmpresa("feriados", empresaId),
+
+      consultarColeccionEmpresa("descansosSustitutoriosFeriados", empresaId),
+    ]);
+
+    cargarOpcionesFiltro(filtroSucursal, sucursales, "Todas las sucursales");
+
+    cargarOpcionesFiltro(filtroArea, areas, "Todas las áreas");
+
+    cargarOpcionesFiltro(filtroSubarea, subareas, "Todas las subáreas");
+
+    registrosResumen = construirRegistrosResumen({
+      fecha,
+
+      colaboradores,
+
+      marcaciones,
+
+      asignaciones,
+
+      horarios,
+
+      excepciones,
+
+      ajustesAsistencia,
+
+      aprobacionesHorasExtra,
+
+      permisos,
+
+      feriados,
+
+      descansosSustitutorios,
+    });
+
+    document.dispatchEvent(
+      new CustomEvent("asistencia:datos-diarios-cargados", {
+        detail: {
+          fecha,
+          colaboradores,
+          marcaciones,
+        },
+      }),
     );
 
+    renderizarResumenAsistencia();
+  } catch (error) {
+    console.error("Error cargando resumen:", error);
 
-    try{
-
-const [
-    colaboradores,
-    marcaciones,
-    asignaciones,
-    horarios,
-    excepciones,
-    sucursales,
-    areas,
-    subareas,
-    ajustesAsistencia,
-    aprobacionesHorasExtra,
-    permisos,
-    feriados,
-    descansosSustitutorios
-] = await Promise.all([
-
-            consultarColeccionEmpresa(
-                "colaboradores",
-                empresaId
-            ),
-
-            consultarColeccionEmpresa(
-                "marcaciones",
-                empresaId
-            ),
-
-            consultarColeccionEmpresa(
-                "asignacionesHorarios",
-                empresaId
-            ),
-
-            consultarColeccionEmpresa(
-                "horarios",
-                empresaId
-            ),
-
-            consultarColeccionEmpresa(
-                "excepcionesHorarios",
-                empresaId
-            ),
-
-            consultarColeccionEmpresa(
-                "sucursales",
-                empresaId
-            ),
-
-            consultarColeccionEmpresa(
-                "areas",
-                empresaId
-            ),
-
-            consultarColeccionEmpresa(
-                "subareas",
-                empresaId
-            ),
-
-            consultarColeccionEmpresa(
-                "ajustesAsistenciaDiaria",
-                empresaId
-            ),
-
-consultarColeccionEmpresa(
-    "aprobacionesHorasExtra",
-    empresaId
-),
-
-consultarColeccionEmpresa(
-    "permisos",
-    empresaId
-),
-
-consultarColeccionEmpresa(
-    "feriados",
-    empresaId
-),
-
-consultarColeccionEmpresa(
-    "descansosSustitutoriosFeriados",
-    empresaId
-)
-
-]);
-
-
-        cargarOpcionesFiltro(
-            filtroSucursal,
-            sucursales,
-            "Todas las sucursales"
-        );
-
-
-        cargarOpcionesFiltro(
-            filtroArea,
-            areas,
-            "Todas las áreas"
-        );
-
-
-        cargarOpcionesFiltro(
-            filtroSubarea,
-            subareas,
-            "Todas las subáreas"
-        );
-
-
-        registrosResumen =
-            construirRegistrosResumen({
-
-                fecha,
-
-                colaboradores,
-
-                marcaciones,
-
-                asignaciones,
-
-                horarios,
-
-                excepciones,
-
-                ajustesAsistencia,
-
-                aprobacionesHorasExtra,
-
-                permisos,
-
-                feriados,
-
-                descansosSustitutorios
-
-            });
-
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "asistencia:datos-diarios-cargados",
-                {
-                    detail:{
-                        fecha,
-                        colaboradores,
-                        marcaciones
-                    }
-                }
-            )
-        );
-
-
-        renderizarResumenAsistencia();
-
-    }
-    catch(error){
-
-        console.error(
-            "Error cargando resumen:",
-            error
-        );
-
-
-        mostrarMensajeTabla(
-            "No se pudo cargar el resumen de asistencia."
-        );
-
-    }
-
+    mostrarMensajeTabla("No se pudo cargar el resumen de asistencia.");
+  }
 }
-
 
 /*=====================================================
 CONSULTAR COLECCIÓN
 =====================================================*/
 
-export async function consultarColeccionEmpresa(
-    nombreColeccion,
-    empresaId
-){
+export async function consultarColeccionEmpresa(nombreColeccion, empresaId) {
+  const consulta = query(
+    collection(db, nombreColeccion),
+    where("empresaId", "==", empresaId),
+  );
 
-    const consulta =
-        query(
-            collection(
-                db,
-                nombreColeccion
-            ),
-            where(
-                "empresaId",
-                "==",
-                empresaId
-            )
-        );
+  const resultado = await getDocs(consulta);
 
+  return resultado.docs.map((documento) => ({
+    id: documento.id,
 
-    const resultado =
-        await getDocs(
-            consulta
-        );
-
-
-    return resultado.docs.map(
-        documento=>({
-
-            id:
-                documento.id,
-
-            ...documento.data()
-
-        })
-    );
-
+    ...documento.data(),
+  }));
 }
-
 
 /*=====================================================
 CONSTRUIR REGISTROS
 =====================================================*/
 
 export function construirRegistrosResumen({
+  fecha,
+  colaboradores,
+  marcaciones,
+  asignaciones,
+  horarios,
+  excepciones,
+  ajustesAsistencia,
+  aprobacionesHorasExtra,
+  permisos,
+  feriados,
+  descansosSustitutorios,
+}) {
+  const horariosPorId = new Map(
+    horarios.map((horario) => [horario.id, horario]),
+  );
 
-    fecha,
-    colaboradores,
-    marcaciones,
-    asignaciones,
-    horarios,
-    excepciones,
-    ajustesAsistencia,
-    aprobacionesHorasExtra,
-    permisos,
-    feriados,
-    descansosSustitutorios
+  const marcacionesPorColaborador = agruparMarcaciones(marcaciones, fecha);
 
-}){
+  const feriadoDia =
+    feriados.find(
+      (feriado) =>
+        String(feriado.estado || "ACTIVO").toUpperCase() === "ACTIVO" &&
+        feriado.fechaInicio <= fecha &&
+        feriado.fechaFin >= fecha,
+    ) || null;
 
-    const horariosPorId =
-        new Map(
-            horarios.map(
-                horario=>[
-                    horario.id,
-                    horario
-                ]
-            )
-        );
-
-
-    const marcacionesPorColaborador =
-        agruparMarcaciones(
-            marcaciones,
-            fecha
-        );
-
-
-    const feriadoDia =
-        feriados.find(
-            feriado=>
-
-                String(
-                    feriado.estado ||
-                    "ACTIVO"
-                )
-                .toUpperCase() ===
-                "ACTIVO"
-
-                &&
-
-                feriado.fechaInicio <=
-                fecha
-
-                &&
-
-                feriado.fechaFin >=
-                fecha
-
-        )
-        ||
-        null;
-
-
-    return colaboradores
+  return colaboradores
     .filter(
-        colaborador=>
-
-            String(
-                colaborador.estado ||
-                "ACTIVO"
-            )
-            .toUpperCase() !==
-            "INACTIVO"
+      (colaborador) =>
+        String(colaborador.estado || "ACTIVO").toUpperCase() !== "INACTIVO",
     )
-    .map(colaborador=>{
+    .map((colaborador) => {
+      const horarioIds = obtenerHorariosEfectivos({
+        colaboradorId: colaborador.id,
 
-        const horarioIds =
-            obtenerHorariosEfectivos({
+        fecha,
 
-                colaboradorId:
-                    colaborador.id,
+        asignaciones,
 
-                fecha,
+        excepciones,
+      });
 
-                asignaciones,
+      const horariosDia = horarioIds
+        .map((id) => horariosPorId.get(id))
+        .filter(Boolean);
 
-                excepciones
+      const marcacionesDia =
+        marcacionesPorColaborador.get(colaborador.id) || [];
 
-            });
+      const ajusteAsistencia =
+        ajustesAsistencia.find(
+          (ajuste) =>
+            ajuste.colaboradorId === colaborador.id &&
+            ajuste.fecha === fecha &&
+            String(ajuste.estado || "ACTIVO").toUpperCase() !== "INACTIVO",
+        ) || null;
 
+      const aprobacionHorasExtra =
+        aprobacionesHorasExtra.find(
+          (aprobacion) =>
+            aprobacion.colaboradorId === colaborador.id &&
+            aprobacion.fecha === fecha &&
+            String(aprobacion.estado || "ACTIVO").toUpperCase() !== "INACTIVO",
+        ) || null;
 
-        const horariosDia =
-            horarioIds
-            .map(
-                id=>
-                    horariosPorId.get(id)
-            )
-            .filter(Boolean);
+      const permisoDia =
+        permisos.find(
+          (permiso) =>
+            permiso.colaboradorId === colaborador.id &&
+            String(permiso.estado || "").toUpperCase() === "APROBADO" &&
+            permiso.fechaInicio <= fecha &&
+            permiso.fechaFin >= fecha,
+        ) || null;
 
+      const descansoSustitutorioDia =
+        descansosSustitutorios.find(
+          (descanso) =>
+            descanso.colaboradorId === colaborador.id &&
+            descanso.fechaDescanso === fecha &&
+            String(descanso.estado || "ACTIVO").toUpperCase() === "ACTIVO",
+        ) || null;
 
-        const marcacionesDia =
-            marcacionesPorColaborador.get(
-                colaborador.id
-            )
-            ||
-            [];
+      return construirRegistroColaborador(
+        colaborador,
 
+        horariosDia,
 
-        const ajusteAsistencia =
-            ajustesAsistencia.find(
-                ajuste=>
+        marcacionesDia,
 
-                    ajuste.colaboradorId ===
-                    colaborador.id
+        ajusteAsistencia,
 
-                    &&
+        aprobacionHorasExtra,
 
-                    ajuste.fecha ===
-                    fecha
+        permisoDia,
 
-                    &&
+        feriadoDia,
 
-                    String(
-                        ajuste.estado ||
-                        "ACTIVO"
-                    )
-                    .toUpperCase() !==
-                    "INACTIVO"
-            )
-            ||
-            null;
+        descansoSustitutorioDia,
 
-
-        const aprobacionHorasExtra =
-            aprobacionesHorasExtra.find(
-                aprobacion=>
-
-                    aprobacion.colaboradorId ===
-                    colaborador.id
-
-                    &&
-
-                    aprobacion.fecha ===
-                    fecha
-
-                    &&
-
-                    String(
-                        aprobacion.estado ||
-                        "ACTIVO"
-                    )
-                    .toUpperCase() !==
-                    "INACTIVO"
-            )
-            ||
-            null;
-
-
-        const permisoDia =
-            permisos.find(
-                permiso=>
-
-                    permiso.colaboradorId ===
-                    colaborador.id
-
-                    &&
-
-                    String(
-                        permiso.estado ||
-                        ""
-                    )
-                    .toUpperCase() ===
-                    "APROBADO"
-
-                    &&
-
-                    permiso.fechaInicio <=
-                    fecha
-
-                    &&
-
-                    permiso.fechaFin >=
-                    fecha
-            )
-            ||
-            null;
-
-
-        const descansoSustitutorioDia =
-            descansosSustitutorios.find(
-                descanso=>
-
-                    descanso.colaboradorId ===
-                    colaborador.id
-
-                    &&
-
-                    descanso.fechaDescanso ===
-                    fecha
-
-                    &&
-
-                    String(
-                        descanso.estado ||
-                        "ACTIVO"
-                    )
-                    .toUpperCase() ===
-                    "ACTIVO"
-            )
-            ||
-            null;
-
-
-        return construirRegistroColaborador(
-
-            colaborador,
-
-            horariosDia,
-
-            marcacionesDia,
-
-            ajusteAsistencia,
-
-            aprobacionHorasExtra,
-
-            permisoDia,
-
-            feriadoDia,
-
-            descansoSustitutorioDia,
-
-            fecha
-
-        );
-
+        fecha,
+      );
     })
-    .sort(
-        (
-            primero,
-            segundo
-        )=>
-
-            primero.nombre.localeCompare(
-                segundo.nombre,
-                "es"
-            )
+    .sort((primero, segundo) =>
+      primero.nombre.localeCompare(segundo.nombre, "es"),
     );
-
 }
-
 
 /*=====================================================
 AGRUPAR MARCACIONES
 =====================================================*/
 
-function agruparMarcaciones(
-    marcaciones,
-    fecha
-){
+function agruparMarcaciones(marcaciones, fecha) {
+  const resultado = new Map();
 
-    const resultado =
-        new Map();
-
-
-    marcaciones
-    .filter(marcacion=>
-
-        marcacion.fecha === fecha
-
-        &&
-
-        String(
-            marcacion.estado ||
-            "VALIDA"
-        )
-        .toUpperCase() ===
-        "VALIDA"
-
+  marcaciones
+    .filter(
+      (marcacion) =>
+        marcacion.fecha === fecha &&
+        String(marcacion.estado || "VALIDA").toUpperCase() === "VALIDA",
     )
-    .forEach(marcacion=>{
+    .forEach((marcacion) => {
+      if (!resultado.has(marcacion.colaboradorId)) {
+        resultado.set(marcacion.colaboradorId, []);
+      }
 
-        if(
-            !resultado.has(
-                marcacion.colaboradorId
-            )
-        ){
-
-            resultado.set(
-                marcacion.colaboradorId,
-                []
-            );
-
-        }
-
-
-        resultado
-        .get(
-            marcacion.colaboradorId
-        )
-        .push(
-            marcacion
-        );
-
+      resultado.get(marcacion.colaboradorId).push(marcacion);
     });
 
+  resultado.forEach((lista) => {
+    lista.sort(
+      (primero, segundo) =>
+        obtenerMilisegundosMarcacion(primero) -
+        obtenerMilisegundosMarcacion(segundo),
+    );
+  });
 
-    resultado.forEach(lista=>{
-
-        lista.sort(
-            (
-                primero,
-                segundo
-            )=>
-
-                obtenerMilisegundosMarcacion(
-                    primero
-                )
-                -
-                obtenerMilisegundosMarcacion(
-                    segundo
-                )
-
-        );
-
-    });
-
-
-    return resultado;
-
+  return resultado;
 }
-
 
 /*=====================================================
 HORARIOS EFECTIVOS
 =====================================================*/
 
 function obtenerHorariosEfectivos({
+  colaboradorId,
+  fecha,
+  asignaciones,
+  excepciones,
+}) {
+  let horarioIds = [];
 
-    colaboradorId,
-    fecha,
-    asignaciones,
-    excepciones
-
-}){
-
-    let horarioIds = [];
-
-
-    asignaciones
-    .filter(asignacion=>
-
-        asignacion.estado !==
-        "INACTIVO"
-
-        &&
-
-        Array.isArray(
-            asignacion.colaboradorIds
-        )
-
-        &&
-
-        asignacion.colaboradorIds.includes(
-            colaboradorId
-        )
-
+  asignaciones
+    .filter(
+      (asignacion) =>
+        asignacion.estado !== "INACTIVO" &&
+        Array.isArray(asignacion.colaboradorIds) &&
+        asignacion.colaboradorIds.includes(colaboradorId),
     )
-    .forEach(asignacion=>{
-
-        horarioIds.push(
-            ...obtenerHorariosAsignacionFecha(
-                asignacion,
-                fecha
-            )
-        );
-
+    .forEach((asignacion) => {
+      horarioIds.push(...obtenerHorariosAsignacionFecha(asignacion, fecha));
     });
 
+  horarioIds = [...new Set(horarioIds)];
 
-    horarioIds =
-        [
-            ...new Set(
-                horarioIds
-            )
-        ];
+  const excepcion = excepciones.find(
+    (item) =>
+      item.colaboradorId === colaboradorId &&
+      item.fecha === fecha &&
+      item.estado !== "INACTIVO",
+  );
 
-
-    const excepcion =
-        excepciones.find(item=>
-
-            item.colaboradorId ===
-            colaboradorId
-
-            &&
-
-            item.fecha ===
-            fecha
-
-            &&
-
-            item.estado !==
-            "INACTIVO"
-
-        );
-
-
-    if(!excepcion){
-
-        return horarioIds;
-
-    }
-
-
-    if(
-        excepcion.tipo ===
-        "SIN_HORARIO"
-    ){
-
-        return [];
-
-    }
-
-
-    if(
-        excepcion.tipo ===
-        "REEMPLAZAR"
-    ){
-
-        return [
-            ...new Set(
-                excepcion.horarioIds ||
-                []
-            )
-        ];
-
-    }
-
-
-    if(
-        excepcion.tipo ===
-        "AGREGAR"
-    ){
-
-        return [
-            ...new Set([
-
-                ...horarioIds,
-
-                ...(
-                    excepcion.horarioIds ||
-                    []
-                )
-
-            ])
-        ];
-
-    }
-
-
+  if (!excepcion) {
     return horarioIds;
+  }
 
+  if (excepcion.tipo === "SIN_HORARIO") {
+    return [];
+  }
+
+  if (excepcion.tipo === "REEMPLAZAR") {
+    return [...new Set(excepcion.horarioIds || [])];
+  }
+
+  if (excepcion.tipo === "AGREGAR") {
+    return [...new Set([...horarioIds, ...(excepcion.horarioIds || [])])];
+  }
+
+  return horarioIds;
 }
-
 
 /*=====================================================
 HORARIOS SEGÚN TIPO DE ASIGNACIÓN
 =====================================================*/
 
-function obtenerHorariosAsignacionFecha(
-    asignacion,
-    fecha
-){
+function obtenerHorariosAsignacionFecha(asignacion, fecha) {
+  if (asignacion.tipoAsignacion === "DIARIA") {
+    return asignacion.fechaInicio === fecha ? [asignacion.horarioId] : [];
+  }
 
-    if(
-        asignacion.tipoAsignacion ===
-        "DIARIA"
-    ){
+  if (asignacion.tipoAsignacion === "MENSUAL") {
+    return (asignacion.programacion || [])
+      .filter((item) => item.fecha === fecha)
+      .map((item) => item.horarioId);
+  }
 
-        return asignacion.fechaInicio ===
-        fecha
-        ?
-        [
-            asignacion.horarioId
-        ]
-        :
-        [];
+  if (asignacion.tipoAsignacion === "SEMANAL") {
+    return obtenerHorariosSemanales(asignacion, fecha);
+  }
 
-    }
-
-
-    if(
-        asignacion.tipoAsignacion ===
-        "MENSUAL"
-    ){
-
-        return (
-            asignacion.programacion ||
-            []
-        )
-        .filter(item=>
-
-            item.fecha ===
-            fecha
-
-        )
-        .map(item=>
-
-            item.horarioId
-
-        );
-
-    }
-
-
-    if(
-        asignacion.tipoAsignacion ===
-        "SEMANAL"
-    ){
-
-        return obtenerHorariosSemanales(
-            asignacion,
-            fecha
-        );
-
-    }
-
-
-    return [];
-
+  return [];
 }
-
 
 /*=====================================================
 HORARIO SEMANAL
 =====================================================*/
 
-function obtenerHorariosSemanales(
-    asignacion,
-    fecha
-){
+function obtenerHorariosSemanales(asignacion, fecha) {
+  if (
+    !asignacion.fechaInicio ||
+    !asignacion.fechaFin ||
+    fecha < asignacion.fechaInicio ||
+    fecha > asignacion.fechaFin
+  ) {
+    return [];
+  }
 
-    if(
-        !asignacion.fechaInicio
-        ||
-        !asignacion.fechaFin
-        ||
-        fecha < asignacion.fechaInicio
-        ||
-        fecha > asignacion.fechaFin
-    ){
+  const inicio = crearFechaLocal(asignacion.fechaInicio);
 
-        return [];
+  const seleccionada = crearFechaLocal(fecha);
 
-    }
+  const diferenciaDias = Math.floor((seleccionada - inicio) / 86400000);
 
+  const numeroSemana = Math.floor(diferenciaDias / 7);
 
-    const inicio =
-        crearFechaLocal(
-            asignacion.fechaInicio
-        );
+  const intervalo = Number(asignacion.intervaloSemanas || 1);
 
+  if (numeroSemana % intervalo !== 0) {
+    return [];
+  }
 
-    const seleccionada =
-        crearFechaLocal(
-            fecha
-        );
+  const nombresDias = [
+    "domingo",
+    "lunes",
+    "martes",
+    "miercoles",
+    "jueves",
+    "viernes",
+    "sabado",
+  ];
 
+  const nombreDia = nombresDias[seleccionada.getDay()];
 
-    const diferenciaDias =
-        Math.floor(
-            (
-                seleccionada -
-                inicio
-            )
-            /
-            86400000
-        );
+  const horarioIds = asignacion.programacionSemanal?.[nombreDia];
 
-
-    const numeroSemana =
-        Math.floor(
-            diferenciaDias /
-            7
-        );
-
-
-    const intervalo =
-        Number(
-            asignacion.intervaloSemanas ||
-            1
-        );
-
-
-    if(
-        numeroSemana %
-        intervalo !==
-        0
-    ){
-
-        return [];
-
-    }
-
-
-    const nombresDias = [
-
-        "domingo",
-        "lunes",
-        "martes",
-        "miercoles",
-        "jueves",
-        "viernes",
-        "sabado"
-
-    ];
-
-
-    const nombreDia =
-        nombresDias[
-            seleccionada.getDay()
-        ];
-
-
-    const horarioIds =
-        asignacion.programacionSemanal
-        ?.[nombreDia];
-
-
-    return Array.isArray(
-        horarioIds
-    )
-    ?
-    horarioIds
-    :
-    [];
-
+  return Array.isArray(horarioIds) ? horarioIds : [];
 }
-
 
 /*=====================================================
 CONSTRUIR REGISTRO DEL COLABORADOR
 =====================================================*/
 
 function construirRegistroColaborador(
-    colaborador,
-    horarios,
-    marcaciones,
-    ajusteAsistencia,
-    aprobacionHorasExtra,
-    permisoDia,
-    feriadoDia,
-    descansoSustitutorioDia,
-    fecha
-){
+  colaborador,
+  horarios,
+  marcaciones,
+  ajusteAsistencia,
+  aprobacionHorasExtra,
+  permisoDia,
+  feriadoDia,
+  descansoSustitutorioDia,
+  fecha,
+) {
+  const nombres =
+    colaborador.datosPersonales?.nombres || colaborador.nombres || "";
 
-    const nombres =
-        colaborador.datosPersonales
-        ?.nombres
-        ||
-        colaborador.nombres
-        ||
-        "";
+  const apellidos =
+    colaborador.datosPersonales?.apellidos || colaborador.apellidos || "";
 
+  const nombre =
+    [nombres, apellidos].filter(Boolean).join(" ").trim() ||
+    colaborador.nombreCompleto ||
+    "Colaborador";
 
-    const apellidos =
-        colaborador.datosPersonales
-        ?.apellidos
-        ||
-        colaborador.apellidos
-        ||
-        "";
+  const documento =
+    colaborador.documento?.numero ||
+    colaborador.numeroDocumento ||
+    colaborador.dni ||
+    "";
 
-
-    const nombre =
-        [
-            nombres,
-            apellidos
-        ]
-        .filter(Boolean)
-        .join(" ")
-        .trim()
-        ||
-        colaborador.nombreCompleto
-        ||
-        "Colaborador";
-
-
-    const documento =
-        colaborador.documento
-        ?.numero
-        ||
-        colaborador.numeroDocumento
-        ||
-        colaborador.dni
-        ||
-        "";
-
-
-
-    /*
+  /*
     Determinar cómo se aplica el feriado
     al colaborador actual.
 */
 
-const aplicacionFeriado =
-    determinarAplicacionFeriado({
+  const aplicacionFeriado = determinarAplicacionFeriado({
+    feriado: feriadoDia,
 
-        feriado:
-            feriadoDia,
+    colaborador,
+  });
 
-        colaborador
-
-    });
-
-    
-    /*
+  /*
         Seleccionamos el primer horario del día
         como horario principal para el resumen.
     */
 
-    const horarioPrincipal =
-        [...horarios]
-        .sort(
-            (
-                primero,
-                segundo
-            )=>
+  const horarioPrincipal =
+    [...horarios].sort(
+      (primero, segundo) =>
+        convertirHoraAMinutos(primero.entrada?.programada) -
+        convertirHoraAMinutos(segundo.entrada?.programada),
+    )[0] || null;
 
-                convertirHoraAMinutos(
-                    primero.entrada?.programada
-                )
-                -
-                convertirHoraAMinutos(
-                    segundo.entrada?.programada
-                )
-
-        )[0]
-        ||
-        null;
-
-
-    /*
+  /*
         Clasificamos las marcas según las ventanas
         del horario.
     */
 
-    const clasificacion =
-        clasificarMarcaciones({
+  const clasificacion = clasificarMarcaciones({
+    marcaciones,
 
-            marcaciones,
+    horarios,
 
-            horarios,
+    fecha,
+  });
 
-            fecha
+  aplicarLimiteVirtualPermisoParcial({
+    permiso: permisoDia,
 
-        });
+    horario: horarioPrincipal,
 
-    aplicarLimiteVirtualPermisoParcial({
+    clasificacion,
+  });
 
-    permiso:
-        permisoDia,
+  aplicarLimiteVirtualPermisoHoras({
+    permiso: permisoDia,
 
-    horario:
-        horarioPrincipal,
+    horario: horarioPrincipal,
 
-    clasificacion
+    clasificacion,
+  });
 
-});
+  const entrada = clasificacion.entrada;
 
-    aplicarLimiteVirtualPermisoHoras({
+  const salida = clasificacion.salida;
 
-    permiso:
-        permisoDia,
-
-    horario:
-        horarioPrincipal,
-
-    clasificacion
-
-});
-
-    
-
-
-    const entrada =
-        clasificacion.entrada;
-
-
-    const salida =
-        clasificacion.salida;
-    
-    /*
+  /*
         Calculamos horas trabajadas, refrigerio,
         tardanza y cumplimiento de jornada.
     */
 
-const tratamientoRefrigerio =
-    ajusteAsistencia
-    ?.tratamientoRefrigerio
-    ||
-    "LABORADO";
+  const tratamientoRefrigerio =
+    ajusteAsistencia?.tratamientoRefrigerio || "LABORADO";
 
+  const tratamientoRefrigerioCorto =
+    ajusteAsistencia?.tratamientoRefrigerioCorto || "NO_CONSIDERAR_EXTRA";
 
-const tratamientoRefrigerioCorto =
-    ajusteAsistencia
-    ?.tratamientoRefrigerioCorto
-    ||
-    "NO_CONSIDERAR_EXTRA";
+  const calculoAsistencia = calcularJornadaAsistencia({
+    horario: horarioPrincipal,
 
+    clasificacion,
 
-const calculoAsistencia =
-    calcularJornadaAsistencia({
+    tratamientoRefrigerio,
 
-        horario:
-            horarioPrincipal,
+    tratamientoRefrigerioCorto,
+  });
 
-        clasificacion,
-
-        tratamientoRefrigerio,
-
-        tratamientoRefrigerioCorto
-
-    });
-
-
-    /*
+  /*
     Cuando un extremo de la jornada está cubierto
     por un permiso parcial, no representa tardanza
     ni salida anticipada.
 */
 
-const tieneLimiteVirtualPermiso =
-    Boolean(
-        clasificacion.entrada
-        ?.esCubiertaPorPermiso
-        ||
-        clasificacion.salida
-        ?.esCubiertaPorPermiso
-    );
+  const tieneLimiteVirtualPermiso = Boolean(
+    clasificacion.entrada?.esCubiertaPorPermiso ||
+      clasificacion.salida?.esCubiertaPorPermiso,
+  );
 
+  if (tieneLimiteVirtualPermiso) {
+    calculoAsistencia.minutosLlegadaPosterior = 0;
 
-if(tieneLimiteVirtualPermiso){
+    calculoAsistencia.minutosTardanza = 0;
 
-    calculoAsistencia
-    .minutosLlegadaPosterior = 0;
-
-    calculoAsistencia
-    .minutosTardanza = 0;
-
-    calculoAsistencia
-    .minutosSalidaAnticipada = 0;
-
+    calculoAsistencia.minutosSalidaAnticipada = 0;
 
     /*
         La parte efectivamente cumplida se toma
         de las horas reales trabajadas.
     */
 
-    calculoAsistencia
-    .minutosJornadaCumplida =
-        Math.min(
+    calculoAsistencia.minutosJornadaCumplida = Math.min(
+      calculoAsistencia.minutosJornadaProgramada,
 
-            calculoAsistencia
-            .minutosJornadaProgramada,
+      calculoAsistencia.minutosTrabajados,
+    );
+  }
 
-            calculoAsistencia
-            .minutosTrabajados
-
-        );
-
-}
-
-
-    /*
+  /*
     Permiso por horas situado dentro de la jornada.
 
     Si no fue necesario crear entrada o salida virtual,
@@ -1815,1085 +869,521 @@ if(tieneLimiteVirtualPermiso){
     realmente trabajadas.
 */
 
-let minutosPermisoDentroTrabajo = 0;
+  let minutosPermisoDentroTrabajo = 0;
 
-
-if(
-    permisoDia
-    &&
-    permisoDia.tipoDuracion ===
-    "HORAS"
-    &&
-    !tieneLimiteVirtualPermiso
-    &&
+  if (
+    permisoDia &&
+    permisoDia.tipoDuracion === "HORAS" &&
+    !tieneLimiteVirtualPermiso &&
     calculoAsistencia.calculable
-){
+  ) {
+    minutosPermisoDentroTrabajo = calcularMinutosPermisoDentroTrabajo({
+      permiso: permisoDia,
 
-    minutosPermisoDentroTrabajo =
-        calcularMinutosPermisoDentroTrabajo({
+      horario: horarioPrincipal,
 
-            permiso:
-                permisoDia,
-
-            horario:
-                horarioPrincipal,
-
-            clasificacion
-
-        });
-
-
-    calculoAsistencia.minutosTrabajados =
-        Math.max(
-
-            0,
-
-            calculoAsistencia
-            .minutosTrabajados
-            -
-            minutosPermisoDentroTrabajo
-
-        );
-
-
-    calculoAsistencia.minutosJornadaCumplida =
-        Math.max(
-
-            0,
-
-            calculoAsistencia
-            .minutosJornadaCumplida
-            -
-            minutosPermisoDentroTrabajo
-
-        );
-
-
-    calculoAsistencia.jornadaCompleta =
-        false;
-
-}
-
-
-    const calculoHorasExtra =
-    calcularHorasExtraAsistencia({
-
-        horario:
-            horarioPrincipal,
-
-        clasificacion,
-
-        calculoAsistencia,
-
-        tratamientoRefrigerioCorto
-
+      clasificacion,
     });
 
+    calculoAsistencia.minutosTrabajados = Math.max(
+      0,
 
-    let estado =
-        "SIN_HORARIO";
+      calculoAsistencia.minutosTrabajados - minutosPermisoDentroTrabajo,
+    );
 
+    calculoAsistencia.minutosJornadaCumplida = Math.max(
+      0,
 
-let tardanzaMinutos =
-    clasificacion.entrada
-    ?.esCubiertaPorPermiso
-    ?
-    0
-    :
-    calculoAsistencia
-    .minutosTardanza;
+      calculoAsistencia.minutosJornadaCumplida - minutosPermisoDentroTrabajo,
+    );
 
+    calculoAsistencia.jornadaCompleta = false;
+  }
 
-    /*
+  const calculoHorasExtra = calcularHorasExtraAsistencia({
+    horario: horarioPrincipal,
+
+    clasificacion,
+
+    calculoAsistencia,
+
+    tratamientoRefrigerioCorto,
+  });
+
+  let estado = "SIN_HORARIO";
+
+  let tardanzaMinutos = clasificacion.entrada?.esCubiertaPorPermiso
+    ? 0
+    : calculoAsistencia.minutosTardanza;
+
+  /*
         Determinar estado general.
     */
 
-    if(
-        horarios.length > 0
-        &&
-        !entrada
-        &&
-        !salida
-    ){
-
-        estado =
-            "AUSENTE";
-
-    }
-    else if(
-        entrada
-        &&
-        !salida
-    ){
-
-        estado =
-            "INCOMPLETO";
-
-    }
-    else if(
-        !entrada
-        &&
-        salida
-    ){
-
-        estado =
-            "INCOMPLETO";
-
-    }
-    else if(
-        entrada
-        &&
-        salida
-    ){
-
-        if(horarioPrincipal){
-
-            estado =
-                tardanzaMinutos > 0
-                ?
-                "TARDANZA"
-                :
-                "PRESENTE";
-
-        }
-        else{
-
-            /*
+  if (horarios.length > 0 && !entrada && !salida) {
+    estado = "AUSENTE";
+  } else if (entrada && !salida) {
+    estado = "INCOMPLETO";
+  } else if (!entrada && salida) {
+    estado = "INCOMPLETO";
+  } else if (entrada && salida) {
+    if (horarioPrincipal) {
+      estado = tardanzaMinutos > 0 ? "TARDANZA" : "PRESENTE";
+    } else {
+      /*
                 Tiene entrada y salida, pero todavía
                 no tiene horario asignado.
             */
 
-            estado =
-                "PRESENTE";
-
-        }
-
+      estado = "PRESENTE";
     }
-    else if(
-        marcaciones.length > 0
-    ){
-
-        /*
+  } else if (marcaciones.length > 0) {
+    /*
             Existen marcas, pero ninguna coincide con
             las ventanas configuradas.
         */
 
-        estado =
-            "INCOMPLETO";
+    estado = "INCOMPLETO";
+  }
 
-    }
-
-
-    /*
+  /*
     Aplicar permiso aprobado de día completo.
 
     El permiso reemplaza el estado AUSENTE únicamente
     cuando no existen marcaciones reales.
 */
 
-/*
+  /*
     Aplicar permiso aprobado según su duración.
 */
 
-const tipoDuracionPermiso =
-    permisoDia?.tipoDuracion
-    ||
-    "DIA_COMPLETO";
+  const tipoDuracionPermiso = permisoDia?.tipoDuracion || "DIA_COMPLETO";
 
+  const noTieneMarcaciones = marcaciones.length === 0;
 
-const noTieneMarcaciones =
-    marcaciones.length === 0;
+  const jornadaProgramada = calculoAsistencia.minutosJornadaProgramada || 0;
 
+  let minutosJustificadosPermiso = 0;
 
-const jornadaProgramada =
-    calculoAsistencia
-    .minutosJornadaProgramada
-    ||
-    0;
+  let minutosComputablesPermiso = 0;
 
-
-let minutosJustificadosPermiso = 0;
-
-let minutosComputablesPermiso = 0;
-
-
-/*
+  /*
     Calcular la duración cubierta por el permiso.
 */
 
-if(permisoDia){
-
-    if(
-        tipoDuracionPermiso ===
-        "DIA_COMPLETO"
-    ){
-
-        minutosJustificadosPermiso =
-            jornadaProgramada;
-
-    }
-    else if(
-        tipoDuracionPermiso ===
-        "MEDIO_DIA"
-    ){
-
-minutosJustificadosPermiso =
-    calcularMinutosPermisoMedioDia({
-
-        horario:
-            horarioPrincipal,
+  if (permisoDia) {
+    if (tipoDuracionPermiso === "DIA_COMPLETO") {
+      minutosJustificadosPermiso = jornadaProgramada;
+    } else if (tipoDuracionPermiso === "MEDIO_DIA") {
+      minutosJustificadosPermiso = calcularMinutosPermisoMedioDia({
+        horario: horarioPrincipal,
 
         clasificacion,
 
-        mitadDia:
-            permisoDia.mitadDia,
+        mitadDia: permisoDia.mitadDia,
 
-        jornadaProgramada
+        jornadaProgramada,
+      });
+    } else if (tipoDuracionPermiso === "HORAS") {
+      minutosJustificadosPermiso = calcularMinutosPermisoPorHoras({
+        permiso: permisoDia,
 
-    });
-
-    }
-    else if(
-        tipoDuracionPermiso ===
-        "HORAS"
-    ){
-
-minutosJustificadosPermiso =
-    calcularMinutosPermisoPorHoras({
-
-        permiso:
-            permisoDia,
-
-        horario:
-            horarioPrincipal,
+        horario: horarioPrincipal,
 
         clasificacion,
 
-        jornadaProgramada
-
-    });
-
+        jornadaProgramada,
+      });
     }
 
-
-    if(
-        permisoDia.computaComoLaborado ===
-        true
-    ){
-
-        minutosComputablesPermiso =
-            minutosJustificadosPermiso;
-
+    if (permisoDia.computaComoLaborado === true) {
+      minutosComputablesPermiso = minutosJustificadosPermiso;
     }
+  }
 
-}
-
-
-/*
+  /*
     Si no existen marcaciones, el permiso aprobado
     reemplaza el estado AUSENTE.
 */
 
-/*
+  /*
     Un permiso aprobado de día completo tiene prioridad
     aunque existan marcaciones accidentales.
 */
 
-if(permisoDia){
+  if (permisoDia) {
+    if (tipoDuracionPermiso === "DIA_COMPLETO") {
+      tardanzaMinutos = 0;
 
-    if(
-        tipoDuracionPermiso ===
-        "DIA_COMPLETO"
-    ){
+      estado =
+        permisoDia.computaComoLaborado === true
+          ? "PERMISO_COMPUTABLE"
+          : "AUSENCIA_JUSTIFICADA";
+    } else if (noTieneMarcaciones) {
+      tardanzaMinutos = 0;
 
-        tardanzaMinutos = 0;
-
-
-        estado =
-            permisoDia.computaComoLaborado ===
-            true
-            ?
-            "PERMISO_COMPUTABLE"
-            :
-            "AUSENCIA_JUSTIFICADA";
-
+      estado =
+        permisoDia.computaComoLaborado === true
+          ? "PERMISO_PARCIAL_COMPUTABLE"
+          : "AUSENCIA_PARCIAL_JUSTIFICADA";
     }
-    else if(noTieneMarcaciones){
+  }
 
-        tardanzaMinutos = 0;
+  const tieneLimiteCubiertoPorPermiso = Boolean(
+    entrada?.esCubiertaPorPermiso || salida?.esCubiertaPorPermiso,
+  );
 
-
-        estado =
-            permisoDia.computaComoLaborado ===
-            true
-            ?
-            "PERMISO_PARCIAL_COMPUTABLE"
-            :
-            "AUSENCIA_PARCIAL_JUSTIFICADA";
-
-    }
-
-}
-
-
-
-    const tieneLimiteCubiertoPorPermiso =
-    Boolean(
-        entrada?.esCubiertaPorPermiso
-        ||
-        salida?.esCubiertaPorPermiso
-    );
-
-
-if(tieneLimiteCubiertoPorPermiso){
-
-    estado =
-        "PRESENTE_CON_PERMISO";
+  if (tieneLimiteCubiertoPorPermiso) {
+    estado = "PRESENTE_CON_PERMISO";
 
     tardanzaMinutos = 0;
+  }
 
-}
-
-
-/*
+  /*
     Permiso por horas con entrada y salida.
 
     Si está ubicado dentro de la jornada, conserva
     una tardanza real que haya ocurrido antes del permiso.
 */
 
-if(
-    permisoDia
-    &&
-    tipoDuracionPermiso ===
-    "HORAS"
-    &&
-    entrada
-    &&
-    salida
-){
-
-    if(tardanzaMinutos > 0){
-
-        estado =
-            "TARDANZA_CON_PERMISO";
-
+  if (permisoDia && tipoDuracionPermiso === "HORAS" && entrada && salida) {
+    if (tardanzaMinutos > 0) {
+      estado = "TARDANZA_CON_PERMISO";
+    } else {
+      estado = "PRESENTE_CON_PERMISO";
     }
-    else{
+  }
 
-        estado =
-            "PRESENTE_CON_PERMISO";
-
-    }
-
-}
-
-
-/*
+  /*
     Aplicar feriado pendiente de configuración.
 */
 
-if(
-    feriadoDia
-    &&
-    aplicacionFeriado ===
-    "PENDIENTE"
-){
-
-    estado =
-        "FERIADO_PENDIENTE";
+  if (feriadoDia && aplicacionFeriado === "PENDIENTE") {
+    estado = "FERIADO_PENDIENTE";
 
     tardanzaMinutos = 0;
+  } else if (
 
-}
-
-
-/*
+  /*
     Aplicar un feriado ya configurado.
 */
+    feriadoDia &&
+    (aplicacionFeriado === "DESCANSA" || aplicacionFeriado === "TRABAJA")
+  ) {
+    const tieneMarcacionesReales = marcaciones.length > 0;
 
-else if(
-    feriadoDia
-    &&
-    (
-        aplicacionFeriado ===
-        "DESCANSA"
+    if (
+      tieneMarcacionesReales &&
+      feriadoDia.identificarFeriadoLaborado !== false
+    ) {
+      const tieneEntradaReal = Boolean(
+        entrada && !entrada.esCubiertaPorPermiso,
+      );
 
-        ||
+      const tieneSalidaReal = Boolean(salida && !salida.esCubiertaPorPermiso);
 
-        aplicacionFeriado ===
-        "TRABAJA"
-    )
-){
-
-    const tieneMarcacionesReales =
-        marcaciones.length > 0;
-
-
-    if(
-        tieneMarcacionesReales
-
-        &&
-
-        feriadoDia
-        .identificarFeriadoLaborado !==
-        false
-    ){
-
-        const tieneEntradaReal =
-            Boolean(
-                entrada
-                &&
-                !entrada.esCubiertaPorPermiso
-            );
-
-
-        const tieneSalidaReal =
-            Boolean(
-                salida
-                &&
-                !salida.esCubiertaPorPermiso
-            );
-
-
-        estado =
-            tieneEntradaReal
-            &&
-            tieneSalidaReal
-            ?
-            "TRABAJO_EN_FERIADO"
-            :
-            "TRABAJO_EN_FERIADO_INCOMPLETO";
-
-    }
-    else if(
-        aplicacionFeriado ===
-        "DESCANSA"
-
-        &&
-
-        !tieneMarcacionesReales
-
-        &&
-
-        feriadoDia
-        .noRegistrarFalta !==
-        false
-    ){
-
-        estado =
-            "FERIADO";
-
+      estado =
+        tieneEntradaReal && tieneSalidaReal
+          ? "TRABAJO_EN_FERIADO"
+          : "TRABAJO_EN_FERIADO_INCOMPLETO";
+    } else if (
+      aplicacionFeriado === "DESCANSA" &&
+      !tieneMarcacionesReales &&
+      feriadoDia.noRegistrarFalta !== false
+    ) {
+      estado = "FERIADO";
     }
 
-
-    if(
-        estado ===
-        "FERIADO"
-
-        ||
-
-        estado ===
-        "TRABAJO_EN_FERIADO"
-
-        ||
-
-        estado ===
-        "TRABAJO_EN_FERIADO_INCOMPLETO"
-    ){
-
-        tardanzaMinutos = 0;
-
+    if (
+      estado === "FERIADO" ||
+      estado === "TRABAJO_EN_FERIADO" ||
+      estado === "TRABAJO_EN_FERIADO_INCOMPLETO"
+    ) {
+      tardanzaMinutos = 0;
     }
+  }
 
-}
-
-
-/*
+  /*
     Aplicar descanso sustitutorio.
 
     El feriado de la propia fecha tiene prioridad
     sobre el descanso sustitutorio.
 */
 
-if(
-    descansoSustitutorioDia
-    &&
-    !feriadoDia
-){
+  if (descansoSustitutorioDia && !feriadoDia) {
+    const tieneMarcacionesReales = marcaciones.length > 0;
 
-    const tieneMarcacionesReales =
-        marcaciones.length > 0;
+    if (!tieneMarcacionesReales) {
+      estado = "DESCANSO_SUSTITUTORIO";
+    } else {
+      const tieneEntradaReal = Boolean(
+        entrada && !entrada.esCubiertaPorPermiso,
+      );
 
+      const tieneSalidaReal = Boolean(salida && !salida.esCubiertaPorPermiso);
 
-    if(!tieneMarcacionesReales){
-
-        estado =
-            "DESCANSO_SUSTITUTORIO";
-
+      estado =
+        tieneEntradaReal && tieneSalidaReal
+          ? "DESCANSO_SUSTITUTORIO_TRABAJADO"
+          : "DESCANSO_SUSTITUTORIO_INCOMPLETO";
     }
-    else{
-
-        const tieneEntradaReal =
-            Boolean(
-                entrada
-                &&
-                !entrada.esCubiertaPorPermiso
-            );
-
-
-        const tieneSalidaReal =
-            Boolean(
-                salida
-                &&
-                !salida.esCubiertaPorPermiso
-            );
-
-
-        estado =
-            tieneEntradaReal
-            &&
-            tieneSalidaReal
-            ?
-            "DESCANSO_SUSTITUTORIO_TRABAJADO"
-            :
-            "DESCANSO_SUSTITUTORIO_INCOMPLETO";
-
-    }
-
 
     tardanzaMinutos = 0;
+  }
 
-}
-    
-    
-return {
+  return {
+    colaboradorId: colaborador.id,
 
-        colaboradorId:
-            colaborador.id,
+    nombre,
 
-        nombre,
+    documento,
 
-        documento,
+    iniciales: obtenerIniciales(nombre),
 
-        iniciales:
-            obtenerIniciales(
-                nombre
-            ),
+    sucursalId:
+      colaborador.organizacion?.sucursalId || colaborador.sucursalId || "",
 
-        sucursalId:
-            colaborador.organizacion
-            ?.sucursalId
-            ||
-            colaborador.sucursalId
-            ||
-            "",
+    areaId: colaborador.organizacion?.areaId || colaborador.areaId || "",
 
-        areaId:
-            colaborador.organizacion
-            ?.areaId
-            ||
-            colaborador.areaId
-            ||
-            "",
+    subareaId:
+      colaborador.organizacion?.subareaId || colaborador.subareaId || "",
 
-        subareaId:
-            colaborador.organizacion
-            ?.subareaId
-            ||
-            colaborador.subareaId
-            ||
-            "",
+    horarios,
 
-        horarios,
+    horarioPrincipal,
 
-        horarioPrincipal,
+    clasificacion,
 
-        clasificacion,
+    entrada,
 
-        entrada,
+    salida,
 
-        salida,
+    cantidadMarcaciones: marcaciones.length,
 
-        cantidadMarcaciones:
-            marcaciones.length,
+    estado,
 
-        estado,
+    tardanzaMinutos,
 
-        tardanzaMinutos,
-
-        /*
+    /*
             Resultado centralizado del cálculo.
         */
 
-calculoAsistencia,
+    calculoAsistencia,
 
-calculoHorasExtra,
+    calculoHorasExtra,
 
-minutosExtra:
-    calculoHorasExtra
-    .minutosExtraTotal,
+    minutosExtra: calculoHorasExtra.minutosExtraTotal,
 
-ajusteAsistencia,
+    ajusteAsistencia,
 
-        tratamientoRefrigerio,
+    tratamientoRefrigerio,
 
-        tratamientoRefrigerioCorto,
+    tratamientoRefrigerioCorto,
 
-        toleranciaMinutos:
-            calculoAsistencia
-            .toleranciaMinutos,
+    toleranciaMinutos: calculoAsistencia.toleranciaMinutos,
 
-        minutosJornadaProgramada:
-            calculoAsistencia
-            .minutosJornadaProgramada,
+    minutosJornadaProgramada: calculoAsistencia.minutosJornadaProgramada,
 
-        minutosJornadaCumplida:
-            calculoAsistencia
-            .minutosJornadaCumplida,
+    minutosJornadaCumplida: calculoAsistencia.minutosJornadaCumplida,
 
-        advertencias:
-            calculoAsistencia
-            .advertencias,
+    advertencias: calculoAsistencia.advertencias,
 
-        minutosTrabajados:
-            calculoAsistencia
-            .minutosTrabajados,
-        
-tipoDuracionPermiso,
+    minutosTrabajados: calculoAsistencia.minutosTrabajados,
 
-minutosJustificadosPermiso,
+    tipoDuracionPermiso,
 
-minutosComputablesPermiso,
+    minutosJustificadosPermiso,
 
-minutosPermisoDentroTrabajo,
+    minutosComputablesPermiso,
 
-aprobacionHorasExtra,
+    minutosPermisoDentroTrabajo,
 
-permisoDia,
+    aprobacionHorasExtra,
 
-feriadoDia,
+    permisoDia,
 
-aplicacionFeriado,
+    feriadoDia,
 
-descansoSustitutorioDia,
+    aplicacionFeriado,
 
-
-    };
-
+    descansoSustitutorioDia,
+  };
 }
-
 
 /*=====================================================
 DETERMINAR APLICACIÓN DEL FERIADO
 =====================================================*/
 
-function determinarAplicacionFeriado({
-
-    feriado,
-    colaborador
-
-}){
-
-    /*
+function determinarAplicacionFeriado({ feriado, colaborador }) {
+  /*
         Si la fecha no tiene un feriado activo,
         no se aplica ninguna regla especial.
     */
 
-    if(!feriado){
+  if (!feriado) {
+    return null;
+  }
 
-        return null;
+  const reglaGeneral = feriado.reglaGeneral || "POR_CONFIGURAR";
 
-    }
-
-
-    const reglaGeneral =
-        feriado.reglaGeneral ||
-        "POR_CONFIGURAR";
-
-
-    /*
+  /*
         Mientras el feriado no esté configurado,
         no asumimos que el colaborador descansa
         ni que trabaja.
     */
 
-    if(
-        reglaGeneral ===
-        "POR_CONFIGURAR"
-    ){
+  if (reglaGeneral === "POR_CONFIGURAR") {
+    return "PENDIENTE";
+  }
 
-        return "PENDIENTE";
+  const excepciones = feriado.excepciones || {};
 
-    }
+  const sucursalId =
+    colaborador.organizacion?.sucursalId || colaborador.sucursalId || "";
 
+  const areaId = colaborador.organizacion?.areaId || colaborador.areaId || "";
 
-    const excepciones =
-        feriado.excepciones ||
-        {};
+  const subareaId =
+    colaborador.organizacion?.subareaId || colaborador.subareaId || "";
 
+  const esExcepcion =
+    (excepciones.sucursales || []).includes(sucursalId) ||
+    (excepciones.areas || []).includes(areaId) ||
+    (excepciones.subareas || []).includes(subareaId) ||
+    (excepciones.colaboradores || []).includes(colaborador.id);
 
-    const sucursalId =
-        colaborador.organizacion
-        ?.sucursalId
-        ||
-        colaborador.sucursalId
-        ||
-        "";
-
-
-    const areaId =
-        colaborador.organizacion
-        ?.areaId
-        ||
-        colaborador.areaId
-        ||
-        "";
-
-
-    const subareaId =
-        colaborador.organizacion
-        ?.subareaId
-        ||
-        colaborador.subareaId
-        ||
-        "";
-
-
-    const esExcepcion =
-        (
-            excepciones.sucursales ||
-            []
-        ).includes(
-            sucursalId
-        )
-
-        ||
-
-        (
-            excepciones.areas ||
-            []
-        ).includes(
-            areaId
-        )
-
-        ||
-
-        (
-            excepciones.subareas ||
-            []
-        ).includes(
-            subareaId
-        )
-
-        ||
-
-        (
-            excepciones.colaboradores ||
-            []
-        ).includes(
-            colaborador.id
-        );
-
-
-    /*
+  /*
         Primero aplicamos la regla general.
     */
 
-    let resultado =
-        reglaGeneral ===
-        "TODOS_DESCANSAN"
-        ?
-        "DESCANSA"
-        :
-        "TRABAJA";
+  let resultado = reglaGeneral === "TODOS_DESCANSAN" ? "DESCANSA" : "TRABAJA";
 
-
-    /*
+  /*
         Las excepciones invierten la regla:
         - si todos descansan, la excepción trabaja;
         - si todos trabajan, la excepción descansa.
     */
 
-    if(esExcepcion){
+  if (esExcepcion) {
+    resultado = resultado === "DESCANSA" ? "TRABAJA" : "DESCANSA";
+  }
 
-        resultado =
-            resultado ===
-            "DESCANSA"
-            ?
-            "TRABAJA"
-            :
-            "DESCANSA";
-
-    }
-
-
-    return resultado;
-
+  return resultado;
 }
-
-
 
 /*=====================================================
 RENDERIZAR
 =====================================================*/
 
-function renderizarResumenAsistencia(){
+function renderizarResumenAsistencia() {
+  if (!cuerpoResumen) {
+    return;
+  }
 
-    if(!cuerpoResumen){
+  const texto = String(buscarResumen?.value || "")
+    .trim()
+    .toLowerCase();
 
-        return;
+  const sucursalId = filtroSucursal?.value || "";
 
+  const areaId = filtroArea?.value || "";
+
+  const subareaId = filtroSubarea?.value || "";
+
+  const estado = filtroEstado?.value || "";
+
+  const filtrados = registrosResumen.filter((registro) => {
+    const coincideTexto =
+      !texto ||
+      registro.nombre.toLowerCase().includes(texto) ||
+      String(registro.documento).includes(texto);
+
+    const coincideSucursal = !sucursalId || registro.sucursalId === sucursalId;
+
+    const coincideArea = !areaId || registro.areaId === areaId;
+
+    const coincideSubarea = !subareaId || registro.subareaId === subareaId;
+
+    const estadosConPermiso = [
+      "PERMISO_COMPUTABLE",
+
+      "AUSENCIA_JUSTIFICADA",
+
+      "PERMISO_PARCIAL_COMPUTABLE",
+
+      "AUSENCIA_PARCIAL_JUSTIFICADA",
+
+      "PRESENTE_CON_PERMISO",
+
+      "TARDANZA_CON_PERMISO",
+    ];
+
+    const estadosPresentes = ["PRESENTE", "TRABAJO_EN_FERIADO"];
+
+    const estadosTardanza = ["TARDANZA", "TARDANZA_CON_PERMISO"];
+
+    const estadosIncompletos = [
+      "INCOMPLETO",
+
+      "TRABAJO_EN_FERIADO_INCOMPLETO",
+
+      "FERIADO_PENDIENTE",
+    ];
+
+    const estadosDescansoSustitutorio = [
+      "DESCANSO_SUSTITUTORIO",
+
+      "DESCANSO_SUSTITUTORIO_TRABAJADO",
+
+      "DESCANSO_SUSTITUTORIO_INCOMPLETO",
+    ];
+
+    let coincideEstado = !estado;
+
+    if (estado === "CON_PERMISO") {
+      coincideEstado = estadosConPermiso.includes(registro.estado);
+    } else if (estado === "PRESENTE") {
+      coincideEstado = estadosPresentes.includes(registro.estado);
+    } else if (estado === "TARDANZA") {
+      coincideEstado = estadosTardanza.includes(registro.estado);
+    } else if (estado === "INCOMPLETO") {
+      coincideEstado = estadosIncompletos.includes(registro.estado);
+    } else if (estado === "DESCANSO_SUSTITUTORIO") {
+      coincideEstado = estadosDescansoSustitutorio.includes(registro.estado);
+    } else if (estado) {
+      coincideEstado = registro.estado === estado;
     }
 
-
-    const texto =
-        String(
-            buscarResumen?.value ||
-            ""
-        )
-        .trim()
-        .toLowerCase();
-
-
-    const sucursalId =
-        filtroSucursal?.value ||
-        "";
-
-
-    const areaId =
-        filtroArea?.value ||
-        "";
-
-
-    const subareaId =
-        filtroSubarea?.value ||
-        "";
-
-
-    const estado =
-        filtroEstado?.value ||
-        "";
-
-
-    const filtrados =
-        registrosResumen.filter(
-            registro=>{
-
-                const coincideTexto =
-                    !texto
-                    ||
-                    registro.nombre
-                    .toLowerCase()
-                    .includes(texto)
-                    ||
-                    String(
-                        registro.documento
-                    )
-                    .includes(texto);
-
-
-                const coincideSucursal =
-                    !sucursalId
-                    ||
-                    registro.sucursalId ===
-                    sucursalId;
-
-
-                const coincideArea =
-                    !areaId
-                    ||
-                    registro.areaId ===
-                    areaId;
-
-
-                const coincideSubarea =
-                    !subareaId
-                    ||
-                    registro.subareaId ===
-                    subareaId;
-
-
-const estadosConPermiso = [
-
-    "PERMISO_COMPUTABLE",
-
-    "AUSENCIA_JUSTIFICADA",
-
-    "PERMISO_PARCIAL_COMPUTABLE",
-
-    "AUSENCIA_PARCIAL_JUSTIFICADA",
-
-    "PRESENTE_CON_PERMISO",
-
-    "TARDANZA_CON_PERMISO"
-
-];
-
-
-const estadosPresentes = [
-
-    "PRESENTE",
-
-    "TRABAJO_EN_FERIADO"
-
-];
-
-
-const estadosTardanza = [
-
-    "TARDANZA",
-
-    "TARDANZA_CON_PERMISO"
-
-];
-
-
-const estadosIncompletos = [
-
-    "INCOMPLETO",
-
-    "TRABAJO_EN_FERIADO_INCOMPLETO",
-
-    "FERIADO_PENDIENTE"
-
-];
-
-const estadosDescansoSustitutorio = [
-
-    "DESCANSO_SUSTITUTORIO",
-
-    "DESCANSO_SUSTITUTORIO_TRABAJADO",
-
-    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
-
-];
-
-
-let coincideEstado =
-    !estado;
-
-
-if(
-    estado ===
-    "CON_PERMISO"
-){
-
-    coincideEstado =
-        estadosConPermiso.includes(
-            registro.estado
-        );
-
-}
-else if(
-    estado ===
-    "PRESENTE"
-){
-
-    coincideEstado =
-        estadosPresentes.includes(
-            registro.estado
-        );
-
-}
-else if(
-    estado ===
-    "TARDANZA"
-){
-
-    coincideEstado =
-        estadosTardanza.includes(
-            registro.estado
-        );
-
-}
-else if(
-    estado ===
-    "INCOMPLETO"
-){
-
-    coincideEstado =
-        estadosIncompletos.includes(
-            registro.estado
-        );
-
-}
-else if(
-    estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
-
-    coincideEstado =
-        estadosDescansoSustitutorio.includes(
-            registro.estado
-        );
-
-}
-else if(estado){
-
-    coincideEstado =
-        registro.estado ===
-        estado;
-
-}
-
-
-                return (
-                    coincideTexto
-                    &&
-                    coincideSucursal
-                    &&
-                    coincideArea
-                    &&
-                    coincideSubarea
-                    &&
-                    coincideEstado
-                );
-
-            }
-        );
-
-
-    actualizarContadores(
-        registrosResumen
+    return (
+      coincideTexto &&
+      coincideSucursal &&
+      coincideArea &&
+      coincideSubarea &&
+      coincideEstado
+    );
+  });
+
+  actualizarContadores(registrosResumen);
+
+  actualizarInformacionPaginacion(filtrados.length);
+
+  if (filtrados.length === 0) {
+    mostrarMensajeTabla(
+      "No existen colaboradores para los filtros seleccionados.",
     );
 
+    return;
+  }
 
-    actualizarInformacionPaginacion(
-        filtrados.length
-    );
-
-
-    if(filtrados.length === 0){
-
-        mostrarMensajeTabla(
-            "No existen colaboradores para los filtros seleccionados."
-        );
-
-        return;
-
-    }
-
-
-    cuerpoResumen.innerHTML =
-        filtrados
-        .map(
-            crearFilaResumen
-        )
-        .join("");
-
+  cuerpoResumen.innerHTML = filtrados.map(crearFilaResumen).join("");
 }
-
 
 /*=====================================================
 CREAR FILA
 =====================================================*/
 
-function crearFilaResumen(
-    registro
-){
-
-    return `
+function crearFilaResumen(registro) {
+  return `
         <tr>
 
             <td>
@@ -2950,10 +1440,7 @@ function crearFilaResumen(
 
                 <span class="estado-asistencia ${obtenerClaseEstado(registro.estado)}">
 
-                    ${obtenerTextoEstado(
-                    registro.estado,
-                    registro
-                    )}
+                    ${obtenerTextoEstado(registro.estado, registro)}
 
                 </span>
 
@@ -3027,55 +1514,30 @@ function crearFilaResumen(
 
         </tr>
     `;
-
 }
 
+function obtenerTextoTratamientoFeriado(tratamiento) {
+  const textos = {
+    PENDIENTE: "Tratamiento pendiente de definir",
 
-function obtenerTextoTratamientoFeriado(
-    tratamiento
-){
+    PAGO_ADICIONAL: "Corresponde pago adicional",
 
-    const textos = {
+    DESCANSO_SUSTITUTORIO: "Corresponde descanso sustitutorio",
 
-        PENDIENTE:
-            "Tratamiento pendiente de definir",
+    PAGO_Y_DESCANSO: "Corresponde pago adicional y descanso",
 
-        PAGO_ADICIONAL:
-            "Corresponde pago adicional",
+    JORNADA_NORMAL: "Se considera jornada normal",
+  };
 
-        DESCANSO_SUSTITUTORIO:
-            "Corresponde descanso sustitutorio",
-
-        PAGO_Y_DESCANSO:
-            "Corresponde pago adicional y descanso",
-
-        JORNADA_NORMAL:
-            "Se considera jornada normal"
-
-    };
-
-
-    return textos[tratamiento]
-    ||
-    "Tratamiento pendiente de definir";
-
+  return textos[tratamiento] || "Tratamiento pendiente de definir";
 }
-
-
 
 /*=====================================================
 HORAS EXTRA
 =====================================================*/
 
-function crearHorasExtraHTML(
-    registro
-){
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
-
+function crearHorasExtraHTML(registro) {
+  if (registro.estado === "DESCANSO_SUSTITUTORIO") {
     return `
         <div class="horas-extra-resumen sin-dato">
 
@@ -3093,24 +1555,14 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO_TRABAJADO"
-){
-
+  if (registro.estado === "DESCANSO_SUSTITUTORIO_TRABAJADO") {
     return `
         <div class="horas-extra-resumen revision">
 
             <strong>
-                ${formatearDuracionCorta(
-                    registro.minutosTrabajados
-                    ||
-                    0
-                )}
+                ${formatearDuracionCorta(registro.minutosTrabajados || 0)}
             </strong>
 
             <span>
@@ -3123,15 +1575,9 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
-){
-
+  if (registro.estado === "DESCANSO_SUSTITUTORIO_INCOMPLETO") {
     return `
         <div class="horas-extra-resumen sin-dato">
 
@@ -3149,18 +1595,13 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-/*
+  /*
     Descanso por feriado sin trabajo.
 */
 
-if(
-    registro.estado ===
-    "FERIADO"
-){
-
+  if (registro.estado === "FERIADO") {
     return `
         <div class="horas-extra-resumen sin-dato">
 
@@ -3178,14 +1619,9 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-if(
-    registro.estado ===
-    "TRABAJO_EN_FERIADO_INCOMPLETO"
-){
-
+  if (registro.estado === "TRABAJO_EN_FERIADO_INCOMPLETO") {
     return `
         <div class="horas-extra-resumen sin-dato">
 
@@ -3203,44 +1639,22 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-    
-/*
+  /*
     Trabajo realizado durante un feriado.
 */
 
-if(
-    registro.estado ===
-    "TRABAJO_EN_FERIADO"
-){
+  if (registro.estado === "TRABAJO_EN_FERIADO") {
+    const tratamiento = registro.feriadoDia?.tratamientoTrabajo || "PENDIENTE";
 
-    const tratamiento =
-        registro.feriadoDia
-        ?.tratamientoTrabajo
-        ||
-        "PENDIENTE";
-
-
-    const clase =
-        tratamiento ===
-        "PENDIENTE"
-        ?
-        "pendiente"
-        :
-        "aprobada";
-
+    const clase = tratamiento === "PENDIENTE" ? "pendiente" : "aprobada";
 
     return `
         <div class="horas-extra-resumen ${clase}">
 
             <strong>
-                ${formatearDuracionCorta(
-                    registro.minutosTrabajados
-                    ||
-                    0
-                )}
+                ${formatearDuracionCorta(registro.minutosTrabajados || 0)}
             </strong>
 
             <span>
@@ -3248,36 +1662,19 @@ if(
             </span>
 
             <small>
-                ${escaparHTML(
-                    obtenerTextoTratamientoFeriado(
-                        tratamiento
-                    )
-                )}
+                ${escaparHTML(obtenerTextoTratamientoFeriado(tratamiento))}
             </small>
 
         </div>
     `;
+  }
 
-}
-    
+  const calculo = registro.calculoHorasExtra;
 
-    const calculo =
-        registro.calculoHorasExtra;
+  const aprobacion = registro.aprobacionHorasExtra || null;
 
-
-    const aprobacion =
-        registro.aprobacionHorasExtra
-        ||
-        null;
-
-
-    if(
-        !calculo
-        ||
-        !calculo.calculable
-    ){
-
-        return `
+  if (!calculo || !calculo.calculable) {
+    return `
             <div class="horas-extra-resumen sin-dato">
 
                 <strong>
@@ -3290,16 +1687,10 @@ if(
 
             </div>
         `;
+  }
 
-    }
-
-
-    if(
-        calculo.minutosExtraTotal <=
-        0
-    ){
-
-        return `
+  if (calculo.minutosExtraTotal <= 0) {
+    return `
             <div class="horas-extra-resumen sin-extra">
 
                 <strong>
@@ -3312,48 +1703,30 @@ if(
 
             </div>
         `;
+  }
 
-    }
-
-
-    /*
+  /*
         Si el cálculo cambió después de la decisión,
         debe revisarse nuevamente.
     */
 
-    const calculoCambio =
-        aprobacion
-        &&
-        Number(
-            aprobacion.minutosCalculados
-            ||
-            0
-        )
-        !==
-        Number(
-            calculo.minutosExtraTotal
-            ||
-            0
-        );
+  const calculoCambio =
+    aprobacion &&
+    Number(aprobacion.minutosCalculados || 0) !==
+      Number(calculo.minutosExtraTotal || 0);
 
-
-    if(calculoCambio){
-
-        return `
+  if (calculoCambio) {
+    return `
             <button
                 type="button"
                 class="horas-extra-resumen revision editable"
                 data-accion="gestionar-horas-extra"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
+                data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
                 title="El cálculo de horas extra cambió"
             >
 
                 <strong>
-                    ${formatearDuracionCorta(
-                        calculo.minutosExtraTotal
-                    )}
+                    ${formatearDuracionCorta(calculo.minutosExtraTotal)}
                 </strong>
 
                 <span>
@@ -3362,13 +1735,9 @@ if(
 
                 <small>
 
-                    El cálculo anterior fue de ${
-                        formatearDuracionCorta(
-                            aprobacion.minutosCalculados
-                            ||
-                            0
-                        )
-                    }.
+                    El cálculo anterior fue de ${formatearDuracionCorta(
+                      aprobacion.minutosCalculados || 0,
+                    )}.
 
                 </small>
 
@@ -3378,30 +1747,21 @@ if(
 
             </button>
         `;
+  }
 
-    }
-
-
-    /*
+  /*
         HORAS EXTRA RECHAZADAS
     */
 
-    if(
-        aprobacion?.decision ===
-        "RECHAZADO"
-    ){
-
-        return `
+  if (aprobacion?.decision === "RECHAZADO") {
+    return `
             <button
                 type="button"
                 class="horas-extra-resumen rechazada editable"
                 data-accion="gestionar-horas-extra"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
+                data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
                 title="${escaparHTML(
-                    aprobacion.motivo ||
-                    "Horas extra rechazadas"
+                  aprobacion.motivo || "Horas extra rechazadas",
                 )}"
             >
 
@@ -3415,11 +1775,7 @@ if(
 
                 <small>
 
-                    ${
-                        formatearDuracionCorta(
-                            calculo.minutosExtraTotal
-                        )
-                    }
+                    ${formatearDuracionCorta(calculo.minutosExtraTotal)}
 
                     trabajados, no aprobados
 
@@ -3431,57 +1787,34 @@ if(
 
             </button>
         `;
+  }
 
-    }
-
-
-    /*
+  /*
         APROBACIÓN PARCIAL
     */
 
-    if(
-        aprobacion
-        &&
-        Number(
-            aprobacion.minutosAprobados
-            ||
-            0
-        )
-        <
-        calculo.minutosExtraTotal
-    ){
-
-        return `
+  if (
+    aprobacion &&
+    Number(aprobacion.minutosAprobados || 0) < calculo.minutosExtraTotal
+  ) {
+    return `
             <button
                 type="button"
                 class="horas-extra-resumen parcial editable"
                 data-accion="gestionar-horas-extra"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
+                data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
                 title="${escaparHTML(
-                    aprobacion.motivo ||
-                    "Aprobación parcial"
+                  aprobacion.motivo || "Aprobación parcial",
                 )}"
             >
 
                 <strong>
 
-                    ${
-                        formatearDuracionCorta(
-                            aprobacion.minutosAprobados
-                            ||
-                            0
-                        )
-                    }
+                    ${formatearDuracionCorta(aprobacion.minutosAprobados || 0)}
 
                     de
 
-                    ${
-                        formatearDuracionCorta(
-                            calculo.minutosExtraTotal
-                        )
-                    }
+                    ${formatearDuracionCorta(calculo.minutosExtraTotal)}
 
                 </strong>
 
@@ -3492,13 +1825,8 @@ if(
                 <small>
 
                     ${
-                        calculo.minutosExtraTotal
-                        -
-                        (
-                            aprobacion.minutosAprobados
-                            ||
-                            0
-                        )
+                      calculo.minutosExtraTotal -
+                      (aprobacion.minutosAprobados || 0)
                     }
 
                     min no aprobados
@@ -3511,38 +1839,27 @@ if(
 
             </button>
         `;
+  }
 
-    }
-
-
-    /*
+  /*
         APROBACIÓN COMPLETA
     */
 
-    if(
-        aprobacion?.decision ===
-        "APROBADO"
-    ){
-
-        return `
+  if (aprobacion?.decision === "APROBADO") {
+    return `
             <button
                 type="button"
                 class="horas-extra-resumen aprobada editable"
                 data-accion="gestionar-horas-extra"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
+                data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
                 title="${escaparHTML(
-                    aprobacion.motivo ||
-                    "Horas extra aprobadas"
+                  aprobacion.motivo || "Horas extra aprobadas",
                 )}"
             >
 
                 <strong>
                     ${formatearDuracionCorta(
-                        aprobacion.minutosAprobados
-                        ||
-                        calculo.minutosExtraTotal
+                      aprobacion.minutosAprobados || calculo.minutosExtraTotal,
                     )}
                 </strong>
 
@@ -3560,29 +1877,23 @@ if(
 
             </button>
         `;
+  }
 
-    }
-
-
-    /*
+  /*
         PENDIENTE
     */
 
-    return `
+  return `
         <button
             type="button"
             class="horas-extra-resumen pendiente editable"
             data-accion="gestionar-horas-extra"
-            data-colaborador-id="${escaparHTML(
-                registro.colaboradorId
-            )}"
+            data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
             title="Revisar horas extra"
         >
 
             <strong>
-                ${formatearDuracionCorta(
-                    calculo.minutosExtraTotal
-                )}
+                ${formatearDuracionCorta(calculo.minutosExtraTotal)}
             </strong>
 
             <span>
@@ -3590,17 +1901,15 @@ if(
             </span>
 
             ${calculo.detalles
-            .map(
-                detalle=>
-                `
+              .map(
+                (detalle) =>
+                  `
                     <small>
-                        ${escaparHTML(
-                            detalle.mensaje
-                        )}
+                        ${escaparHTML(detalle.mensaje)}
                     </small>
-                `
-            )
-            .join("")}
+                `,
+              )
+              .join("")}
 
             <em>
                 Revisar
@@ -3608,31 +1917,22 @@ if(
 
         </button>
     `;
-
 }
 
 /*=====================================================
 HTML HORARIO
 =====================================================*/
 
-function crearHorarioHTML(
-    registro
-){
+function crearHorarioHTML(registro) {
+  const horario = registro.horarioPrincipal;
 
-    const horario =
-        registro.horarioPrincipal;
-
-
-    if(!horario){
-
-        return `
+  if (!horario) {
+    return `
             <button
                 type="button"
                 class="btn-asignar-horario-resumen"
                 data-accion="editar-horario-dia"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
+                data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
                 title="Asignar horario para esta fecha"
             >
 
@@ -3652,18 +1952,14 @@ function crearHorarioHTML(
 
             </button>
         `;
+  }
 
-    }
-
-
-    return `
+  return `
         <button
             type="button"
             class="btn-horario-resumen"
             data-accion="editar-horario-dia"
-            data-colaborador-id="${escaparHTML(
-                registro.colaboradorId
-            )}"
+            data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
             title="Editar horario de esta fecha"
         >
 
@@ -3673,44 +1969,30 @@ function crearHorarioHTML(
 
                 <strong>
 
-                    ${formatearHora(
-                        horario.entrada?.programada
-                    )}
+                    ${formatearHora(horario.entrada?.programada)}
 
                     -
 
-                    ${formatearHora(
-                        horario.salida?.programada
-                    )}
+                    ${formatearHora(horario.salida?.programada)}
 
                 </strong>
 
                 <small>
-                    ${escaparHTML(
-                        horario.nombre ||
-                        "Horario"
-                    )}
+                    ${escaparHTML(horario.nombre || "Horario")}
                 </small>
 
             </span>
 
         </button>
     `;
-
 }
-
-
 
 /*=====================================================
 MARCACIÓN NO REQUERIDA POR FERIADO
 =====================================================*/
 
-function crearMarcacionFeriadoNoRequerida(
-    registro,
-    texto = "No requerida"
-){
-
-    return `
+function crearMarcacionFeriadoNoRequerida(registro, texto = "No requerida") {
+  return `
         <div class="marcacion-no-requerida">
 
             <i class="bi bi-calendar-event"></i>
@@ -3726,27 +2008,17 @@ function crearMarcacionFeriadoNoRequerida(
                 </span>
 
                 <small>
-                    ${escaparHTML(
-                        registro.feriadoDia
-                        ?.nombre
-                        ||
-                        "Feriado"
-                    )}
+                    ${escaparHTML(registro.feriadoDia?.nombre || "Feriado")}
                 </small>
 
             </div>
 
         </div>
     `;
-
 }
 
-function crearMarcacionDescansoSustitutorio(
-    registro,
-    texto = "No requerida"
-){
-
-    return `
+function crearMarcacionDescansoSustitutorio(registro, texto = "No requerida") {
+  return `
         <div class="marcacion-no-requerida">
 
             <i class="bi bi-calendar2-check"></i>
@@ -3763,11 +2035,8 @@ function crearMarcacionDescansoSustitutorio(
 
                 <small>
                     Por ${escaparHTML(
-                        registro
-                        .descansoSustitutorioDia
-                        ?.feriadoNombre
-                        ||
-                        "feriado trabajado"
+                      registro.descansoSustitutorioDia?.feriadoNombre ||
+                        "feriado trabajado",
                     )}
                 </small>
 
@@ -3775,59 +2044,26 @@ function crearMarcacionDescansoSustitutorio(
 
         </div>
     `;
-
 }
-
 
 /*=====================================================
 HTML ENTRADA
 =====================================================*/
 
-function crearEntradaHTML(
-    registro
-){
+function crearEntradaHTML(registro) {
+  if (registro.estado === "DESCANSO_SUSTITUTORIO") {
+    return crearMarcacionDescansoSustitutorio(registro, "No requerida");
+  }
 
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
+  if (registro.estado === "FERIADO") {
+    return crearMarcacionFeriadoNoRequerida(registro, "No requerida");
+  }
 
-    return crearMarcacionDescansoSustitutorio(
-        registro,
-        "No requerida"
-    );
+  const tienePermisoCompleto =
+    registro.permisoDia &&
+    (registro.permisoDia.tipoDuracion || "DIA_COMPLETO") === "DIA_COMPLETO";
 
-}
-
-if(
-    registro.estado ===
-    "FERIADO"
-){
-
-    return crearMarcacionFeriadoNoRequerida(
-        registro,
-        "No requerida"
-    );
-
-}
-    
-
-const tienePermisoCompleto =
-    registro.permisoDia
-    &&
-    (
-        registro.permisoDia.tipoDuracion ||
-        "DIA_COMPLETO"
-    ) ===
-    "DIA_COMPLETO";
-
-
-if(
-    tienePermisoCompleto
-    &&
-    !registro.entrada
-){
-
+  if (tienePermisoCompleto && !registro.entrada) {
     return `
         <div class="marcacion-no-requerida">
 
@@ -3841,10 +2077,8 @@ if(
 
                 <span>
                     ${escaparHTML(
-                        registro.permisoDia
-                        .tipoPermisoNombre
-                        ||
-                        "Permiso aprobado"
+                      registro.permisoDia.tipoPermisoNombre ||
+                        "Permiso aprobado",
                     )}
                 </span>
 
@@ -3852,25 +2086,21 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-    /*
+  /*
         Si no existe entrada mostramos el botón
         para agregarla manualmente.
     */
 
-    if(!registro.entrada){
-
-        return `
+  if (!registro.entrada) {
+    return `
             <button
                 type="button"
                 class="btn-marcacion-faltante entrada"
                 data-accion="agregar-marcacion-manual"
                 data-tipo-marcacion="ENTRADA"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
+                data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
                 title="Registrar entrada manualmente"
             >
 
@@ -3890,48 +2120,23 @@ if(
 
             </button>
         `;
+  }
 
-    }
-
-
-if(
-    registro.entrada
-    ?.esCubiertaPorPermiso
-){
-
-    const entradaVirtual =
-        registro.entrada;
-
+  if (registro.entrada?.esCubiertaPorPermiso) {
+    const entradaVirtual = registro.entrada;
 
     const nombrePermiso =
-        entradaVirtual.permisoNombre
-        ||
-        registro.permisoDia
-        ?.tipoPermisoNombre
-        ||
-        "Permiso aprobado";
+      entradaVirtual.permisoNombre ||
+      registro.permisoDia?.tipoPermisoNombre ||
+      "Permiso aprobado";
 
+    const esPermisoPorHoras = entradaVirtual.tipoDuracionPermiso === "HORAS";
 
-    const esPermisoPorHoras =
-        entradaVirtual.tipoDuracionPermiso ===
-        "HORAS";
-
-
-    const rangoPermiso =
-        esPermisoPorHoras
-        ?
-        `${
-            formatearHora(
-                entradaVirtual.horaInicioPermiso
-            )
-        }–${
-            formatearHora(
-                entradaVirtual.horaFinPermiso
-            )
-        }`
-        :
-        "";
-
+    const rangoPermiso = esPermisoPorHoras
+      ? `${formatearHora(entradaVirtual.horaInicioPermiso)}–${formatearHora(
+          entradaVirtual.horaFinPermiso,
+        )}`
+      : "";
 
     return `
         <div class="marcacion-permiso-virtual">
@@ -3941,29 +2146,19 @@ if(
             <div>
 
                 <strong>
-                    ${formatearHora(
-                        obtenerHoraMarcacion(
-                            entradaVirtual
-                        )
-                    )}
+                    ${formatearHora(obtenerHoraMarcacion(entradaVirtual))}
                 </strong>
 
                 <span>
-                    Fin de ${escaparHTML(
-                        nombrePermiso
-                    )}
+                    Fin de ${escaparHTML(nombrePermiso)}
                 </span>
 
                 <small>
 
                     ${
-                        esPermisoPorHoras
-                        ?
-                        `Permiso ${escaparHTML(
-                            rangoPermiso
-                        )}`
-                        :
-                        "Inicia refrigerio"
+                      esPermisoPorHoras
+                        ? `Permiso ${escaparHTML(rangoPermiso)}`
+                        : "Inicia refrigerio"
                     }
 
                 </small>
@@ -3972,38 +2167,23 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-    
-
-    /*
+  /*
         La clase debe definirse antes de construir
         el HTML que la utiliza.
     */
 
-    const clase =
-        registro.estado ===
-        "TARDANZA"
-        ?
-        "tardanza"
-        :
-        "correcta";
+  const clase = registro.estado === "TARDANZA" ? "tardanza" : "correcta";
 
-
-    return `
+  return `
         <button
             type="button"
             class="btn-horario-resumen ${clase} editable"
             data-accion="editar-marcacion-existente"
-            data-marcacion-id="${escaparHTML(
-                registro.entrada.id ||
-                ""
-            )}"
+            data-marcacion-id="${escaparHTML(registro.entrada.id || "")}"
             data-tipo-marcacion="ENTRADA"
-            data-colaborador-id="${escaparHTML(
-                registro.colaboradorId
-            )}"
+            data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
             title="Editar entrada"
         >
 
@@ -4012,26 +2192,17 @@ if(
             <div>
 
                 <strong>
-                    ${formatearHora(
-                        obtenerHoraMarcacion(
-                            registro.entrada
-                        )
-                    )}
+                    ${formatearHora(obtenerHoraMarcacion(registro.entrada))}
                 </strong>
 
                 <span>
 
                     ${
-                        registro.horarioPrincipal
-                        ?
-                        `Programado ${
-                            formatearHora(
-                                registro.horarioPrincipal
-                                .entrada?.programada
-                            )
-                        }`
-                        :
-                        "Sin horario programado"
+                      registro.horarioPrincipal
+                        ? `Programado ${formatearHora(
+                            registro.horarioPrincipal.entrada?.programada,
+                          )}`
+                        : "Sin horario programado"
                     }
 
                 </span>
@@ -4044,79 +2215,34 @@ if(
 
         </button>
     `;
-
 }
 
 /*=====================================================
 INICIO DEL REFRIGERIO
 =====================================================*/
 
-function crearInicioRefrigerioHTML(
-    registro
-){
+function crearInicioRefrigerioHTML(registro) {
+  if (registro.estado === "DESCANSO_SUSTITUTORIO") {
+    return crearMarcacionDescansoSustitutorio(registro, "No requerido");
+  }
 
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
+  if (registro.estado === "FERIADO") {
+    return crearMarcacionFeriadoNoRequerida(registro, "No requerido");
+  }
 
-    return crearMarcacionDescansoSustitutorio(
-        registro,
-        "No requerido"
-    );
+  const refrigerio = registro.horarioPrincipal?.refrigerio;
 
-}
+  if (!refrigerio?.habilitado) {
+    return crearRefrigerioNoAplica();
+  }
 
+  const marcacion = registro.clasificacion?.inicioRefrigerio;
 
-if(
-    registro.estado ===
-    "FERIADO"
-){
+  const tienePermisoCompleto =
+    registro.permisoDia &&
+    (registro.permisoDia.tipoDuracion || "DIA_COMPLETO") === "DIA_COMPLETO";
 
-    return crearMarcacionFeriadoNoRequerida(
-        registro,
-        "No requerido"
-    );
-
-}
-    
-
-    const refrigerio =
-        registro.horarioPrincipal
-        ?.refrigerio;
-
-
-    if(
-        !refrigerio
-        ?.habilitado
-    ){
-
-        return crearRefrigerioNoAplica();
-
-    }
-
-
-    const marcacion =
-        registro.clasificacion
-        ?.inicioRefrigerio;
-
-
-    const tienePermisoCompleto =
-    registro.permisoDia
-    &&
-    (
-        registro.permisoDia.tipoDuracion ||
-        "DIA_COMPLETO"
-    ) ===
-    "DIA_COMPLETO";
-
-
-if(
-    tienePermisoCompleto
-    &&
-    !marcacion
-){
-
+  if (tienePermisoCompleto && !marcacion) {
     return `
         <div class="marcacion-no-requerida">
 
@@ -4136,102 +2262,46 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-    
-
-    if(!marcacion){
-
-        return crearBotonRefrigerioFaltante(
-            registro,
-            "INICIO_REFRIGERIO",
-            "Sin inicio",
-            "Agregar inicio"
-        );
-
-    }
-
-
-    return crearMarcacionRefrigerioHTML(
-        registro,
-        marcacion,
-        "INICIO_REFRIGERIO"
+  if (!marcacion) {
+    return crearBotonRefrigerioFaltante(
+      registro,
+      "INICIO_REFRIGERIO",
+      "Sin inicio",
+      "Agregar inicio",
     );
+  }
 
+  return crearMarcacionRefrigerioHTML(registro, marcacion, "INICIO_REFRIGERIO");
 }
-
 
 /*=====================================================
 FIN DEL REFRIGERIO
 =====================================================*/
 
-function crearFinRefrigerioHTML(
-    registro
-){
+function crearFinRefrigerioHTML(registro) {
+  if (registro.estado === "DESCANSO_SUSTITUTORIO") {
+    return crearMarcacionDescansoSustitutorio(registro, "No requerido");
+  }
 
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
+  if (registro.estado === "FERIADO") {
+    return crearMarcacionFeriadoNoRequerida(registro, "No requerido");
+  }
 
-    return crearMarcacionDescansoSustitutorio(
-        registro,
-        "No requerido"
-    );
+  const refrigerio = registro.horarioPrincipal?.refrigerio;
 
-}
+  if (!refrigerio?.habilitado) {
+    return crearRefrigerioNoAplica();
+  }
 
+  const marcacion = registro.clasificacion?.finRefrigerio;
 
-if(
-    registro.estado ===
-    "FERIADO"
-){
+  const tienePermisoCompleto =
+    registro.permisoDia &&
+    (registro.permisoDia.tipoDuracion || "DIA_COMPLETO") === "DIA_COMPLETO";
 
-    return crearMarcacionFeriadoNoRequerida(
-        registro,
-        "No requerido"
-    );
-
-}
-
-    
-    const refrigerio =
-        registro.horarioPrincipal
-        ?.refrigerio;
-
-
-    if(
-        !refrigerio
-        ?.habilitado
-    ){
-
-        return crearRefrigerioNoAplica();
-
-    }
-
-
-    const marcacion =
-        registro.clasificacion
-        ?.finRefrigerio;
-
-
-    const tienePermisoCompleto =
-    registro.permisoDia
-    &&
-    (
-        registro.permisoDia.tipoDuracion ||
-        "DIA_COMPLETO"
-    ) ===
-    "DIA_COMPLETO";
-
-
-if(
-    tienePermisoCompleto
-    &&
-    !marcacion
-){
-
+  if (tienePermisoCompleto && !marcacion) {
     return `
         <div class="marcacion-no-requerida">
 
@@ -4251,51 +2321,29 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-    
-
-    if(!marcacion){
-
-        return crearBotonRefrigerioFaltante(
-            registro,
-            "FIN_REFRIGERIO",
-            "Sin término",
-            "Agregar término"
-        );
-
-    }
-
-
-    return crearMarcacionRefrigerioHTML(
-        registro,
-        marcacion,
-        "FIN_REFRIGERIO"
+  if (!marcacion) {
+    return crearBotonRefrigerioFaltante(
+      registro,
+      "FIN_REFRIGERIO",
+      "Sin término",
+      "Agregar término",
     );
+  }
 
+  return crearMarcacionRefrigerioHTML(registro, marcacion, "FIN_REFRIGERIO");
 }
-
 
 /*=====================================================
 MARCACIÓN DE REFRIGERIO
 =====================================================*/
 
-function crearMarcacionRefrigerioHTML(
-    registro,
-    marcacion,
-    tipo
-){
+function crearMarcacionRefrigerioHTML(registro, marcacion, tipo) {
+  const esAutomatica = Boolean(marcacion.esAutomatica);
 
-    const esAutomatica =
-        Boolean(
-            marcacion.esAutomatica
-        );
-
-
-    if(esAutomatica){
-
-        return `
+  if (esAutomatica) {
+    return `
             <div class="marcacion-refrigerio automatica">
 
                 <i class="bi bi-cpu"></i>
@@ -4303,11 +2351,7 @@ function crearMarcacionRefrigerioHTML(
                 <div>
 
                     <strong>
-                        ${formatearHora(
-                            obtenerHoraMarcacion(
-                                marcacion
-                            )
-                        )}
+                        ${formatearHora(obtenerHoraMarcacion(marcacion))}
                     </strong>
 
                     <span>
@@ -4318,28 +2362,21 @@ function crearMarcacionRefrigerioHTML(
 
             </div>
         `;
+  }
 
-    }
-
-
-    /*
+  /*
         Las marcaciones reales se dejan preparadas
         como botones para su posterior edición.
     */
 
-    return `
+  return `
         <button
             type="button"
             class="marcacion-refrigerio real"
             data-accion="editar-marcacion-existente"
-            data-marcacion-id="${escaparHTML(
-                marcacion.id ||
-                ""
-            )}"
+            data-marcacion-id="${escaparHTML(marcacion.id || "")}"
             data-tipo-marcacion="${tipo}"
-            data-colaborador-id="${escaparHTML(
-                registro.colaboradorId
-            )}"
+            data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
             title="Editar marcación"
         >
 
@@ -4348,11 +2385,7 @@ function crearMarcacionRefrigerioHTML(
             <div>
 
                 <strong>
-                    ${formatearHora(
-                        obtenerHoraMarcacion(
-                            marcacion
-                        )
-                    )}
+                    ${formatearHora(obtenerHoraMarcacion(marcacion))}
                 </strong>
 
                 <span>
@@ -4363,30 +2396,20 @@ function crearMarcacionRefrigerioHTML(
 
         </button>
     `;
-
 }
-
 
 /*=====================================================
 REFRIGERIO FALTANTE
 =====================================================*/
 
-function crearBotonRefrigerioFaltante(
-    registro,
-    tipo,
-    titulo,
-    subtitulo
-){
-
-    return `
+function crearBotonRefrigerioFaltante(registro, tipo, titulo, subtitulo) {
+  return `
         <button
             type="button"
             class="btn-marcacion-faltante refrigerio"
             data-accion="agregar-marcacion-manual"
             data-tipo-marcacion="${tipo}"
-            data-colaborador-id="${escaparHTML(
-                registro.colaboradorId
-            )}"
+            data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
             title="${escaparHTML(subtitulo)}"
         >
 
@@ -4406,17 +2429,14 @@ function crearBotonRefrigerioFaltante(
 
         </button>
     `;
-
 }
-
 
 /*=====================================================
 REFRIGERIO NO APLICA
 =====================================================*/
 
-function crearRefrigerioNoAplica(){
-
-    return `
+function crearRefrigerioNoAplica() {
+  return `
         <div class="marcacion-refrigerio no-aplica">
 
             <i class="bi bi-dash-circle"></i>
@@ -4435,58 +2455,26 @@ function crearRefrigerioNoAplica(){
 
         </div>
     `;
-
 }
 
 /*=====================================================
 HTML SALIDA
 =====================================================*/
 
-function crearSalidaHTML(
-    registro
-){
+function crearSalidaHTML(registro) {
+  if (registro.estado === "DESCANSO_SUSTITUTORIO") {
+    return crearMarcacionDescansoSustitutorio(registro, "No requerida");
+  }
 
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
+  if (registro.estado === "FERIADO") {
+    return crearMarcacionFeriadoNoRequerida(registro, "No requerida");
+  }
 
-    return crearMarcacionDescansoSustitutorio(
-        registro,
-        "No requerida"
-    );
+  const tienePermisoCompleto =
+    registro.permisoDia &&
+    (registro.permisoDia.tipoDuracion || "DIA_COMPLETO") === "DIA_COMPLETO";
 
-}
-
-    
-if(
-    registro.estado ===
-    "FERIADO"
-){
-
-    return crearMarcacionFeriadoNoRequerida(
-        registro,
-        "No requerida"
-    );
-
-}
-
-const tienePermisoCompleto =
-    registro.permisoDia
-    &&
-    (
-        registro.permisoDia.tipoDuracion ||
-        "DIA_COMPLETO"
-    ) ===
-    "DIA_COMPLETO";
-
-
-if(
-    tienePermisoCompleto
-    &&
-    !registro.salida
-){
-
+  if (tienePermisoCompleto && !registro.salida) {
     return `
         <div class="marcacion-no-requerida">
 
@@ -4500,10 +2488,8 @@ if(
 
                 <span>
                     ${escaparHTML(
-                        registro.permisoDia
-                        .tipoPermisoNombre
-                        ||
-                        "Permiso aprobado"
+                      registro.permisoDia.tipoPermisoNombre ||
+                        "Permiso aprobado",
                     )}
                 </span>
 
@@ -4511,25 +2497,21 @@ if(
 
         </div>
     `;
+  }
 
-}
-    
-    /*
+  /*
         Si no existe una salida, mostramos
         el botón para agregarla.
     */
 
-    if(!registro.salida){
-
-        return `
+  if (!registro.salida) {
+    return `
             <button
                 type="button"
                 class="btn-marcacion-faltante salida"
                 data-accion="agregar-marcacion-manual"
                 data-tipo-marcacion="SALIDA"
-                data-colaborador-id="${escaparHTML(
-                    registro.colaboradorId
-                )}"
+                data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
                 title="Registrar salida manualmente"
             >
 
@@ -4549,49 +2531,23 @@ if(
 
             </button>
         `;
+  }
 
-    }
-
-
-
-if(
-    registro.salida
-    ?.esCubiertaPorPermiso
-){
-
-    const salidaVirtual =
-        registro.salida;
-
+  if (registro.salida?.esCubiertaPorPermiso) {
+    const salidaVirtual = registro.salida;
 
     const nombrePermiso =
-        salidaVirtual.permisoNombre
-        ||
-        registro.permisoDia
-        ?.tipoPermisoNombre
-        ||
-        "Permiso aprobado";
+      salidaVirtual.permisoNombre ||
+      registro.permisoDia?.tipoPermisoNombre ||
+      "Permiso aprobado";
 
+    const esPermisoPorHoras = salidaVirtual.tipoDuracionPermiso === "HORAS";
 
-    const esPermisoPorHoras =
-        salidaVirtual.tipoDuracionPermiso ===
-        "HORAS";
-
-
-    const rangoPermiso =
-        esPermisoPorHoras
-        ?
-        `${
-            formatearHora(
-                salidaVirtual.horaInicioPermiso
-            )
-        }–${
-            formatearHora(
-                salidaVirtual.horaFinPermiso
-            )
-        }`
-        :
-        "";
-
+    const rangoPermiso = esPermisoPorHoras
+      ? `${formatearHora(salidaVirtual.horaInicioPermiso)}–${formatearHora(
+          salidaVirtual.horaFinPermiso,
+        )}`
+      : "";
 
     return `
         <div class="marcacion-permiso-virtual">
@@ -4601,29 +2557,19 @@ if(
             <div>
 
                 <strong>
-                    ${formatearHora(
-                        obtenerHoraMarcacion(
-                            salidaVirtual
-                        )
-                    )}
+                    ${formatearHora(obtenerHoraMarcacion(salidaVirtual))}
                 </strong>
 
                 <span>
-                    Inicio de ${escaparHTML(
-                        nombrePermiso
-                    )}
+                    Inicio de ${escaparHTML(nombrePermiso)}
                 </span>
 
                 <small>
 
                     ${
-                        esPermisoPorHoras
-                        ?
-                        `Permiso ${escaparHTML(
-                            rangoPermiso
-                        )}`
-                        :
-                        "Después del refrigerio"
+                      esPermisoPorHoras
+                        ? `Permiso ${escaparHTML(rangoPermiso)}`
+                        : "Después del refrigerio"
                     }
 
                 </small>
@@ -4632,29 +2578,21 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-
-    
-    /*
+  /*
         Si la salida sí existe, mostramos
         la hora como botón editable.
     */
 
-    return `
+  return `
         <button
             type="button"
             class="btn-horario-resumen"
             data-accion="editar-marcacion-existente"
-            data-marcacion-id="${escaparHTML(
-                registro.salida.id ||
-                ""
-            )}"
+            data-marcacion-id="${escaparHTML(registro.salida.id || "")}"
             data-tipo-marcacion="SALIDA"
-            data-colaborador-id="${escaparHTML(
-                registro.colaboradorId
-            )}"
+            data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
             title="Editar salida"
         >
 
@@ -4663,26 +2601,17 @@ if(
             <div>
 
                 <strong>
-                    ${formatearHora(
-                        obtenerHoraMarcacion(
-                            registro.salida
-                        )
-                    )}
+                    ${formatearHora(obtenerHoraMarcacion(registro.salida))}
                 </strong>
 
                 <span>
 
                     ${
-                        registro.horarioPrincipal
-                        ?
-                        `Programado ${
-                            formatearHora(
-                                registro.horarioPrincipal
-                                .salida?.programada
-                            )
-                        }`
-                        :
-                        "Sin horario programado"
+                      registro.horarioPrincipal
+                        ? `Programado ${formatearHora(
+                            registro.horarioPrincipal.salida?.programada,
+                          )}`
+                        : "Sin horario programado"
                     }
 
                 </span>
@@ -4695,41 +2624,25 @@ if(
 
         </button>
     `;
-
 }
-
-
 
 /*=====================================================
 TOLERANCIA
 =====================================================*/
 
-function crearToleranciaHTML(
-    registro
-){
-
-    if(!registro.horarioPrincipal){
-
-        return `
+function crearToleranciaHTML(registro) {
+  if (!registro.horarioPrincipal) {
+    return `
             <span class="tolerancia-asistencia sin-dato">
                 —
             </span>
         `;
+  }
 
-    }
+  const tolerancia = Number(registro.toleranciaMinutos || 0);
 
-
-    const tolerancia =
-        Number(
-            registro.toleranciaMinutos
-            ||
-            0
-        );
-
-
-    if(tolerancia === 0){
-
-        return `
+  if (tolerancia === 0) {
+    return `
             <span class="tolerancia-asistencia sin-tolerancia">
 
                 <i class="bi bi-clock"></i>
@@ -4738,11 +2651,9 @@ function crearToleranciaHTML(
 
             </span>
         `;
+  }
 
-    }
-
-
-    return `
+  return `
         <span class="tolerancia-asistencia">
 
             <i class="bi bi-clock-history"></i>
@@ -4751,33 +2662,19 @@ function crearToleranciaHTML(
 
         </span>
     `;
-
 }
-
 
 /*=====================================================
 JORNADA
 =====================================================*/
 
-function crearJornadaHTML(
-    registro
-){
-
-/*
+function crearJornadaHTML(registro) {
+  /*
     Jornada durante un feriado.
 */
 
-if(
-    registro.estado ===
-    "FERIADO"
-){
-
-    const nombreFeriado =
-        registro.feriadoDia
-        ?.nombre
-        ||
-        "Feriado";
-
+  if (registro.estado === "FERIADO") {
+    const nombreFeriado = registro.feriadoDia?.nombre || "Feriado";
 
     return `
         <div class="jornada-asistencia completa">
@@ -4787,9 +2684,7 @@ if(
             </strong>
 
             <span>
-                ${escaparHTML(
-                    nombreFeriado
-                )}
+                ${escaparHTML(nombreFeriado)}
             </span>
 
             <small>
@@ -4798,21 +2693,10 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-
-if(
-    registro.estado ===
-    "TRABAJO_EN_FERIADO_INCOMPLETO"
-){
-
-    const nombreFeriado =
-        registro.feriadoDia
-        ?.nombre
-        ||
-        "Feriado";
-
+  if (registro.estado === "TRABAJO_EN_FERIADO_INCOMPLETO") {
+    const nombreFeriado = registro.feriadoDia?.nombre || "Feriado";
 
     return `
         <div class="jornada-asistencia incompleta">
@@ -4826,42 +2710,23 @@ if(
             </span>
 
             <small>
-                ${escaparHTML(
-                    nombreFeriado
-                )}
+                ${escaparHTML(nombreFeriado)}
             </small>
 
         </div>
     `;
+  }
 
-}
+  if (registro.estado === "TRABAJO_EN_FERIADO") {
+    const nombreFeriado = registro.feriadoDia?.nombre || "Feriado";
 
-    
-if(
-    registro.estado ===
-    "TRABAJO_EN_FERIADO"
-){
-
-    const nombreFeriado =
-        registro.feriadoDia
-        ?.nombre
-        ||
-        "Feriado";
-
-
-    const minutosTrabajados =
-        registro.minutosTrabajados
-        ||
-        0;
-
+    const minutosTrabajados = registro.minutosTrabajados || 0;
 
     return `
         <div class="jornada-asistencia completa">
 
             <strong>
-                ${formatearDuracionCorta(
-                    minutosTrabajados
-                )}
+                ${formatearDuracionCorta(minutosTrabajados)}
                 trabajadas
             </strong>
 
@@ -4870,27 +2735,15 @@ if(
             </span>
 
             <small>
-                ${escaparHTML(
-                    nombreFeriado
-                )}
+                ${escaparHTML(nombreFeriado)}
             </small>
 
         </div>
     `;
+  }
 
-}
-
-if(
-    registro.estado ===
-    "FERIADO_PENDIENTE"
-){
-
-    const nombreFeriado =
-        registro.feriadoDia
-        ?.nombre
-        ||
-        "Feriado";
-
+  if (registro.estado === "FERIADO_PENDIENTE") {
+    const nombreFeriado = registro.feriadoDia?.nombre || "Feriado";
 
     return `
         <div class="jornada-asistencia incompleta">
@@ -4904,21 +2757,14 @@ if(
             </span>
 
             <small>
-                ${escaparHTML(
-                    nombreFeriado
-                )}
+                ${escaparHTML(nombreFeriado)}
             </small>
 
         </div>
     `;
+  }
 
-}
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
-
+  if (registro.estado === "DESCANSO_SUSTITUTORIO") {
     return `
         <div class="jornada-asistencia completa">
 
@@ -4932,34 +2778,21 @@ if(
 
             <small>
                 Por ${escaparHTML(
-                    registro
-                    .descansoSustitutorioDia
-                    ?.feriadoNombre
-                    ||
-                    "feriado trabajado"
+                  registro.descansoSustitutorioDia?.feriadoNombre ||
+                    "feriado trabajado",
                 )}
             </small>
 
         </div>
     `;
+  }
 
-}
-
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO_TRABAJADO"
-){
-
+  if (registro.estado === "DESCANSO_SUSTITUTORIO_TRABAJADO") {
     return `
         <div class="jornada-asistencia incompleta">
 
             <strong>
-                ${formatearDuracionCorta(
-                    registro.minutosTrabajados
-                    ||
-                    0
-                )}
+                ${formatearDuracionCorta(registro.minutosTrabajados || 0)}
                 trabajadas
             </strong>
 
@@ -4973,15 +2806,9 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
-){
-
+  if (registro.estado === "DESCANSO_SUSTITUTORIO_INCOMPLETO") {
     return `
         <div class="jornada-asistencia incompleta">
 
@@ -4999,193 +2826,104 @@ if(
 
         </div>
     `;
+  }
 
-}
+  const permiso = registro.permisoDia;
 
-const permiso =
-    registro.permisoDia;
+  const tipoDuracionPermiso = permiso?.tipoDuracion || "DIA_COMPLETO";
 
+  const sinMarcaciones = registro.cantidadMarcaciones === 0;
 
-const tipoDuracionPermiso =
-    permiso?.tipoDuracion
-    ||
-    "DIA_COMPLETO";
+  if (permiso && (tipoDuracionPermiso === "DIA_COMPLETO" || sinMarcaciones)) {
+    const nombrePermiso = permiso.tipoPermisoNombre || "Permiso aprobado";
 
+    const minutosJustificados = registro.minutosJustificadosPermiso || 0;
 
-const sinMarcaciones =
-    registro.cantidadMarcaciones ===
-    0;
+    const minutosComputables = registro.minutosComputablesPermiso || 0;
 
-
-if(
-    permiso
-    &&
-    (
-        tipoDuracionPermiso ===
-        "DIA_COMPLETO"
-        ||
-        sinMarcaciones
-    )
-){
-
-    const nombrePermiso =
-        permiso.tipoPermisoNombre
-        ||
-        "Permiso aprobado";
-
-
-    const minutosJustificados =
-        registro.minutosJustificadosPermiso
-        ||
-        0;
-
-
-    const minutosComputables =
-        registro.minutosComputablesPermiso
-        ||
-        0;
-
-
-    const esDiaCompleto =
-        tipoDuracionPermiso ===
-        "DIA_COMPLETO";
-
+    const esDiaCompleto = tipoDuracionPermiso === "DIA_COMPLETO";
 
     /*
         Permiso que sí computa para la jornada:
         vacaciones, permiso con goce, comisión, etc.
     */
 
-    if(
-        permiso.computaComoLaborado ===
-        true
-    ){
-
-        return `
+    if (permiso.computaComoLaborado === true) {
+      return `
             <div class="jornada-asistencia ${
-                esDiaCompleto
-                ?
-                "completa"
-                :
-                "incompleta"
+              esDiaCompleto ? "completa" : "incompleta"
             }">
 
                 <strong>
-                    ${formatearDuracionCorta(
-                        minutosComputables
-                    )}
+                    ${formatearDuracionCorta(minutosComputables)}
                     computables
                 </strong>
 
                 <span>
-                    0 h trabajadas · ${escaparHTML(
-                        nombrePermiso
-                    )}
+                    0 h trabajadas · ${escaparHTML(nombrePermiso)}
                 </span>
 
             </div>
         `;
-
     }
-
 
     /*
         Permiso que justifica la ausencia,
         pero no representa horas trabajadas.
     */
 
-    if(
-        permiso.justificaAusencia ===
-        true
-    ){
+    if (permiso.justificaAusencia === true) {
+      const jornadaProgramada = registro.minutosJornadaProgramada || 0;
 
-       const jornadaProgramada =
-    registro.minutosJornadaProgramada
-    ||
-    0;
+      const minutosCubiertos = Math.min(jornadaProgramada, minutosJustificados);
 
-
-const minutosCubiertos =
-    Math.min(
-        jornadaProgramada,
-        minutosJustificados
-    );
-
-
-        
-return `
+      return `
     <div class="jornada-asistencia permiso-justificado">
 
         <strong>
-            ${formatearDuracionCorta(
-                minutosCubiertos
-            )}
+            ${formatearDuracionCorta(minutosCubiertos)}
             de
-            ${formatearDuracionCorta(
-                jornadaProgramada
-            )}
+            ${formatearDuracionCorta(jornadaProgramada)}
             cubiertas
         </strong>
 
         <span>
-            ${formatearDuracionCorta(
-                minutosJustificados
-            )}
+            ${formatearDuracionCorta(minutosJustificados)}
             justificadas
         </span>
 
         <small>
-            0 h trabajadas · ${escaparHTML(
-                nombrePermiso
-            )}
+            0 h trabajadas · ${escaparHTML(nombrePermiso)}
         </small>
 
         ${
-            tipoDuracionPermiso ===
-            "DIA_COMPLETO"
-            &&
-            registro.cantidadMarcaciones > 0
-            ?
-            `
+          tipoDuracionPermiso === "DIA_COMPLETO" &&
+          registro.cantidadMarcaciones > 0
+            ? `
                 <small class="permiso-marcacion-advertencia">
 
                     <i class="bi bi-exclamation-triangle"></i>
 
                     ${registro.cantidadMarcaciones}
 
-                    marcación${
-                        registro.cantidadMarcaciones === 1
-                        ?
-                        ""
-                        :
-                        "es"
-                    }
+                    marcación${registro.cantidadMarcaciones === 1 ? "" : "es"}
 
-                    registrada${
-                        registro.cantidadMarcaciones === 1
-                        ?
-                        ""
-                        :
-                        "s"
-                    }
+                    registrada${registro.cantidadMarcaciones === 1 ? "" : "s"}
 
                     durante el permiso
 
                 </small>
             `
-            :
-            ""
+            : ""
         }
 
     </div>
 `;
     }
+  }
 
-}
-
-    if(!registro.horarioPrincipal){
-
-        return `
+  if (!registro.horarioPrincipal) {
+    return `
             <div class="jornada-asistencia sin-horario">
 
                 <strong>
@@ -5198,78 +2936,42 @@ return `
 
             </div>
         `;
+  }
 
-    }
+  const calculo = registro.calculoAsistencia;
 
+  const programada = registro.minutosJornadaProgramada || 0;
 
-    const calculo =
-        registro.calculoAsistencia;
+  const cumplidaReal = registro.minutosJornadaCumplida || 0;
 
+  const minutosCubiertosPermiso = registro.minutosJustificadosPermiso || 0;
 
-    const programada =
-        registro.minutosJornadaProgramada
-        ||
-        0;
+  const cumplida = Math.min(
+    programada,
 
+    cumplidaReal + minutosCubiertosPermiso,
+  );
 
-const cumplidaReal =
-    registro.minutosJornadaCumplida
-    ||
-    0;
+  const advertenciasRefrigerio =
+    obtenerAdvertenciasRefrigerioRegistro(registro);
 
-
-const minutosCubiertosPermiso =
-    registro.minutosJustificadosPermiso
-    ||
-    0;
-
-
-const cumplida =
-    Math.min(
-
-        programada,
-
-        cumplidaReal
-        +
-        minutosCubiertosPermiso
-
-    );
-
-
-    const advertenciasRefrigerio =
-        obtenerAdvertenciasRefrigerioRegistro(
-            registro
-        );
-
-
-    /*
+  /*
         Si falta entrada o salida no puede calcularse
         completamente la jornada.
     */
 
-    if(!calculo?.calculable){
+  if (!calculo?.calculable) {
+    const noTieneMarcaciones = !registro.entrada && !registro.salida;
 
-        const noTieneMarcaciones =
-            !registro.entrada
-            &&
-            !registro.salida;
-
-
-        return `
+    return `
             <div class="jornada-asistencia incompleta">
 
                 <strong>
 
                     ${
-                        noTieneMarcaciones
-                        ?
-                        `0 h de ${
-                            formatearDuracionCorta(
-                                programada
-                            )
-                        }`
-                        :
-                        "Por calcular"
+                      noTieneMarcaciones
+                        ? `0 h de ${formatearDuracionCorta(programada)}`
+                        : "Por calcular"
                     }
 
                 </strong>
@@ -5277,34 +2979,21 @@ const cumplida =
                 <span>
 
                     ${
-                        noTieneMarcaciones
-                        ?
-                        "Jornada no cumplida"
-                        :
-                        "Marcación incompleta"
+                      noTieneMarcaciones
+                        ? "Jornada no cumplida"
+                        : "Marcación incompleta"
                     }
 
                 </span>
 
             </div>
         `;
+  }
 
-    }
+  const completa = cumplida >= programada;
 
-
-const completa =
-    cumplida >=
-    programada;
-
-
-    return `
-        <div class="jornada-asistencia ${
-            completa
-            ?
-            "completa"
-            :
-            "incompleta"
-        }">
+  return `
+        <div class="jornada-asistencia ${completa ? "completa" : "incompleta"}">
 
             <strong>
 
@@ -5320,57 +3009,36 @@ const completa =
             <span>
 
                 ${
-completa
-?
-(
-    registro.permisoDia
-    ?
-    "Jornada cubierta"
-    :
-    "Jornada cumplida"
-)
-:
-"Jornada incompleta"
+                  completa
+                    ? registro.permisoDia
+                      ? "Jornada cubierta"
+                      : "Jornada cumplida"
+                    : "Jornada incompleta"
                 }
 
             </span>
 
             ${
-    registro.permisoDia
-    ?
-    `
+              registro.permisoDia
+                ? `
         <small class="detalle-permiso-jornada">
 
-            ${formatearDuracionCorta(
-                registro.minutosJustificadosPermiso
-                ||
-                0
-            )}
+            ${formatearDuracionCorta(registro.minutosJustificadosPermiso || 0)}
 
             ${
-                registro.permisoDia
-                .computaComoLaborado ===
-                true
-                ?
-                "computables"
-                :
-                "justificadas"
+              registro.permisoDia.computaComoLaborado === true
+                ? "computables"
+                : "justificadas"
             }
 
             ·
 
-            ${escaparHTML(
-                registro.permisoDia
-                .tipoPermisoNombre
-                ||
-                "Permiso"
-            )}
+            ${escaparHTML(registro.permisoDia.tipoPermisoNombre || "Permiso")}
 
         </small>
     `
-    :
-    ""
-}
+                : ""
+            }
 
 
             ${crearDetalleDescuentoJornada(registro)}
@@ -5379,29 +3047,21 @@ completa
             ${crearEstadoRefrigerioHTML(registro)}
             
             ${
-                advertenciasRefrigerio.length > 0
-                ?
-                `
+              advertenciasRefrigerio.length > 0
+                ? `
                     <button
                         type="button"
                         class="contador-advertencias-jornada ${
-    registro.ajusteAsistencia
-    ?
-    "resuelta"
-    :
-    ""
-}"
+                          registro.ajusteAsistencia ? "resuelta" : ""
+                        }"
                         data-accion="gestionar-ajuste-refrigerio"
                         data-colaborador-id="${escaparHTML(
-                            registro.colaboradorId
+                          registro.colaboradorId,
                         )}"
                         title="${escaparHTML(
-                            advertenciasRefrigerio
-                            .map(
-                                advertencia=>
-                                    advertencia.mensaje
-                            )
-                            .join(" | ")
+                          advertenciasRefrigerio
+                            .map((advertencia) => advertencia.mensaje)
+                            .join(" | "),
                         )}"
                     >
 
@@ -5412,46 +3072,30 @@ completa
 <span>
 
     ${
-        registro.ajusteAsistencia
-        ?
-        "Cambiar"
-        :
-        registro.calculoAsistencia
-        ?.minutosExcesoRefrigerio > 0
-        ?
-        "Ver"
-        :
-        "Revisar"
+      registro.ajusteAsistencia
+        ? "Cambiar"
+        : registro.calculoAsistencia?.minutosExcesoRefrigerio > 0
+          ? "Ver"
+          : "Revisar"
     }
 
 </span>
 
                     </button>
                 `
-                :
-                ""
+                : ""
             }
 
         </div>
     `;
-
 }
-
-
 
 /*=====================================================
 DETALLE DE TARDANZA
 =====================================================*/
 
-function crearTardanzaHTML(
-    registro
-){
-
-if(
-    registro.estado ===
-    "FERIADO"
-){
-
+function crearTardanzaHTML(registro) {
+  if (registro.estado === "FERIADO") {
     return `
         <div class="detalle-tardanza sin-dato">
 
@@ -5465,14 +3109,9 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
-
+  if (registro.estado === "DESCANSO_SUSTITUTORIO") {
     return `
         <div class="detalle-tardanza sin-dato">
 
@@ -5486,15 +3125,9 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO_TRABAJADO"
-){
-
+  if (registro.estado === "DESCANSO_SUSTITUTORIO_TRABAJADO") {
     return `
         <div class="detalle-tardanza sin-dato">
 
@@ -5508,15 +3141,9 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-
-if(
-    registro.estado ===
-    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
-){
-
+  if (registro.estado === "DESCANSO_SUSTITUTORIO_INCOMPLETO") {
     return `
         <div class="detalle-tardanza sin-dato">
 
@@ -5530,15 +3157,9 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-
-if(
-    registro.estado ===
-    "TRABAJO_EN_FERIADO_INCOMPLETO"
-){
-
+  if (registro.estado === "TRABAJO_EN_FERIADO_INCOMPLETO") {
     return `
         <div class="detalle-tardanza sin-dato">
 
@@ -5552,18 +3173,10 @@ if(
 
         </div>
     `;
+  }
 
-}
-
-    
-
-    if(
-        !registro.horarioPrincipal
-        ||
-        !registro.entrada
-    ){
-
-        return `
+  if (!registro.horarioPrincipal || !registro.entrada) {
+    return `
             <div class="detalle-tardanza sin-dato">
 
                 <strong>
@@ -5572,19 +3185,14 @@ if(
 
             </div>
         `;
+  }
 
-    }
-
-    /*
+  /*
     Una entrada virtual cubierta por permiso
     no representa una llegada tardía.
 */
 
-if(
-    registro.entrada
-    ?.esCubiertaPorPermiso
-){
-
+  if (registro.entrada?.esCubiertaPorPermiso) {
     return `
         <div class="detalle-tardanza sin-dato">
 
@@ -5598,52 +3206,23 @@ if(
 
         </div>
     `;
+  }
 
-}
+  const calculo = registro.calculoAsistencia || {};
 
+  const llegadaPosterior = Number(calculo.minutosLlegadaPosterior || 0);
 
-    const calculo =
-        registro.calculoAsistencia
-        ||
-        {};
+  const tardanza = Number(calculo.minutosTardanza || 0);
 
+  const tolerancia = Number(calculo.toleranciaMinutos || 0);
 
-    const llegadaPosterior =
-        Number(
-            calculo.minutosLlegadaPosterior
-            ||
-            0
-        );
-
-
-    const tardanza =
-        Number(
-            calculo.minutosTardanza
-            ||
-            0
-        );
-
-
-    const tolerancia =
-        Number(
-            calculo.toleranciaMinutos
-            ||
-            0
-        );
-
-
-    /*
+  /*
         Llegó después, pero todavía se encuentra
         dentro de la tolerancia.
     */
 
-    if(
-        llegadaPosterior > 0
-        &&
-        tardanza === 0
-    ){
-
-        return `
+  if (llegadaPosterior > 0 && tardanza === 0) {
+    return `
             <div class="detalle-tardanza tolerada">
 
                 <strong>
@@ -5660,17 +3239,14 @@ if(
 
             </div>
         `;
+  }
 
-    }
-
-
-    /*
+  /*
         Superó la tolerancia.
     */
 
-    if(tardanza > 0){
-
-return `
+  if (tardanza > 0) {
+    return `
     <div class="detalle-tardanza tardanza-real">
 
         <strong>
@@ -5683,15 +3259,13 @@ return `
 
     </div>
 `;
+  }
 
-    }
-
-
-    /*
+  /*
         Llegó a la hora programada o antes.
     */
 
-    return `
+  return `
         <div class="detalle-tardanza puntual">
 
             <strong>
@@ -5704,432 +3278,202 @@ return `
 
         </div>
     `;
-
 }
-
 
 /*=====================================================
 MOTIVOS DE JORNADA INCOMPLETA
 =====================================================*/
 
-function crearDetalleDescuentoJornada(
-    registro
-){
+function crearDetalleDescuentoJornada(registro) {
+  const calculo = registro.calculoAsistencia || {};
 
-    const calculo =
-        registro.calculoAsistencia
-        ||
-        {};
+  const motivos = [];
 
+  const llegadaPosterior = Number(calculo.minutosLlegadaPosterior || 0);
 
-    const motivos = [];
+  const salidaAnticipada = Number(calculo.minutosSalidaAnticipada || 0);
 
+  const excesoRefrigerio = Number(calculo.minutosExcesoRefrigerio || 0);
 
-    const llegadaPosterior =
-        Number(
-            calculo.minutosLlegadaPosterior
-            ||
-            0
-        );
+  if (llegadaPosterior > 0) {
+    motivos.push({
+      icono: "bi-box-arrow-in-right",
 
+      texto: `${llegadaPosterior} min por llegada posterior`,
 
-    const salidaAnticipada =
-        Number(
-            calculo.minutosSalidaAnticipada
-            ||
-            0
-        );
+      clase: calculo.minutosTardanza > 0 ? "negativo" : "informativo",
+    });
+  }
 
+  if (salidaAnticipada > 0) {
+    motivos.push({
+      icono: "bi-box-arrow-right",
 
-    const excesoRefrigerio =
-        Number(
-            calculo.minutosExcesoRefrigerio
-            ||
-            0
-        );
+      texto: `${salidaAnticipada} min por salida anticipada`,
 
+      clase: "negativo",
+    });
+  }
 
-    if(llegadaPosterior > 0){
+  if (excesoRefrigerio > 0) {
+    motivos.push({
+      icono: "bi-cup-hot",
 
-        motivos.push({
+      texto: `${excesoRefrigerio} min por exceso de refrigerio`,
 
-            icono:
-                "bi-box-arrow-in-right",
+      clase: "negativo",
+    });
+  }
 
-            texto:
-                `${llegadaPosterior} min por llegada posterior`,
+  if (motivos.length === 0) {
+    return "";
+  }
 
-            clase:
-                calculo.minutosTardanza > 0
-                ?
-                "negativo"
-                :
-                "informativo"
-
-        });
-
-    }
-
-
-    if(salidaAnticipada > 0){
-
-        motivos.push({
-
-            icono:
-                "bi-box-arrow-right",
-
-            texto:
-                `${salidaAnticipada} min por salida anticipada`,
-
-            clase:
-                "negativo"
-
-        });
-
-    }
-
-
-    if(excesoRefrigerio > 0){
-
-        motivos.push({
-
-            icono:
-                "bi-cup-hot",
-
-            texto:
-                `${excesoRefrigerio} min por exceso de refrigerio`,
-
-            clase:
-                "negativo"
-
-        });
-
-    }
-
-
-    if(motivos.length === 0){
-
-        return "";
-
-    }
-
-
-    return `
+  return `
         <div class="detalle-descuento-jornada">
 
             ${motivos
-            .map(
-                motivo=>
-                `
+              .map(
+                (motivo) =>
+                  `
                     <small class="${motivo.clase}">
 
                         <i class="bi ${motivo.icono}"></i>
 
-                        ${escaparHTML(
-                            motivo.texto
-                        )}
+                        ${escaparHTML(motivo.texto)}
 
                     </small>
-                `
-            )
-            .join("")}
+                `,
+              )
+              .join("")}
 
         </div>
     `;
-
 }
-
 
 /*=====================================================
 ESTADO DEL REFRIGERIO
 =====================================================*/
 
-function crearEstadoRefrigerioHTML(
-    registro
-){
+function crearEstadoRefrigerioHTML(registro) {
+  const refrigerio = registro.horarioPrincipal?.refrigerio;
 
-    const refrigerio =
-        registro.horarioPrincipal
-        ?.refrigerio;
+  if (!refrigerio?.habilitado) {
+    return "";
+  }
 
+  const calculo = registro.calculoAsistencia || {};
 
-    if(
-        !refrigerio
-        ?.habilitado
-    ){
+  const ajuste = registro.ajusteAsistencia || null;
 
-        return "";
+  let clase = "normal";
 
-    }
+  let titulo = "Refrigerio";
 
+  let detalle = "";
 
-    const calculo =
-        registro.calculoAsistencia
-        ||
-        {};
-
-
-    const ajuste =
-        registro.ajusteAsistencia
-        ||
-        null;
-
-
-    let clase =
-        "normal";
-
-
-    let titulo =
-        "Refrigerio";
-
-
-    let detalle =
-        "";
-
-
-    /*
+  /*
         Refrigerio automático.
     */
 
-    if(
-        calculo.refrigerioAutomatico
-    ){
+  if (calculo.refrigerioAutomatico) {
+    clase = "automatico";
 
-        clase =
-            "automatico";
+    titulo = "Automático";
 
+    detalle = `${
+      calculo.minutosRefrigerioDescontados || refrigerio.duracionMinutos || 0
+    } min descontados`;
+  } else if (
 
-        titulo =
-            "Automático";
-
-
-        detalle =
-            `${
-                calculo.minutosRefrigerioDescontados
-                ||
-                refrigerio.duracionMinutos
-                ||
-                0
-            } min descontados`;
-
-    }
-
-
-    /*
+  /*
         Decisión para refrigerio sin marcaciones.
     */
+    ajuste?.tratamientoRefrigerio === "LABORADO" &&
+    calculo.advertencias?.some(
+      (advertencia) =>
+        advertencia.codigo === "REFRIGERIO_SIN_MARCACIONES" ||
+        advertencia.codigo === "REFRIGERIO_INCOMPLETO",
+    )
+  ) {
+    clase = "trabajado";
 
-    else if(
-        ajuste?.tratamientoRefrigerio ===
-        "LABORADO"
+    titulo = "Considerado trabajado";
 
-        &&
+    detalle = "0 min descontados";
+  } else if (
+    ajuste?.tratamientoRefrigerio === "DESCONTAR_PROGRAMADO" &&
+    calculo.advertencias?.some(
+      (advertencia) =>
+        advertencia.codigo === "REFRIGERIO_SIN_MARCACIONES" ||
+        advertencia.codigo === "REFRIGERIO_INCOMPLETO",
+    )
+  ) {
+    clase = "descontado";
 
-        calculo.advertencias
-        ?.some(
-            advertencia=>
+    titulo = "Refrigerio descontado";
 
-                advertencia.codigo ===
-                "REFRIGERIO_SIN_MARCACIONES"
+    detalle = `${
+      calculo.minutosRefrigerioDescontados || refrigerio.duracionMinutos || 0
+    } min descontados`;
+  } else if (calculo.minutosRefrigerioNoUsado > 0) {
 
-                ||
-
-                advertencia.codigo ===
-                "REFRIGERIO_INCOMPLETO"
-
-        )
-    ){
-
-        clase =
-            "trabajado";
-
-
-        titulo =
-            "Considerado trabajado";
-
-
-        detalle =
-            "0 min descontados";
-
-    }
-
-
-    else if(
-        ajuste?.tratamientoRefrigerio ===
-        "DESCONTAR_PROGRAMADO"
-
-        &&
-
-        calculo.advertencias
-        ?.some(
-            advertencia=>
-
-                advertencia.codigo ===
-                "REFRIGERIO_SIN_MARCACIONES"
-
-                ||
-
-                advertencia.codigo ===
-                "REFRIGERIO_INCOMPLETO"
-
-        )
-    ){
-
-        clase =
-            "descontado";
-
-
-        titulo =
-            "Refrigerio descontado";
-
-
-        detalle =
-            `${
-                calculo.minutosRefrigerioDescontados
-                ||
-                refrigerio.duracionMinutos
-                ||
-                0
-            } min descontados`;
-
-    }
-
-
-    /*
+  /*
         Refrigerio corto con decisión.
     */
+    if (ajuste?.tratamientoRefrigerioCorto === "CONSIDERAR_REAL") {
+      clase = "trabajado";
 
-    else if(
-        calculo.minutosRefrigerioNoUsado > 0
-    ){
+      titulo = "Tiempo real considerado";
 
-        if(
-            ajuste?.tratamientoRefrigerioCorto ===
-            "CONSIDERAR_REAL"
-        ){
+      detalle = `${calculo.minutosRefrigerioDescontados || 0} min descontados`;
+    } else {
+      clase = "descontado";
 
-            clase =
-                "trabajado";
+      titulo = "Duración completa descontada";
 
-
-            titulo =
-                "Tiempo real considerado";
-
-
-            detalle =
-                `${
-                    calculo.minutosRefrigerioDescontados
-                    ||
-                    0
-                } min descontados`;
-
-        }
-        else{
-
-            clase =
-                "descontado";
-
-
-            titulo =
-                "Duración completa descontada";
-
-
-            detalle =
-                `${
-                    calculo.minutosRefrigerioDescontados
-                    ||
-                    refrigerio.duracionMinutos
-                    ||
-                    0
-                } min descontados`;
-
-        }
-
+      detalle = `${
+        calculo.minutosRefrigerioDescontados || refrigerio.duracionMinutos || 0
+      } min descontados`;
     }
+  } else if (calculo.minutosExcesoRefrigerio > 0) {
 
-
-    /*
+  /*
         Refrigerio excedido.
     */
+    clase = "exceso";
 
-    else if(
-        calculo.minutosExcesoRefrigerio > 0
-    ){
+    titulo = "Refrigerio excedido";
 
-        clase =
-            "exceso";
+    detalle = `${calculo.minutosRefrigerioDescontados || 0} min descontados`;
+  } else if (calculo.refrigerioCompleto) {
 
-
-        titulo =
-            "Refrigerio excedido";
-
-
-        detalle =
-            `${
-                calculo.minutosRefrigerioDescontados
-                ||
-                0
-            } min descontados`;
-
-    }
-
-
-    /*
+  /*
         Refrigerio completo y normal.
     */
+    clase = "normal";
 
-    else if(
-        calculo.refrigerioCompleto
-    ){
+    titulo = "Refrigerio registrado";
 
-        clase =
-            "normal";
+    detalle = `${calculo.minutosRefrigerioDescontados || 0} min descontados`;
+  } else {
 
-
-        titulo =
-            "Refrigerio registrado";
-
-
-        detalle =
-            `${
-                calculo.minutosRefrigerioDescontados
-                ||
-                0
-            } min descontados`;
-
-    }
-
-
-    /*
+  /*
         Sin marcaciones y todavía sin decisión.
 
         Se muestra el comportamiento predeterminado.
     */
+    clase = "pendiente";
 
-    else{
+    titulo = "Sin decisión guardada";
 
-        clase =
-            "pendiente";
+    detalle = "Por defecto se considera trabajado";
+  }
 
-
-        titulo =
-            "Sin decisión guardada";
-
-
-        detalle =
-            "Por defecto se considera trabajado";
-
-    }
-
-
-    return `
+  return `
         <div class="estado-refrigerio-resumen ${clase}">
 
-            <i class="bi ${
-                obtenerIconoEstadoRefrigerio(
-                    clase
-                )
-            }"></i>
+            <i class="bi ${obtenerIconoEstadoRefrigerio(clase)}"></i>
 
             <div>
 
@@ -6145,1893 +3489,914 @@ function crearEstadoRefrigerioHTML(
 
         </div>
     `;
-
 }
-
 
 /*=====================================================
 ICONO DEL ESTADO DEL REFRIGERIO
 =====================================================*/
 
-function obtenerIconoEstadoRefrigerio(
-    clase
-){
+function obtenerIconoEstadoRefrigerio(clase) {
+  const iconos = {
+    automatico: "bi-cpu",
 
-    const iconos = {
+    trabajado: "bi-briefcase",
 
-        automatico:
-            "bi-cpu",
+    descontado: "bi-dash-circle",
 
-        trabajado:
-            "bi-briefcase",
+    exceso: "bi-exclamation-triangle",
 
-        descontado:
-            "bi-dash-circle",
+    pendiente: "bi-question-circle",
 
-        exceso:
-            "bi-exclamation-triangle",
+    normal: "bi-cup-hot",
+  };
 
-        pendiente:
-            "bi-question-circle",
-
-        normal:
-            "bi-cup-hot"
-
-    };
-
-
-    return iconos[clase]
-    ||
-    "bi-cup-hot";
-
+  return iconos[clase] || "bi-cup-hot";
 }
-
 
 /*=====================================================
 OBTENER ADVERTENCIAS DE REFRIGERIO
 =====================================================*/
 
-function obtenerAdvertenciasRefrigerioRegistro(
-    registro
-){
+function obtenerAdvertenciasRefrigerioRegistro(registro) {
+  const codigosRefrigerio = [
+    "REFRIGERIO_SIN_MARCACIONES",
 
-    const codigosRefrigerio = [
+    "REFRIGERIO_INCOMPLETO",
 
-        "REFRIGERIO_SIN_MARCACIONES",
+    "REFRIGERIO_CORTO",
 
-        "REFRIGERIO_INCOMPLETO",
+    "REFRIGERIO_EXCESIVO",
+  ];
 
-        "REFRIGERIO_CORTO",
-
-        "REFRIGERIO_EXCESIVO"
-
-    ];
-
-
-    return (
-        registro.advertencias ||
-        []
-    )
-    .filter(
-        advertencia=>
-
-            codigosRefrigerio.includes(
-                advertencia.codigo
-            )
-
-    );
-
+  return (registro.advertencias || []).filter((advertencia) =>
+    codigosRefrigerio.includes(advertencia.codigo),
+  );
 }
-
 
 /*=====================================================
 CONTADORES
 =====================================================*/
 
-function actualizarContadores(
-    registros
-){
-
-    /*
+function actualizarContadores(registros) {
+  /*
         Colaboradores que tenían una jornada
         programada para la fecha.
     */
 
-    asignarContador(
-        "totalProgramadosAsistencia",
+  asignarContador(
+    "totalProgramadosAsistencia",
 
-        registros.filter(
-            registro=>
-                registro.horarios.length > 0
-        ).length
-    );
+    registros.filter((registro) => registro.horarios.length > 0).length,
+  );
 
-
-    /*
+  /*
         Presentes normales y quienes trabajaron
         durante un feriado.
     */
 
-    const estadosPresentes = [
+  const estadosPresentes = [
+    "PRESENTE",
 
-        "PRESENTE",
+    "TRABAJO_EN_FERIADO",
 
-        "TRABAJO_EN_FERIADO",
+    "DESCANSO_SUSTITUTORIO_TRABAJADO",
+  ];
 
-        "DESCANSO_SUSTITUTORIO_TRABAJADO"
+  asignarContador(
+    "totalPresentesAsistencia",
 
-    ];
+    registros.filter((registro) => estadosPresentes.includes(registro.estado))
+      .length,
+  );
 
-
-    asignarContador(
-        "totalPresentesAsistencia",
-
-        registros.filter(
-            registro=>
-                estadosPresentes.includes(
-                    registro.estado
-                )
-        ).length
-    );
-
-
-    /*
+  /*
         Tardanzas normales y tardanzas
         acompañadas de un permiso.
     */
 
-    const estadosTardanza = [
+  const estadosTardanza = ["TARDANZA", "TARDANZA_CON_PERMISO"];
 
-        "TARDANZA",
+  asignarContador(
+    "totalTardanzasAsistencia",
 
-        "TARDANZA_CON_PERMISO"
+    registros.filter((registro) => estadosTardanza.includes(registro.estado))
+      .length,
+  );
 
-    ];
-
-
-    asignarContador(
-        "totalTardanzasAsistencia",
-
-        registros.filter(
-            registro=>
-                estadosTardanza.includes(
-                    registro.estado
-                )
-        ).length
-    );
-
-
-    /*
+  /*
         Solo corresponde ausencia cuando realmente
         debía trabajar y no existe permiso aplicable.
     */
 
-    asignarContador(
-        "totalAusentesAsistencia",
+  asignarContador(
+    "totalAusentesAsistencia",
 
-        registros.filter(
-            registro=>
-                registro.estado ===
-                "AUSENTE"
-        ).length
-    );
+    registros.filter((registro) => registro.estado === "AUSENTE").length,
+  );
 
-
-    /*
+  /*
         Permisos completos y parciales.
     */
 
-    const estadosPermiso = [
+  const estadosPermiso = [
+    "PERMISO_COMPUTABLE",
 
-        "PERMISO_COMPUTABLE",
+    "AUSENCIA_JUSTIFICADA",
 
-        "AUSENCIA_JUSTIFICADA",
+    "PERMISO_PARCIAL_COMPUTABLE",
 
-        "PERMISO_PARCIAL_COMPUTABLE",
+    "AUSENCIA_PARCIAL_JUSTIFICADA",
 
-        "AUSENCIA_PARCIAL_JUSTIFICADA",
+    "PRESENTE_CON_PERMISO",
 
-        "PRESENTE_CON_PERMISO",
+    "TARDANZA_CON_PERMISO",
+  ];
 
-        "TARDANZA_CON_PERMISO"
+  asignarContador(
+    "totalPermisosAsistencia",
 
-    ];
+    registros.filter((registro) => estadosPermiso.includes(registro.estado))
+      .length,
+  );
 
-
-    asignarContador(
-        "totalPermisosAsistencia",
-
-        registros.filter(
-            registro=>
-                estadosPermiso.includes(
-                    registro.estado
-                )
-        ).length
-    );
-
-
-    /*
+  /*
         Marcaciones incompletas o un feriado
         que todavía necesita configuración.
     */
 
-const estadosIncompletos = [
-
+  const estadosIncompletos = [
     "INCOMPLETO",
 
     "TRABAJO_EN_FERIADO_INCOMPLETO",
 
     "DESCANSO_SUSTITUTORIO_INCOMPLETO",
 
-    "FERIADO_PENDIENTE"
+    "FERIADO_PENDIENTE",
+  ];
 
-];
+  asignarContador(
+    "totalIncompletosAsistencia",
 
-
-    asignarContador(
-        "totalIncompletosAsistencia",
-
-        registros.filter(
-            registro=>
-                estadosIncompletos.includes(
-                    registro.estado
-                )
-        ).length
-    );
-
+    registros.filter((registro) => estadosIncompletos.includes(registro.estado))
+      .length,
+  );
 }
 
-function formatearDuracionCorta(
-    minutosTotales
-){
+function formatearDuracionCorta(minutosTotales) {
+  const total = Math.max(0, Number(minutosTotales || 0));
 
-    const total =
-        Math.max(
-            0,
-            Number(
-                minutosTotales
-                ||
-                0
-            )
-        );
+  const horas = Math.floor(total / 60);
 
+  const minutos = total % 60;
 
-    const horas =
-        Math.floor(
-            total /
-            60
-        );
+  if (minutos === 0) {
+    return `${horas} h`;
+  }
 
-
-    const minutos =
-        total %
-        60;
-
-
-    if(minutos === 0){
-
-        return `${horas} h`;
-
-    }
-
-
-    return `${horas} h ${minutos} min`;
-
+  return `${horas} h ${minutos} min`;
 }
 
 /*=====================================================
 FILTROS
 =====================================================*/
 
-function cargarOpcionesFiltro(
-    select,
-    elementos,
-    textoInicial
-){
+function cargarOpcionesFiltro(select, elementos, textoInicial) {
+  if (!select) {
+    return;
+  }
 
-    if(!select){
+  const valorActual = select.value;
 
-        return;
-
-    }
-
-
-    const valorActual =
-        select.value;
-
-
-    select.innerHTML =
-        `
+  select.innerHTML =
+    `
             <option value="">
                 ${textoInicial}
             </option>
-        `
-        +
-        elementos
-        .filter(item=>
-
-            item.estado !==
-            "INACTIVO"
-
-        )
-        .sort(
-            (
-                primero,
-                segundo
-            )=>
-
-                String(
-                    primero.nombre ||
-                    ""
-                )
-                .localeCompare(
-                    String(
-                        segundo.nombre ||
-                        ""
-                    ),
-                    "es"
-                )
-
-        )
-        .map(item=>
-            `
+        ` +
+    elementos
+      .filter((item) => item.estado !== "INACTIVO")
+      .sort((primero, segundo) =>
+        String(primero.nombre || "").localeCompare(
+          String(segundo.nombre || ""),
+          "es",
+        ),
+      )
+      .map(
+        (item) =>
+          `
                 <option value="${escaparHTML(item.id)}">
                     ${escaparHTML(item.nombre || "Sin nombre")}
                 </option>
-            `
-        )
-        .join("");
+            `,
+      )
+      .join("");
 
-
-    select.value =
-        valorActual;
-
+  select.value = valorActual;
 }
 
+function limpiarFiltrosAsistencia() {
+  if (buscarResumen) {
+    buscarResumen.value = "";
+  }
 
-function limpiarFiltrosAsistencia(){
+  [filtroSucursal, filtroArea, filtroSubarea, filtroEstado].forEach(
+    (select) => {
+      if (select) {
+        select.value = "";
+      }
+    },
+  );
 
-    if(buscarResumen){
-
-        buscarResumen.value =
-            "";
-
-    }
-
-
-    [
-        filtroSucursal,
-        filtroArea,
-        filtroSubarea,
-        filtroEstado
-    ]
-    .forEach(select=>{
-
-        if(select){
-
-            select.value =
-                "";
-
-        }
-
-    });
-
-
-    renderizarResumenAsistencia();
-
+  renderizarResumenAsistencia();
 }
-
 
 /*=====================================================
 UTILIDADES
 =====================================================*/
 
-function obtenerMilisegundosMarcacion(
-    marcacion
-){
+function obtenerMilisegundosMarcacion(marcacion) {
+  if (marcacion.fechaHora?.toMillis) {
+    return marcacion.fechaHora.toMillis();
+  }
 
-    if(
-        marcacion.fechaHora
-        ?.toMillis
-    ){
-
-        return marcacion.fechaHora.toMillis();
-
-    }
-
-
-    return new Date(
-        marcacion.fechaHoraISO ||
-        `${marcacion.fecha}T${marcacion.hora}`
-    )
-    .getTime();
-
+  return new Date(
+    marcacion.fechaHoraISO || `${marcacion.fecha}T${marcacion.hora}`,
+  ).getTime();
 }
 
-
-function obtenerHoraMarcacion(
-    marcacion
-){
-
-    return String(
-        marcacion?.hora ||
-        ""
-    )
-    .slice(
-        0,
-        5
-    );
-
+function obtenerHoraMarcacion(marcacion) {
+  return String(marcacion?.hora || "").slice(0, 5);
 }
 
+function formatearMinutosTrabajados(registro) {
+  const tieneLimiteVirtual = Boolean(
+    registro.entrada?.esCubiertaPorPermiso ||
+      registro.salida?.esCubiertaPorPermiso,
+  );
 
+  const tienePermisoCompleto =
+    registro.permisoDia &&
+    (registro.permisoDia.tipoDuracion || "DIA_COMPLETO") === "DIA_COMPLETO";
 
-
-function formatearMinutosTrabajados(
-    registro
-){
-
-const tieneLimiteVirtual =
-    Boolean(
-        registro.entrada
-        ?.esCubiertaPorPermiso
-        ||
-        registro.salida
-        ?.esCubiertaPorPermiso
-    );
-
-
-const tienePermisoCompleto =
-    registro.permisoDia
-    &&
-    (
-        registro.permisoDia.tipoDuracion ||
-        "DIA_COMPLETO"
-    ) ===
-    "DIA_COMPLETO";
-
-
-if(tienePermisoCompleto){
-
+  if (tienePermisoCompleto) {
     return "0 h";
+  }
 
-}
-
-if(
-    registro.cantidadMarcaciones ===
-    1
-    &&
-    !tieneLimiteVirtual
-){
-
+  if (registro.cantidadMarcaciones === 1 && !tieneLimiteVirtual) {
     return "Incompleto";
+  }
 
+  if (registro.minutosTrabajados <= 0) {
+    return "0 h";
+  }
+
+  const horas = Math.floor(registro.minutosTrabajados / 60);
+
+  const minutos = registro.minutosTrabajados % 60;
+
+  return `${horas} h ${minutos} min`;
 }
-
-
-    if(
-        registro.minutosTrabajados <=
-        0
-    ){
-
-        return "0 h";
-
-    }
-
-
-    const horas =
-        Math.floor(
-            registro.minutosTrabajados /
-            60
-        );
-
-
-    const minutos =
-        registro.minutosTrabajados %
-        60;
-
-
-    return `${horas} h ${minutos} min`;
-
-}
-
-
 
 /*=====================================================
 APLICAR LÍMITE VIRTUAL POR PERMISO DE MEDIO DÍA
 =====================================================*/
 
 function aplicarLimiteVirtualPermisoParcial({
-
-    permiso,
-    horario,
-    clasificacion
-
-}){
-
-if(
-    !permiso
-    ||
-    !horario
-    ||
-    permiso.tipoDuracion !==
-    "MEDIO_DIA"
-    ||
-    (
-        permiso.computaComoLaborado !==
-        true
-
-        &&
-
-        permiso.justificaAusencia !==
-        true
-    )
-){
-
+  permiso,
+  horario,
+  clasificacion,
+}) {
+  if (
+    !permiso ||
+    !horario ||
+    permiso.tipoDuracion !== "MEDIO_DIA" ||
+    (permiso.computaComoLaborado !== true && permiso.justificaAusencia !== true)
+  ) {
     return;
+  }
 
-}
+  const limiteMitad = obtenerLimiteMitadJornada(
+    horario,
 
+    clasificacion,
 
-const limiteMitad =
-    obtenerLimiteMitadJornada(
+    permiso.mitadDia,
+  );
 
-        horario,
+  if (!Number.isFinite(limiteMitad)) {
+    return;
+  }
 
-        clasificacion,
+  const marcadorVirtual = {
+    id: null,
 
-        permiso.mitadDia
+    hora: convertirMinutosAHoraResumen(limiteMitad),
 
-    );
+    minutosJornada: limiteMitad,
 
+    origen: "PERMISO",
 
-    if(!Number.isFinite(limiteMitad)){
+    estado: "VIRTUAL",
 
-        return;
+    esCubiertaPorPermiso: true,
 
-    }
+    permisoId: permiso.id,
 
+    permisoNombre: permiso.tipoPermisoNombre || "Permiso aprobado",
+  };
 
-    const marcadorVirtual = {
-
-        id:null,
-
-        hora:
-            convertirMinutosAHoraResumen(
-                limiteMitad
-            ),
-
-        minutosJornada:
-            limiteMitad,
-
-        origen:
-            "PERMISO",
-
-        estado:
-            "VIRTUAL",
-
-        esCubiertaPorPermiso:
-            true,
-
-        permisoId:
-            permiso.id,
-
-        permisoNombre:
-            permiso.tipoPermisoNombre
-            ||
-            "Permiso aprobado"
-
-    };
-
-
-    /*
+  /*
         Primera mitad cubierta:
         el límite virtual funciona como entrada
         para comenzar la segunda mitad trabajada.
     */
 
-    if(
-        permiso.mitadDia ===
-        "PRIMERA_MITAD"
-        &&
-        !clasificacion.entrada
-        &&
-        clasificacion.salida
-    ){
+  if (
+    permiso.mitadDia === "PRIMERA_MITAD" &&
+    !clasificacion.entrada &&
+    clasificacion.salida
+  ) {
+    clasificacion.entrada = {
+      ...marcadorVirtual,
 
-        clasificacion.entrada = {
+      tipo: "ENTRADA",
 
-            ...marcadorVirtual,
+      tipoInterpretado: "ENTRADA",
+    };
+  }
 
-            tipo:
-                "ENTRADA",
-
-            tipoInterpretado:
-                "ENTRADA"
-
-        };
-
-    }
-
-
-    /*
+  /*
         Segunda mitad cubierta:
         el límite virtual funciona como salida
         de la primera mitad trabajada.
     */
 
-    if(
-        permiso.mitadDia ===
-        "SEGUNDA_MITAD"
-        &&
-        clasificacion.entrada
-        &&
-        !clasificacion.salida
-    ){
+  if (
+    permiso.mitadDia === "SEGUNDA_MITAD" &&
+    clasificacion.entrada &&
+    !clasificacion.salida
+  ) {
+    clasificacion.salida = {
+      ...marcadorVirtual,
 
-        clasificacion.salida = {
+      tipo: "SALIDA",
 
-            ...marcadorVirtual,
-
-            tipo:
-                "SALIDA",
-
-            tipoInterpretado:
-                "SALIDA"
-
-        };
-
-    }
-
+      tipoInterpretado: "SALIDA",
+    };
+  }
 }
-
 
 /*=====================================================
 APLICAR LÍMITE VIRTUAL POR PERMISO DE HORAS
 =====================================================*/
 
-function aplicarLimiteVirtualPermisoHoras({
+function aplicarLimiteVirtualPermisoHoras({ permiso, horario, clasificacion }) {
+  if (
+    !permiso ||
+    !horario ||
+    permiso.tipoDuracion !== "HORAS" ||
+    (permiso.computaComoLaborado !== true && permiso.justificaAusencia !== true)
+  ) {
+    return;
+  }
 
-    permiso,
-    horario,
-    clasificacion
+  const entradaProgramada = convertirHoraAMinutos(horario.entrada?.programada);
 
-}){
+  let salidaProgramada = convertirHoraAMinutos(horario.salida?.programada);
 
-    if(
-        !permiso
-        ||
-        !horario
-        ||
-        permiso.tipoDuracion !==
-        "HORAS"
-        ||
-        (
-            permiso.computaComoLaborado !==
-            true
+  let inicioPermiso = convertirHoraAMinutos(permiso.horaInicio);
 
-            &&
+  let finPermiso = convertirHoraAMinutos(permiso.horaFin);
 
-            permiso.justificaAusencia !==
-            true
-        )
-    ){
+  if (horario.cruzaMedianoche || salidaProgramada <= entradaProgramada) {
+    salidaProgramada += 1440;
 
-        return;
-
+    if (inicioPermiso < entradaProgramada) {
+      inicioPermiso += 1440;
     }
 
-
-    const entradaProgramada =
-        convertirHoraAMinutos(
-            horario.entrada
-            ?.programada
-        );
-
-
-    let salidaProgramada =
-        convertirHoraAMinutos(
-            horario.salida
-            ?.programada
-        );
-
-
-    let inicioPermiso =
-        convertirHoraAMinutos(
-            permiso.horaInicio
-        );
-
-
-    let finPermiso =
-        convertirHoraAMinutos(
-            permiso.horaFin
-        );
-
-
-    if(
-        horario.cruzaMedianoche
-        ||
-        salidaProgramada <=
-        entradaProgramada
-    ){
-
-        salidaProgramada += 1440;
-
-
-        if(
-            inicioPermiso <
-            entradaProgramada
-        ){
-
-            inicioPermiso += 1440;
-
-        }
-
-
-        if(
-            finPermiso <=
-            entradaProgramada
-        ){
-
-            finPermiso += 1440;
-
-        }
-
+    if (finPermiso <= entradaProgramada) {
+      finPermiso += 1440;
     }
+  }
 
+  const permisoEmpiezaConJornada = inicioPermiso <= entradaProgramada;
 
-    const permisoEmpiezaConJornada =
-        inicioPermiso <=
-        entradaProgramada;
+  const permisoTerminaConJornada = finPermiso >= salidaProgramada;
 
+  const nombrePermiso = permiso.tipoPermisoNombre || "Permiso aprobado";
 
-    const permisoTerminaConJornada =
-        finPermiso >=
-        salidaProgramada;
-
-
-    const nombrePermiso =
-        permiso.tipoPermisoNombre
-        ||
-        "Permiso aprobado";
-
-
-    /*
+  /*
         Permiso al inicio:
         su término funciona como entrada virtual.
     */
 
-    if(
-        permisoEmpiezaConJornada
-        &&
-        !clasificacion.entrada
-        &&
-        clasificacion.salida
-    ){
+  if (
+    permisoEmpiezaConJornada &&
+    !clasificacion.entrada &&
+    clasificacion.salida
+  ) {
+    clasificacion.entrada = {
+      id: null,
 
-        clasificacion.entrada = {
+      tipo: "ENTRADA",
 
-            id:null,
+      tipoInterpretado: "ENTRADA",
 
-            tipo:
-                "ENTRADA",
+      hora: convertirMinutosAHoraResumen(finPermiso),
 
-            tipoInterpretado:
-                "ENTRADA",
+      minutosJornada: finPermiso,
 
-            hora:
-                convertirMinutosAHoraResumen(
-                    finPermiso
-                ),
+      origen: "PERMISO",
 
-            minutosJornada:
-                finPermiso,
+      estado: "VIRTUAL",
 
-            origen:
-                "PERMISO",
+      esCubiertaPorPermiso: true,
 
-            estado:
-                "VIRTUAL",
+      tipoDuracionPermiso: "HORAS",
 
-            esCubiertaPorPermiso:
-                true,
+      permisoId: permiso.id,
 
-            tipoDuracionPermiso:
-                "HORAS",
+      permisoNombre: nombrePermiso,
 
-            permisoId:
-                permiso.id,
+      horaInicioPermiso: permiso.horaInicio,
 
-            permisoNombre:
-                nombrePermiso,
+      horaFinPermiso: permiso.horaFin,
+    };
+  }
 
-            horaInicioPermiso:
-                permiso.horaInicio,
-
-            horaFinPermiso:
-                permiso.horaFin
-
-        };
-
-    }
-
-
-    /*
+  /*
         Permiso al final:
         su inicio funciona como salida virtual.
     */
 
-    if(
-        permisoTerminaConJornada
-        &&
-        clasificacion.entrada
-        &&
-        !clasificacion.salida
-    ){
+  if (
+    permisoTerminaConJornada &&
+    clasificacion.entrada &&
+    !clasificacion.salida
+  ) {
+    clasificacion.salida = {
+      id: null,
 
-        clasificacion.salida = {
+      tipo: "SALIDA",
 
-            id:null,
+      tipoInterpretado: "SALIDA",
 
-            tipo:
-                "SALIDA",
+      hora: convertirMinutosAHoraResumen(inicioPermiso),
 
-            tipoInterpretado:
-                "SALIDA",
+      minutosJornada: inicioPermiso,
 
-            hora:
-                convertirMinutosAHoraResumen(
-                    inicioPermiso
-                ),
+      origen: "PERMISO",
 
-            minutosJornada:
-                inicioPermiso,
+      estado: "VIRTUAL",
 
-            origen:
-                "PERMISO",
+      esCubiertaPorPermiso: true,
 
-            estado:
-                "VIRTUAL",
+      tipoDuracionPermiso: "HORAS",
 
-            esCubiertaPorPermiso:
-                true,
+      permisoId: permiso.id,
 
-            tipoDuracionPermiso:
-                "HORAS",
+      permisoNombre: nombrePermiso,
 
-            permisoId:
-                permiso.id,
+      horaInicioPermiso: permiso.horaInicio,
 
-            permisoNombre:
-                nombrePermiso,
-
-            horaInicioPermiso:
-                permiso.horaInicio,
-
-            horaFinPermiso:
-                permiso.horaFin
-
-        };
-
-    }
-
+      horaFinPermiso: permiso.horaFin,
+    };
+  }
 }
-
 
 /*=====================================================
 OBTENER LÍMITE DEL PERMISO DE MEDIO DÍA
 =====================================================*/
 
-function obtenerLimiteMitadJornada(
+function obtenerLimiteMitadJornada(horario, clasificacion, mitadDia) {
+  const entradaProgramada = convertirHoraAMinutos(horario.entrada?.programada);
 
-    horario,
-    clasificacion,
-    mitadDia
+  let salidaProgramada = convertirHoraAMinutos(horario.salida?.programada);
 
-){
+  if (horario.cruzaMedianoche || salidaProgramada <= entradaProgramada) {
+    salidaProgramada += 1440;
+  }
 
-    const entradaProgramada =
-        convertirHoraAMinutos(
-            horario.entrada
-            ?.programada
-        );
+  const inicioRefrigerio = clasificacion?.inicioRefrigerio?.minutosJornada;
 
+  const finRefrigerio = clasificacion?.finRefrigerio?.minutosJornada;
 
-    let salidaProgramada =
-        convertirHoraAMinutos(
-            horario.salida
-            ?.programada
-        );
-
-
-    if(
-        horario.cruzaMedianoche
-        ||
-        salidaProgramada <=
-        entradaProgramada
-    ){
-
-        salidaProgramada += 1440;
-
-    }
-
-
-    const inicioRefrigerio =
-        clasificacion
-        ?.inicioRefrigerio
-        ?.minutosJornada;
-
-
-    const finRefrigerio =
-        clasificacion
-        ?.finRefrigerio
-        ?.minutosJornada;
-
-
-    /*
+  /*
         Si existe refrigerio, este divide naturalmente
         la primera y segunda mitad de la jornada.
     */
 
-    if(
-        Number.isFinite(
-            inicioRefrigerio
-        )
-        &&
-        Number.isFinite(
-            finRefrigerio
-        )
-    ){
-
-        if(
-    mitadDia ===
-    "PRIMERA_MITAD"
-){
-
-    /*
+  if (Number.isFinite(inicioRefrigerio) && Number.isFinite(finRefrigerio)) {
+    if (mitadDia === "PRIMERA_MITAD") {
+      /*
         El permiso de primera mitad termina
         cuando comienza el refrigerio.
     */
 
-    return inicioRefrigerio;
+      return inicioRefrigerio;
+    }
 
-}
-
-
-/*
+    /*
     El permiso de segunda mitad comienza
     cuando termina el refrigerio.
 */
 
-return finRefrigerio;
+    return finRefrigerio;
+  }
 
-    }
-
-
-    /*
+  /*
         Solo si no existe refrigerio utilizamos
         el punto medio matemático.
     */
 
-    return Math.round(
-        entradaProgramada
-        +
-        (
-            salidaProgramada -
-            entradaProgramada
-        )
-        /
-        2
-    );
-
+  return Math.round(
+    entradaProgramada + (salidaProgramada - entradaProgramada) / 2,
+  );
 }
-
-
 
 /*=====================================================
 MINUTOS CUBIERTOS POR PERMISO DE MEDIO DÍA
 =====================================================*/
 
 function calcularMinutosPermisoMedioDia({
+  horario,
+  clasificacion,
+  mitadDia,
+  jornadaProgramada,
+}) {
+  if (!horario) {
+    return 0;
+  }
 
-    horario,
-    clasificacion,
-    mitadDia,
-    jornadaProgramada
+  const entradaProgramada = convertirHoraAMinutos(horario.entrada?.programada);
 
-}){
+  let salidaProgramada = convertirHoraAMinutos(horario.salida?.programada);
 
-    if(!horario){
+  if (horario.cruzaMedianoche || salidaProgramada <= entradaProgramada) {
+    salidaProgramada += 1440;
+  }
 
-        return 0;
+  const inicioRefrigerio = clasificacion?.inicioRefrigerio?.minutosJornada;
 
+  const finRefrigerio = clasificacion?.finRefrigerio?.minutosJornada;
+
+  if (Number.isFinite(inicioRefrigerio) && Number.isFinite(finRefrigerio)) {
+    if (mitadDia === "PRIMERA_MITAD") {
+      return Math.max(0, inicioRefrigerio - entradaProgramada);
     }
 
+    return Math.max(0, salidaProgramada - finRefrigerio);
+  }
 
-    const entradaProgramada =
-        convertirHoraAMinutos(
-            horario.entrada
-            ?.programada
-        );
-
-
-    let salidaProgramada =
-        convertirHoraAMinutos(
-            horario.salida
-            ?.programada
-        );
-
-
-    if(
-        horario.cruzaMedianoche
-        ||
-        salidaProgramada <=
-        entradaProgramada
-    ){
-
-        salidaProgramada += 1440;
-
-    }
-
-
-    const inicioRefrigerio =
-        clasificacion
-        ?.inicioRefrigerio
-        ?.minutosJornada;
-
-
-    const finRefrigerio =
-        clasificacion
-        ?.finRefrigerio
-        ?.minutosJornada;
-
-
-    if(
-        Number.isFinite(
-            inicioRefrigerio
-        )
-        &&
-        Number.isFinite(
-            finRefrigerio
-        )
-    ){
-
-        if(
-            mitadDia ===
-            "PRIMERA_MITAD"
-        ){
-
-            return Math.max(
-                0,
-                inicioRefrigerio -
-                entradaProgramada
-            );
-
-        }
-
-
-        return Math.max(
-            0,
-            salidaProgramada -
-            finRefrigerio
-        );
-
-    }
-
-
-    return Math.round(
-        jornadaProgramada /
-        2
-    );
-
+  return Math.round(jornadaProgramada / 2);
 }
-
 
 /*=====================================================
 MINUTOS CUBIERTOS POR PERMISO DE HORAS
 =====================================================*/
 
 function calcularMinutosPermisoPorHoras({
+  permiso,
+  horario,
+  clasificacion,
+  jornadaProgramada,
+}) {
+  if (!permiso || !horario) {
+    return 0;
+  }
 
-    permiso,
-    horario,
-    clasificacion,
-    jornadaProgramada
+  const entradaProgramada = convertirHoraAMinutos(horario.entrada?.programada);
 
-}){
+  let salidaProgramada = convertirHoraAMinutos(horario.salida?.programada);
 
-    if(
-        !permiso
-        ||
-        !horario
-    ){
+  let inicioPermiso = convertirHoraAMinutos(permiso.horaInicio);
 
-        return 0;
+  let finPermiso = convertirHoraAMinutos(permiso.horaFin);
 
+  if (horario.cruzaMedianoche || salidaProgramada <= entradaProgramada) {
+    salidaProgramada += 1440;
+
+    if (inicioPermiso < entradaProgramada) {
+      inicioPermiso += 1440;
     }
 
-
-    const entradaProgramada =
-        convertirHoraAMinutos(
-            horario.entrada
-            ?.programada
-        );
-
-
-    let salidaProgramada =
-        convertirHoraAMinutos(
-            horario.salida
-            ?.programada
-        );
-
-
-    let inicioPermiso =
-        convertirHoraAMinutos(
-            permiso.horaInicio
-        );
-
-
-    let finPermiso =
-        convertirHoraAMinutos(
-            permiso.horaFin
-        );
-
-
-    if(
-        horario.cruzaMedianoche
-        ||
-        salidaProgramada <=
-        entradaProgramada
-    ){
-
-        salidaProgramada += 1440;
-
-
-        if(
-            inicioPermiso <
-            entradaProgramada
-        ){
-
-            inicioPermiso += 1440;
-
-        }
-
-
-        if(
-            finPermiso <=
-            entradaProgramada
-        ){
-
-            finPermiso += 1440;
-
-        }
-
+    if (finPermiso <= entradaProgramada) {
+      finPermiso += 1440;
     }
+  }
 
-
-    /*
+  /*
         Limitamos el permiso al horario programado.
     */
 
-    const inicioAplicable =
-        Math.max(
-            entradaProgramada,
-            inicioPermiso
-        );
+  const inicioAplicable = Math.max(entradaProgramada, inicioPermiso);
 
+  const finAplicable = Math.min(salidaProgramada, finPermiso);
 
-    const finAplicable =
-        Math.min(
-            salidaProgramada,
-            finPermiso
-        );
+  let minutosCubiertos = Math.max(0, finAplicable - inicioAplicable);
 
-
-    let minutosCubiertos =
-        Math.max(
-            0,
-            finAplicable -
-            inicioAplicable
-        );
-
-
-    /*
+  /*
         Si el permiso coincide con el refrigerio,
         ese tiempo no se contabiliza dos veces.
     */
 
-    const inicioRefrigerio =
-        clasificacion
-        ?.inicioRefrigerio
-        ?.minutosJornada;
+  const inicioRefrigerio = clasificacion?.inicioRefrigerio?.minutosJornada;
 
+  const finRefrigerio = clasificacion?.finRefrigerio?.minutosJornada;
 
-    const finRefrigerio =
-        clasificacion
-        ?.finRefrigerio
-        ?.minutosJornada;
+  if (Number.isFinite(inicioRefrigerio) && Number.isFinite(finRefrigerio)) {
+    const solapamientoRefrigerio = Math.max(
+      0,
 
-
-    if(
-        Number.isFinite(
-            inicioRefrigerio
-        )
-        &&
-        Number.isFinite(
-            finRefrigerio
-        )
-    ){
-
-        const solapamientoRefrigerio =
-            Math.max(
-
-                0,
-
-                Math.min(
-                    finAplicable,
-                    finRefrigerio
-                )
-                -
-                Math.max(
-                    inicioAplicable,
-                    inicioRefrigerio
-                )
-
-            );
-
-
-        minutosCubiertos -=
-            solapamientoRefrigerio;
-
-    }
-
-
-    return Math.min(
-
-        jornadaProgramada,
-
-        Math.max(
-            0,
-            minutosCubiertos
-        )
-
+      Math.min(finAplicable, finRefrigerio) -
+        Math.max(inicioAplicable, inicioRefrigerio),
     );
 
+    minutosCubiertos -= solapamientoRefrigerio;
+  }
+
+  return Math.min(
+    jornadaProgramada,
+
+    Math.max(0, minutosCubiertos),
+  );
 }
-
-
 
 /*=====================================================
 PERMISO POR HORAS DENTRO DEL TRAMO TRABAJADO
 =====================================================*/
 
 function calcularMinutosPermisoDentroTrabajo({
+  permiso,
+  horario,
+  clasificacion,
+}) {
+  if (
+    !permiso ||
+    !horario ||
+    !clasificacion?.entrada ||
+    !clasificacion?.salida
+  ) {
+    return 0;
+  }
 
-    permiso,
-    horario,
-    clasificacion
+  let entradaReal = Number(clasificacion.entrada.minutosJornada);
 
-}){
+  let salidaReal = Number(clasificacion.salida.minutosJornada);
 
-    if(
-        !permiso
-        ||
-        !horario
-        ||
-        !clasificacion?.entrada
-        ||
-        !clasificacion?.salida
-    ){
+  let inicioPermiso = convertirHoraAMinutos(permiso.horaInicio);
 
-        return 0;
+  let finPermiso = convertirHoraAMinutos(permiso.horaFin);
 
+  const entradaProgramada = convertirHoraAMinutos(horario.entrada?.programada);
+
+  if (horario.cruzaMedianoche) {
+    if (salidaReal <= entradaReal) {
+      salidaReal += 1440;
     }
 
-
-    let entradaReal =
-        Number(
-            clasificacion
-            .entrada
-            .minutosJornada
-        );
-
-
-    let salidaReal =
-        Number(
-            clasificacion
-            .salida
-            .minutosJornada
-        );
-
-
-    let inicioPermiso =
-        convertirHoraAMinutos(
-            permiso.horaInicio
-        );
-
-
-    let finPermiso =
-        convertirHoraAMinutos(
-            permiso.horaFin
-        );
-
-
-    const entradaProgramada =
-        convertirHoraAMinutos(
-            horario.entrada
-            ?.programada
-        );
-
-
-    if(
-        horario.cruzaMedianoche
-    ){
-
-        if(
-            salidaReal <=
-            entradaReal
-        ){
-
-            salidaReal += 1440;
-
-        }
-
-
-        if(
-            inicioPermiso <
-            entradaProgramada
-        ){
-
-            inicioPermiso += 1440;
-
-        }
-
-
-        if(
-            finPermiso <=
-            entradaProgramada
-        ){
-
-            finPermiso += 1440;
-
-        }
-
+    if (inicioPermiso < entradaProgramada) {
+      inicioPermiso += 1440;
     }
 
+    if (finPermiso <= entradaProgramada) {
+      finPermiso += 1440;
+    }
+  }
 
-    const inicioAplicable =
-        Math.max(
-            entradaReal,
-            inicioPermiso
-        );
+  const inicioAplicable = Math.max(entradaReal, inicioPermiso);
 
+  const finAplicable = Math.min(salidaReal, finPermiso);
 
-    const finAplicable =
-        Math.min(
-            salidaReal,
-            finPermiso
-        );
+  let minutos = Math.max(0, finAplicable - inicioAplicable);
 
-
-    let minutos =
-        Math.max(
-            0,
-            finAplicable -
-            inicioAplicable
-        );
-
-
-    /*
+  /*
         Restamos el solapamiento con refrigerio,
         porque ese tiempo ya se descontó previamente.
     */
 
-    const inicioRefrigerio =
-        clasificacion
-        ?.inicioRefrigerio
-        ?.minutosJornada;
+  const inicioRefrigerio = clasificacion?.inicioRefrigerio?.minutosJornada;
 
+  const finRefrigerio = clasificacion?.finRefrigerio?.minutosJornada;
 
-    const finRefrigerio =
-        clasificacion
-        ?.finRefrigerio
-        ?.minutosJornada;
+  if (Number.isFinite(inicioRefrigerio) && Number.isFinite(finRefrigerio)) {
+    const solapamientoRefrigerio = Math.max(
+      0,
 
-
-    if(
-        Number.isFinite(
-            inicioRefrigerio
-        )
-        &&
-        Number.isFinite(
-            finRefrigerio
-        )
-    ){
-
-        const solapamientoRefrigerio =
-            Math.max(
-
-                0,
-
-                Math.min(
-                    finAplicable,
-                    finRefrigerio
-                )
-                -
-                Math.max(
-                    inicioAplicable,
-                    inicioRefrigerio
-                )
-
-            );
-
-
-        minutos -=
-            solapamientoRefrigerio;
-
-    }
-
-
-    return Math.max(
-        0,
-        minutos
+      Math.min(finAplicable, finRefrigerio) -
+        Math.max(inicioAplicable, inicioRefrigerio),
     );
 
-}
+    minutos -= solapamientoRefrigerio;
+  }
 
+  return Math.max(0, minutos);
+}
 
 /*=====================================================
 CONVERTIR MINUTOS A HORA
 =====================================================*/
 
-function convertirMinutosAHoraResumen(
-    minutosTotales
-){
+function convertirMinutosAHoraResumen(minutosTotales) {
+  const minutosNormalizados =
+    ((Math.round(minutosTotales) % 1440) + 1440) % 1440;
 
-    const minutosNormalizados =
-        (
-            Math.round(
-                minutosTotales
-            )
-            %
-            1440
-            +
-            1440
-        )
-        %
-        1440;
+  const horas = Math.floor(minutosNormalizados / 60);
 
+  const minutos = minutosNormalizados % 60;
 
-    const horas =
-        Math.floor(
-            minutosNormalizados /
-            60
-        );
-
-
-    const minutos =
-        minutosNormalizados %
-        60;
-
-
-    return `${String(horas).padStart(2,"0")}:${String(
-        minutos
-    ).padStart(2,"0")}`;
-
+  return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(
+    2,
+    "0",
+  )}`;
 }
 
+function convertirHoraAMinutos(hora) {
+  if (!hora) {
+    return 0;
+  }
 
-function convertirHoraAMinutos(
-    hora
-){
+  const [horas, minutos] = String(hora).split(":").map(Number);
 
-    if(!hora){
-
-        return 0;
-
-    }
-
-
-    const [
-        horas,
-        minutos
-    ] =
-        String(
-            hora
-        )
-        .split(":")
-        .map(Number);
-
-
-    return (
-        horas *
-        60
-    )
-    +
-    minutos;
-
+  return horas * 60 + minutos;
 }
 
-
-function formatearHora(
-    hora
-){
-
-    return hora
-    ?
-    String(
-        hora
-    )
-    .slice(
-        0,
-        5
-    )
-    :
-    "—";
-
+function formatearHora(hora) {
+  return hora ? String(hora).slice(0, 5) : "—";
 }
 
-
-function crearFechaLocal(
-    fechaISO
-){
-
-    return new Date(
-        `${fechaISO}T00:00:00`
-    );
-
+function crearFechaLocal(fechaISO) {
+  return new Date(`${fechaISO}T00:00:00`);
 }
 
-
-function obtenerIniciales(
-    nombre
-){
-
-    return String(
-        nombre
-    )
+function obtenerIniciales(nombre) {
+  return String(nombre)
     .trim()
     .split(/\s+/)
-    .slice(
-        0,
-        2
-    )
-    .map(parte=>
-
-        parte.charAt(0)
-        .toUpperCase()
-
-    )
+    .slice(0, 2)
+    .map((parte) => parte.charAt(0).toUpperCase())
     .join("");
-
 }
 
+function obtenerClaseEstado(estado) {
+  const clases = {
+    PRESENTE: "presente",
 
-function obtenerClaseEstado(
-    estado
-){
+    TARDANZA: "tardanza",
 
-    const clases = {
+    AUSENTE: "ausente",
 
-        PRESENTE:
-            "presente",
+    INCOMPLETO: "tardanza",
 
-        TARDANZA:
-            "tardanza",
+    SIN_HORARIO: "permiso",
 
-        AUSENTE:
-            "ausente",
+    PERMISO_COMPUTABLE: "permiso",
 
-        INCOMPLETO:
-            "tardanza",
+    AUSENCIA_JUSTIFICADA: "permiso",
 
-        SIN_HORARIO:
-            "permiso",
+    PERMISO_PARCIAL_COMPUTABLE: "permiso",
 
-        PERMISO_COMPUTABLE:
-            "permiso",
+    AUSENCIA_PARCIAL_JUSTIFICADA: "permiso",
 
-        AUSENCIA_JUSTIFICADA:
-            "permiso",
+    PRESENTE_CON_PERMISO: "permiso",
 
-        PERMISO_PARCIAL_COMPUTABLE:
-            "permiso",
+    TARDANZA_CON_PERMISO: "tardanza",
 
-        AUSENCIA_PARCIAL_JUSTIFICADA:
-            "permiso",
+    PRESENTE_CON_PERMISO: "permiso",
 
-        PRESENTE_CON_PERMISO:
-            "permiso",
+    TARDANZA_CON_PERMISO: "tardanza",
 
-        TARDANZA_CON_PERMISO:
-            "tardanza",
+    FERIADO: "permiso",
 
-        PRESENTE_CON_PERMISO:
-            "permiso",
+    TRABAJO_EN_FERIADO: "presente",
 
-        TARDANZA_CON_PERMISO:
-            "tardanza",
+    FERIADO_PENDIENTE: "tardanza",
 
-        FERIADO:
-            "permiso",
+    TRABAJO_EN_FERIADO_INCOMPLETO: "tardanza",
 
-        TRABAJO_EN_FERIADO:
-            "presente",
+    DESCANSO_SUSTITUTORIO: "permiso",
 
-        FERIADO_PENDIENTE:
-            "tardanza", 
+    DESCANSO_SUSTITUTORIO_TRABAJADO: "tardanza",
 
-        TRABAJO_EN_FERIADO_INCOMPLETO:
-            "tardanza",
+    DESCANSO_SUSTITUTORIO_INCOMPLETO: "tardanza",
+  };
 
-        DESCANSO_SUSTITUTORIO:
-            "permiso",
-
-        DESCANSO_SUSTITUTORIO_TRABAJADO:
-            "tardanza",
-
-        DESCANSO_SUSTITUTORIO_INCOMPLETO:
-            "tardanza",
-
-    };
-
-
-    return clases[estado] ||
-    "permiso";
-
+  return clases[estado] || "permiso";
 }
 
-
-function obtenerTextoEstado(
-    estado,
-    registro = null
-){
-
-if(
-    estado ===
-    "DESCANSO_SUSTITUTORIO"
-){
-
+function obtenerTextoEstado(estado, registro = null) {
+  if (estado === "DESCANSO_SUSTITUTORIO") {
     return "Descanso sustitutorio";
+  }
 
-}
-
-
-if(
-    estado ===
-    "DESCANSO_SUSTITUTORIO_TRABAJADO"
-){
-
+  if (estado === "DESCANSO_SUSTITUTORIO_TRABAJADO") {
     return "Descanso sustitutorio trabajado";
+  }
 
-}
-
-
-if(
-    estado ===
-    "DESCANSO_SUSTITUTORIO_INCOMPLETO"
-){
-
+  if (estado === "DESCANSO_SUSTITUTORIO_INCOMPLETO") {
     return "Descanso sustitutorio incompleto";
+  }
 
-}
-
-if(
-    estado === "FERIADO"
-    ||
-    estado === "TRABAJO_EN_FERIADO"
-    ||
-    estado === "TRABAJO_EN_FERIADO_INCOMPLETO"
-    ||
+  if (
+    estado === "FERIADO" ||
+    estado === "TRABAJO_EN_FERIADO" ||
+    estado === "TRABAJO_EN_FERIADO_INCOMPLETO" ||
     estado === "FERIADO_PENDIENTE"
-){
+  ) {
+    const nombreFeriado = registro?.feriadoDia?.nombre || "Feriado";
 
-    const nombreFeriado =
-        registro
-        ?.feriadoDia
-        ?.nombre
-        ||
-        "Feriado";
-
-
-    if(
-        estado ===
-        "TRABAJO_EN_FERIADO"
-    ){
-
-        return `Trabajó en feriado · ${nombreFeriado}`;
-
+    if (estado === "TRABAJO_EN_FERIADO") {
+      return `Trabajó en feriado · ${nombreFeriado}`;
     }
 
-    if(
-    estado ===
-    "TRABAJO_EN_FERIADO_INCOMPLETO"
-){
-
-    return `Trabajo en feriado incompleto · ${nombreFeriado}`;
-
-}
-
-
-    if(
-        estado ===
-        "FERIADO_PENDIENTE"
-    ){
-
-        return `Feriado por configurar · ${nombreFeriado}`;
-
+    if (estado === "TRABAJO_EN_FERIADO_INCOMPLETO") {
+      return `Trabajo en feriado incompleto · ${nombreFeriado}`;
     }
 
+    if (estado === "FERIADO_PENDIENTE") {
+      return `Feriado por configurar · ${nombreFeriado}`;
+    }
 
     return nombreFeriado;
+  }
 
-}
-    
-
-if(
-    estado ===
-    "PRESENTE_CON_PERMISO"
-){
-
-    const nombrePermiso =
-        registro
-        ?.permisoDia
-        ?.tipoPermisoNombre
-        ||
-        "Permiso";
-
+  if (estado === "PRESENTE_CON_PERMISO") {
+    const nombrePermiso = registro?.permisoDia?.tipoPermisoNombre || "Permiso";
 
     return `Presente · ${nombrePermiso}`;
+  }
 
-}
-
-if(
-    estado === "PERMISO_COMPUTABLE"
-    ||
-    estado === "AUSENCIA_JUSTIFICADA"
-    ||
-    estado === "PERMISO_PARCIAL_COMPUTABLE"
-    ||
+  if (
+    estado === "PERMISO_COMPUTABLE" ||
+    estado === "AUSENCIA_JUSTIFICADA" ||
+    estado === "PERMISO_PARCIAL_COMPUTABLE" ||
     estado === "AUSENCIA_PARCIAL_JUSTIFICADA"
-){
-
+  ) {
     const nombrePermiso =
-        registro
-        ?.permisoDia
-        ?.tipoPermisoNombre
-        ||
-        "Permiso aprobado";
-
+      registro?.permisoDia?.tipoPermisoNombre || "Permiso aprobado";
 
     const esParcial =
-        estado ===
-        "PERMISO_PARCIAL_COMPUTABLE"
-        ||
-        estado ===
-        "AUSENCIA_PARCIAL_JUSTIFICADA";
+      estado === "PERMISO_PARCIAL_COMPUTABLE" ||
+      estado === "AUSENCIA_PARCIAL_JUSTIFICADA";
 
+    return esParcial ? `${nombrePermiso} parcial` : nombrePermiso;
+  }
 
-    return esParcial
-        ?
-        `${nombrePermiso} parcial`
-        :
-        nombrePermiso;
-
-}
-
-
-    if(
-    estado ===
-    "TARDANZA_CON_PERMISO"
-){
-
-    const nombrePermiso =
-        registro
-        ?.permisoDia
-        ?.tipoPermisoNombre
-        ||
-        "Permiso";
-
+  if (estado === "TARDANZA_CON_PERMISO") {
+    const nombrePermiso = registro?.permisoDia?.tipoPermisoNombre || "Permiso";
 
     return `Tardanza · ${nombrePermiso}`;
+  }
 
+  const textos = {
+    PRESENTE: "Presente",
+
+    TARDANZA: "Tardanza",
+
+    AUSENTE: "Ausente",
+
+    INCOMPLETO: "Incompleto",
+
+    SIN_HORARIO: "Sin horario",
+
+    PERMISO_COMPUTABLE: "Permiso computable",
+
+    AUSENCIA_JUSTIFICADA: "Ausencia justificada",
+
+    PRESENTE_CON_PERMISO: "Presente con permiso",
+  };
+
+  return textos[estado] || estado;
 }
 
+function asignarContador(id, cantidad) {
+  const elemento = document.getElementById(id);
 
-    const textos = {
-
-        PRESENTE:
-            "Presente",
-
-        TARDANZA:
-            "Tardanza",
-
-        AUSENTE:
-            "Ausente",
-
-        INCOMPLETO:
-            "Incompleto",
-
-        SIN_HORARIO:
-            "Sin horario",
-
-        PERMISO_COMPUTABLE:
-            "Permiso computable",
-
-        AUSENCIA_JUSTIFICADA:
-            "Ausencia justificada",
-
-        PRESENTE_CON_PERMISO:
-            "Presente con permiso",
-
-    };
-
-
-    return textos[estado] ||
-    estado;
-
+  if (elemento) {
+    elemento.textContent = cantidad;
+  }
 }
 
-function asignarContador(
-    id,
-    cantidad
-){
+function actualizarInformacionPaginacion(cantidad) {
+  const elemento = document.getElementById("informacionPaginacionAsistencia");
 
-    const elemento =
-        document.getElementById(
-            id
-        );
+  if (!elemento) {
+    return;
+  }
 
-
-    if(elemento){
-
-        elemento.textContent =
-            cantidad;
-
-    }
-
+  elemento.textContent =
+    cantidad === 0
+      ? "Mostrando 0 - 0 de 0 colaboradores"
+      : `Mostrando 1 - ${cantidad} de ${cantidad} colaboradores`;
 }
 
+function mostrarMensajeTabla(mensaje) {
+  if (!cuerpoResumen) {
+    return;
+  }
 
-function actualizarInformacionPaginacion(
-    cantidad
-){
-
-    const elemento =
-        document.getElementById(
-            "informacionPaginacionAsistencia"
-        );
-
-
-    if(!elemento){
-
-        return;
-
-    }
-
-
-    elemento.textContent =
-        cantidad === 0
-        ?
-        "Mostrando 0 - 0 de 0 colaboradores"
-        :
-        `Mostrando 1 - ${cantidad} de ${cantidad} colaboradores`;
-
-}
-
-
-function mostrarMensajeTabla(
-    mensaje
-){
-
-    if(!cuerpoResumen){
-
-        return;
-
-    }
-
-
-    cuerpoResumen.innerHTML = `
+  cuerpoResumen.innerHTML = `
         <tr>
 
             <td
@@ -8043,37 +4408,14 @@ function mostrarMensajeTabla(
 
         </tr>
     `;
-
 }
 
-
-function escaparHTML(
-    valor
-){
-
-    return String(
-        valor ??
-        ""
-    )
-    .replaceAll(
-        "&",
-        "&amp;"
-    )
-    .replaceAll(
-        "<",
-        "&lt;"
-    )
-    .replaceAll(
-        ">",
-        "&gt;"
-    )
-    .replaceAll(
-        '"',
-        "&quot;"
-    )
-    .replaceAll(
-        "'",
-        "&#039;"
-    );
-
+function escaparHTML(valor) {
+  return String(valor ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
+
