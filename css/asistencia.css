@@ -4691,3 +4691,23 @@ JORNADA JUSTIFICADA POR PERMISO
     font-size:8px;
 
 }
+
+/* REPORTE POR PERIODO */
+.asistencia-rango-fechas,.asistencia-acciones-periodo{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.asistencia-rango-fechas label{display:flex;flex-direction:column;gap:5px;color:#64748b;font-size:11px;font-weight:700}
+.asistencia-rango-fechas input{min-height:38px;padding:7px 10px;border:1px solid #dbe3ee;border-radius:9px;background:#fff;color:#172033}
+.asistencia-filtros-mensuales{align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.btn-asistencia-exportar{min-height:38px;padding:8px 13px;border:0;border-radius:9px;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.btn-asistencia-exportar.excel{background:#16834a}.btn-asistencia-exportar.pdf{background:#c43d3d}
+.btn-asistencia-exportar:disabled{opacity:.55;cursor:not-allowed}
+.btn-ver-detalle-periodo{padding:7px 10px;border:1px solid #c7d2fe;border-radius:8px;background:#eef2ff;color:#4338ca;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer}
+.modal-detalle-periodo{width:min(1180px,96vw);max-height:90vh;overflow:hidden}
+#modalDetallePeriodoAsistencia{display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.58)}
+#modalDetallePeriodoAsistencia .modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid #e2e8f0}
+#modalDetallePeriodoAsistencia .modal-footer{display:flex;justify-content:flex-end;padding:14px 20px;border-top:1px solid #e2e8f0}
+#modalDetallePeriodoAsistencia .btn-cerrar-modal{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:#f1f5f9;color:#475569;cursor:pointer}
+.modal-detalle-periodo .asistencia-tabla-contenedor{max-height:62vh;overflow:auto}
+.asistencia-tabla-detalle-periodo{min-width:1050px}
+.asistencia-tabla-detalle-periodo td{vertical-align:top}
+.detalle-marcacion-hora{display:block;font-weight:700;color:#1e293b}.detalle-marcacion-extra{display:block;margin-top:3px;color:#64748b;font-size:9px}
+@media(max-width:760px){.asistencia-rango-fechas{width:100%}.asistencia-rango-fechas label{flex:1;min-width:135px}.asistencia-acciones-periodo{width:100%}.asistencia-acciones-periodo button{flex:1}.modal-detalle-periodo{width:98vw}}
