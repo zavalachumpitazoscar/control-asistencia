@@ -3871,6 +3871,116 @@ JORNADA JUSTIFICADA POR PERMISO
   padding: 16px;
   background: rgba(15, 23, 42, 0.58);
 }
+#modalVistaPreviaReporteAsistencia {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10020;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+}
+.modal-vista-previa-reporte {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(1480px, 98vw);
+  height: min(940px, 96vh);
+  overflow: hidden;
+  border-radius: 16px;
+  background: #f1f5f9;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.3);
+}
+.vista-previa-reporte-barra,
+.vista-previa-reporte-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 20px;
+  background: #fff;
+}
+.vista-previa-reporte-barra {
+  border-bottom: 1px solid #dbe3ee;
+}
+.vista-previa-reporte-barra h3 {
+  margin: 2px 0;
+  color: #0f172a;
+  font-size: 17px;
+}
+.vista-previa-reporte-barra p {
+  margin: 0;
+  color: #64748b;
+  font-size: 10px;
+}
+.vista-previa-reporte-barra .btn-cerrar-modal {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #475569;
+  cursor: pointer;
+}
+.vista-previa-reporte-lienzo {
+  min-width: 0;
+  overflow: auto;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 10% 0, rgba(99, 102, 241, 0.07), transparent 30%),
+    #e8edf4;
+}
+.vista-previa-reporte-pie {
+  border-top: 1px solid #dbe3ee;
+}
+.vista-previa-reporte-pie > div {
+  display: flex;
+  gap: 9px;
+}
+.btn-descarga-final {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.btn-descarga-final.excel {
+  background: #15803d;
+}
+.btn-descarga-final.pdf {
+  background: #dc2626;
+}
+.aviso-vista-previa-reporte {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #c7d2fe;
+  border-radius: 11px;
+  background: #eef2ff;
+  color: #4338ca;
+}
+.aviso-vista-previa-reporte > i {
+  font-size: 21px;
+}
+.aviso-vista-previa-reporte > div {
+  display: grid;
+  gap: 2px;
+}
+.aviso-vista-previa-reporte small {
+  color: #64748b;
+  font-size: 9px;
+}
 .modal-descarga-reporte {
   width: min(560px, 96vw);
   overflow: hidden;
