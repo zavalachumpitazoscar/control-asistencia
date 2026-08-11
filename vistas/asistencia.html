@@ -1,2136 +1,1534 @@
 <section class="asistencia">
-
-
-    
-    <!-- =========================================
+  <!-- =========================================
          ENCABEZADO
     ========================================== -->
 
-    <div class="asistencia-encabezado">
+  <div class="asistencia-encabezado">
+    <div>
+      <span class="asistencia-etiqueta"> Control de asistencia </span>
 
-        <div>
+      <h2>Asistencia</h2>
 
-            <span class="asistencia-etiqueta">
-                Control de asistencia
-            </span>
-
-            <h2>
-                Asistencia
-            </h2>
-
-            <p>
-                Consulta marcaciones, tardanzas, permisos e incidencias de los colaboradores.
-            </p>
-
-        </div>
-
-
-        <div class="asistencia-acciones-encabezado">
-
-            <button
-                type="button"
-                class="btn-asistencia-secundario"
-            >
-
-                <i class="bi bi-arrow-clockwise"></i>
-
-                Recalcular
-
-            </button>
-
-
-            <button
-                type="button"
-                class="btn-asistencia-principal"
-            >
-
-                <i class="bi bi-plus-lg"></i>
-
-                Registrar marcación
-
-            </button>
-
-        </div>
-
+      <p>
+        Consulta marcaciones, tardanzas, permisos e incidencias de los
+        colaboradores.
+      </p>
     </div>
 
+    <div class="asistencia-acciones-encabezado">
+      <button type="button" class="btn-asistencia-secundario">
+        <i class="bi bi-arrow-clockwise"></i>
 
+        Recalcular
+      </button>
 
-    <!-- =========================================
+      <button type="button" class="btn-asistencia-principal">
+        <i class="bi bi-plus-lg"></i>
+
+        Registrar marcación
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================
          PESTAÑAS
     ========================================== -->
 
-    <div class="asistencia-tabs">
+  <div class="asistencia-tabs">
+    <button type="button" class="asistencia-tab activo" data-tab="resumen">
+      <i class="bi bi-grid-1x2"></i>
 
-        <button
-            type="button"
-            class="asistencia-tab activo"
-            data-tab="resumen"
-        >
+      <span> Resumen diario </span>
+    </button>
 
-            <i class="bi bi-grid-1x2"></i>
+    <button type="button" class="asistencia-tab" data-tab="mensual">
+      <i class="bi bi-calendar3"></i>
+      <span>Resumen mensual</span>
+    </button>
 
-            <span>
-                Resumen diario
-            </span>
+    <button type="button" class="asistencia-tab" data-tab="marcaciones">
+      <i class="bi bi-fingerprint"></i>
 
-        </button>
+      <span> Marcaciones </span>
+    </button>
 
+    <button type="button" class="asistencia-tab" data-tab="incidencias">
+      <i class="bi bi-exclamation-triangle"></i>
 
-        <button
-            type="button"
-            class="asistencia-tab"
-            data-tab="mensual"
-        >
-            <i class="bi bi-calendar3"></i>
-            <span>Resumen mensual</span>
-        </button>
+      <span> Incidencias </span>
+    </button>
 
+    <button type="button" class="asistencia-tab" data-tab="regularizaciones">
+      <i class="bi bi-pencil-square"></i>
 
-        <button
-            type="button"
-            class="asistencia-tab"
-            data-tab="marcaciones"
-        >
+      <span> Regularizaciones </span>
+    </button>
 
-            <i class="bi bi-fingerprint"></i>
+    <button type="button" class="asistencia-tab" data-tab="cierres">
+      <i class="bi bi-lock"></i>
 
-            <span>
-                Marcaciones
-            </span>
+      <span> Cierres </span>
+    </button>
+  </div>
 
-        </button>
-
-
-        <button
-            type="button"
-            class="asistencia-tab"
-            data-tab="incidencias"
-        >
-
-            <i class="bi bi-exclamation-triangle"></i>
-
-            <span>
-                Incidencias
-            </span>
-
-        </button>
-
-
-        <button
-            type="button"
-            class="asistencia-tab"
-            data-tab="regularizaciones"
-        >
-
-            <i class="bi bi-pencil-square"></i>
-
-            <span>
-                Regularizaciones
-            </span>
-
-        </button>
-
-
-        <button
-            type="button"
-            class="asistencia-tab"
-            data-tab="cierres"
-        >
-
-            <i class="bi bi-lock"></i>
-
-            <span>
-                Cierres
-            </span>
-
-        </button>
-
-    </div>
-
-
-
-    <!-- =========================================
+  <!-- =========================================
          CONTENIDO DE RESUMEN DIARIO
     ========================================== -->
 
-    <div
-        class="asistencia-contenido asistencia-panel-tab activo"
-        data-contenido-tab="resumen"
-    >
-
-
-        <!-- =====================================
+  <div
+    class="asistencia-contenido asistencia-panel-tab activo"
+    data-contenido-tab="resumen"
+  >
+    <!-- =====================================
              FILTROS PRINCIPALES
         ====================================== -->
 
-        <div class="asistencia-filtros">
+    <div class="asistencia-filtros">
+      <!-- FECHA -->
 
+      <div class="asistencia-selector-fecha">
+        <button
+          type="button"
+          class="btn-fecha-navegacion"
+          id="btnDiaAnteriorAsistencia"
+          title="Día anterior"
+        >
+          <i class="bi bi-chevron-left"></i>
+        </button>
 
-            <!-- FECHA -->
+        <div class="asistencia-fecha-actual">
+          <span> Fecha seleccionada </span>
 
-<div class="asistencia-selector-fecha">
-
-    <button
-        type="button"
-        class="btn-fecha-navegacion"
-        id="btnDiaAnteriorAsistencia"
-        title="Día anterior"
-    >
-
-        <i class="bi bi-chevron-left"></i>
-
-    </button>
-
-
-    <div class="asistencia-fecha-actual">
-
-        <span>
-            Fecha seleccionada
-        </span>
-
-        <strong id="fechaActualAsistencia">
+          <strong id="fechaActualAsistencia">
             Viernes, 17 de julio de 2026
-        </strong>
-
-    </div>
-
-    <label class="asistencia-ir-fecha" title="Elegir una fecha del calendario">
-        <i class="bi bi-calendar3"></i>
-        <span>Ir a fecha</span>
-        <input type="date" id="selectorFechaAsistencia">
-    </label>
-
-
-    <button
-        type="button"
-        class="btn-fecha-navegacion"
-        id="btnDiaSiguienteAsistencia"
-        title="Día siguiente"
-    >
-
-        <i class="bi bi-chevron-right"></i>
-
-    </button>
-
-
-    <button
-        type="button"
-        class="btn-asistencia-hoy"
-        id="btnHoyAsistencia"
-    >
-        Hoy
-    </button>
-
-</div>
-
-
-
-            <!-- BUSCADOR -->
-
-            <div class="asistencia-buscador">
-
-                <i class="bi bi-search"></i>
-
-           <input type="text" id="buscarResumenAsistencia"
-           placeholder="Buscar colaborador o documento...">
-
-            </div>
-
+          </strong>
         </div>
 
+        <label
+          class="asistencia-ir-fecha"
+          title="Elegir una fecha del calendario"
+        >
+          <i class="bi bi-calendar3"></i>
+          <span>Ir a fecha</span>
+          <input type="date" id="selectorFechaAsistencia" />
+        </label>
 
+        <button
+          type="button"
+          class="btn-fecha-navegacion"
+          id="btnDiaSiguienteAsistencia"
+          title="Día siguiente"
+        >
+          <i class="bi bi-chevron-right"></i>
+        </button>
 
-        <!-- =====================================
+        <button type="button" class="btn-asistencia-hoy" id="btnHoyAsistencia">
+          Hoy
+        </button>
+      </div>
+
+      <!-- BUSCADOR -->
+
+      <div class="asistencia-buscador">
+        <i class="bi bi-search"></i>
+
+        <input
+          type="text"
+          id="buscarResumenAsistencia"
+          placeholder="Buscar colaborador o documento..."
+        />
+      </div>
+    </div>
+
+    <!-- =====================================
              FILTROS SECUNDARIOS
         ====================================== -->
 
-        <div class="asistencia-filtros-secundarios">
+    <div class="asistencia-filtros-secundarios">
+      <div class="campo-filtro-asistencia">
+        <label> Sucursal </label>
 
-            <div class="campo-filtro-asistencia">
+        <select id="filtroSucursalAsistencia">
+          <option value="">Todas las sucursales</option>
+        </select>
+      </div>
 
-                <label>
-                    Sucursal
-                </label>
+      <div class="campo-filtro-asistencia">
+        <label> Área </label>
 
-<select id="filtroSucursalAsistencia">
+        <select id="filtroAreaAsistencia">
+          <option value="">Todas las áreas</option>
+        </select>
+      </div>
 
-    <option value="">
-        Todas las sucursales
-    </option>
+      <div class="campo-filtro-asistencia">
+        <label> Subárea </label>
 
-</select>
+        <select id="filtroSubareaAsistencia">
+          <option value="">Todas las subáreas</option>
+        </select>
+      </div>
 
-            </div>
+      <div class="campo-filtro-asistencia">
+        <label> Estado </label>
 
+        <select id="filtroEstadoAsistencia">
+          <option value="">Todos los estados</option>
 
-            <div class="campo-filtro-asistencia">
+          <option value="PRESENTE">Presentes</option>
 
-                <label>
-                    Área
-                </label>
+          <option value="TARDANZA">Tardanzas</option>
 
-<select id="filtroAreaAsistencia">
+          <option value="AUSENTE">Ausentes</option>
 
-    <option value="">
-        Todas las áreas
-    </option>
+          <option value="INCOMPLETO">Incompletos</option>
 
-</select>
+          <option value="CON_PERMISO">Con permiso</option>
 
-            </div>
+          <option value="FERIADO">Descanso por feriado</option>
 
+          <option value="TRABAJO_EN_FERIADO">Trabajo en feriado</option>
 
-            <div class="campo-filtro-asistencia">
+          <option value="FERIADO_PENDIENTE">Feriado por configurar</option>
 
-                <label>
-                    Subárea
-                </label>
+          <option value="DESCANSO_SUSTITUTORIO">Descanso sustitutorio</option>
 
-<select id="filtroSubareaAsistencia">
+          <option value="SIN_HORARIO">Sin horario</option>
+        </select>
+      </div>
 
-    <option value="">
-        Todas las subáreas
-    </option>
+      <button
+        type="button"
+        class="btn-limpiar-filtros-asistencia"
+        id="btnLimpiarFiltrosAsistencia"
+      >
+        <i class="bi bi-funnel"></i>
 
-</select>
+        Limpiar filtros
+      </button>
+    </div>
 
-            </div>
-
-
-            <div class="campo-filtro-asistencia">
-
-                <label>
-                    Estado
-                </label>
-
-<select id="filtroEstadoAsistencia">
-
-    <option value="">
-        Todos los estados
-    </option>
-
-    <option value="PRESENTE">
-        Presentes
-    </option>
-
-    <option value="TARDANZA">
-        Tardanzas
-    </option>
-
-    <option value="AUSENTE">
-        Ausentes
-    </option>
-
-    <option value="INCOMPLETO">
-        Incompletos
-    </option>
-
-    <option value="CON_PERMISO">
-        Con permiso
-    </option>
-
-    <option value="FERIADO">
-        Descanso por feriado
-    </option>
-
-    <option value="TRABAJO_EN_FERIADO">
-        Trabajo en feriado
-    </option>
-
-    <option value="FERIADO_PENDIENTE">
-        Feriado por configurar
-    </option>
-
-    <option value="DESCANSO_SUSTITUTORIO">
-        Descanso sustitutorio
-    </option>
-
-    <option value="SIN_HORARIO">
-        Sin horario
-    </option>
-
-</select>
-
-            </div>
-
-
-            <button type="button" class="btn-limpiar-filtros-asistencia" id="btnLimpiarFiltrosAsistencia">
-
-                <i class="bi bi-funnel"></i>
-
-                Limpiar filtros
-
-            </button>
-
-        </div>
-
-
-
-        <!-- =====================================
+    <!-- =====================================
              TARJETAS DE RESUMEN
         ====================================== -->
 
-        <div class="asistencia-resumen">
-
-
-            <!-- PROGRAMADOS -->
-
-            <button
-                type="button"
-                class="asistencia-resumen-card"
-            >
-
-                <div class="resumen-card-icono programados">
-
-                    <i class="bi bi-people"></i>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        Programados
-                    </span>
-
-<strong id="totalProgramadosAsistencia">
-    0
-</strong>
-
-                    <small>
-                        Colaboradores con horario
-                    </small>
-
-                </div>
-
-            </button>
-
-
-
-            <!-- PRESENTES -->
-
-            <button
-                type="button"
-                class="asistencia-resumen-card"
-            >
-
-                <div class="resumen-card-icono presentes">
-
-                    <i class="bi bi-person-check"></i>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        Presentes
-                    </span>
-
-<strong id="totalPresentesAsistencia">
-    0
-</strong>
-
-                    <small>
-                        Ingresaron correctamente
-                    </small>
-
-                </div>
-
-            </button>
-
-
-
-            <!-- TARDANZAS -->
-
-            <button
-                type="button"
-                class="asistencia-resumen-card"
-            >
-
-                <div class="resumen-card-icono tardanzas">
-
-                    <i class="bi bi-clock-history"></i>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        Tardanzas
-                    </span>
-
-<strong id="totalTardanzasAsistencia">
-    0
-</strong>
-
-                    <small>
-                        Fuera de tolerancia
-                    </small>
-
-                </div>
-
-            </button>
-
-
-
-            <!-- AUSENTES -->
-
-            <button
-                type="button"
-                class="asistencia-resumen-card"
-            >
-
-                <div class="resumen-card-icono ausentes">
-
-                    <i class="bi bi-person-x"></i>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        Ausentes
-                    </span>
-
-<strong id="totalAusentesAsistencia">
-    0
-</strong>
-
-                    <small>
-                        Sin marcación ni permiso
-                    </small>
-
-                </div>
-
-            </button>
-
-
-
-            <!-- PERMISOS -->
-
-            <button
-                type="button"
-                class="asistencia-resumen-card"
-            >
-
-                <div class="resumen-card-icono permisos">
-
-                    <i class="bi bi-calendar-check"></i>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        Con permiso
-                    </span>
-
-<strong id="totalPermisosAsistencia">
-    0
-</strong>
-
-                    <small>
-                        Permisos aprobados
-                    </small>
-
-                </div>
-
-            </button>
-
-
-
-            <!-- INCOMPLETOS -->
-
-            <button
-                type="button"
-                class="asistencia-resumen-card"
-            >
-
-                <div class="resumen-card-icono incompletos">
-
-                    <i class="bi bi-exclamation-circle"></i>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        Incompletos
-                    </span>
-
-<strong id="totalIncompletosAsistencia">
-    0
-</strong>
-
-                    <small>
-                        Falta entrada o salida
-                    </small>
-
-                </div>
-
-            </button>
-
+    <div class="asistencia-resumen">
+      <!-- PROGRAMADOS -->
+
+      <button type="button" class="asistencia-resumen-card">
+        <div class="resumen-card-icono programados">
+          <i class="bi bi-people"></i>
         </div>
 
+        <div>
+          <span> Programados </span>
 
+          <strong id="totalProgramadosAsistencia"> 0 </strong>
 
-        <!-- =====================================
+          <small> Colaboradores con horario </small>
+        </div>
+      </button>
+
+      <!-- PRESENTES -->
+
+      <button type="button" class="asistencia-resumen-card">
+        <div class="resumen-card-icono presentes">
+          <i class="bi bi-person-check"></i>
+        </div>
+
+        <div>
+          <span> Presentes </span>
+
+          <strong id="totalPresentesAsistencia"> 0 </strong>
+
+          <small> Ingresaron correctamente </small>
+        </div>
+      </button>
+
+      <!-- TARDANZAS -->
+
+      <button type="button" class="asistencia-resumen-card">
+        <div class="resumen-card-icono tardanzas">
+          <i class="bi bi-clock-history"></i>
+        </div>
+
+        <div>
+          <span> Tardanzas </span>
+
+          <strong id="totalTardanzasAsistencia"> 0 </strong>
+
+          <small> Fuera de tolerancia </small>
+        </div>
+      </button>
+
+      <!-- AUSENTES -->
+
+      <button type="button" class="asistencia-resumen-card">
+        <div class="resumen-card-icono ausentes">
+          <i class="bi bi-person-x"></i>
+        </div>
+
+        <div>
+          <span> Ausentes </span>
+
+          <strong id="totalAusentesAsistencia"> 0 </strong>
+
+          <small> Sin marcación ni permiso </small>
+        </div>
+      </button>
+
+      <!-- PERMISOS -->
+
+      <button type="button" class="asistencia-resumen-card">
+        <div class="resumen-card-icono permisos">
+          <i class="bi bi-calendar-check"></i>
+        </div>
+
+        <div>
+          <span> Con permiso </span>
+
+          <strong id="totalPermisosAsistencia"> 0 </strong>
+
+          <small> Permisos aprobados </small>
+        </div>
+      </button>
+
+      <!-- INCOMPLETOS -->
+
+      <button type="button" class="asistencia-resumen-card">
+        <div class="resumen-card-icono incompletos">
+          <i class="bi bi-exclamation-circle"></i>
+        </div>
+
+        <div>
+          <span> Incompletos </span>
+
+          <strong id="totalIncompletosAsistencia"> 0 </strong>
+
+          <small> Falta entrada o salida </small>
+        </div>
+      </button>
+    </div>
+
+    <!-- =====================================
              TABLA DE ASISTENCIA
         ====================================== -->
 
-        <div class="asistencia-tabla-card">
+    <div class="asistencia-tabla-card">
+      <!-- CABECERA DE LA TABLA -->
 
+      <div class="asistencia-tabla-header">
+        <div>
+          <h3>Resumen del día</h3>
 
-            <!-- CABECERA DE LA TABLA -->
+          <p>Mostrando el estado de asistencia de los colaboradores.</p>
+        </div>
 
-            <div class="asistencia-tabla-header">
+        <div class="asistencia-tabla-opciones">
+          <button
+            type="button"
+            class="btn-tabla-asistencia"
+            id="btnImportarMarcaciones"
+          >
+            <i class="bi bi-upload"></i>
+            Importar
+          </button>
 
-                <div>
+          <button
+            type="button"
+            class="btn-tabla-asistencia"
+            id="btnExportarMarcaciones"
+          >
+            <i class="bi bi-download"></i>
+            Exportar
+          </button>
 
-                    <h3>
-                        Resumen del día
-                    </h3>
+          <button
+            type="button"
+            class="btn-tabla-asistencia solo-icono"
+            title="Configurar columnas"
+          >
+            <i class="bi bi-sliders"></i>
+          </button>
+        </div>
+      </div>
 
-                    <p>
-                        Mostrando el estado de asistencia de los colaboradores.
-                    </p>
+      <!-- CONTENEDOR RESPONSIVE -->
 
-                </div>
+      <div class="asistencia-tabla-contenedor">
+        <table class="asistencia-tabla">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
 
+              <th>Horario</th>
 
-                <div class="asistencia-tabla-opciones">
+              <th>Entrada</th>
 
-                    <button type="button" class="btn-tabla-asistencia" id="btnImportarMarcaciones">
-                        <i class="bi bi-upload"></i>
-                        Importar
-                    </button>
+              <th>Inicio refrigerio</th>
 
-                    <button type="button" class="btn-tabla-asistencia" id="btnExportarMarcaciones">
-                        <i class="bi bi-download"></i>
-                        Exportar
-                    </button>
+              <th>Fin refrigerio</th>
 
+              <th>Salida</th>
 
-                    <button
-                        type="button"
-                        class="btn-tabla-asistencia solo-icono"
-                        title="Configurar columnas"
-                    >
+              <th>Estado</th>
 
-                        <i class="bi bi-sliders"></i>
+              <th>Tardanza</th>
 
-                    </button>
+              <th>Tolerancia</th>
 
-                </div>
+              <th>Horas trabajadas</th>
 
-            </div>
+              <th>Jornada</th>
 
+              <th>Horas extra</th>
 
+              <th class="columna-acciones-asistencia">Acciones</th>
+            </tr>
+          </thead>
 
-            <!-- CONTENEDOR RESPONSIVE -->
+          <tbody id="cuerpoResumenAsistencia">
+            <tr>
+              <td colspan="13" class="asistencia-tabla-vacia">
+                Cargando colaboradores...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-            <div class="asistencia-tabla-contenedor">
+      <!-- PIE DE TABLA -->
 
-                <table class="asistencia-tabla">
+      <div class="asistencia-tabla-footer">
+        <span id="informacionPaginacionAsistencia">
+          Mostrando 0 - 0 de 0 colaboradores
+        </span>
 
-                    <thead>
+        <div class="asistencia-paginacion" hidden>
+          <button type="button" disabled>
+            <i class="bi bi-chevron-left"></i>
+          </button>
 
-                        <tr>
+          <button type="button" class="activo">1</button>
 
-                            <th>
-                                Colaborador
-                            </th>
+          <button type="button">2</button>
 
-                            <th>
-                                Horario
-                            </th>
+          <button type="button">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-                            <th>
-                               Entrada
-                            </th>
+  <!-- RESUMEN MENSUAL -->
 
-                            <th>
-                               Inicio refrigerio
-                            </th>
+  <div class="asistencia-panel-tab" data-contenido-tab="mensual">
+    <div class="asistencia-seccion-cabecera">
+      <div>
+        <span class="asistencia-seccion-etiqueta">Reporte por período</span>
+        <h3>Resumen de asistencia</h3>
+        <p>
+          Revisa la asistencia acumulada de cada colaborador en el rango de
+          fechas que necesites.
+        </p>
+      </div>
+    </div>
 
-                            <th>
-                               Fin refrigerio
-                            </th>
+    <div class="reporte-periodo-controles">
+      <div class="reporte-periodo-principal">
+        <div class="reporte-periodo-titulo">
+          <i class="bi bi-calendar-range"></i>
+          <div>
+            <strong>Período del reporte</strong
+            ><span>Selecciona la fecha inicial y final</span>
+          </div>
+        </div>
+        <div class="asistencia-rango-fechas">
+          <label
+            ><span>Desde</span><input type="date" id="fechaDesdeResumenMensual"
+          /></label>
+          <span class="reporte-separador-fechas"
+            ><i class="bi bi-arrow-right"></i
+          ></span>
+          <label
+            ><span>Hasta</span><input type="date" id="fechaHastaResumenMensual"
+          /></label>
+          <button
+            type="button"
+            class="btn-reporte-consultar"
+            id="btnAplicarRangoResumenMensual"
+          >
+            <i class="bi bi-search"></i> Consultar
+          </button>
+        </div>
+      </div>
+      <div class="reporte-periodo-accesos">
+        <span>Acceso rápido</span>
+        <div>
+          <button
+            type="button"
+            class="btn-periodo-rapido"
+            id="btnMesActualResumenMensual"
+          >
+            Mes actual
+          </button>
+          <button
+            type="button"
+            class="btn-periodo-rapido"
+            id="btnMesAnteriorResumenMensual"
+          >
+            Mes anterior
+          </button>
+        </div>
+      </div>
+    </div>
 
-                            <th>
-                               Salida
-                            </th>
+    <div class="asistencia-resumen asistencia-resumen-mensual">
+      <div class="asistencia-resumen-card">
+        <div class="resumen-card-icono programados">
+          <i class="bi bi-calendar2-week"></i>
+        </div>
+        <div>
+          <span>Días programados</span
+          ><strong id="totalDiasProgramadosMensual">—</strong
+          ><small>Total del periodo</small>
+        </div>
+      </div>
+      <div class="asistencia-resumen-card">
+        <div class="resumen-card-icono presentes">
+          <i class="bi bi-person-check"></i>
+        </div>
+        <div>
+          <span>Asistencias</span><strong id="totalAsistenciasMensual">—</strong
+          ><small>Jornadas con presencia</small>
+        </div>
+      </div>
+      <div class="asistencia-resumen-card">
+        <div class="resumen-card-icono tardanzas">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <div>
+          <span>Tardanzas</span><strong id="totalTardanzasMensual">—</strong
+          ><small>Fuera de tolerancia</small>
+        </div>
+      </div>
+      <div class="asistencia-resumen-card">
+        <div class="resumen-card-icono ausentes">
+          <i class="bi bi-person-x"></i>
+        </div>
+        <div>
+          <span>Ausencias</span><strong id="totalAusenciasMensual">—</strong
+          ><small>Sin permiso aprobado</small>
+        </div>
+      </div>
+    </div>
 
-                            <th>
-                                Estado
-                            </th>
+    <div class="asistencia-tabla-card">
+      <div class="asistencia-tabla-header">
+        <div>
+          <h3>Resultados por colaborador</h3>
+          <p id="descripcionResumenMensual">
+            Selecciona un período para generar el reporte.
+          </p>
+        </div>
+        <div class="reporte-tabla-acciones">
+          <div class="asistencia-buscador reporte-buscador">
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              id="buscarResumenMensualAsistencia"
+              placeholder="Buscar nombre o documento"
+            />
+          </div>
+          <button
+            type="button"
+            class="btn-reporte-icono"
+            id="btnActualizarResumenMensual"
+            title="Actualizar reporte"
+          >
+            <i class="bi bi-arrow-clockwise"></i><span>Actualizar</span>
+          </button>
+          <button
+            type="button"
+            class="btn-asistencia-exportar excel"
+            id="btnExportarExcelResumenMensual"
+          >
+            <i class="bi bi-file-earmark-spreadsheet"></i> Excel
+          </button>
+          <button
+            type="button"
+            class="btn-asistencia-exportar pdf"
+            id="btnExportarPdfResumenMensual"
+          >
+            <i class="bi bi-file-earmark-pdf"></i> PDF
+          </button>
+        </div>
+      </div>
+      <div class="asistencia-tabla-contenedor">
+        <table class="asistencia-tabla asistencia-tabla-mensual">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Días<br />programados</th>
+              <th>Días<br />asistidos</th>
+              <th>Tardanzas</th>
+              <th>Ausencias</th>
+              <th>Permisos</th>
+              <th>Horas<br />trabajadas</th>
+              <th>Horas<br />justificadas</th>
+              <th>Horas extra<br />aprobadas</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoResumenMensualAsistencia">
+            <tr>
+              <td colspan="10" class="asistencia-tabla-vacia">
+                Selecciona un período para calcular el resumen.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-                            <th>
-                                Tardanza
-                            </th>
-
-                            <th>
-                                Tolerancia
-                            </th>
-
-                            <th>
-                                Horas trabajadas
-                            </th>
-
-                            <th>
-                                Jornada
-                            </th>
-
-                            <th>
-                                Horas extra
-                            </th>
-
-                            <th class="columna-acciones-asistencia">
-                                Acciones
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-<tbody id="cuerpoResumenAsistencia">
-
-    <tr>
-
-        <td
-            colspan="13"
-            class="asistencia-tabla-vacia"
+  <div id="modalDetallePeriodoAsistencia" class="modal" aria-hidden="true">
+    <div class="modal-contenido modal-detalle-periodo">
+      <div class="modal-header">
+        <div>
+          <span class="asistencia-seccion-etiqueta">Asistencia por día</span>
+          <h3 id="tituloDetallePeriodoAsistencia">—</h3>
+          <p id="subtituloDetallePeriodoAsistencia">—</p>
+        </div>
+        <button
+          type="button"
+          class="btn-cerrar-modal"
+          id="btnCerrarDetallePeriodoAsistencia"
+          aria-label="Cerrar"
         >
-            Cargando colaboradores...
-        </td>
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="asistencia-tabla-contenedor">
+        <table class="asistencia-tabla asistencia-tabla-detalle-periodo">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Entrada</th>
+              <th>Inicio de<br />refrigerio</th>
+              <th>Fin de<br />refrigerio</th>
+              <th>Salida</th>
+              <th>Tardanza</th>
+              <th>Horas<br />trabajadas</th>
+              <th>Horas<br />justificadas</th>
+              <th>Horas extra<br />aprobadas</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoDetallePeriodoAsistencia"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn-asistencia-secundario"
+          id="btnCerrarDetallePeriodoAsistenciaFooter"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 
-    </tr>
+  <!-- MARCACIONES -->
 
-</tbody>
-
-                </table>
-
-            </div>
-
-
-
-            <!-- PIE DE TABLA -->
-
-            <div class="asistencia-tabla-footer">
-
-<span id="informacionPaginacionAsistencia">
-    Mostrando 0 - 0 de 0 colaboradores
-</span>
-
-
-                <div class="asistencia-paginacion" hidden>
-
-                    <button
-                        type="button"
-                        disabled
-                    >
-
-                        <i class="bi bi-chevron-left"></i>
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="activo"
-                    >
-                        1
-                    </button>
-
-
-                    <button
-                        type="button"
-                    >
-                        2
-                    </button>
-
-
-                    <button
-                        type="button"
-                    >
-
-                        <i class="bi bi-chevron-right"></i>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
+  <div class="asistencia-panel-tab" data-contenido-tab="marcaciones">
+    <div class="asistencia-seccion-cabecera">
+      <div>
+        <span class="asistencia-seccion-etiqueta">Historial del día</span>
+        <h3>Marcaciones registradas</h3>
+        <p>
+          Muestra cada registro importado o agregado manualmente para la fecha
+          seleccionada.
+        </p>
+      </div>
+      <span class="asistencia-estado-desarrollo listo"
+        ><i class="bi bi-check-circle"></i> Datos sincronizados</span
+      >
     </div>
 
-
-
-    <!-- RESUMEN MENSUAL -->
-
-    <div class="asistencia-panel-tab" data-contenido-tab="mensual">
-        <div class="asistencia-seccion-cabecera">
-            <div>
-                <span class="asistencia-seccion-etiqueta">Consolidado mensual</span>
-                <h3>Resumen por colaborador</h3>
-                <p>Consulta jornadas, asistencias, tardanzas, permisos y horas acumuladas del mes.</p>
-            </div>
-            <label class="asistencia-selector-mes">
-                <i class="bi bi-calendar-month"></i>
-                <span>Mes de consulta</span>
-                <input type="month" id="selectorMesAsistencia">
-            </label>
+    <div class="asistencia-filtros asistencia-filtros-marcaciones">
+      <div class="asistencia-selector-fecha">
+        <button
+          type="button"
+          class="btn-fecha-navegacion"
+          id="btnDiaAnteriorMarcaciones"
+          title="Día anterior"
+        >
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="asistencia-fecha-actual">
+          <span>Fecha seleccionada</span
+          ><strong id="fechaActualMarcaciones">—</strong>
         </div>
-
-        <div class="asistencia-filtros asistencia-filtros-mensuales">
-            <div class="asistencia-buscador">
-                <i class="bi bi-search"></i>
-                <input type="text" id="buscarResumenMensualAsistencia" placeholder="Buscar colaborador o documento...">
-            </div>
-            <button type="button" class="btn-asistencia-secundario" id="btnActualizarResumenMensual">
-                <i class="bi bi-arrow-clockwise"></i> Actualizar mes
-            </button>
-        </div>
-
-        <div class="asistencia-resumen asistencia-resumen-mensual">
-            <div class="asistencia-resumen-card">
-                <div class="resumen-card-icono programados"><i class="bi bi-calendar2-week"></i></div>
-                <div><span>Días programados</span><strong id="totalDiasProgramadosMensual">—</strong><small>Total del periodo</small></div>
-            </div>
-            <div class="asistencia-resumen-card">
-                <div class="resumen-card-icono presentes"><i class="bi bi-person-check"></i></div>
-                <div><span>Asistencias</span><strong id="totalAsistenciasMensual">—</strong><small>Jornadas con presencia</small></div>
-            </div>
-            <div class="asistencia-resumen-card">
-                <div class="resumen-card-icono tardanzas"><i class="bi bi-clock-history"></i></div>
-                <div><span>Tardanzas</span><strong id="totalTardanzasMensual">—</strong><small>Fuera de tolerancia</small></div>
-            </div>
-            <div class="asistencia-resumen-card">
-                <div class="resumen-card-icono ausentes"><i class="bi bi-person-x"></i></div>
-                <div><span>Ausencias</span><strong id="totalAusenciasMensual">—</strong><small>Sin permiso aprobado</small></div>
-            </div>
-        </div>
-
-        <div class="asistencia-tabla-card">
-            <div class="asistencia-tabla-header">
-                <div><h3>Detalle mensual</h3><p id="descripcionResumenMensual">Consolidado de jornadas calculadas con las reglas de asistencia.</p></div>
-                <span class="asistencia-estado-desarrollo listo"><i class="bi bi-check-circle"></i> Cálculo sincronizado</span>
-            </div>
-            <div class="asistencia-tabla-contenedor">
-                <table class="asistencia-tabla asistencia-tabla-mensual">
-                    <thead><tr><th>Colaborador</th><th>Días programados</th><th>Asistencias</th><th>Tardanzas</th><th>Ausencias</th><th>Permisos</th><th>Horas trabajadas</th><th>Horas justificadas</th><th>Horas extra aprobadas</th></tr></thead>
-                    <tbody id="cuerpoResumenMensualAsistencia"><tr><td colspan="9" class="asistencia-tabla-vacia">Selecciona un mes para calcular el resumen.</td></tr></tbody>
-                </table>
-            </div>
-        </div>
+        <label
+          class="asistencia-ir-fecha"
+          title="Elegir una fecha del calendario"
+        >
+          <i class="bi bi-calendar3"></i>
+          <span>Ir a fecha</span>
+          <input type="date" id="selectorFechaMarcaciones" />
+        </label>
+        <button
+          type="button"
+          class="btn-fecha-navegacion"
+          id="btnDiaSiguienteMarcaciones"
+          title="Día siguiente"
+        >
+          <i class="bi bi-chevron-right"></i>
+        </button>
+        <button type="button" class="btn-asistencia-hoy" id="btnHoyMarcaciones">
+          Hoy
+        </button>
+      </div>
+      <div class="asistencia-buscador">
+        <i class="bi bi-search"></i
+        ><input
+          type="text"
+          id="buscarMarcacionesAsistencia"
+          placeholder="Buscar colaborador o documento..."
+        />
+      </div>
     </div>
 
-
-    <!-- MARCACIONES -->
-
-    <div class="asistencia-panel-tab" data-contenido-tab="marcaciones">
-        <div class="asistencia-seccion-cabecera">
-            <div>
-                <span class="asistencia-seccion-etiqueta">Historial del día</span>
-                <h3>Marcaciones registradas</h3>
-                <p>Muestra cada registro importado o agregado manualmente para la fecha seleccionada.</p>
-            </div>
-            <span class="asistencia-estado-desarrollo listo"><i class="bi bi-check-circle"></i> Datos sincronizados</span>
+    <div class="asistencia-tabla-card">
+      <div class="asistencia-tabla-header">
+        <div>
+          <h3>Historial de marcaciones</h3>
+          <p>Una fila por cada hora registrada, ordenada cronológicamente.</p>
         </div>
-
-        <div class="asistencia-filtros asistencia-filtros-marcaciones">
-            <div class="asistencia-selector-fecha">
-                <button type="button" class="btn-fecha-navegacion" id="btnDiaAnteriorMarcaciones" title="Día anterior"><i class="bi bi-chevron-left"></i></button>
-                <div class="asistencia-fecha-actual"><span>Fecha seleccionada</span><strong id="fechaActualMarcaciones">—</strong></div>
-                <label class="asistencia-ir-fecha" title="Elegir una fecha del calendario">
-                    <i class="bi bi-calendar3"></i>
-                    <span>Ir a fecha</span>
-                    <input type="date" id="selectorFechaMarcaciones">
-                </label>
-                <button type="button" class="btn-fecha-navegacion" id="btnDiaSiguienteMarcaciones" title="Día siguiente"><i class="bi bi-chevron-right"></i></button>
-                <button type="button" class="btn-asistencia-hoy" id="btnHoyMarcaciones">Hoy</button>
-            </div>
-            <div class="asistencia-buscador">
-                <i class="bi bi-search"></i><input type="text" id="buscarMarcacionesAsistencia" placeholder="Buscar colaborador o documento...">
-            </div>
-        </div>
-
-        <div class="asistencia-tabla-card">
-            <div class="asistencia-tabla-header">
-                <div><h3>Historial de marcaciones</h3><p>Una fila por cada hora registrada, ordenada cronológicamente.</p></div>
-            </div>
-            <div class="asistencia-tabla-contenedor">
-                <table class="asistencia-tabla asistencia-tabla-marcaciones">
-                    <thead><tr><th>Colaborador</th><th>Documento</th><th>Fecha</th><th>Hora</th><th>Tipo</th><th>Origen</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody id="cuerpoMarcacionesAsistencia"><tr><td colspan="8" class="asistencia-tabla-vacia">Cargando marcaciones...</td></tr></tbody>
-                </table>
-            </div>
-            <div class="asistencia-tabla-footer">
-                <span id="informacionMarcacionesAsistencia">Mostrando 0 marcaciones</span>
-            </div>
-        </div>
+      </div>
+      <div class="asistencia-tabla-contenedor">
+        <table class="asistencia-tabla asistencia-tabla-marcaciones">
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Documento</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Tipo</th>
+              <th>Origen</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoMarcacionesAsistencia">
+            <tr>
+              <td colspan="8" class="asistencia-tabla-vacia">
+                Cargando marcaciones...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="asistencia-tabla-footer">
+        <span id="informacionMarcacionesAsistencia"
+          >Mostrando 0 marcaciones</span
+        >
+      </div>
     </div>
+  </div>
 
+  <!-- SECCIONES EN PREPARACIÓN -->
 
-    <!-- SECCIONES EN PREPARACIÓN -->
-
-    <div class="asistencia-panel-tab" data-contenido-tab="incidencias">
-        <div class="asistencia-vista-provisional">
-            <div class="asistencia-vista-provisional-icono advertencia"><i class="bi bi-exclamation-triangle"></i></div>
-            <h3>Incidencias</h3>
-            <p>No hay incidencias disponibles. Aquí se revisarán faltas, tardanzas, marcaciones incompletas e inconsistencias.</p>
-        </div>
+  <div class="asistencia-panel-tab" data-contenido-tab="incidencias">
+    <div class="asistencia-vista-provisional">
+      <div class="asistencia-vista-provisional-icono advertencia">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <h3>Incidencias</h3>
+      <p>
+        No hay incidencias disponibles. Aquí se revisarán faltas, tardanzas,
+        marcaciones incompletas e inconsistencias.
+      </p>
     </div>
+  </div>
 
-    <div class="asistencia-panel-tab" data-contenido-tab="regularizaciones">
-        <div class="asistencia-vista-provisional">
-            <div class="asistencia-vista-provisional-icono regularizacion"><i class="bi bi-pencil-square"></i></div>
-            <h3>Regularizaciones</h3>
-            <p>Esta sección permitirá justificar y corregir registros, conservando siempre la marcación original.</p>
-        </div>
+  <div class="asistencia-panel-tab" data-contenido-tab="regularizaciones">
+    <div class="asistencia-vista-provisional">
+      <div class="asistencia-vista-provisional-icono regularizacion">
+        <i class="bi bi-pencil-square"></i>
+      </div>
+      <h3>Regularizaciones</h3>
+      <p>
+        Esta sección permitirá justificar y corregir registros, conservando
+        siempre la marcación original.
+      </p>
     </div>
+  </div>
 
-    <div class="asistencia-panel-tab" data-contenido-tab="cierres">
-        <div class="asistencia-vista-provisional">
-            <div class="asistencia-vista-provisional-icono cierre"><i class="bi bi-lock"></i></div>
-            <h3>Cierres</h3>
-            <p>Esta sección permitirá revisar y cerrar periodos mensuales para evitar modificaciones posteriores.</p>
-        </div>
+  <div class="asistencia-panel-tab" data-contenido-tab="cierres">
+    <div class="asistencia-vista-provisional">
+      <div class="asistencia-vista-provisional-icono cierre">
+        <i class="bi bi-lock"></i>
+      </div>
+      <h3>Cierres</h3>
+      <p>
+        Esta sección permitirá revisar y cerrar periodos mensuales para evitar
+        modificaciones posteriores.
+      </p>
     </div>
+  </div>
 
-
-    <!--======================================
+  <!--======================================
     MODAL EDITAR DÍA DEL COLABORADOR
 =======================================-->
 
-<div
-    id="modalEditarDiaColaborador"
-    class="modal"
->
-
+  <div id="modalEditarDiaColaborador" class="modal">
     <div class="modal-contenido modal-editar-dia-colaborador">
+      <div class="modal-header">
+        <div>
+          <h3 id="tituloEditarDiaColaborador">Editar programación del día</h3>
 
-        <div class="modal-header">
+          <p id="subtituloEditarDiaColaborador">
+            Modifica únicamente esta fecha.
+          </p>
+        </div>
+
+        <button
+          id="cerrarEditarDiaColaborador"
+          type="button"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="editar-dia-body">
+        <!-- INFORMACIÓN DEL DÍA -->
+
+        <div class="resumen-dia-seleccionado">
+          <div class="resumen-dia-icono">
+            <i class="bi bi-calendar-event"></i>
+          </div>
+
+          <div>
+            <span> Fecha seleccionada </span>
+
+            <strong id="fechaEditarDiaColaborador"> -- </strong>
+
+            <p id="nombreEditarDiaColaborador">Colaborador</p>
+          </div>
+        </div>
+
+        <!-- HORARIOS ACTUALES -->
+
+        <div class="seccion-formulario">
+          <div class="titulo-seccion-formulario">
+            <div class="icono-seccion">
+              <i class="bi bi-clock-history"></i>
+            </div>
 
             <div>
+              <h4>Horarios actuales</h4>
 
-                <h3 id="tituloEditarDiaColaborador">
-                    Editar programación del día
-                </h3>
-
-                <p id="subtituloEditarDiaColaborador">
-                    Modifica únicamente esta fecha.
-                </p>
-
+              <p>Programación efectiva antes de aplicar el cambio.</p>
             </div>
+          </div>
 
-
-            <button
-                id="cerrarEditarDiaColaborador"
-                type="button"
-                aria-label="Cerrar"
-            >
-
-                ×
-
-            </button>
-
+          <div
+            id="horariosActualesEditarDia"
+            class="horarios-actuales-editar-dia"
+          ></div>
         </div>
 
+        <!-- TIPO DE CAMBIO -->
 
-        <div class="editar-dia-body">
-
-            <!-- INFORMACIÓN DEL DÍA -->
-
-            <div class="resumen-dia-seleccionado">
-
-                <div class="resumen-dia-icono">
-
-                    <i class="bi bi-calendar-event"></i>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Fecha seleccionada
-                    </span>
-
-                    <strong id="fechaEditarDiaColaborador">
-                        --
-                    </strong>
-
-                    <p id="nombreEditarDiaColaborador">
-                        Colaborador
-                    </p>
-
-                </div>
-
+        <div class="seccion-formulario">
+          <div class="titulo-seccion-formulario">
+            <div class="icono-seccion">
+              <i class="bi bi-sliders"></i>
             </div>
 
+            <div>
+              <h4>Acción para esta fecha</h4>
 
-            <!-- HORARIOS ACTUALES -->
-
-            <div class="seccion-formulario">
-
-                <div class="titulo-seccion-formulario">
-
-                    <div class="icono-seccion">
-
-                        <i class="bi bi-clock-history"></i>
-
-                    </div>
-
-
-                    <div>
-
-                        <h4>
-                            Horarios actuales
-                        </h4>
-
-                        <p>
-                            Programación efectiva antes de aplicar el cambio.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="horariosActualesEditarDia"
-                    class="horarios-actuales-editar-dia"
-                ></div>
-
+              <p>El cambio afectará únicamente al día seleccionado.</p>
             </div>
+          </div>
 
+          <div class="acciones-editar-dia-grid">
+            <label class="accion-editar-dia">
+              <input
+                type="radio"
+                name="accionEditarDia"
+                value="REEMPLAZAR"
+                checked
+              />
 
-            <!-- TIPO DE CAMBIO -->
+              <span>
+                <i class="bi bi-arrow-repeat"></i>
 
-            <div class="seccion-formulario">
+                <strong> Reemplazar horarios </strong>
 
-                <div class="titulo-seccion-formulario">
+                <small>
+                  Ignora la programación original y utiliza los horarios
+                  seleccionados.
+                </small>
+              </span>
+            </label>
 
-                    <div class="icono-seccion">
+            <label class="accion-editar-dia">
+              <input type="radio" name="accionEditarDia" value="AGREGAR" />
 
-                        <i class="bi bi-sliders"></i>
+              <span>
+                <i class="bi bi-plus-circle"></i>
 
-                    </div>
+                <strong> Agregar horarios </strong>
 
+                <small> Conserva los horarios actuales y añade otros. </small>
+              </span>
+            </label>
 
-                    <div>
+            <label class="accion-editar-dia">
+              <input type="radio" name="accionEditarDia" value="SIN_HORARIO" />
 
-                        <h4>
-                            Acción para esta fecha
-                        </h4>
+              <span>
+                <i class="bi bi-calendar-x"></i>
 
-                        <p>
-                            El cambio afectará únicamente al día seleccionado.
-                        </p>
+                <strong> Dejar sin horario </strong>
 
-                    </div>
+                <small> El colaborador no tendrá horario en esta fecha. </small>
+              </span>
+            </label>
 
-                </div>
+            <label class="accion-editar-dia">
+              <input type="radio" name="accionEditarDia" value="RESTAURAR" />
 
+              <span>
+                <i class="bi bi-arrow-counterclockwise"></i>
 
-                <div class="acciones-editar-dia-grid">
+                <strong> Restaurar programación </strong>
 
-                    <label class="accion-editar-dia">
-
-                        <input
-                            type="radio"
-                            name="accionEditarDia"
-                            value="REEMPLAZAR"
-                            checked
-                        >
-
-                        <span>
-
-                            <i class="bi bi-arrow-repeat"></i>
-
-                            <strong>
-                                Reemplazar horarios
-                            </strong>
-
-                            <small>
-                                Ignora la programación original y utiliza los horarios seleccionados.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="accion-editar-dia">
-
-                        <input
-                            type="radio"
-                            name="accionEditarDia"
-                            value="AGREGAR"
-                        >
-
-                        <span>
-
-                            <i class="bi bi-plus-circle"></i>
-
-                            <strong>
-                                Agregar horarios
-                            </strong>
-
-                            <small>
-                                Conserva los horarios actuales y añade otros.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="accion-editar-dia">
-
-                        <input
-                            type="radio"
-                            name="accionEditarDia"
-                            value="SIN_HORARIO"
-                        >
-
-                        <span>
-
-                            <i class="bi bi-calendar-x"></i>
-
-                            <strong>
-                                Dejar sin horario
-                            </strong>
-
-                            <small>
-                                El colaborador no tendrá horario en esta fecha.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="accion-editar-dia">
-
-                        <input
-                            type="radio"
-                            name="accionEditarDia"
-                            value="RESTAURAR"
-                        >
-
-                        <span>
-
-                            <i class="bi bi-arrow-counterclockwise"></i>
-
-                            <strong>
-                                Restaurar programación
-                            </strong>
-
-                            <small>
-                                Elimina el cambio puntual y recupera la programación original.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            <!-- SELECCIÓN DE HORARIOS -->
-
-            <div
-                id="seccionHorariosEditarDia"
-                class="seccion-formulario"
-            >
-
-                <div class="titulo-seccion-formulario">
-
-                    <div class="icono-seccion">
-
-                        <i class="bi bi-clock"></i>
-
-                    </div>
-
-
-                    <div>
-
-                        <h4>
-                            Seleccionar horarios
-                        </h4>
-
-                        <p>
-                            Puedes seleccionar uno o varios horarios que no se superpongan.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="campo-formulario">
-
-                    <label for="buscarHorarioEditarDia">
-                        Buscar horario
-                    </label>
-
-                    <div class="busqueda-colaborador-asignacion">
-
-                        <i class="bi bi-search"></i>
-
-                        <input
-                            id="buscarHorarioEditarDia"
-                            type="search"
-                            placeholder="Buscar por nombre"
-                            autocomplete="off"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="listaHorariosEditarDia"
-                    class="lista-horarios-editar-dia"
-                ></div>
-
-            </div>
-
+                <small>
+                  Elimina el cambio puntual y recupera la programación original.
+                </small>
+              </span>
+            </label>
+          </div>
         </div>
 
+        <!-- SELECCIÓN DE HORARIOS -->
 
-        <div class="modal-footer">
+        <div id="seccionHorariosEditarDia" class="seccion-formulario">
+          <div class="titulo-seccion-formulario">
+            <div class="icono-seccion">
+              <i class="bi bi-clock"></i>
+            </div>
 
-            <button
-                id="cancelarEditarDiaColaborador"
-                type="button"
-                class="btn-secundario"
-            >
+            <div>
+              <h4>Seleccionar horarios</h4>
 
-                Cancelar
+              <p>
+                Puedes seleccionar uno o varios horarios que no se superpongan.
+              </p>
+            </div>
+          </div>
 
-            </button>
+          <div class="campo-formulario">
+            <label for="buscarHorarioEditarDia"> Buscar horario </label>
 
+            <div class="busqueda-colaborador-asignacion">
+              <i class="bi bi-search"></i>
 
-            <button
-                id="guardarEditarDiaColaborador"
-                type="button"
-                class="btn-principal"
-            >
+              <input
+                id="buscarHorarioEditarDia"
+                type="search"
+                placeholder="Buscar por nombre"
+                autocomplete="off"
+              />
+            </div>
+          </div>
 
-                <i class="bi bi-check-circle"></i>
-
-                Aplicar cambio
-
-            </button>
-
+          <div
+            id="listaHorariosEditarDia"
+            class="lista-horarios-editar-dia"
+          ></div>
         </div>
+      </div>
 
+      <div class="modal-footer">
+        <button
+          id="cancelarEditarDiaColaborador"
+          type="button"
+          class="btn-secundario"
+        >
+          Cancelar
+        </button>
+
+        <button
+          id="guardarEditarDiaColaborador"
+          type="button"
+          class="btn-principal"
+        >
+          <i class="bi bi-check-circle"></i>
+
+          Aplicar cambio
+        </button>
+      </div>
     </div>
+  </div>
 
-</div>
-
-
-
-    <!--======================================
+  <!--======================================
     MODAL REGISTRAR MARCACIÓN MANUAL
 =======================================-->
 
-<div
-    id="modalMarcacionManualAsistencia"
-    class="modal"
->
-
+  <div id="modalMarcacionManualAsistencia" class="modal">
     <div class="modal-contenido modal-marcacion-manual">
+      <!-- CABECERA -->
 
-        <!-- CABECERA -->
+      <div class="modal-header">
+        <div>
+          <h3 id="tituloModalMarcacionManual">Registrar marcación manual</h3>
 
-        <div class="modal-header">
+          <p id="subtituloModalMarcacionManual">
+            Agrega una marcación faltante del colaborador.
+          </p>
+        </div>
+
+        <button
+          id="cerrarMarcacionManualAsistencia"
+          type="button"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+
+      <!-- CONTENIDO -->
+
+      <div class="marcacion-manual-body">
+        <!-- COLABORADOR Y FECHA -->
+
+        <div class="resumen-marcacion-manual">
+          <div class="resumen-marcacion-icono">
+            <i class="bi bi-person"></i>
+          </div>
+
+          <div>
+            <span> Colaborador </span>
+
+            <strong id="nombreMarcacionManualAsistencia"> Colaborador </strong>
+
+            <p id="fechaMarcacionManualAsistencia">Fecha</p>
+          </div>
+        </div>
+
+        <!-- TIPO SOLICITADO -->
+
+        <div class="seccion-formulario">
+          <div class="titulo-seccion-formulario">
+            <div class="icono-seccion">
+              <i
+                id="iconoTipoMarcacionManual"
+                class="bi bi-box-arrow-in-right"
+              ></i>
+            </div>
 
             <div>
+              <h4>Marcación que se agregará</h4>
 
-<h3 id="tituloModalMarcacionManual">
-    Registrar marcación manual
-</h3>
-
-<p id="subtituloModalMarcacionManual">
-    Agrega una marcación faltante del colaborador.
-</p>
-
+              <p>El tipo también será comprobado con el horario asignado.</p>
             </div>
+          </div>
 
-
-            <button
-                id="cerrarMarcacionManualAsistencia"
-                type="button"
-                aria-label="Cerrar"
-            >
-                ×
-            </button>
-
+          <div
+            id="tipoMarcacionManualAsistencia"
+            class="tipo-marcacion-manual entrada"
+          >
+            Entrada
+          </div>
         </div>
 
+        <!-- HORARIO ASIGNADO -->
 
-        <!-- CONTENIDO -->
-
-        <div class="marcacion-manual-body">
-
-
-            <!-- COLABORADOR Y FECHA -->
-
-            <div class="resumen-marcacion-manual">
-
-                <div class="resumen-marcacion-icono">
-
-                    <i class="bi bi-person"></i>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Colaborador
-                    </span>
-
-                    <strong id="nombreMarcacionManualAsistencia">
-                        Colaborador
-                    </strong>
-
-                    <p id="fechaMarcacionManualAsistencia">
-                        Fecha
-                    </p>
-
-                </div>
-
+        <div class="seccion-formulario">
+          <div class="titulo-seccion-formulario">
+            <div class="icono-seccion">
+              <i class="bi bi-clock-history"></i>
             </div>
 
+            <div>
+              <h4>Horario asignado</h4>
 
-            <!-- TIPO SOLICITADO -->
-
-            <div class="seccion-formulario">
-
-                <div class="titulo-seccion-formulario">
-
-                    <div class="icono-seccion">
-
-                        <i
-                            id="iconoTipoMarcacionManual"
-                            class="bi bi-box-arrow-in-right"
-                        ></i>
-
-                    </div>
-
-
-                    <div>
-
-                        <h4>
-                            Marcación que se agregará
-                        </h4>
-
-                        <p>
-                            El tipo también será comprobado con el horario asignado.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="tipoMarcacionManualAsistencia"
-                    class="tipo-marcacion-manual entrada"
-                >
-                    Entrada
-                </div>
-
+              <p>La hora ingresada se validará con estas ventanas.</p>
             </div>
+          </div>
 
-
-            <!-- HORARIO ASIGNADO -->
-
-            <div class="seccion-formulario">
-
-                <div class="titulo-seccion-formulario">
-
-                    <div class="icono-seccion">
-
-                        <i class="bi bi-clock-history"></i>
-
-                    </div>
-
-
-                    <div>
-
-                        <h4>
-                            Horario asignado
-                        </h4>
-
-                        <p>
-                            La hora ingresada se validará con estas ventanas.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="horarioMarcacionManualAsistencia"
-                    class="horario-marcacion-manual"
-                >
-                    Cargando horario...
-                </div>
-
-            </div>
-
-
-            <!-- HORA -->
-
-            <div class="seccion-formulario">
-
-                <div class="campo-formulario">
-
-                    <label for="horaMarcacionManualAsistencia">
-
-                        Hora de la marcación
-
-                        <span class="campo-obligatorio">
-                            *
-                        </span>
-
-                    </label>
-
-
-                    <input
-                        id="horaMarcacionManualAsistencia"
-                        type="time"
-                        step="60"
-                    >
-
-
-                    <small
-                        id="ayudaHoraMarcacionManual"
-                        class="ayuda-campo"
-                    >
-                        Selecciona la hora que realmente marcó o debió marcar el colaborador.
-                    </small>
-
-                </div>
-
-
-                <!-- RESULTADO DE LA INTERPRETACIÓN -->
-
-                <div
-                    id="resultadoInterpretacionMarcacion"
-                    class="resultado-interpretacion-marcacion"
-                    hidden
-                >
-
-                    <i class="bi bi-info-circle"></i>
-
-                    <div>
-
-                        <strong id="tituloInterpretacionMarcacion">
-                            Tipo interpretado
-                        </strong>
-
-                        <span id="detalleInterpretacionMarcacion">
-                            La hora corresponde al horario asignado.
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- MOTIVO -->
-
-            <div class="seccion-formulario">
-
-                <div class="campo-formulario">
-
-                    <label for="motivoMarcacionManualAsistencia">
-
-                        Motivo del registro manual
-
-                        <span class="campo-obligatorio">
-                            *
-                        </span>
-
-                    </label>
-
-
-                    <textarea
-                        id="motivoMarcacionManualAsistencia"
-                        rows="3"
-                        maxlength="300"
-                        placeholder="Ejemplo: El colaborador olvidó marcar su salida."
-                    ></textarea>
-
-
-                    <div class="contador-motivo-marcacion">
-
-                        <small>
-                            Este motivo quedará registrado para auditoría.
-                        </small>
-
-                        <small id="contadorMotivoMarcacionManual">
-                            0/300
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ADVERTENCIA -->
-
-            <div class="advertencia-marcacion-manual">
-
-                <i class="bi bi-shield-check"></i>
-
-                <p>
-                    La marcación se guardará como registro manual junto con el usuario que realizó el cambio.
-                </p>
-
-            </div>
-
+          <div
+            id="horarioMarcacionManualAsistencia"
+            class="horario-marcacion-manual"
+          >
+            Cargando horario...
+          </div>
         </div>
 
+        <!-- HORA -->
 
-        <!-- PIE -->
+        <div class="seccion-formulario">
+          <div class="campo-formulario">
+            <label for="horaMarcacionManualAsistencia">
+              Hora de la marcación
 
-        <div class="modal-footer">
+              <span class="campo-obligatorio"> * </span>
+            </label>
 
-            <button
-                id="cancelarMarcacionManualAsistencia"
-                type="button"
-                class="btn-secundario"
-            >
-                Cancelar
-            </button>
+            <input id="horaMarcacionManualAsistencia" type="time" step="60" />
 
+            <small id="ayudaHoraMarcacionManual" class="ayuda-campo">
+              Selecciona la hora que realmente marcó o debió marcar el
+              colaborador.
+            </small>
+          </div>
 
-            <button
-                id="guardarMarcacionManualAsistencia"
-                type="button"
-                class="btn-principal"
-            >
+          <!-- RESULTADO DE LA INTERPRETACIÓN -->
 
-                <i class="bi bi-check-circle"></i>
+          <div
+            id="resultadoInterpretacionMarcacion"
+            class="resultado-interpretacion-marcacion"
+            hidden
+          >
+            <i class="bi bi-info-circle"></i>
 
-                Registrar marcación
+            <div>
+              <strong id="tituloInterpretacionMarcacion">
+                Tipo interpretado
+              </strong>
 
-            </button>
-
+              <span id="detalleInterpretacionMarcacion">
+                La hora corresponde al horario asignado.
+              </span>
+            </div>
+          </div>
         </div>
 
+        <!-- MOTIVO -->
+
+        <div class="seccion-formulario">
+          <div class="campo-formulario">
+            <label for="motivoMarcacionManualAsistencia">
+              Motivo del registro manual
+
+              <span class="campo-obligatorio"> * </span>
+            </label>
+
+            <textarea
+              id="motivoMarcacionManualAsistencia"
+              rows="3"
+              maxlength="300"
+              placeholder="Ejemplo: El colaborador olvidó marcar su salida."
+            ></textarea>
+
+            <div class="contador-motivo-marcacion">
+              <small> Este motivo quedará registrado para auditoría. </small>
+
+              <small id="contadorMotivoMarcacionManual"> 0/300 </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADVERTENCIA -->
+
+        <div class="advertencia-marcacion-manual">
+          <i class="bi bi-shield-check"></i>
+
+          <p>
+            La marcación se guardará como registro manual junto con el usuario
+            que realizó el cambio.
+          </p>
+        </div>
+      </div>
+
+      <!-- PIE -->
+
+      <div class="modal-footer">
+        <button
+          id="cancelarMarcacionManualAsistencia"
+          type="button"
+          class="btn-secundario"
+        >
+          Cancelar
+        </button>
+
+        <button
+          id="guardarMarcacionManualAsistencia"
+          type="button"
+          class="btn-principal"
+        >
+          <i class="bi bi-check-circle"></i>
+
+          Registrar marcación
+        </button>
+      </div>
     </div>
+  </div>
 
-</div>
-
-
-
-<!--======================================
+  <!--======================================
     MODAL AJUSTAR REFRIGERIO
 =======================================-->
 
-<div
-    id="modalAjusteRefrigerioAsistencia"
-    class="modal"
->
-
+  <div id="modalAjusteRefrigerioAsistencia" class="modal">
     <div class="modal-contenido modal-ajuste-refrigerio">
+      <div class="modal-header">
+        <div>
+          <h3>Revisar refrigerio</h3>
 
-        <div class="modal-header">
+          <p>Define cómo debe considerarse en el cálculo diario.</p>
+        </div>
+
+        <button
+          id="cerrarAjusteRefrigerioAsistencia"
+          type="button"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="ajuste-refrigerio-body">
+        <!-- COLABORADOR -->
+
+        <div class="resumen-marcacion-manual">
+          <div class="resumen-marcacion-icono">
+            <i class="bi bi-cup-hot"></i>
+          </div>
+
+          <div>
+            <span> Colaborador </span>
+
+            <strong id="nombreAjusteRefrigerio"> Colaborador </strong>
+
+            <p id="fechaAjusteRefrigerio">Fecha</p>
+          </div>
+        </div>
+
+        <!-- ADVERTENCIAS -->
+
+        <div
+          id="listaAdvertenciasRefrigerio"
+          class="lista-advertencias-refrigerio"
+        ></div>
+
+        <!-- SIN MARCACIONES -->
+
+        <div
+          id="seccionRefrigerioSinMarcaciones"
+          class="seccion-formulario"
+          hidden
+        >
+          <div class="titulo-seccion-formulario">
+            <div class="icono-seccion">
+              <i class="bi bi-question-circle"></i>
+            </div>
 
             <div>
+              <h4>Refrigerio sin marcaciones</h4>
 
-                <h3>
-                    Revisar refrigerio
-                </h3>
-
-                <p>
-                    Define cómo debe considerarse en el cálculo diario.
-                </p>
-
+              <p>Indica qué ocurrió durante ese periodo.</p>
             </div>
+          </div>
 
+          <div class="opciones-ajuste-refrigerio">
+            <label class="opcion-ajuste-refrigerio">
+              <input
+                type="radio"
+                name="tratamientoRefrigerio"
+                value="LABORADO"
+                checked
+              />
 
-            <button
-                id="cerrarAjusteRefrigerioAsistencia"
-                type="button"
-                aria-label="Cerrar"
-            >
-                ×
-            </button>
+              <span>
+                <strong> Considerar trabajado </strong>
 
+                <small>
+                  No descuenta el refrigerio y tampoco genera horas extra.
+                </small>
+              </span>
+            </label>
+
+            <label class="opcion-ajuste-refrigerio">
+              <input
+                type="radio"
+                name="tratamientoRefrigerio"
+                value="DESCONTAR_PROGRAMADO"
+              />
+
+              <span>
+                <strong> Descontar refrigerio programado </strong>
+
+                <small>
+                  Descuenta la duración configurada en el horario.
+                </small>
+              </span>
+            </label>
+          </div>
         </div>
 
+        <!-- REFRIGERIO CORTO -->
 
-        <div class="ajuste-refrigerio-body">
-
-            <!-- COLABORADOR -->
-
-            <div class="resumen-marcacion-manual">
-
-                <div class="resumen-marcacion-icono">
-
-                    <i class="bi bi-cup-hot"></i>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Colaborador
-                    </span>
-
-                    <strong id="nombreAjusteRefrigerio">
-                        Colaborador
-                    </strong>
-
-                    <p id="fechaAjusteRefrigerio">
-                        Fecha
-                    </p>
-
-                </div>
-
+        <div id="seccionRefrigerioCorto" class="seccion-formulario" hidden>
+          <div class="titulo-seccion-formulario">
+            <div class="icono-seccion">
+              <i class="bi bi-stopwatch"></i>
             </div>
 
+            <div>
+              <h4>Refrigerio menor al programado</h4>
 
-            <!-- ADVERTENCIAS -->
-
-            <div
-                id="listaAdvertenciasRefrigerio"
-                class="lista-advertencias-refrigerio"
-            ></div>
-
-
-            <!-- SIN MARCACIONES -->
-
-            <div
-                id="seccionRefrigerioSinMarcaciones"
-                class="seccion-formulario"
-                hidden
-            >
-
-                <div class="titulo-seccion-formulario">
-
-                    <div class="icono-seccion">
-
-                        <i class="bi bi-question-circle"></i>
-
-                    </div>
-
-
-                    <div>
-
-                        <h4>
-                            Refrigerio sin marcaciones
-                        </h4>
-
-                        <p>
-                            Indica qué ocurrió durante ese periodo.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="opciones-ajuste-refrigerio">
-
-                    <label class="opcion-ajuste-refrigerio">
-
-                        <input
-                            type="radio"
-                            name="tratamientoRefrigerio"
-                            value="LABORADO"
-                            checked
-                        >
-
-                        <span>
-
-                            <strong>
-                                Considerar trabajado
-                            </strong>
-
-                            <small>
-                                No descuenta el refrigerio y tampoco genera horas extra.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="opcion-ajuste-refrigerio">
-
-                        <input
-                            type="radio"
-                            name="tratamientoRefrigerio"
-                            value="DESCONTAR_PROGRAMADO"
-                        >
-
-                        <span>
-
-                            <strong>
-                                Descontar refrigerio programado
-                            </strong>
-
-                            <small>
-                                Descuenta la duración configurada en el horario.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-                </div>
-
+              <p>Define cómo tratar el tiempo que no utilizó.</p>
             </div>
+          </div>
 
+          <div class="opciones-ajuste-refrigerio">
+            <label class="opcion-ajuste-refrigerio">
+              <input
+                type="radio"
+                name="tratamientoRefrigerioCorto"
+                value="NO_CONSIDERAR_EXTRA"
+                checked
+              />
 
-            <!-- REFRIGERIO CORTO -->
+              <span>
+                <strong> No considerar tiempo adicional </strong>
 
-            <div
-                id="seccionRefrigerioCorto"
-                class="seccion-formulario"
-                hidden
-            >
+                <small> Se descuenta todo el refrigerio programado. </small>
+              </span>
+            </label>
 
-                <div class="titulo-seccion-formulario">
+            <label class="opcion-ajuste-refrigerio">
+              <input
+                type="radio"
+                name="tratamientoRefrigerioCorto"
+                value="CONSIDERAR_REAL"
+              />
 
-                    <div class="icono-seccion">
+              <span>
+                <strong> Considerar tiempo realmente trabajado </strong>
 
-                        <i class="bi bi-stopwatch"></i>
-
-                    </div>
-
-
-                    <div>
-
-                        <h4>
-                            Refrigerio menor al programado
-                        </h4>
-
-                        <p>
-                            Define cómo tratar el tiempo que no utilizó.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="opciones-ajuste-refrigerio">
-
-                    <label class="opcion-ajuste-refrigerio">
-
-                        <input
-                            type="radio"
-                            name="tratamientoRefrigerioCorto"
-                            value="NO_CONSIDERAR_EXTRA"
-                            checked
-                        >
-
-                        <span>
-
-                            <strong>
-                                No considerar tiempo adicional
-                            </strong>
-
-                            <small>
-                                Se descuenta todo el refrigerio programado.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="opcion-ajuste-refrigerio">
-
-                        <input
-                            type="radio"
-                            name="tratamientoRefrigerioCorto"
-                            value="CONSIDERAR_REAL"
-                        >
-
-                        <span>
-
-                            <strong>
-                                Considerar tiempo realmente trabajado
-                            </strong>
-
-                            <small>
-                                Solo descuenta el refrigerio que realmente tomó.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            <!-- MOTIVO -->
-
-            <div class="seccion-formulario">
-
-                <div class="campo-formulario">
-
-                    <label for="motivoAjusteRefrigerio">
-
-                        Motivo de la decisión
-
-                        <span class="campo-obligatorio">
-                            *
-                        </span>
-
-                    </label>
-
-
-                    <textarea
-                        id="motivoAjusteRefrigerio"
-                        rows="3"
-                        maxlength="300"
-                        placeholder="Explica brevemente por qué se aplica esta decisión."
-                    ></textarea>
-
-                </div>
-
-            </div>
-
+                <small>
+                  Solo descuenta el refrigerio que realmente tomó.
+                </small>
+              </span>
+            </label>
+          </div>
         </div>
 
+        <!-- MOTIVO -->
 
-        <div class="modal-footer">
+        <div class="seccion-formulario">
+          <div class="campo-formulario">
+            <label for="motivoAjusteRefrigerio">
+              Motivo de la decisión
 
-            <button
-                id="cancelarAjusteRefrigerioAsistencia"
-                type="button"
-                class="btn-secundario"
-            >
-                Cancelar
-            </button>
+              <span class="campo-obligatorio"> * </span>
+            </label>
 
-
-            <button
-                id="guardarAjusteRefrigerioAsistencia"
-                type="button"
-                class="btn-principal"
-            >
-
-                <i class="bi bi-check-circle"></i>
-
-                Aplicar decisión
-
-            </button>
-
+            <textarea
+              id="motivoAjusteRefrigerio"
+              rows="3"
+              maxlength="300"
+              placeholder="Explica brevemente por qué se aplica esta decisión."
+            ></textarea>
+          </div>
         </div>
+      </div>
 
+      <div class="modal-footer">
+        <button
+          id="cancelarAjusteRefrigerioAsistencia"
+          type="button"
+          class="btn-secundario"
+        >
+          Cancelar
+        </button>
+
+        <button
+          id="guardarAjusteRefrigerioAsistencia"
+          type="button"
+          class="btn-principal"
+        >
+          <i class="bi bi-check-circle"></i>
+
+          Aplicar decisión
+        </button>
+      </div>
     </div>
+  </div>
 
-</div>
-
-
-<!--======================================
+  <!--======================================
     MODAL APROBAR HORAS EXTRA
 =======================================-->
 
-<div
-    id="modalHorasExtraAsistencia"
-    class="modal"
->
-
+  <div id="modalHorasExtraAsistencia" class="modal">
     <div class="modal-contenido modal-horas-extra">
+      <div class="modal-header">
+        <div>
+          <h3>Revisar horas extra</h3>
 
-        <div class="modal-header">
+          <p>Aprueba o rechaza el tiempo adicional calculado.</p>
+        </div>
+
+        <button
+          id="cerrarHorasExtraAsistencia"
+          type="button"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="horas-extra-modal-body">
+        <!-- COLABORADOR -->
+
+        <div class="resumen-marcacion-manual">
+          <div class="resumen-marcacion-icono">
+            <i class="bi bi-clock-history"></i>
+          </div>
+
+          <div>
+            <span> Colaborador </span>
+
+            <strong id="nombreHorasExtraAsistencia"> Colaborador </strong>
+
+            <p id="fechaHorasExtraAsistencia">Fecha</p>
+          </div>
+        </div>
+
+        <!-- RESUMEN -->
+
+        <div class="resumen-horas-extra-modal">
+          <div>
+            <span> Tiempo calculado </span>
+
+            <strong id="totalHorasExtraCalculadas"> 0 min </strong>
+          </div>
+
+          <div id="detalleHorasExtraCalculadas">Sin detalle.</div>
+        </div>
+
+        <!-- DECISIÓN -->
+
+        <div class="seccion-formulario">
+          <div class="titulo-seccion-formulario">
+            <div class="icono-seccion">
+              <i class="bi bi-check2-square"></i>
+            </div>
 
             <div>
+              <h4>Decisión</h4>
 
-                <h3>
-                    Revisar horas extra
-                </h3>
-
-                <p>
-                    Aprueba o rechaza el tiempo adicional calculado.
-                </p>
-
+              <p>Selecciona cómo debe considerarse este tiempo.</p>
             </div>
-
-
-            <button
-                id="cerrarHorasExtraAsistencia"
-                type="button"
-                aria-label="Cerrar"
-            >
-                ×
-            </button>
-
-        </div>
-
-
-        <div class="horas-extra-modal-body">
-
-            <!-- COLABORADOR -->
-
-            <div class="resumen-marcacion-manual">
-
-                <div class="resumen-marcacion-icono">
-
-                    <i class="bi bi-clock-history"></i>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Colaborador
-                    </span>
-
-                    <strong id="nombreHorasExtraAsistencia">
-                        Colaborador
-                    </strong>
-
-                    <p id="fechaHorasExtraAsistencia">
-                        Fecha
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- RESUMEN -->
-
-            <div class="resumen-horas-extra-modal">
-
-                <div>
-
-                    <span>
-                        Tiempo calculado
-                    </span>
-
-                    <strong id="totalHorasExtraCalculadas">
-                        0 min
-                    </strong>
-
-                </div>
-
-
-                <div id="detalleHorasExtraCalculadas">
-
-                    Sin detalle.
-
-                </div>
-
-            </div>
-
-
-            <!-- DECISIÓN -->
-
-            <div class="seccion-formulario">
-
-                <div class="titulo-seccion-formulario">
-
-                    <div class="icono-seccion">
-
-                        <i class="bi bi-check2-square"></i>
-
-                    </div>
-
-
-                    <div>
-
-                        <h4>
-                            Decisión
-                        </h4>
-
-                        <p>
-                            Selecciona cómo debe considerarse este tiempo.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="opciones-aprobacion-extra">
-
-                    <label class="opcion-aprobacion-extra">
-
-                        <input
-                            type="radio"
-                            name="decisionHorasExtra"
-                            value="APROBADO"
-                            checked
-                        >
-
-                        <span>
-
-                            <i class="bi bi-check-circle"></i>
-
-                            <strong>
-                                Aprobar
-                            </strong>
-
-                            <small>
-                                Reconoce el tiempo seleccionado como horas extra.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="opcion-aprobacion-extra">
-
-                        <input
-                            type="radio"
-                            name="decisionHorasExtra"
-                            value="RECHAZADO"
-                        >
-
-                        <span>
-
-                            <i class="bi bi-x-circle"></i>
-
-                            <strong>
-                                Rechazar
-                            </strong>
-
-                            <small>
-                                El tiempo no se reconocerá como horas extra.
-                            </small>
-
-                        </span>
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            <!-- MINUTOS APROBADOS -->
-
-            <div
-                id="seccionMinutosAprobados"
-                class="seccion-formulario"
-            >
-
-                <div class="campo-formulario">
-
-                    <label for="minutosHorasExtraAprobados">
-
-                        Minutos que se aprobarán
-
-                        <span class="campo-obligatorio">
-                            *
-                        </span>
-
-                    </label>
-
-
-                    <input
-                        id="minutosHorasExtraAprobados"
-                        type="number"
-                        min="1"
-                        step="1"
-                    >
-
-
-                    <small class="ayuda-campo">
-
-                        Puedes aprobar todo el tiempo o solamente una parte.
-
-                    </small>
-
-                </div>
-
-            </div>
-
-
-            <!-- MOTIVO -->
-
-            <div class="seccion-formulario">
-
-                <div class="campo-formulario">
-
-                    <label for="motivoHorasExtraAsistencia">
-
-                        Motivo de la decisión
-
-                        <span class="campo-obligatorio">
-                            *
-                        </span>
-
-                    </label>
-
-
-                    <textarea
-                        id="motivoHorasExtraAsistencia"
-                        rows="3"
-                        maxlength="300"
-                        placeholder="Explica brevemente por qué se aprueba o rechaza este tiempo."
-                    ></textarea>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="modal-footer">
-
-            <button
-                id="cancelarHorasExtraAsistencia"
-                type="button"
-                class="btn-secundario"
-            >
-                Cancelar
-            </button>
-
-
-            <button
-                id="guardarHorasExtraAsistencia"
-                type="button"
-                class="btn-principal"
-            >
-
+          </div>
+
+          <div class="opciones-aprobacion-extra">
+            <label class="opcion-aprobacion-extra">
+              <input
+                type="radio"
+                name="decisionHorasExtra"
+                value="APROBADO"
+                checked
+              />
+
+              <span>
                 <i class="bi bi-check-circle"></i>
 
-                Guardar decisión
+                <strong> Aprobar </strong>
 
-            </button>
+                <small>
+                  Reconoce el tiempo seleccionado como horas extra.
+                </small>
+              </span>
+            </label>
 
+            <label class="opcion-aprobacion-extra">
+              <input type="radio" name="decisionHorasExtra" value="RECHAZADO" />
+
+              <span>
+                <i class="bi bi-x-circle"></i>
+
+                <strong> Rechazar </strong>
+
+                <small> El tiempo no se reconocerá como horas extra. </small>
+              </span>
+            </label>
+          </div>
         </div>
 
+        <!-- MINUTOS APROBADOS -->
+
+        <div id="seccionMinutosAprobados" class="seccion-formulario">
+          <div class="campo-formulario">
+            <label for="minutosHorasExtraAprobados">
+              Minutos que se aprobarán
+
+              <span class="campo-obligatorio"> * </span>
+            </label>
+
+            <input
+              id="minutosHorasExtraAprobados"
+              type="number"
+              min="1"
+              step="1"
+            />
+
+            <small class="ayuda-campo">
+              Puedes aprobar todo el tiempo o solamente una parte.
+            </small>
+          </div>
+        </div>
+
+        <!-- MOTIVO -->
+
+        <div class="seccion-formulario">
+          <div class="campo-formulario">
+            <label for="motivoHorasExtraAsistencia">
+              Motivo de la decisión
+
+              <span class="campo-obligatorio"> * </span>
+            </label>
+
+            <textarea
+              id="motivoHorasExtraAsistencia"
+              rows="3"
+              maxlength="300"
+              placeholder="Explica brevemente por qué se aprueba o rechaza este tiempo."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          id="cancelarHorasExtraAsistencia"
+          type="button"
+          class="btn-secundario"
+        >
+          Cancelar
+        </button>
+
+        <button
+          id="guardarHorasExtraAsistencia"
+          type="button"
+          class="btn-principal"
+        >
+          <i class="bi bi-check-circle"></i>
+
+          Guardar decisión
+        </button>
+      </div>
     </div>
-
-</div>
-
-    
+  </div>
 </section>
 
