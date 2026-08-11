@@ -1,83 +1,48 @@
-import {
-    iniciarNavegacionAsistencia
-}
-from "./asistencia/navegacion-asistencia.js";
+import { iniciarNavegacionAsistencia } from "./asistencia/navegacion-asistencia.js";
 
-import {
-    iniciarFechaAsistencia
-}
-from "./asistencia/fecha-asistencia.js";
+import { iniciarFechaAsistencia } from "./asistencia/fecha-asistencia.js";
 
+import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js";
 
-import {
-    iniciarImportacionMarcaciones
-}
-from "./asistencia/importacion-marcaciones.js";
+import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js";
 
-import {
-    iniciarResumenAsistencia
-}
-from "./asistencia/resumen-asistencia.js";
+import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js";
 
-import {
-    iniciarMarcacionesAsistencia
-}
-from "./asistencia/marcaciones-asistencia.js";
+import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js";
 
-import {
-    iniciarResumenMensualAsistencia
-}
-from "./asistencia/resumen-mensual-asistencia.js";
+import { iniciarEditarDiaAsistencia } from "./asistencia/editar-dia-asistencia.js";
 
-import {
-    iniciarEditarDiaAsistencia
-}
-from "./asistencia/editar-dia-asistencia.js";
+import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-asistencia.js";
 
-import {
-    iniciarMarcacionManualAsistencia
-}
-from "./asistencia/marcacion-manual-asistencia.js";
+import { iniciarAjusteRefrigerioAsistencia } from "./asistencia/ajuste-refrigerio-asistencia.js";
 
-import {
-    iniciarAjusteRefrigerioAsistencia
-}
-from "./asistencia/ajuste-refrigerio-asistencia.js";
-
-import {
-    iniciarAprobacionHorasExtraAsistencia
-}
-from "./asistencia/aprobar-horas-extra-asistencia.js";
+import { iniciarAprobacionHorasExtraAsistencia } from "./asistencia/aprobar-horas-extra-asistencia.js";
 
 /*=====================================================
 INICIAR MÓDULO DE ASISTENCIA
 =====================================================*/
 
-export async function iniciarAsistencia(){
+export async function iniciarAsistencia() {
+  console.log("✅ INICIANDO MÓDULO DE ASISTENCIA");
 
-    console.log(
-        "✅ INICIANDO MÓDULO DE ASISTENCIA"
-    );
+  iniciarNavegacionAsistencia();
 
+  iniciarResumenAsistencia();
 
-iniciarNavegacionAsistencia();
+  iniciarMarcacionesAsistencia();
 
-iniciarResumenAsistencia();
+  iniciarResumenMensualAsistencia();
 
-iniciarMarcacionesAsistencia();
+  iniciarEditarDiaAsistencia();
 
-iniciarResumenMensualAsistencia();
+  iniciarMarcacionManualAsistencia();
 
-iniciarEditarDiaAsistencia();
+  iniciarAjusteRefrigerioAsistencia();
 
-iniciarMarcacionManualAsistencia();
+  iniciarFechaAsistencia();
 
-iniciarAjusteRefrigerioAsistencia();
+  iniciarImportacionMarcaciones();
 
-iniciarFechaAsistencia();
-
-iniciarImportacionMarcaciones();
-
-iniciarAprobacionHorasExtraAsistencia();
+  iniciarAprobacionHorasExtraAsistencia();
 }
 
