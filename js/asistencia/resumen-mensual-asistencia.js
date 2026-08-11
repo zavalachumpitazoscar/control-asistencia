@@ -7,7 +7,8 @@ let fechaDesde, fechaHasta, buscarResumen, cuerpoResumen, btnActualizar;
 let registrosPeriodo = [],
   periodoCargado = "",
   cargando = false,
-  reportePrevisualizado = null;
+  reportePrevisualizado = null,
+  datosEmpresaReporte = null;
 
 const colecciones = [
   "colaboradores",
@@ -20,6 +21,7 @@ const colecciones = [
   "permisos",
   "feriados",
   "descansosSustitutoriosFeriados",
+  "companias",
 ];
 
 export function iniciarResumenMensualAsistencia() {
@@ -105,7 +107,12 @@ async function cargarResumenPeriodo(forzar = false) {
       permisos,
       feriados,
       descansosSustitutorios,
+      companias,
     ] = resultados;
+    datosEmpresaReporte =
+      companias.find((compania) => compania.empresaId === empresaId) ||
+      companias[0] ||
+      null;
     const fechas = obtenerFechas(fechaDesde.value, fechaHasta.value),
       consolidado = new Map();
     fechas.forEach((fecha) => {
@@ -152,6 +159,7 @@ function acumular(mapa, r, fecha) {
       minutosTrabajados: 0,
       minutosAsignados: 0,
       minutosJornadaCumplida: 0,
+      minutosAusencia: 0,
       minutosJustificados: 0,
       minutosExtraAprobados: 0,
       detalles: [],
@@ -168,6 +176,7 @@ function acumular(mapa, r, fecha) {
   t.minutosJornadaCumplida += numero(r.minutosJornadaCumplida);
   t.minutosTrabajados += numero(r.minutosTrabajados);
   t.minutosJustificados += numero(r.minutosJustificadosPermiso);
+  t.minutosAusencia += calcularMinutosAusencia(r);
   const extra =
     String(aprobacion?.decision || "").toUpperCase() === "APROBADO"
       ? numero(aprobacion.minutosAprobados)
@@ -187,9 +196,27 @@ function acumular(mapa, r, fecha) {
     jornadaCumplida: numero(r.minutosJornadaCumplida),
     trabajados: numero(r.minutosTrabajados),
     justificados: numero(r.minutosJustificadosPermiso),
+    ausencia: calcularMinutosAusencia(r),
+    salidaAnticipada: numero(r.calculoAsistencia?.minutosSalidaAnticipada),
+    excesoRefrigerio: numero(r.calculoAsistencia?.minutosExcesoRefrigerio),
     extra,
     marcaciones: r.clasificacion?.todas || [],
   });
+}
+
+function calcularMinutosAusencia(registro) {
+  const asignados = numero(registro.minutosJornadaProgramada);
+  const cumplidos = Math.min(
+    asignados,
+    numero(registro.minutosJornadaCumplida),
+  );
+  const pendientes = Math.max(0, asignados - cumplidos);
+  const justificados = Math.min(
+    pendientes,
+    numero(registro.minutosJustificadosPermiso),
+  );
+
+  return Math.max(0, pendientes - justificados);
 }
 
 function renderizarResumen() {
@@ -466,6 +493,9 @@ function agregarHojaHorasTrabajadas(XLSX, libro, filas) {
       "Jornada cumplida": minutosExcel(d.jornadaCumplida),
       "Horas trabajadas": minutosExcel(d.trabajados),
       Tardanza: minutosExcel(d.tardanza),
+      "Salida anticipada": minutosExcel(d.salidaAnticipada),
+      "Exceso de refrigerio": minutosExcel(d.excesoRefrigerio),
+      "Ausencia no justificada": minutosExcel(d.ausencia),
       "Horas justificadas": minutosExcel(d.justificados),
       "Horas extra aprobadas": minutosExcel(d.extra),
     })),
@@ -625,14 +655,14 @@ function tablaPdfHorasTrabajadas(filas) {
     .flatMap((r) =>
       r.detalles.map(
         (d) =>
-          `<tr><td>${html(r.documento || "—")}</td><td class="texto-izquierda"><strong>${html(r.nombre)}</strong></td><td>${formatearFecha(d.fecha)}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
+          `<tr><td>${html(r.documento || "—")}</td><td class="texto-izquierda"><strong>${html(r.nombre)}</strong></td><td>${formatearFecha(d.fecha)}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.salidaAnticipada)}</td><td>${minutos(d.excesoRefrigerio)}</td><td>${minutos(d.ausencia)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
       ),
     )
     .join("");
   return hojaReporte({
     titulo: "Reporte de horas trabajadas",
     subtitulo: "Detalle diario de todos los colaboradores",
-    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Documento</th><th>Colaborador</th><th>Fecha</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div>`,
+    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Documento</th><th>Colaborador</th><th>Fecha</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Salida<br>anticipada</th><th>Exceso<br>refrigerio</th><th>Ausencia</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div>`,
   });
 }
 
@@ -671,11 +701,18 @@ function seccionPdfSimplificada(r) {
 
 function hojaReporte({ titulo, subtitulo, contenido, colaborador }) {
   const empresa = html(
-    sessionStorage.getItem("razonSocial") ||
+    datosEmpresaReporte?.empresa?.razonSocial ||
+      datosEmpresaReporte?.razonSocial ||
+      sessionStorage.getItem("razonSocial") ||
       sessionStorage.getItem("nombreEmpresa") ||
       "CONTROL DE ASISTENCIA",
   );
-  const ruc = html(sessionStorage.getItem("rucEmpresa") || "—");
+  const ruc = html(
+    datosEmpresaReporte?.empresa?.ruc ||
+      datosEmpresaReporte?.ruc ||
+      sessionStorage.getItem("rucEmpresa") ||
+      "—",
+  );
   const datosColaborador = colaborador
     ? `<div><span>Colaborador</span><strong>${html(colaborador.nombre)}</strong></div><div><span>Documento</span><strong>${html(colaborador.documento || "—")}</strong></div>`
     : "";
