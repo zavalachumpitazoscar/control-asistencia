@@ -62,6 +62,18 @@ export function calcularJornadaAsistencia({
     };
 
 
+    const entrada =
+        clasificacion?.entrada
+        ||
+        null;
+
+
+    const salida =
+        clasificacion?.salida
+        ||
+        null;
+
+
     if(!horario){
 
         resultado.advertencias.push({
@@ -73,7 +85,20 @@ export function calcularJornadaAsistencia({
                 "ADVERTENCIA",
 
             mensaje:
-                "No se puede calcular la jornada porque el colaborador no tiene horario."
+                "El colaborador no tiene horario; las horas trabajadas se calculan únicamente con sus marcaciones reales."
+
+        });
+
+
+        calcularTrabajoSinHorario({
+
+            resultado,
+
+            clasificacion,
+
+            entrada,
+
+            salida
 
         });
 
@@ -81,18 +106,6 @@ export function calcularJornadaAsistencia({
         return resultado;
 
     }
-
-
-    const entrada =
-        clasificacion?.entrada
-        ||
-        null;
-
-
-    const salida =
-        clasificacion?.salida
-        ||
-        null;
 
 
     const entradaProgramada =
@@ -393,6 +406,151 @@ export function calcularJornadaAsistencia({
 
 
     return resultado;
+
+}
+
+
+/*=====================================================
+CALCULAR TRABAJO CUANDO NO EXISTE HORARIO
+=====================================================*/
+
+function calcularTrabajoSinHorario({
+
+    resultado,
+    clasificacion,
+    entrada,
+    salida
+
+}){
+
+    /*
+        Sin ambos extremos no existe un intervalo
+        verificable. El estado general se encargará de
+        identificar la marcación como incompleta.
+    */
+
+    if(
+        !entrada
+        ||
+        !salida
+    ){
+
+        return;
+
+    }
+
+
+    const entradaReal =
+        obtenerMinutosMarcacion(
+            entrada
+        );
+
+
+    let salidaReal =
+        obtenerMinutosMarcacion(
+            salida
+        );
+
+
+    /*
+        Si la salida pertenece al día siguiente, su valor
+        horario será menor o igual que el de la entrada.
+    */
+
+    if(
+        salidaReal <=
+        entradaReal
+    ){
+
+        salidaReal +=
+            1440;
+
+    }
+
+
+    resultado.calculable =
+        true;
+
+
+    resultado.minutosTranscurridos =
+        Math.max(
+            0,
+            salidaReal - entradaReal
+        );
+
+
+    const periodosRefrigerio =
+        Array.isArray(
+            clasificacion?.refrigerios
+        )
+        ?
+        clasificacion.refrigerios
+        :
+        [];
+
+
+    const minutosRefrigerioReal =
+        periodosRefrigerio.reduce(
+            (
+                total,
+                periodo
+            )=>
+
+                total +
+                (
+                    periodo?.inicio
+                    &&
+                    periodo?.fin
+                    ?
+                    Math.max(
+                        0,
+                        Number(
+                            periodo.minutos
+                            ||
+                            0
+                        )
+                    )
+                    :
+                    0
+                ),
+
+            0
+        );
+
+
+    resultado.minutosRefrigerioReal =
+        minutosRefrigerioReal;
+
+
+    resultado.minutosRefrigerioDescontados =
+        minutosRefrigerioReal;
+
+
+    resultado.refrigerioCompleto =
+        minutosRefrigerioReal > 0;
+
+
+    resultado.minutosTrabajados =
+        Math.max(
+            0,
+            resultado.minutosTranscurridos -
+            resultado.minutosRefrigerioDescontados
+        );
+
+
+    /*
+        Sin horario no hay jornada programada contra la
+        cual medir cumplimiento.
+    */
+
+    resultado.minutosJornadaProgramada =
+        0;
+
+    resultado.minutosJornadaCumplida =
+        0;
+
+    resultado.jornadaCompleta =
+        false;
 
 }
 
