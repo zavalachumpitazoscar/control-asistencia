@@ -551,17 +551,10 @@
           </button>
           <button
             type="button"
-            class="btn-asistencia-exportar excel"
-            id="btnExportarExcelResumenMensual"
+            class="btn-asistencia-exportar descargar"
+            id="btnAbrirDescargaResumenMensual"
           >
-            <i class="bi bi-file-earmark-spreadsheet"></i> Excel
-          </button>
-          <button
-            type="button"
-            class="btn-asistencia-exportar pdf"
-            id="btnExportarPdfResumenMensual"
-          >
-            <i class="bi bi-file-earmark-pdf"></i> PDF
+            <i class="bi bi-download"></i> Descargar reporte
           </button>
         </div>
       </div>
@@ -575,6 +568,8 @@
               <th>Tardanzas</th>
               <th>Ausencias</th>
               <th>Permisos</th>
+              <th>Horas<br />asignadas</th>
+              <th>Jornada<br />cumplida</th>
               <th>Horas<br />trabajadas</th>
               <th>Horas<br />justificadas</th>
               <th>Horas extra<br />aprobadas</th>
@@ -583,7 +578,7 @@
           </thead>
           <tbody id="cuerpoResumenMensualAsistencia">
             <tr>
-              <td colspan="10" class="asistencia-tabla-vacia">
+              <td colspan="12" class="asistencia-tabla-vacia">
                 Selecciona un período para calcular el resumen.
               </td>
             </tr>
@@ -621,6 +616,8 @@
               <th>Fin de<br />refrigerio</th>
               <th>Salida</th>
               <th>Tardanza</th>
+              <th>Horas<br />asignadas</th>
+              <th>Jornada<br />cumplida</th>
               <th>Horas<br />trabajadas</th>
               <th>Horas<br />justificadas</th>
               <th>Horas extra<br />aprobadas</th>
@@ -636,6 +633,55 @@
           id="btnCerrarDetallePeriodoAsistenciaFooter"
         >
           Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalDescargaReporteAsistencia" class="modal" aria-hidden="true">
+    <div class="modal-contenido modal-descarga-reporte">
+      <div class="modal-header">
+        <div>
+          <span class="asistencia-seccion-etiqueta">Exportación</span>
+          <h3>Descargar reporte</h3>
+          <p>Elige el contenido y el formato que necesitas.</p>
+        </div>
+        <button type="button" class="btn-cerrar-modal" id="btnCerrarDescargaReporteAsistencia" aria-label="Cerrar">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="descarga-reporte-cuerpo">
+        <label>
+          <span>Tipo de reporte</span>
+          <select id="tipoDescargaReporteAsistencia">
+            <option value="RESUMEN">Resumen por colaboradores</option>
+            <option value="MARCACIONES">Listado completo de marcaciones</option>
+            <option value="INDIVIDUAL">Detalle de un colaborador</option>
+            <option value="TODOS">Detalle de todos por colaborador</option>
+          </select>
+        </label>
+        <label id="grupoColaboradorDescargaReporte" hidden>
+          <span>Colaborador</span>
+          <select id="colaboradorDescargaReporteAsistencia"></select>
+        </label>
+        <fieldset>
+          <legend>Formato</legend>
+          <label class="opcion-formato-reporte">
+            <input type="radio" name="formatoDescargaReporte" value="EXCEL" checked />
+            <i class="bi bi-file-earmark-spreadsheet"></i>
+            <span><strong>Excel</strong><small>Libro .xlsx con hojas organizadas</small></span>
+          </label>
+          <label class="opcion-formato-reporte">
+            <input type="radio" name="formatoDescargaReporte" value="PDF" />
+            <i class="bi bi-file-earmark-pdf"></i>
+            <span><strong>PDF</strong><small>Vista lista para imprimir o guardar</small></span>
+          </label>
+        </fieldset>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-asistencia-secundario" id="btnCancelarDescargaReporteAsistencia">Cancelar</button>
+        <button type="button" class="btn-asistencia-exportar descargar" id="btnGenerarDescargaReporteAsistencia">
+          <i class="bi bi-download"></i> Generar reporte
         </button>
       </div>
     </div>
