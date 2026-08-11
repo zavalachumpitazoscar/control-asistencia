@@ -162,4 +162,3 @@ function obtenerFechaISO(fecha) {
 
   return `${anio}-${mes}-${dia}`;
 }
-
