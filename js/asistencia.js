@@ -25,6 +25,11 @@ import {
 from "./asistencia/marcaciones-asistencia.js";
 
 import {
+    iniciarResumenMensualAsistencia
+}
+from "./asistencia/resumen-mensual-asistencia.js";
+
+import {
     iniciarEditarDiaAsistencia
 }
 from "./asistencia/editar-dia-asistencia.js";
@@ -61,6 +66,8 @@ iniciarResumenAsistencia();
 
 iniciarMarcacionesAsistencia();
 
+iniciarResumenMensualAsistencia();
+
 iniciarEditarDiaAsistencia();
 
 iniciarMarcacionManualAsistencia();
@@ -73,3 +80,4 @@ iniciarImportacionMarcaciones();
 
 iniciarAprobacionHorasExtraAsistencia();
 }
+
