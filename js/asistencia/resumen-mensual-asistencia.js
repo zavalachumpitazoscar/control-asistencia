@@ -184,6 +184,7 @@ function acumular(mapa, r, fecha) {
   t.minutosExtraAprobados += extra;
   t.detalles.push({
     fecha,
+    horario: formatearHorarioAsignado(r.horarios),
     estado: r.estado || "SIN_ESTADO",
     entrada: r.entrada,
     refrigerioInicio:
@@ -286,6 +287,29 @@ function horaMarcacion(m) {
         hour12: false,
       })
     : "—";
+}
+
+function formatearHorarioAsignado(horarios) {
+  const tramos = (Array.isArray(horarios) ? horarios : [])
+    .map((horario) => {
+      const entrada = horario?.entrada?.programada;
+      const salida = horario?.salida?.programada;
+
+      if (!entrada || !salida) return null;
+
+      return {
+        entrada: String(entrada).slice(0, 5),
+        salida: String(salida).slice(0, 5),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.entrada.localeCompare(b.entrada));
+
+  if (!tramos.length) return "Sin horario";
+
+  return tramos
+    .map(({ entrada, salida }) => `${entrada}–${salida}`)
+    .join(" / ");
 }
 
 function configurarModal() {
@@ -506,6 +530,7 @@ function agregarHojaHorasTrabajadas(XLSX, libro, filas) {
 function agregarHojaSimplificada(XLSX, libro, r) {
   const datos = r.detalles.map((d) => ({
     Fecha: formatearFecha(d.fecha),
+    Horario: d.horario,
     Estado: etiquetaPlano(d.estado),
     Entrada: horaMarcacion(d.entrada),
     "Inicio refrigerio": horaMarcacion(d.refrigerioInicio),
@@ -520,6 +545,7 @@ function agregarHojaSimplificada(XLSX, libro, r) {
   }));
   datos.push({
     Fecha: "TOTALES",
+    Horario: "",
     Estado: "",
     Entrada: "",
     "Inicio refrigerio": "",
@@ -673,7 +699,7 @@ function seccionPdfSimplificada(r) {
       const filas = semana
         .map(
           (d) =>
-            `<tr><td class="texto-izquierda"><strong>${nombreDia(d.fecha)}</strong><small>${formatearFecha(d.fecha)}</small></td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
+            `<tr><td class="texto-izquierda"><strong>${nombreDia(d.fecha)}</strong><small>${formatearFecha(d.fecha)}</small></td><td><strong>${html(d.horario)}</strong></td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
         )
         .join("");
       const total = semana.reduce(
@@ -687,7 +713,7 @@ function seccionPdfSimplificada(r) {
         }),
         { asignado: 0, jornada: 0, trabajado: 0, tardanza: 0, justificado: 0, extra: 0 },
       );
-      return `${filas}<tr class="resumen-semana"><th colspan="5">Resumen · Semana ${indice + 1}</th><th>${minutos(total.asignado)}</th><th>${minutos(total.jornada)}</th><th>${minutos(total.trabajado)}</th><th>${minutos(total.tardanza)}</th><th>${minutos(total.justificado)}</th><th>${minutos(total.extra)}</th><th></th></tr>`;
+      return `${filas}<tr class="resumen-semana"><th colspan="6">Resumen · Semana ${indice + 1}</th><th>${minutos(total.asignado)}</th><th>${minutos(total.jornada)}</th><th>${minutos(total.trabajado)}</th><th>${minutos(total.tardanza)}</th><th>${minutos(total.justificado)}</th><th>${minutos(total.extra)}</th><th></th></tr>`;
     })
     .join("");
   const resumen = `<div class="reporte-resumen-final"><div><span>Horas asignadas</span><strong>${minutos(r.minutosAsignados)}</strong></div><div><span>Jornada cumplida</span><strong>${minutos(r.minutosJornadaCumplida)}</strong></div><div><span>Horas trabajadas</span><strong>${minutos(r.minutosTrabajados)}</strong></div><div><span>Horas justificadas</span><strong>${minutos(r.minutosJustificados)}</strong></div><div><span>Horas extra</span><strong>${minutos(r.minutosExtraAprobados)}</strong></div><div><span>Asistencias</span><strong>${r.asistencias}</strong></div><div><span>Tardanzas</span><strong>${r.tardanzas}</strong></div><div><span>Ausencias</span><strong>${r.ausencias}</strong></div></div>`;
@@ -695,7 +721,7 @@ function seccionPdfSimplificada(r) {
     titulo: "Planilla individual de asistencia",
     subtitulo: "Detalle diario organizado por semanas",
     colaborador: r,
-    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Fecha</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div><h2 class="titulo-resumen-reporte">Resumen general</h2>${resumen}`,
+    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div><h2 class="titulo-resumen-reporte">Resumen general</h2>${resumen}`,
   });
 }
 
@@ -935,4 +961,3 @@ function html(v) {
   e.textContent = String(v ?? "");
   return e.innerHTML;
 }
-
