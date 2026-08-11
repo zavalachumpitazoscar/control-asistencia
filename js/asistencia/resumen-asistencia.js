@@ -856,6 +856,20 @@ consultarColeccionEmpresa(
             });
 
 
+        document.dispatchEvent(
+            new CustomEvent(
+                "asistencia:datos-diarios-cargados",
+                {
+                    detail:{
+                        fecha,
+                        colaboradores,
+                        marcaciones
+                    }
+                }
+            )
+        );
+
+
         renderizarResumenAsistencia();
 
     }
