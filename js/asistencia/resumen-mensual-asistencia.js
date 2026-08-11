@@ -6,7 +6,8 @@ import {
 let fechaDesde, fechaHasta, buscarResumen, cuerpoResumen, btnActualizar;
 let registrosPeriodo = [],
   periodoCargado = "",
-  cargando = false;
+  cargando = false,
+  reportePrevisualizado = null;
 
 const colecciones = [
   "colaboradores",
@@ -292,16 +293,55 @@ function abrirDescargaReporte() {
 
 function configurarModalDescarga() {
   const modal = document.getElementById("modalDescargaReporteAsistencia");
+  const modalVistaPrevia = document.getElementById(
+    "modalVistaPreviaReporteAsistencia",
+  );
   const cerrar = () => {
     if (modal) modal.style.display = "none";
     modal?.setAttribute("aria-hidden", "true");
+  };
+  const cerrarVistaPrevia = () => {
+    if (modalVistaPrevia) modalVistaPrevia.style.display = "none";
+    modalVistaPrevia?.setAttribute("aria-hidden", "true");
   };
   document.getElementById("btnCerrarDescargaReporteAsistencia")?.addEventListener("click", cerrar);
   document.getElementById("btnCancelarDescargaReporteAsistencia")?.addEventListener("click", cerrar);
   document.getElementById("tipoDescargaReporteAsistencia")?.addEventListener("change", actualizarTipoDescarga);
   document.getElementById("btnGenerarDescargaReporteAsistencia")?.addEventListener("click", generarDescargaReporte);
+  document
+    .getElementById("btnCerrarVistaPreviaReporteAsistencia")
+    ?.addEventListener("click", cerrarVistaPrevia);
+  document
+    .getElementById("btnVolverConfiguracionReporteAsistencia")
+    ?.addEventListener("click", () => {
+      cerrarVistaPrevia();
+      abrirDescargaReporte();
+    });
+  document
+    .getElementById("btnDescargarExcelVistaPrevia")
+    ?.addEventListener("click", async () => {
+      if (!reportePrevisualizado) return;
+      await exportarExcel(
+        reportePrevisualizado.tipo,
+        reportePrevisualizado.filas,
+        reportePrevisualizado.colaboradorId,
+      );
+    });
+  document
+    .getElementById("btnDescargarPdfVistaPrevia")
+    ?.addEventListener("click", () => {
+      if (!reportePrevisualizado) return;
+      exportarPdf(
+        reportePrevisualizado.tipo,
+        reportePrevisualizado.filas,
+        reportePrevisualizado.colaboradorId,
+      );
+    });
   modal?.addEventListener("click", (e) => {
     if (e.target === modal) cerrar();
+  });
+  modalVistaPrevia?.addEventListener("click", (e) => {
+    if (e.target === modalVistaPrevia) cerrarVistaPrevia();
   });
 }
 
@@ -311,14 +351,55 @@ function actualizarTipoDescarga() {
   if (grupo) grupo.hidden = tipo !== "SIMPLIFICADO_INDIVIDUAL";
 }
 
-async function generarDescargaReporte() {
+function generarDescargaReporte() {
   const tipo = document.getElementById("tipoDescargaReporteAsistencia")?.value || "RESUMEN";
-  const formato = document.querySelector('input[name="formatoDescargaReporte"]:checked')?.value || "EXCEL";
   const colaboradorId = document.getElementById("colaboradorDescargaReporteAsistencia")?.value;
   const filas = obtenerFiltrados();
   if (!filas.length) return;
-  if (formato === "EXCEL") await exportarExcel(tipo, filas, colaboradorId);
-  else exportarPdf(tipo, filas, colaboradorId);
+  reportePrevisualizado = { tipo, filas, colaboradorId };
+  mostrarVistaPreviaReporte(tipo, filas, colaboradorId);
+}
+
+function mostrarVistaPreviaReporte(tipo, filas, colaboradorId) {
+  const configuracion = document.getElementById("modalDescargaReporteAsistencia");
+  const modal = document.getElementById("modalVistaPreviaReporteAsistencia");
+  const contenido = document.getElementById("contenidoVistaPreviaReporteAsistencia");
+  const titulo = document.getElementById("tituloVistaPreviaReporteAsistencia");
+  if (!modal || !contenido) return;
+
+  configuracion.style.display = "none";
+  configuracion.setAttribute("aria-hidden", "true");
+  contenido.innerHTML = `<style>${estilosDocumentoReporte()}</style>${construirDocumentoReporte(tipo, filas, colaboradorId)}`;
+  if (titulo) titulo.textContent = nombreTipoReporte(tipo);
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function construirDocumentoReporte(tipo, filas, colaboradorId) {
+  if (tipo === "RESUMEN") return tablaPdfResumen(filas);
+  if (tipo === "HORAS_TRABAJADAS") return tablaPdfHorasTrabajadas(filas);
+  if (tipo === "SIMPLIFICADO_INDIVIDUAL") {
+    const colaborador = filas.find((r) => r.colaboradorId === colaboradorId);
+    return colaborador ? seccionPdfSimplificada(colaborador) : mensajeSinDatos();
+  }
+  if (tipo === "SIMPLIFICADO_TODOS") {
+    return filas.map(seccionPdfSimplificada).join("");
+  }
+  return mensajeSinDatos();
+}
+
+function nombreTipoReporte(tipo) {
+  const nombres = {
+    RESUMEN: "Resumen general de asistencia",
+    HORAS_TRABAJADAS: "Reporte de horas trabajadas",
+    SIMPLIFICADO_INDIVIDUAL: "Asistencia simplificada",
+    SIMPLIFICADO_TODOS: "Asistencia simplificada por colaboradores",
+  };
+  return nombres[tipo] || "Reporte de asistencia";
+}
+
+function mensajeSinDatos() {
+  return '<div class="reporte-sin-datos">No existen datos para mostrar.</div>';
 }
 
 async function exportarExcel(tipo, filas, colaboradorId) {
@@ -443,14 +524,57 @@ function agregarHojaDetalle(XLSX, libro, r) {
 }
 
 function agregarHoja(XLSX, libro, nombre, datos) {
-  const hoja = XLSX.utils.json_to_sheet(datos.length ? datos : [{ Información: "Sin datos" }]);
-  hoja["!cols"] = Object.keys(datos[0] || { Información: "" }).map((clave) => ({ wch: Math.max(12, Math.min(32, clave.length + 5)) }));
-  const ultimaColumna = Math.max(0, Object.keys(datos[0] || { Información: "" }).length - 1);
-  const ultimaFila = Math.max(0, datos.length);
+  const filas = datos.length ? datos : [{ Información: "Sin datos" }];
+  const columnas = Object.keys(filas[0]);
+  const ultimaColumna = Math.max(0, columnas.length - 1);
+  const hoja = XLSX.utils.aoa_to_sheet([
+    [nombre.toUpperCase()],
+    [
+      `Período: ${formatearFecha(fechaDesde.value)} al ${formatearFecha(fechaHasta.value)}`,
+    ],
+    [`Generado: ${new Date().toLocaleString("es-PE")}`],
+    [],
+    [],
+  ]);
+  XLSX.utils.sheet_add_json(hoja, filas, { origin: "A6" });
+  hoja["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: ultimaColumna } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: ultimaColumna } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: ultimaColumna } },
+  ];
+  hoja["!rows"] = [
+    { hpt: 26 },
+    { hpt: 18 },
+    { hpt: 18 },
+    { hpt: 8 },
+    { hpt: 8 },
+    { hpt: 24 },
+  ];
+  hoja["!cols"] = columnas.map((clave) => {
+    const largoDatos = filas.reduce(
+      (maximo, fila) => Math.max(maximo, String(fila[clave] ?? "").length),
+      clave.length,
+    );
+    return { wch: Math.max(12, Math.min(34, largoDatos + 3)) };
+  });
+  const ultimaFila = 6 + filas.length - 1;
   hoja["!autofilter"] = {
-    ref: `A1:${XLSX.utils.encode_col(ultimaColumna)}${ultimaFila + 1}`,
+    ref: `A6:${XLSX.utils.encode_col(ultimaColumna)}${ultimaFila}`,
   };
-  hoja["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2" };
+  hoja["!freeze"] = { xSplit: 0, ySplit: 6, topLeftCell: "A7" };
+  hoja["!pageSetup"] = {
+    orientation: "landscape",
+    fitToWidth: 1,
+    fitToHeight: 0,
+  };
+  hoja["!margins"] = {
+    left: 0.25,
+    right: 0.25,
+    top: 0.45,
+    bottom: 0.45,
+    header: 0.2,
+    footer: 0.2,
+  };
   const base = nombreHoja(nombre);
   let definitivo = base;
   let correlativo = 2;
@@ -461,21 +585,31 @@ function agregarHoja(XLSX, libro, nombre, datos) {
 }
 
 function exportarPdf(tipo, filas, colaboradorId) {
-  let contenido = "";
-  if (tipo === "RESUMEN") contenido = tablaPdfResumen(filas);
-  if (tipo === "HORAS_TRABAJADAS") contenido = tablaPdfHorasTrabajadas(filas);
-  if (tipo === "SIMPLIFICADO_INDIVIDUAL") {
-    const r = filas.find((x) => x.colaboradorId === colaboradorId);
-    contenido = r ? seccionPdfSimplificada(r) : "";
-  }
-  if (tipo === "SIMPLIFICADO_TODOS")
-    contenido = filas.map(seccionPdfSimplificada).join("");
-  abrirImpresion(contenido);
+  abrirImpresion(construirDocumentoReporte(tipo, filas, colaboradorId));
 }
 
 function tablaPdfResumen(filas) {
-  const cuerpo = filas.map((r) => `<tr><td>${html(r.nombre)}<br><small>${html(r.documento || "")}</small></td><td>${r.diasProgramados}</td><td>${r.asistencias}</td><td>${r.tardanzas}</td><td>${r.ausencias}</td><td>${minutos(r.minutosAsignados)}</td><td>${minutos(r.minutosJornadaCumplida)}</td><td>${minutos(r.minutosTrabajados)}</td><td>${minutos(r.minutosExtraAprobados)}</td></tr>`).join("");
-  return `<h1>Resumen de asistencia</h1>${periodoPdf()}<table><thead><tr><th>Colaborador</th><th>Prog.</th><th>Asist.</th><th>Tard.</th><th>Aus.</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Extra</th></tr></thead><tbody>${cuerpo}</tbody></table>`;
+  const cuerpo = filas
+    .map(
+      (r, indice) =>
+        `<tr><td>${indice + 1}</td><td class="texto-izquierda"><strong>${html(r.nombre)}</strong><small>${html(r.documento || "Sin documento")}</small></td><td>${r.diasProgramados}</td><td>${r.asistencias}</td><td>${r.tardanzas}</td><td>${r.ausencias}</td><td>${r.permisos}</td><td>${minutos(r.minutosAsignados)}</td><td>${minutos(r.minutosJornadaCumplida)}</td><td>${minutos(r.minutosTrabajados)}</td><td>${minutos(r.minutosJustificados)}</td><td>${minutos(r.minutosExtraAprobados)}</td></tr>`,
+    )
+    .join("");
+  const totales = filas.reduce(
+    (a, r) => ({
+      asignado: a.asignado + r.minutosAsignados,
+      jornada: a.jornada + r.minutosJornadaCumplida,
+      trabajado: a.trabajado + r.minutosTrabajados,
+      justificado: a.justificado + r.minutosJustificados,
+      extra: a.extra + r.minutosExtraAprobados,
+    }),
+    { asignado: 0, jornada: 0, trabajado: 0, justificado: 0, extra: 0 },
+  );
+  return hojaReporte({
+    titulo: "Resumen general de asistencia",
+    subtitulo: `${filas.length} colaboradores consolidados`,
+    contenido: `<div class="reporte-tabla-marco"><table><thead><tr><th>N.º</th><th>Colaborador</th><th>Días<br>programados</th><th>Asistencias</th><th>Tardanzas</th><th>Ausencias</th><th>Permisos</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Justificado</th><th>Extra</th></tr></thead><tbody>${cuerpo}</tbody><tfoot><tr><th colspan="7">Totales del período</th><th>${minutos(totales.asignado)}</th><th>${minutos(totales.jornada)}</th><th>${minutos(totales.trabajado)}</th><th>${minutos(totales.justificado)}</th><th>${minutos(totales.extra)}</th></tr></tfoot></table></div>`,
+  });
 }
 
 function tablaPdfMarcaciones(filas) {
@@ -491,21 +625,87 @@ function tablaPdfHorasTrabajadas(filas) {
     .flatMap((r) =>
       r.detalles.map(
         (d) =>
-          `<tr><td>${html(r.documento || "")}</td><td>${html(r.nombre)}</td><td>${formatearFecha(d.fecha)}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td>${html(etiquetaPlano(d.estado))}</td></tr>`,
+          `<tr><td>${html(r.documento || "—")}</td><td class="texto-izquierda"><strong>${html(r.nombre)}</strong></td><td>${formatearFecha(d.fecha)}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
       ),
     )
     .join("");
-  return `<h1>Reporte de horas trabajadas</h1>${periodoPdf()}<table><thead><tr><th>Documento</th><th>Colaborador</th><th>Fecha</th><th>Entrada</th><th>Ref. inicio</th><th>Ref. fin</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table>`;
+  return hojaReporte({
+    titulo: "Reporte de horas trabajadas",
+    subtitulo: "Detalle diario de todos los colaboradores",
+    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Documento</th><th>Colaborador</th><th>Fecha</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div>`,
+  });
 }
 
 function seccionPdfSimplificada(r) {
-  const cuerpo = r.detalles
-    .map(
-      (d) =>
-        `<tr><td>${formatearFecha(d.fecha)}</td><td>${html(etiquetaPlano(d.estado))}</td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td></tr>`,
-    )
+  const semanas = agruparPorSemana(r.detalles);
+  const cuerpo = semanas
+    .map((semana, indice) => {
+      const filas = semana
+        .map(
+          (d) =>
+            `<tr><td class="texto-izquierda"><strong>${nombreDia(d.fecha)}</strong><small>${formatearFecha(d.fecha)}</small></td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
+        )
+        .join("");
+      const total = semana.reduce(
+        (a, d) => ({
+          asignado: a.asignado + d.asignados,
+          jornada: a.jornada + d.jornadaCumplida,
+          trabajado: a.trabajado + d.trabajados,
+          tardanza: a.tardanza + d.tardanza,
+          justificado: a.justificado + d.justificados,
+          extra: a.extra + d.extra,
+        }),
+        { asignado: 0, jornada: 0, trabajado: 0, tardanza: 0, justificado: 0, extra: 0 },
+      );
+      return `${filas}<tr class="resumen-semana"><th colspan="5">Resumen · Semana ${indice + 1}</th><th>${minutos(total.asignado)}</th><th>${minutos(total.jornada)}</th><th>${minutos(total.trabajado)}</th><th>${minutos(total.tardanza)}</th><th>${minutos(total.justificado)}</th><th>${minutos(total.extra)}</th><th></th></tr>`;
+    })
     .join("");
-  return `<section class="hoja"><h1>Reporte de asistencia simplificado</h1><p><strong>${html(r.nombre)}</strong> · ${html(r.documento || "Sin documento")}</p>${periodoPdf()}<table><thead><tr><th>Fecha</th><th>Estado</th><th>Entrada</th><th>Ref. inicio</th><th>Ref. fin</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th></tr></thead><tbody>${cuerpo}</tbody><tfoot><tr><th colspan="6">TOTALES</th><th>${minutos(r.minutosAsignados)}</th><th>${minutos(r.minutosJornadaCumplida)}</th><th>${minutos(r.minutosTrabajados)}</th><th>—</th><th>${minutos(r.minutosJustificados)}</th><th>${minutos(r.minutosExtraAprobados)}</th></tr></tfoot></table></section>`;
+  const resumen = `<div class="reporte-resumen-final"><div><span>Horas asignadas</span><strong>${minutos(r.minutosAsignados)}</strong></div><div><span>Jornada cumplida</span><strong>${minutos(r.minutosJornadaCumplida)}</strong></div><div><span>Horas trabajadas</span><strong>${minutos(r.minutosTrabajados)}</strong></div><div><span>Horas justificadas</span><strong>${minutos(r.minutosJustificados)}</strong></div><div><span>Horas extra</span><strong>${minutos(r.minutosExtraAprobados)}</strong></div><div><span>Asistencias</span><strong>${r.asistencias}</strong></div><div><span>Tardanzas</span><strong>${r.tardanzas}</strong></div><div><span>Ausencias</span><strong>${r.ausencias}</strong></div></div>`;
+  return hojaReporte({
+    titulo: "Planilla individual de asistencia",
+    subtitulo: "Detalle diario organizado por semanas",
+    colaborador: r,
+    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Fecha</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Tardanza</th><th>Justificado</th><th>Extra</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div><h2 class="titulo-resumen-reporte">Resumen general</h2>${resumen}`,
+  });
+}
+
+function hojaReporte({ titulo, subtitulo, contenido, colaborador }) {
+  const empresa = html(
+    sessionStorage.getItem("razonSocial") ||
+      sessionStorage.getItem("nombreEmpresa") ||
+      "CONTROL DE ASISTENCIA",
+  );
+  const ruc = html(sessionStorage.getItem("rucEmpresa") || "—");
+  const datosColaborador = colaborador
+    ? `<div><span>Colaborador</span><strong>${html(colaborador.nombre)}</strong></div><div><span>Documento</span><strong>${html(colaborador.documento || "—")}</strong></div>`
+    : "";
+  return `<section class="hoja reporte-documento"><header class="reporte-cabecera"><div class="reporte-marca"><span class="reporte-logo"><i class="bi bi-calendar2-check"></i></span><div><small>${empresa}</small><h1>${html(titulo)}</h1><p>${html(subtitulo)}</p></div></div><div class="reporte-sello"><span>Generado</span><strong>${new Date().toLocaleDateString("es-PE")}</strong></div></header><div class="reporte-datos"><div><span>Empresa</span><strong>${empresa}</strong></div><div><span>RUC</span><strong>${ruc}</strong></div>${datosColaborador}<div><span>Período desde</span><strong>${formatearFecha(fechaDesde.value)}</strong></div><div><span>Hasta</span><strong>${formatearFecha(fechaHasta.value)}</strong></div></div>${contenido}<footer class="reporte-pie-documento"><span>Reporte generado por el sistema de control de asistencia</span><span>${formatearFecha(fechaDesde.value)} — ${formatearFecha(fechaHasta.value)}</span></footer></section>`;
+}
+
+function agruparPorSemana(detalles) {
+  const grupos = [];
+  detalles.forEach((detalle) => {
+    const fecha = parseLocal(detalle.fecha);
+    const inicioSemana = new Date(fecha);
+    const dia = (fecha.getDay() + 6) % 7;
+    inicioSemana.setDate(fecha.getDate() - dia);
+    const clave = local(
+      inicioSemana.getFullYear(),
+      inicioSemana.getMonth(),
+      inicioSemana.getDate(),
+    );
+    let grupo = grupos.find((item) => item.clave === clave);
+    if (!grupo) {
+      grupo = { clave, detalles: [] };
+      grupos.push(grupo);
+    }
+    grupo.detalles.push(detalle);
+  });
+  return grupos.map((grupo) => grupo.detalles);
+}
+
+function nombreDia(fecha) {
+  return parseLocal(fecha).toLocaleDateString("es-PE", { weekday: "short" });
 }
 
 function seccionPdfDetalle(r) {
@@ -516,8 +716,12 @@ function seccionPdfDetalle(r) {
 function abrirImpresion(contenido) {
   const ventana = window.open("", "_blank");
   if (!ventana) return alert("Permite las ventanas emergentes para generar el PDF.");
-  ventana.document.write(`<!doctype html><html><head><title>Reporte de asistencia</title><style>@page{size:landscape;margin:9mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#172033;margin:0}h1{font-size:18px;text-transform:uppercase;color:#1e3a8a;margin:0;padding:0 0 7px;border-bottom:3px solid #2563eb}p{margin:7px 0;color:#475569}.hoja{break-after:page}.hoja:last-child{break-after:auto}table{width:100%;margin-top:10px;border-collapse:collapse;font-size:8px}th,td{padding:5px;border:1px solid #94a3b8;text-align:center}th{background:#dbeafe;color:#1e3a8a;font-weight:700}tbody tr:nth-child(even){background:#f8fafc}tfoot th{background:#e2e8f0;color:#172033}small{color:#64748b}</style></head><body>${contenido}<script>window.onload=()=>window.print()<\/script></body></html>`);
+  ventana.document.write(`<!doctype html><html><head><title>Reporte de asistencia</title><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><style>${estilosDocumentoReporte()}@page{size:landscape;margin:8mm}body{margin:0;background:#fff}.reporte-documento{box-shadow:none!important;margin:0 auto 8mm!important}.hoja{break-after:page}.hoja:last-child{break-after:auto}</style></head><body>${contenido}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);
   ventana.document.close();
+}
+
+function estilosDocumentoReporte() {
+  return `*{box-sizing:border-box}.reporte-documento{width:100%;max-width:1180px;margin:0 auto 24px;padding:28px;background:#fff;color:#1e293b;font-family:Inter,Segoe UI,Arial,sans-serif;border-radius:16px;box-shadow:0 12px 32px rgba(15,23,42,.12)}.reporte-cabecera{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:18px;border-bottom:3px solid #1d4ed8}.reporte-marca{display:flex;align-items:center;gap:14px}.reporte-logo{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#1d4ed8,#4f46e5);color:#fff;font-size:24px}.reporte-marca small{color:#64748b;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.reporte-marca h1{margin:3px 0;color:#0f172a;font-size:22px;line-height:1.1;text-transform:uppercase}.reporte-marca p{margin:0;color:#64748b;font-size:10px}.reporte-sello{min-width:100px;padding:9px 12px;border:1px solid #dbeafe;border-radius:10px;background:#eff6ff;text-align:right}.reporte-sello span,.reporte-datos span{display:block;color:#64748b;font-size:8px;font-weight:700;text-transform:uppercase}.reporte-sello strong,.reporte-datos strong{display:block;margin-top:3px;color:#1e3a8a;font-size:10px}.reporte-datos{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:1px;margin:15px 0;background:#cbd5e1;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden}.reporte-datos>div{min-height:48px;padding:9px 11px;background:#f8fafc}.reporte-tabla-marco{overflow:hidden;border:1px solid #cbd5e1;border-radius:10px}.reporte-tabla-marco table{width:100%;border-collapse:collapse;font-size:8px}.reporte-tabla-marco th,.reporte-tabla-marco td{padding:7px 5px;border-right:1px solid #dbe3ee;border-bottom:1px solid #dbe3ee;text-align:center;vertical-align:middle}.reporte-tabla-marco thead th{background:#1e3a8a;color:#fff;font-weight:800;text-transform:uppercase;letter-spacing:.025em}.reporte-tabla-marco tbody tr:nth-child(even){background:#f8fafc}.reporte-tabla-marco tbody tr:hover{background:#eff6ff}.reporte-tabla-marco tfoot th,.resumen-semana th{background:#dbeafe!important;color:#1e3a8a!important;font-weight:800}.texto-izquierda{text-align:left!important}.texto-izquierda small,.reporte-tabla-marco td small{display:block;margin-top:2px;color:#64748b;font-size:7px}.estado-reporte{display:inline-block;padding:3px 5px;border-radius:4px;background:#e0e7ff;color:#3730a3;font-size:7px;font-weight:800}.reporte-resumen-final{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.reporte-resumen-final>div{padding:11px;border:1px solid #dbeafe;border-radius:9px;background:linear-gradient(145deg,#f8fafc,#eff6ff)}.reporte-resumen-final span{display:block;color:#64748b;font-size:8px;font-weight:700;text-transform:uppercase}.reporte-resumen-final strong{display:block;margin-top:4px;color:#1e3a8a;font-size:15px}.titulo-resumen-reporte{margin:16px 0 9px;color:#0f172a;font-size:13px;text-transform:uppercase}.reporte-pie-documento{display:flex;justify-content:space-between;gap:12px;margin-top:14px;padding-top:8px;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:7px}.reporte-sin-datos{padding:50px;text-align:center;color:#64748b}@media(max-width:900px){.reporte-datos{grid-template-columns:repeat(2,1fr)}.reporte-resumen-final{grid-template-columns:repeat(2,1fr)}.reporte-documento{min-width:980px}}`;
 }
 
 function periodoPdf() {
