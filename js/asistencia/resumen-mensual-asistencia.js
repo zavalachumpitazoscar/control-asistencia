@@ -4,6 +4,8 @@ import {
 } from "./resumen-asistencia.js";
 
 let fechaDesde, fechaHasta, buscarResumen, cuerpoResumen, btnActualizar;
+let paginaResumenMensual = 1;
+let limiteResumenMensual = 10;
 let registrosPeriodo = [],
   periodoCargado = "",
   cargando = false,
@@ -34,6 +36,7 @@ export function iniciarResumenMensualAsistencia() {
   if (!fechaDesde || !fechaHasta || !cuerpoResumen) return;
 
   instalarFiltrosOrganizacionales();
+  instalarPaginacionResumenMensual();
 
   asignarMes(new Date());
   document
@@ -57,7 +60,7 @@ export function iniciarResumenMensualAsistencia() {
   document
     .getElementById("btnAbrirDescargaResumenMensual")
     ?.addEventListener("click", abrirDescargaReporte);
-  buscarResumen?.addEventListener("input", renderizarResumen);
+  buscarResumen?.addEventListener("input", () => { paginaResumenMensual = 1; renderizarResumen(); });
   cuerpoResumen.addEventListener("click", (e) => {
     const b = e.target.closest('[data-accion="ver-detalle-periodo"]');
     if (b) abrirDetalle(b.dataset.colaboradorId);
@@ -276,6 +279,7 @@ function renderizarResumen() {
   actualizarTarjetas(filtrados);
   actualizarBotonesExportar(filtrados.length > 0);
   if (!filtrados.length) {
+    actualizarPaginacionResumenMensual(0, 0, 1);
     mostrarMensaje(
       registrosPeriodo.length
         ? "No existen colaboradores para la búsqueda ingresada."
@@ -283,12 +287,46 @@ function renderizarResumen() {
     );
     return;
   }
-  cuerpoResumen.innerHTML = filtrados
+  const paginas = Math.max(1, Math.ceil(filtrados.length / limiteResumenMensual));
+  paginaResumenMensual = Math.min(paginas, Math.max(1, paginaResumenMensual));
+  const inicio = (paginaResumenMensual - 1) * limiteResumenMensual;
+  const visibles = filtrados.slice(inicio, inicio + limiteResumenMensual);
+  cuerpoResumen.innerHTML = visibles
     .map(
       (r) =>
         `<tr><td class="mensual-colaborador"><div class="mensual-avatar">${iniciales(r.nombre)}</div><div><strong>${html(r.nombre)}</strong><small>${html(r.documento || "Sin documento")}</small></div></td><td>${r.diasProgramados}</td><td>${r.asistencias}</td><td>${valorContador(r.tardanzas, "advertencia")}</td><td>${valorContador(r.ausencias, "peligro")}</td><td>${valorContador(r.permisos, "informacion")}</td><td>${minutos(r.minutosAsignados)}</td><td>${minutos(r.minutosJornadaCumplida)}</td><td>${minutos(r.minutosTrabajados)}</td><td>${minutos(r.minutosAusencia)}</td><td>${minutos(r.minutosJustificados)}</td><td>${minutos(r.minutosExtraGenerados)}</td><td>${minutos(r.minutosExtraPendientes)}</td><td>${minutos(r.minutosExtraAprobados)}</td><td><button type="button" class="btn-ver-detalle-periodo" data-accion="ver-detalle-periodo" data-colaborador-id="${html(r.colaboradorId)}"><i class="bi bi-eye"></i> Ver detalle</button></td></tr>`,
     )
     .join("");
+  actualizarPaginacionResumenMensual(filtrados.length, inicio, paginas);
+}
+
+function instalarPaginacionResumenMensual() {
+  if (document.getElementById("paginacionResumenMensual")) return;
+  const tarjeta = cuerpoResumen?.closest(".asistencia-tabla-card");
+  if (!tarjeta) return;
+  const pie = document.createElement("div");
+  pie.id = "paginacionResumenMensual";
+  pie.className = "paginacion-reporte-mensual";
+  pie.innerHTML = `<span id="informacionPaginacionResumenMensual">Mostrando 0 colaboradores</span><div><label>Mostrar <select id="limiteResumenMensual"><option value="10">10</option><option value="20">20</option><option value="50">50</option></select></label><button id="anteriorResumenMensual" type="button">Anterior</button><span id="paginaActualResumenMensual">Página 1 de 1</span><button id="siguienteResumenMensual" type="button">Siguiente</button></div>`;
+  tarjeta.append(pie);
+  pie.querySelector("#limiteResumenMensual").addEventListener("change", (evento) => { limiteResumenMensual = Number(evento.target.value) || 10; paginaResumenMensual = 1; renderizarResumen(); });
+  pie.querySelector("#anteriorResumenMensual").addEventListener("click", () => { paginaResumenMensual--; renderizarResumen(); });
+  pie.querySelector("#siguienteResumenMensual").addEventListener("click", () => { paginaResumenMensual++; renderizarResumen(); });
+  const estilo = document.createElement("style");
+  estilo.textContent = `.paginacion-reporte-mensual{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-top:1px solid #e2e8f0;color:#64748b;font-size:10px}.paginacion-reporte-mensual>div{display:flex;align-items:center;gap:8px}.paginacion-reporte-mensual label{display:flex;align-items:center;gap:5px}.paginacion-reporte-mensual select,.paginacion-reporte-mensual button{padding:7px 9px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#475569}.paginacion-reporte-mensual button{cursor:pointer}.paginacion-reporte-mensual button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:700px){.paginacion-reporte-mensual{align-items:flex-start;flex-direction:column}.paginacion-reporte-mensual>div{flex-wrap:wrap}}`;
+  tarjeta.append(estilo);
+}
+
+function actualizarPaginacionResumenMensual(total, inicio, paginas) {
+  const fin = Math.min(inicio + limiteResumenMensual, total);
+  const informacion = document.getElementById("informacionPaginacionResumenMensual");
+  if (informacion) informacion.textContent = total ? `Mostrando ${inicio + 1}–${fin} de ${total} colaboradores` : "Mostrando 0 colaboradores";
+  const pagina = document.getElementById("paginaActualResumenMensual");
+  if (pagina) pagina.textContent = `Página ${paginaResumenMensual} de ${paginas}`;
+  const anterior = document.getElementById("anteriorResumenMensual");
+  const siguiente = document.getElementById("siguienteResumenMensual");
+  if (anterior) anterior.disabled = paginaResumenMensual <= 1;
+  if (siguiente) siguiente.disabled = paginaResumenMensual >= paginas;
 }
 
 function abrirDetalle(id) {
@@ -1099,7 +1137,7 @@ function instalarFiltrosOrganizacionales() {
     <select id="filtroAreaReporteMensual" aria-label="Filtrar por área"><option value="">Todas las áreas</option></select>
     <select id="filtroSubareaReporteMensual" aria-label="Filtrar por subárea"><option value="">Todas las subáreas</option></select>`;
   referencia.prepend(contenedor);
-  contenedor.addEventListener("change", renderizarResumen);
+  contenedor.addEventListener("change", () => { paginaResumenMensual = 1; renderizarResumen(); });
 }
 
 function actualizarOpcionesFiltrosOrganizacionales() {
@@ -1236,3 +1274,4 @@ function html(v) {
   e.textContent = String(v ?? "");
   return e.innerHTML;
 }
+
