@@ -8,7 +8,7 @@ import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js";
 
 import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js";
 
-import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js";
+import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260812-1";
 
 import { iniciarEditarDiaAsistencia } from "./asistencia/editar-dia-asistencia.js";
 
