@@ -8,10 +8,10 @@ import { iniciarEditarDiaAsistencia } from "./asistencia/editar-dia-asistencia.j
 import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-asistencia.js";
 import { iniciarAjusteRefrigerioAsistencia } from "./asistencia/ajuste-refrigerio-asistencia.js";
 import { iniciarAprobacionHorasExtraAsistencia } from "./asistencia/aprobar-horas-extra-asistencia.js";
-import { iniciarOperacionesMensualesAsistencia } from "./asistencia/operaciones-mensuales-asistencia.js?v=20260812-3";
+import { iniciarOperacionesMensualesAsistencia } from "./asistencia/operaciones-mensuales-asistencia.js?v=20260812-4";
 
 export async function iniciarAsistencia() {
-  console.log("✅ INICIANDO MÓDULO DE ASISTENCIA · VERSIÓN 2026-08-12.3");
+  console.log("✅ INICIANDO MÓDULO DE ASISTENCIA · VERSIÓN 2026-08-12.4");
   iniciarNavegacionAsistencia();
   iniciarResumenAsistencia();
   iniciarMarcacionesAsistencia();
