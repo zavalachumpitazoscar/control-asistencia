@@ -33,6 +33,8 @@ export function iniciarResumenMensualAsistencia() {
   btnActualizar = document.getElementById("btnActualizarResumenMensual");
   if (!fechaDesde || !fechaHasta || !cuerpoResumen) return;
 
+  instalarFiltrosOrganizacionales();
+
   asignarMes(new Date());
   document
     .getElementById("btnAplicarRangoResumenMensual")
@@ -150,6 +152,14 @@ async function cargarResumenPeriodo(forzar = false) {
     registrosPeriodo = [...consolidado.values()].sort((a, b) =>
       a.nombre.localeCompare(b.nombre, "es"),
     );
+    actualizarOpcionesFiltrosOrganizacionales();
+    document.dispatchEvent(new CustomEvent("asistencia:reporte-periodo-cargado", {
+      detail: {
+        desde: fechaDesde.value,
+        hasta: fechaHasta.value,
+        registros: registrosPeriodo,
+      },
+    }));
     periodoCargado = clave;
     actualizarDescripcion(fechas.length);
     renderizarResumen();
@@ -1063,12 +1073,48 @@ function obtenerFiltrados() {
   const q = String(buscarResumen?.value || "")
     .trim()
     .toLowerCase();
+  const sucursal = document.getElementById("filtroSucursalReporteMensual")?.value || "";
+  const area = document.getElementById("filtroAreaReporteMensual")?.value || "";
+  const subarea = document.getElementById("filtroSubareaReporteMensual")?.value || "";
   return registrosPeriodo.filter(
     (r) =>
-      !q ||
-      r.nombre.toLowerCase().includes(q) ||
-      String(r.documento || "").includes(q),
+      (!sucursal || r.sucursal === sucursal) &&
+      (!area || r.area === area) &&
+      (!subarea || r.subarea === subarea) &&
+      (!q ||
+        r.nombre.toLowerCase().includes(q) ||
+        String(r.documento || "").includes(q)),
   );
+}
+
+function instalarFiltrosOrganizacionales() {
+  if (document.getElementById("filtrosOrganizacionalesReporteMensual")) return;
+  const referencia = buscarResumen?.closest(".reporte-tabla-acciones") || buscarResumen?.parentElement;
+  if (!referencia) return;
+  const contenedor = document.createElement("div");
+  contenedor.id = "filtrosOrganizacionalesReporteMensual";
+  contenedor.className = "filtros-organizacionales-reporte";
+  contenedor.innerHTML = `
+    <select id="filtroSucursalReporteMensual" aria-label="Filtrar por sucursal"><option value="">Todas las sucursales</option></select>
+    <select id="filtroAreaReporteMensual" aria-label="Filtrar por área"><option value="">Todas las áreas</option></select>
+    <select id="filtroSubareaReporteMensual" aria-label="Filtrar por subárea"><option value="">Todas las subáreas</option></select>`;
+  referencia.prepend(contenedor);
+  contenedor.addEventListener("change", renderizarResumen);
+}
+
+function actualizarOpcionesFiltrosOrganizacionales() {
+  const completar = (id, valores, etiqueta) => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    const actual = select.value;
+    select.innerHTML = `<option value="">${etiqueta}</option>` + [...new Set(valores.filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, "es"))
+      .map((valor) => `<option value="${html(valor)}">${html(valor)}</option>`).join("");
+    if ([...select.options].some((opcion) => opcion.value === actual)) select.value = actual;
+  };
+  completar("filtroSucursalReporteMensual", registrosPeriodo.map((r) => r.sucursal), "Todas las sucursales");
+  completar("filtroAreaReporteMensual", registrosPeriodo.map((r) => r.area), "Todas las áreas");
+  completar("filtroSubareaReporteMensual", registrosPeriodo.map((r) => r.subarea), "Todas las subáreas");
 }
 function actualizarTarjetas(rs) {
   const t = rs.reduce(
@@ -1190,4 +1236,3 @@ function html(v) {
   e.textContent = String(v ?? "");
   return e.innerHTML;
 }
-
