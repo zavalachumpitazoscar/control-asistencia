@@ -1,47 +1,26 @@
 import { iniciarNavegacionAsistencia } from "./asistencia/navegacion-asistencia.js";
-
 import { iniciarFechaAsistencia } from "./asistencia/fecha-asistencia.js";
-
 import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js";
-
 import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js";
-
 import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js";
-
-import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260812-1";
-
+import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260812-3";
 import { iniciarEditarDiaAsistencia } from "./asistencia/editar-dia-asistencia.js";
-
 import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-asistencia.js";
-
 import { iniciarAjusteRefrigerioAsistencia } from "./asistencia/ajuste-refrigerio-asistencia.js";
-
 import { iniciarAprobacionHorasExtraAsistencia } from "./asistencia/aprobar-horas-extra-asistencia.js";
-
-/*=====================================================
-INICIAR MÓDULO DE ASISTENCIA
-=====================================================*/
+import { iniciarOperacionesMensualesAsistencia } from "./asistencia/operaciones-mensuales-asistencia.js?v=20260812-3";
 
 export async function iniciarAsistencia() {
-  console.log("✅ INICIANDO MÓDULO DE ASISTENCIA");
-
+  console.log("✅ INICIANDO MÓDULO DE ASISTENCIA · VERSIÓN 2026-08-12.3");
   iniciarNavegacionAsistencia();
-
   iniciarResumenAsistencia();
-
   iniciarMarcacionesAsistencia();
-
   iniciarResumenMensualAsistencia();
-
   iniciarEditarDiaAsistencia();
-
   iniciarMarcacionManualAsistencia();
-
   iniciarAjusteRefrigerioAsistencia();
-
   iniciarFechaAsistencia();
-
   iniciarImportacionMarcaciones();
-
   iniciarAprobacionHorasExtraAsistencia();
+  iniciarOperacionesMensualesAsistencia();
 }
