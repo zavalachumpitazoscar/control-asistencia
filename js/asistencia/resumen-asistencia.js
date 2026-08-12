@@ -34,6 +34,8 @@ let filtroSubarea;
 let filtroEstado;
 
 let btnLimpiarFiltros;
+let paginaResumenDiario = 1;
+let limiteResumenDiario = 10;
 
 /*=====================================================
 INICIAR RESUMEN
@@ -60,15 +62,17 @@ export function iniciarResumenAsistencia() {
     return;
   }
 
-  buscarResumen?.addEventListener("input", renderizarResumenAsistencia);
+  instalarPaginacionResumenDiario();
 
-  filtroSucursal?.addEventListener("change", renderizarResumenAsistencia);
+  buscarResumen?.addEventListener("input", () => { paginaResumenDiario = 1; renderizarResumenAsistencia(); });
 
-  filtroArea?.addEventListener("change", renderizarResumenAsistencia);
+  filtroSucursal?.addEventListener("change", () => { paginaResumenDiario = 1; renderizarResumenAsistencia(); });
 
-  filtroSubarea?.addEventListener("change", renderizarResumenAsistencia);
+  filtroArea?.addEventListener("change", () => { paginaResumenDiario = 1; renderizarResumenAsistencia(); });
 
-  filtroEstado?.addEventListener("change", renderizarResumenAsistencia);
+  filtroSubarea?.addEventListener("change", () => { paginaResumenDiario = 1; renderizarResumenAsistencia(); });
+
+  filtroEstado?.addEventListener("change", () => { paginaResumenDiario = 1; renderizarResumenAsistencia(); });
 
   btnLimpiarFiltros?.addEventListener("click", limpiarFiltrosAsistencia);
 
@@ -1367,7 +1371,11 @@ function renderizarResumenAsistencia() {
 
   actualizarContadores(registrosResumen);
 
-  actualizarInformacionPaginacion(filtrados.length);
+  const paginas = Math.max(1, Math.ceil(filtrados.length / limiteResumenDiario));
+  paginaResumenDiario = Math.min(paginas, Math.max(1, paginaResumenDiario));
+  const inicioPagina = (paginaResumenDiario - 1) * limiteResumenDiario;
+  const visibles = filtrados.slice(inicioPagina, inicioPagina + limiteResumenDiario);
+  actualizarInformacionPaginacion(filtrados.length, inicioPagina, paginas);
 
   if (filtrados.length === 0) {
     mostrarMensajeTabla(
@@ -1377,7 +1385,7 @@ function renderizarResumenAsistencia() {
     return;
   }
 
-  cuerpoResumen.innerHTML = filtrados.map(crearFilaResumen).join("");
+  cuerpoResumen.innerHTML = visibles.map(crearFilaResumen).join("");
 }
 
 /*=====================================================
@@ -4380,7 +4388,7 @@ function asignarContador(id, cantidad) {
   }
 }
 
-function actualizarInformacionPaginacion(cantidad) {
+function actualizarInformacionPaginacion(cantidad, inicio = 0, paginas = 1) {
   const elemento = document.getElementById("informacionPaginacionAsistencia");
 
   if (!elemento) {
@@ -4390,7 +4398,31 @@ function actualizarInformacionPaginacion(cantidad) {
   elemento.textContent =
     cantidad === 0
       ? "Mostrando 0 - 0 de 0 colaboradores"
-      : `Mostrando 1 - ${cantidad} de ${cantidad} colaboradores`;
+      : `Mostrando ${inicio + 1} - ${Math.min(inicio + limiteResumenDiario, cantidad)} de ${cantidad} colaboradores`;
+  const pagina = document.getElementById("paginaActualResumenDiario");
+  if (pagina) pagina.textContent = `Página ${paginaResumenDiario} de ${paginas}`;
+  const anterior = document.getElementById("anteriorResumenDiario");
+  const siguiente = document.getElementById("siguienteResumenDiario");
+  if (anterior) anterior.disabled = paginaResumenDiario <= 1;
+  if (siguiente) siguiente.disabled = paginaResumenDiario >= paginas;
+}
+
+function instalarPaginacionResumenDiario() {
+  const pie = document.getElementById("informacionPaginacionAsistencia")?.parentElement;
+  if (!pie || document.getElementById("controlesPaginacionResumenDiario")) return;
+  const anteriorFalso = pie.querySelector(".asistencia-paginacion");
+  if (anteriorFalso) anteriorFalso.remove();
+  const controles = document.createElement("div");
+  controles.id = "controlesPaginacionResumenDiario";
+  controles.className = "asistencia-paginacion controles-paginacion-real";
+  controles.innerHTML = `<label>Mostrar <select id="limiteResumenDiario"><option value="10">10</option><option value="20">20</option><option value="50">50</option></select></label><button id="anteriorResumenDiario" type="button">Anterior</button><span id="paginaActualResumenDiario">Página 1 de 1</span><button id="siguienteResumenDiario" type="button">Siguiente</button>`;
+  pie.append(controles);
+  controles.querySelector("#limiteResumenDiario").addEventListener("change", (evento) => { limiteResumenDiario = Number(evento.target.value) || 10; paginaResumenDiario = 1; renderizarResumenAsistencia(); });
+  controles.querySelector("#anteriorResumenDiario").addEventListener("click", () => { paginaResumenDiario--; renderizarResumenAsistencia(); });
+  controles.querySelector("#siguienteResumenDiario").addEventListener("click", () => { paginaResumenDiario++; renderizarResumenAsistencia(); });
+  const estilo = document.createElement("style");
+  estilo.textContent = `.controles-paginacion-real{display:flex!important;align-items:center;gap:7px}.controles-paginacion-real label{display:flex;align-items:center;gap:5px;color:#64748b;font-size:10px}.controles-paginacion-real select,.controles-paginacion-real button{padding:7px 9px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#475569}.controles-paginacion-real button:disabled{opacity:.45;cursor:not-allowed}.controles-paginacion-real span{color:#64748b;font-size:10px}@media(max-width:650px){.asistencia-tabla-footer{align-items:flex-start;flex-direction:column}.controles-paginacion-real{flex-wrap:wrap}}`;
+  pie.append(estilo);
 }
 
 function mostrarMensajeTabla(mensaje) {
