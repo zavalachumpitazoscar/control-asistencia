@@ -27,7 +27,7 @@ from
 
 import { iniciarCompañia } from "./compañia.js";
 import { iniciarEmpleados } from "./empleados.js";
-import { iniciarAsistencia } from "./asistencia.js";
+import { iniciarAsistencia } from "./asistencia.js?v=20260812-1";
 
 const sidebar = document.querySelector(".sidebar");
 
