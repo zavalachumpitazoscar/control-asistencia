@@ -25,6 +25,7 @@ const colecciones = [
 ];
 
 export function iniciarResumenMensualAsistencia() {
+  console.info("✅ REPORTES DE ASISTENCIA · VERSIÓN 2026-08-12.2");
   fechaDesde = document.getElementById("fechaDesdeResumenMensual");
   fechaHasta = document.getElementById("fechaHastaResumenMensual");
   buscarResumen = document.getElementById("buscarResumenMensualAsistencia");
@@ -378,8 +379,7 @@ function abrirDescargaReporte() {
     .map((r) => `<option value="${html(r.colaboradorId)}">${html(r.nombre)} · ${html(r.documento || "Sin documento")}</option>`)
     .join("");
   actualizarTipoDescarga();
-  modal.style.display = "flex";
-  modal.setAttribute("aria-hidden", "false");
+  mostrarModalReporte(modal);
 }
 
 function configurarModalDescarga() {
@@ -387,14 +387,8 @@ function configurarModalDescarga() {
   const modalVistaPrevia = document.getElementById(
     "modalVistaPreviaReporteAsistencia",
   );
-  const cerrar = () => {
-    if (modal) modal.style.display = "none";
-    modal?.setAttribute("aria-hidden", "true");
-  };
-  const cerrarVistaPrevia = () => {
-    if (modalVistaPrevia) modalVistaPrevia.style.display = "none";
-    modalVistaPrevia?.setAttribute("aria-hidden", "true");
-  };
+  const cerrar = () => ocultarModalReporte(modal);
+  const cerrarVistaPrevia = () => ocultarModalReporte(modalVistaPrevia);
   document.getElementById("btnCerrarDescargaReporteAsistencia")?.addEventListener("click", cerrar);
   document.getElementById("btnCancelarDescargaReporteAsistencia")?.addEventListener("click", cerrar);
   document.getElementById("tipoDescargaReporteAsistencia")?.addEventListener("change", actualizarTipoDescarga);
@@ -436,6 +430,24 @@ function configurarModalDescarga() {
   });
 }
 
+function ocultarModalReporte(modal) {
+  if (!modal) return;
+  const enfocado = document.activeElement;
+  if (enfocado && modal.contains(enfocado) && typeof enfocado.blur === "function")
+    enfocado.blur();
+  modal.inert = true;
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function mostrarModalReporte(modal) {
+  if (!modal) return;
+  modal.inert = false;
+  modal.removeAttribute("inert");
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+}
+
 function actualizarTipoDescarga() {
   const tipo = document.getElementById("tipoDescargaReporteAsistencia")?.value;
   const grupo = document.getElementById("grupoColaboradorDescargaReporte");
@@ -458,12 +470,11 @@ function mostrarVistaPreviaReporte(tipo, filas, colaboradorId) {
   const titulo = document.getElementById("tituloVistaPreviaReporteAsistencia");
   if (!modal || !contenido) return;
 
-  configuracion.style.display = "none";
-  configuracion.setAttribute("aria-hidden", "true");
+  ocultarModalReporte(configuracion);
   contenido.innerHTML = `<style>${estilosDocumentoReporte()}</style>${construirDocumentoReporte(tipo, filas, colaboradorId)}`;
   if (titulo) titulo.textContent = nombreTipoReporte(tipo);
-  modal.style.display = "flex";
-  modal.setAttribute("aria-hidden", "false");
+  mostrarModalReporte(modal);
+  document.getElementById("btnCerrarVistaPreviaReporteAsistencia")?.focus();
 }
 
 function construirDocumentoReporte(tipo, filas, colaboradorId) {
@@ -1179,3 +1190,4 @@ function html(v) {
   e.textContent = String(v ?? "");
   return e.innerHTML;
 }
+
