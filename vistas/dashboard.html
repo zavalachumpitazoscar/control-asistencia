@@ -1,1 +1,74 @@
+<section class="dashboard-pagina">
+  <header class="dashboard-bienvenida">
+    <div>
+      <span class="dashboard-etiqueta">RESUMEN OPERATIVO</span>
+      <h2 id="saludoDashboard">Buen día</h2>
+      <p id="fechaDashboard">Consulta rápida del estado de tu empresa.</p>
+    </div>
+    <div class="dashboard-acciones-cabecera">
+      <label><span>Fecha de consulta</span><input id="fechaConsultaDashboard" type="date"></label>
+      <button id="actualizarDashboard" class="btn-dashboard primario" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button>
+    </div>
+  </header>
+
+  <div id="estadoCargaDashboard" class="dashboard-carga"><span></span> Preparando información...</div>
+
+  <div class="dashboard-kpis">
+    <article class="kpi-dashboard azul"><div class="kpi-icono"><i class="bi bi-people"></i></div><div><span>Colaboradores activos</span><strong id="kpiColaboradores">—</strong><small id="detalleColaboradores">Personal registrado</small></div></article>
+    <article class="kpi-dashboard verde"><div class="kpi-icono"><i class="bi bi-person-check"></i></div><div><span>Asistieron</span><strong id="kpiAsistieron">—</strong><small id="detalleAsistieron">En la fecha consultada</small></div></article>
+    <article class="kpi-dashboard ambar"><div class="kpi-icono"><i class="bi bi-clock-history"></i></div><div><span>Tardanzas</span><strong id="kpiTardanzas">—</strong><small id="detalleTardanzas">Requieren seguimiento</small></div></article>
+    <article class="kpi-dashboard rojo"><div class="kpi-icono"><i class="bi bi-person-x"></i></div><div><span>Ausencias</span><strong id="kpiAusencias">—</strong><small id="detalleAusencias">Sin asistencia registrada</small></div></article>
+    <article class="kpi-dashboard violeta"><div class="kpi-icono"><i class="bi bi-exclamation-diamond"></i></div><div><span>Incompletos</span><strong id="kpiIncompletos">—</strong><small id="detalleIncompletos">Falta alguna marcación</small></div></article>
+    <article class="kpi-dashboard celeste"><div class="kpi-icono"><i class="bi bi-stopwatch"></i></div><div><span>Extra pendiente</span><strong id="kpiExtraPendiente">—</strong><small id="detalleExtraPendiente">Por revisar o aprobar</small></div></article>
+  </div>
+
+  <div class="dashboard-grid-principal">
+    <article class="dashboard-card estado-hoy-card">
+      <header><div><span>CONTROL DEL DÍA</span><h3>Estado de asistencia</h3></div><button class="enlace-dashboard" data-ir="asistencia" type="button">Ver asistencia <i class="bi bi-arrow-right"></i></button></header>
+      <div class="estado-hoy-contenido">
+        <div id="anilloAsistencia" class="anillo-asistencia" style="--porcentaje:0"><div><strong id="porcentajeAsistencia">0%</strong><small>asistencia</small></div></div>
+        <div class="leyenda-asistencia">
+          <div><span class="punto verde"></span><p><strong id="leyendaPuntuales">0</strong><small>Puntuales</small></p></div>
+          <div><span class="punto ambar"></span><p><strong id="leyendaTardanzas">0</strong><small>Con tardanza</small></p></div>
+          <div><span class="punto rojo"></span><p><strong id="leyendaAusencias">0</strong><small>Ausentes</small></p></div>
+          <div><span class="punto violeta"></span><p><strong id="leyendaOtros">0</strong><small>Permisos y otros</small></p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="dashboard-card alertas-card">
+      <header><div><span>ATENCIÓN REQUERIDA</span><h3>Alertas del día</h3></div><b id="contadorAlertas">0</b></header>
+      <div id="listaAlertasDashboard" class="lista-alertas"><p class="dashboard-vacio">No existen alertas pendientes.</p></div>
+    </article>
+  </div>
+
+  <div class="dashboard-grid-secundario">
+    <article class="dashboard-card resumen-mes-card">
+      <header><div><span>MES EN CURSO</span><h3>Indicadores acumulados</h3></div><small id="periodoDashboard">—</small></header>
+      <div class="indicadores-mes">
+        <div><span>Asistencias</span><strong id="mesAsistencias">0</strong><div class="barra-indicador"><i id="barraAsistencias"></i></div></div>
+        <div><span>Tardanzas</span><strong id="mesTardanzas">0</strong><div class="barra-indicador ambar"><i id="barraTardanzas"></i></div></div>
+        <div><span>Ausencias</span><strong id="mesAusencias">0</strong><div class="barra-indicador rojo"><i id="barraAusencias"></i></div></div>
+        <div><span>Horas trabajadas</span><strong id="mesHorasTrabajadas">0 h</strong></div>
+        <div><span>Horas extra generadas</span><strong id="mesHorasExtra">0 h</strong></div>
+        <div><span>Cumplimiento</span><strong id="mesCumplimiento">0%</strong></div>
+      </div>
+    </article>
+
+    <article class="dashboard-card marcaciones-card">
+      <header><div><span>ACTIVIDAD RECIENTE</span><h3>Últimas marcaciones</h3></div><button class="enlace-dashboard" data-ir="asistencia" type="button">Ver todas</button></header>
+      <div id="listaMarcacionesDashboard" class="lista-marcaciones"><p class="dashboard-vacio">No hay marcaciones recientes.</p></div>
+    </article>
+
+    <article class="dashboard-card accesos-card">
+      <header><div><span>ACCESOS RÁPIDOS</span><h3>Acciones frecuentes</h3></div></header>
+      <div class="accesos-dashboard">
+        <button data-ir="asistencia" type="button"><i class="bi bi-clock"></i><span><strong>Revisar asistencia</strong><small>Marcaciones y estados</small></span></button>
+        <button data-ir="colaboradores" type="button"><i class="bi bi-person-plus"></i><span><strong>Gestionar personal</strong><small>Crear o modificar</small></span></button>
+        <button data-ir="horarios" type="button"><i class="bi bi-calendar-week"></i><span><strong>Asignar horarios</strong><small>Programación del personal</small></span></button>
+        <button data-ir="auditoria" type="button"><i class="bi bi-shield-check"></i><span><strong>Consultar auditoría</strong><small>Historial de cambios</small></span></button>
+      </div>
+    </article>
+  </div>
+</section>
 
