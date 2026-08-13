@@ -761,4 +761,3 @@ regla.innerHTML =
 }
 
 }
-
