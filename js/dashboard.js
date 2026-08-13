@@ -1,6 +1,9 @@
 import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260813-3";
 
 let cargaActual = 0;
+let detallesDashboard = {};
+let destinoModalDashboard = "asistencia";
+let controlDashboard = null;
 const coleccionesDashboard = [
   "colaboradores", "marcaciones", "asignacionesHorarios", "horarios",
   "excepcionesHorarios", "ajustesAsistenciaDiaria", "aprobacionesHorasExtra",
@@ -8,16 +11,29 @@ const coleccionesDashboard = [
 ];
 
 export function iniciarDashboard() {
+  controlDashboard?.abort();
+  controlDashboard = new AbortController();
+  const opcionesEvento = { signal: controlDashboard.signal };
   const fecha = document.getElementById("fechaConsultaDashboard");
   if (!fecha) return;
   fecha.value = fechaLocal(new Date());
   actualizarSaludo();
-  document.getElementById("actualizarDashboard")?.addEventListener("click", cargarDashboard);
-  fecha.addEventListener("change", cargarDashboard);
+  document.getElementById("actualizarDashboard")?.addEventListener("click", cargarDashboard, opcionesEvento);
+  fecha.addEventListener("change", cargarDashboard, opcionesEvento);
   document.querySelector(".dashboard-pagina")?.addEventListener("click", (evento) => {
+    const tarjeta = evento.target.closest("[data-resumen]");
+    if (tarjeta) return abrirResumenDashboard(tarjeta.dataset.resumen);
     const destino = evento.target.closest("[data-ir]")?.dataset.ir;
-    if (destino) document.querySelector(`.item[data-vista="${destino}"]`)?.click();
-  });
+    if (destino) navegarDashboard(destino);
+  }, opcionesEvento);
+  document.querySelector(".dashboard-pagina")?.addEventListener("keydown", (evento) => {
+    const tarjeta = evento.target.closest("[data-resumen]");
+    if (tarjeta && ["Enter", " "].includes(evento.key)) { evento.preventDefault(); abrirResumenDashboard(tarjeta.dataset.resumen); }
+  }, opcionesEvento);
+  document.getElementById("cerrarResumenDashboard")?.addEventListener("click", cerrarResumenDashboard, opcionesEvento);
+  document.getElementById("modalResumenDashboard")?.addEventListener("click", (e) => { if (e.target === e.currentTarget) cerrarResumenDashboard(); }, opcionesEvento);
+  document.getElementById("irDetalleResumenDashboard")?.addEventListener("click", () => { cerrarResumenDashboard(); navegarDashboard(destinoModalDashboard); }, opcionesEvento);
+  document.addEventListener("keydown", cerrarModalConEscape, opcionesEvento);
   cargarDashboard();
 }
 
@@ -33,6 +49,7 @@ async function cargarDashboard() {
     const datos = Object.fromEntries(coleccionesDashboard.map((nombre, i) => [nombre, resultados[i]]));
     const activos = datos.colaboradores.filter((c) => String(c.estado || "ACTIVO").toUpperCase() !== "INACTIVO");
     const registrosDia = construirDia(fecha, datos);
+    prepararDetalles(activos, registrosDia, fecha);
     renderizarKpis(activos, registrosDia);
     renderizarEstadoDia(registrosDia);
     renderizarAlertas(registrosDia);
@@ -46,6 +63,20 @@ async function cargarDashboard() {
     if (turno === cargaActual) mostrarCarga(false);
   }
 }
+
+function prepararDetalles(activos, registros, fecha) {
+  detallesDashboard = {
+    activos: activos.map((c) => ({ nombre:nombreColaborador(c), documento:documentoColaborador(c), detalle:[c.organizacion?.sucursal,c.organizacion?.area,c.organizacion?.subarea].filter(Boolean).join(" · ") || "Sin ubicación asignada", valor:c.informacionAdicional?.cargoProfesion || "Colaborador activo", tono:"verde" })),
+    asistieron: registros.filter((r) => esAsistencia(r.estado)).map((r) => detalleRegistro(r, `${horaMarca(r.entrada)} a ${horaMarca(r.salida)}`, "verde")),
+    tardanzas: registros.filter((r) => /TARDANZA/.test(r.estado)).map((r) => detalleRegistro(r, `${r.tardanzaMinutos || 0} minutos de tardanza`, "ambar")),
+    ausencias: registros.filter((r) => r.estado === "AUSENTE").map((r) => detalleRegistro(r, `Sin marcaciones el ${fechaVisible(fecha)}`, "rojo")),
+    incompletos: registros.filter((r) => /INCOMPLETO/.test(r.estado)).map((r) => detalleRegistro(r, explicacionIncompleto(r), "ambar")),
+    extra: registros.filter((r) => minutosExtraPendiente(r) > 0).map((r) => detalleRegistro(r, `${duracion(minutosExtraPendiente(r))} pendiente de decisión`, "ambar")),
+  };
+}
+
+function detalleRegistro(r, valor, tono) { return { nombre:r.nombre, documento:r.documento || "Sin documento", detalle:`Entrada ${horaMarca(r.entrada)} · Salida ${horaMarca(r.salida)} · ${etiquetaEstado(r.estado)}`, valor, tono }; }
+function explicacionIncompleto(r){if(r.entrada&&!r.salida)return "Registró entrada, pero falta la salida";if(!r.entrada&&r.salida)return "Registró salida, pero falta la entrada";return "Las marcaciones no completan la jornada";}
 
 function construirDia(fecha, d) {
   return construirRegistrosResumen({
@@ -81,6 +112,42 @@ function renderizarKpis(activos, registros) {
   asignar("detalleIncompletos", incompletos.length ? "Revisar entradas y salidas" : "Sin jornadas incompletas");
   asignar("detalleExtraPendiente", extraPendiente ? "Pendiente de decisión" : "Sin horas pendientes");
 }
+
+function abrirResumenDashboard(tipo) {
+  const configuracion = {
+    activos:["Colaboradores activos", "Personal actualmente habilitado en la empresa", "colaboradores"],
+    asistieron:["Colaboradores que asistieron", "Personal con asistencia registrada en la fecha consultada", "asistencia"],
+    tardanzas:["Tardanzas registradas", "Personas que superaron la tolerancia de ingreso", "asistencia"],
+    ausencias:["Colaboradores ausentes", "Personal programado sin marcaciones de asistencia", "asistencia"],
+    incompletos:["Jornadas incompletas", "Marcaciones que requieren revisión o corrección", "asistencia"],
+    extra:["Horas extra pendientes", "Tiempo adicional que todavía necesita una decisión", "asistencia"],
+  }[tipo];
+  if (!configuracion) return;
+  const [titulo, subtitulo, destino] = configuracion;
+  const filas = detallesDashboard[tipo] || [];
+  destinoModalDashboard = destino;
+  asignar("tituloResumenDashboard", titulo);
+  asignar("subtituloResumenDashboard", subtitulo);
+  asignar("cantidadResumenDashboard", `${filas.length} ${filas.length === 1 ? "registro" : "registros"}`);
+  document.getElementById("irDetalleResumenDashboard").textContent = destino === "colaboradores" ? "Gestionar colaboradores" : "Ir a Asistencia";
+  document.getElementById("contenidoResumenDashboard").innerHTML = filas.length ? filas.map((f) => `<div class="fila-resumen-dashboard"><div class="avatar-resumen">${html(iniciales(f.nombre))}</div><span><strong>${html(f.nombre)}</strong><small>${html(f.documento)} · ${html(f.detalle)}</small></span><em><span class="estado-chip-dashboard ${html(f.tono)}">${html(f.valor)}</span></em></div>`).join("") : '<div class="modal-resumen-vacio"><i class="bi bi-check-circle"></i>No existen personas en este indicador.</div>';
+  const modal = document.getElementById("modalResumenDashboard");
+  modal.hidden = false; modal.inert = false; modal.removeAttribute("inert"); modal.setAttribute("aria-hidden", "false");
+  document.getElementById("cerrarResumenDashboard").focus();
+}
+
+function cerrarResumenDashboard() { const modal=document.getElementById("modalResumenDashboard");if(!modal||modal.hidden)return;if(modal.contains(document.activeElement))document.activeElement.blur();modal.inert=true;modal.setAttribute("inert","");modal.setAttribute("aria-hidden","true");modal.hidden=true; }
+function cerrarModalConEscape(e){if(e.key==="Escape")cerrarResumenDashboard();}
+
+function navegarDashboard(destino) {
+  if (destino === "colaboradores" || destino === "horarios") {
+    document.querySelector('.item[data-vista="empleados"]')?.click();
+    if (destino === "horarios") abrirHorariosCuandoEsteListo();
+    return;
+  }
+  document.querySelector(`.item[data-vista="${destino}"]`)?.click();
+}
+function abrirHorariosCuandoEsteListo(intentos=0){const tab=document.querySelector('.tab[data-tab="horarios"]');if(tab)return tab.click();if(intentos<20)setTimeout(()=>abrirHorariosCuandoEsteListo(intentos+1),100);}
 
 function renderizarEstadoDia(registros) {
   const programados = registrosProgramados(registros);
@@ -160,6 +227,10 @@ function barra(id,p){const e=document.getElementById(id);if(e)e.style.width=`${M
 function asignar(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
 function nombreColaborador(c){return [c.datosPersonales?.nombres,c.datosPersonales?.apellidos].filter(Boolean).join(" ")||c.nombreCompleto||c.nombre||"Colaborador";}
 function iniciales(n){return String(n).trim().split(/\s+/).slice(0,2).map((x)=>x[0]||"").join("").toUpperCase();}
+function documentoColaborador(c){return c.documento?.numero||c.numeroDocumento||c.dni||"Sin documento";}
+function horaMarca(m){return m?.hora?String(m.hora).slice(0,5):"—";}
+function fechaVisible(v){const p=String(v||"").split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:v;}
+function etiquetaEstado(v){return String(v||"Sin estado").replaceAll("_"," ").toLowerCase().replace(/^./,(c)=>c.toUpperCase());}
 function tipoMarcacion(t){const x=String(t||"MARCIÓN").replaceAll("_"," ").toLowerCase();return x.replace(/^./,(c)=>c.toUpperCase());}
 function tiempoMarca(m){if(typeof m.fechaHora?.toMillis==="function")return m.fechaHora.toMillis();return Date.parse(m.fechaHoraISO||`${m.fecha}T${m.hora||"00:00"}`)||0;}
 function fechaLocal(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
