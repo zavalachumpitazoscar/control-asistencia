@@ -1,7 +1,7 @@
-/*=====================================================
+/* =====================================================
    SHELL PRINCIPAL — CONTROL DE ASISTENCIA
    Diseño oscuro moderno inspirado en paneles SaaS
-=====================================================*/
+===================================================== */
 
 :root {
     --shell-bg: #f3f5f9;
@@ -89,9 +89,9 @@ input {
 }
 
 .logo {
-    position: fixed;
-    top: 32px;
-    left: 29px;
+    position: absolute;
+    top: 17px;
+    left: 14px;
     width: 36px;
     height: 36px;
     border-radius: 11px;
@@ -563,11 +563,6 @@ input {
 
     .sidebar.mostrar { left: 8px; }
 
-    .logo {
-        top: 26px;
-        left: 23px;
-    }
-
     .contenido { padding: 10px; }
 
     .topbar { margin-bottom: 10px; }
@@ -593,15 +588,4 @@ input {
         animation-duration: .01ms !important;
         animation-iteration-count: 1 !important;
     }
-}
-
-.logo img {
-    width: 70%;
-    height: 70%;
-    object-fit: contain;
-    display: block;
-}
-
-.logo::before {
-    display: none;
 }
