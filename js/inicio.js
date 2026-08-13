@@ -29,6 +29,7 @@ import { iniciarCompañia } from "./compañia.js";
 import { iniciarEmpleados } from "./empleados.js";
 import { iniciarAsistencia } from "./asistencia.js?v=20260813-3";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260813-3";
+import { iniciarDashboard } from "./dashboard.js?v=20260813-1";
 
 const sidebar = document.querySelector(".sidebar");
 
@@ -413,6 +414,12 @@ async function cargarVista(
 
 
         switch(vistaPrincipal){
+
+            case "dashboard":
+
+                iniciarDashboard();
+
+            break;
 
             case "compañia":
 
