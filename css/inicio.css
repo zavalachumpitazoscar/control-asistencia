@@ -200,6 +200,7 @@ input {
 .item[data-vista="compañia"] span::before { content: "\f1ad"; }
 .item[data-vista="empleados"] span::before { content: "\f4d0"; }
 .item[data-vista="asistencia"] span::before { content: "\f293"; }
+.item[data-vista="auditoria"] span::before { content: "\f52e"; }
 .item[data-vista="horarios"] span::before { content: "\f1e2"; }
 .item[data-vista="reportes"] span::before { content: "\f17b"; }
 .item[data-vista="configuracion"] span::before { content: "\f3e5"; }
