@@ -264,7 +264,7 @@ input {
 
 .topbar {
     position: sticky;
-    top: 12px;
+    top: 0;
     z-index: 20;
     min-height: 60px;
     margin-bottom: 16px;
@@ -278,6 +278,53 @@ input {
     box-shadow: 0 8px 25px rgba(15, 23, 42, .06);
     -webkit-backdrop-filter: blur(16px) saturate(145%);
     backdrop-filter: blur(16px) saturate(145%);
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+        min-height .24s ease,
+        border-radius .24s ease,
+        background .24s ease,
+        border-color .24s ease,
+        box-shadow .24s ease,
+        transform .24s ease;
+}
+
+/* Línea de énfasis que aparece solamente durante el desplazamiento. */
+.topbar::after {
+    content: "";
+    position: absolute;
+    right: 18px;
+    bottom: 0;
+    left: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transform: scaleX(.35);
+    transition: opacity .25s ease, transform .3s ease;
+    pointer-events: none;
+}
+
+/* Estado compacto al bajar dentro del contenido. */
+.topbar.en-desplazamiento {
+    min-height: 54px;
+    border-color: rgba(148, 163, 184, .28);
+    border-radius: 0 0 15px 15px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow:
+        0 12px 28px rgba(15, 23, 42, .10),
+        0 1px 0 rgba(255, 255, 255, .8) inset;
+    -webkit-backdrop-filter: blur(20px) saturate(155%);
+    backdrop-filter: blur(20px) saturate(155%);
+}
+
+.topbar.en-desplazamiento::after {
+    opacity: .55;
+    transform: scaleX(1);
+}
+
+.topbar.en-desplazamiento .usuario-avatar {
+    transform: scale(.92);
 }
 
 .topbar-izquierda {
@@ -458,6 +505,7 @@ input {
     color: #fff;
     background: linear-gradient(145deg, #3193ff, #1768dc);
     font-size: 16px;
+    transition: transform .24s ease;
 }
 
 .usuario-info {
@@ -663,13 +711,18 @@ input {
 
 @media (max-width: 768px) {
     .topbar {
-        top: 8px;
+        top: 0;
         min-height: 56px;
         padding: 0 10px;
         border-radius: 14px;
     }
 
     .topbar h1 { font-size: 17px; }
+
+    .topbar.en-desplazamiento {
+        min-height: 52px;
+        border-radius: 0 0 13px 13px;
+    }
 
     #contenedorVista {
         min-height: calc(100vh - 116px);
