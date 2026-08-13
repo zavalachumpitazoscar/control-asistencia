@@ -27,8 +27,8 @@ from
 
 import { iniciarCompañia } from "./compañia.js";
 import { iniciarEmpleados } from "./empleados.js";
-import { iniciarAsistencia } from "./asistencia.js?v=20260813-2";
-import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260813-2";
+import { iniciarAsistencia } from "./asistencia.js?v=20260813-3";
+import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260813-3";
 
 const sidebar = document.querySelector(".sidebar");
 
@@ -806,3 +806,4 @@ regla.innerHTML =
 }
 
 }
+
