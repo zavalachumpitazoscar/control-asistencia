@@ -201,9 +201,56 @@ function mostrarDetalle(e) {
   const id = e.target.closest("[data-detalle]")?.dataset.detalle; if (!id) return;
   const r = registros.find((x) => x.id === id); if (!r) return;
   document.getElementById("tituloDetalleAuditoria").textContent = `${etiqueta(r.accion)} · ${r.modulo}`;
-  document.getElementById("contenidoDetalleAuditoria").innerHTML = `<div class="detalle-auditoria-grid"><div><span>Fecha</span><strong>${html(fechaVisible(r.fecha))}</strong></div><div><span>Responsable</span><strong>${html(r.responsableNombre || r.responsableId || "—")}</strong></div><div><span>Usuario / correo</span><strong>${html(r.responsableCorreo || r.responsableId || "—")}</strong></div><div><span>Afectado</span><strong>${html(r.afectadoNombre || r.afectadoId || "—")}</strong></div><div><span>Motivo</span><strong>${html(r.motivo || "No especificado")}</strong></div><div><span>Documento</span><strong>${html(r.documentoId || r.afectadoDocumento || "—")}</strong></div></div><pre class="cambio-json">${html(JSON.stringify({ cambios:r.cambios, antes:r.antes, despues:r.despues }, null, 2))}</pre>`;
+  const cambiosVisibles = construirCambiosVisibles(r);
+  document.getElementById("contenidoDetalleAuditoria").innerHTML = `
+    <div class="detalle-auditoria-grid">
+      <div><span>Fecha y hora</span><strong>${html(fechaVisible(r.fecha))}</strong></div>
+      <div><span>Realizado por</span><strong>${html(r.responsableNombre || "Usuario del sistema")}</strong><small>${html(r.responsableCorreo || r.responsableRol || "")}</small></div>
+      <div><span>Módulo</span><strong>${html(r.modulo || "Sistema")}</strong></div>
+      <div><span>Acción realizada</span><strong>${html(accionAmigable(r.accion))}</strong></div>
+      <div><span>Persona o registro afectado</span><strong>${html(nombreAfectado(r))}</strong></div>
+      <div><span>Motivo u observación</span><strong>${html(motivoVisible(r.motivo))}</strong></div>
+    </div>
+    <section class="detalle-cambios-amigable">
+      <h4><i class="bi bi-arrow-left-right"></i> ¿Qué cambió?</h4>
+      ${cambiosVisibles}
+    </section>`;
   const modal = document.getElementById("modalDetalleAuditoria"); modal.hidden = false; modal.inert = false; modal.removeAttribute("inert"); modal.setAttribute("aria-hidden", "false"); document.getElementById("cerrarDetalleAuditoria").focus();
 }
+
+function construirCambiosVisibles(registro) {
+  const cambios = registro.cambios && typeof registro.cambios === "object"
+    ? Object.entries(registro.cambios)
+    : [];
+  const utiles = cambios.filter(([campo]) => !campoTecnico(campo));
+  if (utiles.length) {
+    return `<div class="lista-cambios-amigable">${utiles.map(([campo, valores]) => `
+      <article>
+        <strong>${html(nombreCampo(campo))}</strong>
+        <div class="comparacion-cambio">
+          <span><small>Antes</small>${html(valorAmigable(valores?.anterior))}</span>
+          <i class="bi bi-arrow-right"></i>
+          <span class="nuevo"><small>Ahora</small>${html(valorAmigable(valores?.nuevo))}</span>
+        </div>
+      </article>`).join("")}</div>`;
+  }
+  const datos = registro.despues || registro.antes || {};
+  const resumen = camposImportantes(datos).map(([campo, valor]) => `<li><span>${html(nombreCampo(campo))}</span><strong>${html(valorAmigable(valor))}</strong></li>`).join("");
+  return resumen
+    ? `<p class="explicacion-cambio">${html(registro.resumen || "Se registró una operación en el sistema.")}</p><ul class="datos-operacion">${resumen}</ul>`
+    : `<p class="sin-detalle-cambio">${html(registro.resumen || "La operación fue registrada correctamente.")}</p>`;
+}
+
+function camposImportantes(datos) {
+  const preferidos = ["fecha", "estado", "decision", "estadoAprobacion", "minutosAprobados", "minutosCalculados", "tipo", "hora", "desde", "hasta", "cantidad", "observacion", "motivo"];
+  return preferidos.filter((campo) => datos?.[campo] != null && !campoTecnico(campo)).slice(0, 8).map((campo) => [campo, datos[campo]]);
+}
+function campoTecnico(campo) { return /(^id$|Id$|fechaRegistro|fechaModificacion|fechaActualizacion|fechaDecision|fechaEdicion|creadoPor|modificadoPor|decididoPor|empresa|origen|historial|password|token)/i.test(campo); }
+function nombreCampo(campo) { const nombres={ estado:"Estado",decision:"Decisión",estadoAprobacion:"Aprobación",minutosAprobados:"Tiempo aprobado",minutosCalculados:"Tiempo calculado",motivo:"Motivo",observacion:"Observación",fecha:"Fecha",hora:"Hora",tipo:"Tipo",desde:"Desde",hasta:"Hasta",cantidad:"Cantidad",nombre:"Nombre",correo:"Correo",rol:"Rol",horarioIds:"Horario asignado" }; return nombres[campo] || String(campo).replace(/([a-z])([A-Z])/g,"$1 $2").replaceAll("_"," ").replace(/^./,(x)=>x.toUpperCase()); }
+function valorAmigable(valor) { if(valor==null||valor==="")return "Sin información";if(typeof valor==="boolean")return valor?"Sí":"No";if(Array.isArray(valor))return valor.length?`${valor.length} elemento${valor.length===1?"":"s"}`:"Ninguno";if(typeof valor==="object")return "Información actualizada";if(/minutos/i.test(String(valor)))return String(valor);return String(valor).replaceAll("_"," "); }
+function accionAmigable(accion) { const a=String(accion||"").toUpperCase();if(a.includes("CREAR")||a.includes("AGREGAR"))return "Se creó un registro";if(a.includes("ELIMINAR"))return "Se eliminó un registro";if(a.includes("APROBAR"))return "Se aprobó una solicitud";if(a.includes("RECHAZAR"))return "Se rechazó una solicitud";if(a.includes("MODIFICAR"))return "Se modificó información";return etiqueta(accion).toLowerCase().replace(/^./,(x)=>x.toUpperCase()); }
+function nombreAfectado(r) { const nombre=String(r.afectadoNombre||"").trim();return nombre&&nombre!=="Registro del sistema"?nombre:(r.modulo?`Registro de ${r.modulo}`:"Registro del sistema"); }
+function motivoVisible(motivo) { const m=String(motivo||"").trim();return !m||m==="."||m==="-"?"No se indicó un motivo":m; }
 function cerrarDetalle() { const modal=document.getElementById("modalDetalleAuditoria"); if(modal.contains(document.activeElement))document.activeElement.blur(); modal.inert=true; modal.setAttribute("inert",""); modal.setAttribute("aria-hidden","true"); modal.hidden=true; }
 function limpiarFiltros(){["buscarAuditoria","filtroModuloAuditoria","filtroAccionAuditoria","fechaDesdeAuditoria","fechaHastaAuditoria"].forEach((id)=>document.getElementById(id).value="");pagina=1;renderizarAuditoria();}
 function completarModulos(){const s=document.getElementById("filtroModuloAuditoria"),actual=s.value;const modulos=[...new Set(registros.map((r)=>r.modulo).filter(Boolean))].sort();s.innerHTML='<option value="">Todos los módulos</option>'+modulos.map((m)=>`<option value="${html(m)}">${html(m)}</option>`).join("");if(modulos.includes(actual))s.value=actual;}
