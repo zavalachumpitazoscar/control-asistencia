@@ -29,7 +29,7 @@ import { iniciarCompañia } from "./compañia.js";
 import { iniciarEmpleados } from "./empleados.js";
 import { iniciarAsistencia } from "./asistencia.js?v=20260813-3";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260813-3";
-import { iniciarDashboard } from "./dashboard.js?v=20260813-1";
+import { iniciarDashboard } from "./dashboard.js?v=20260813-2";
 
 const sidebar = document.querySelector(".sidebar");
 
@@ -813,4 +813,3 @@ regla.innerHTML =
 }
 
 }
-
