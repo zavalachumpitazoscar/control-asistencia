@@ -14,12 +14,12 @@
   <div id="estadoCargaDashboard" class="dashboard-carga"><span></span> Preparando información...</div>
 
   <div class="dashboard-kpis">
-    <article class="kpi-dashboard azul"><div class="kpi-icono"><i class="bi bi-people"></i></div><div><span>Colaboradores activos</span><strong id="kpiColaboradores">—</strong><small id="detalleColaboradores">Personal registrado</small></div></article>
-    <article class="kpi-dashboard verde"><div class="kpi-icono"><i class="bi bi-person-check"></i></div><div><span>Asistieron</span><strong id="kpiAsistieron">—</strong><small id="detalleAsistieron">En la fecha consultada</small></div></article>
-    <article class="kpi-dashboard ambar"><div class="kpi-icono"><i class="bi bi-clock-history"></i></div><div><span>Tardanzas</span><strong id="kpiTardanzas">—</strong><small id="detalleTardanzas">Requieren seguimiento</small></div></article>
-    <article class="kpi-dashboard rojo"><div class="kpi-icono"><i class="bi bi-person-x"></i></div><div><span>Ausencias</span><strong id="kpiAusencias">—</strong><small id="detalleAusencias">Sin asistencia registrada</small></div></article>
-    <article class="kpi-dashboard violeta"><div class="kpi-icono"><i class="bi bi-exclamation-diamond"></i></div><div><span>Incompletos</span><strong id="kpiIncompletos">—</strong><small id="detalleIncompletos">Falta alguna marcación</small></div></article>
-    <article class="kpi-dashboard celeste"><div class="kpi-icono"><i class="bi bi-stopwatch"></i></div><div><span>Extra pendiente</span><strong id="kpiExtraPendiente">—</strong><small id="detalleExtraPendiente">Por revisar o aprobar</small></div></article>
+    <article class="kpi-dashboard azul" data-resumen="activos" role="button" tabindex="0" aria-label="Ver colaboradores activos"><div class="kpi-icono"><i class="bi bi-people"></i></div><div><span>Colaboradores activos</span><strong id="kpiColaboradores">—</strong><small id="detalleColaboradores">Pulsa para ver el personal</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard verde" data-resumen="asistieron" role="button" tabindex="0" aria-label="Ver colaboradores que asistieron"><div class="kpi-icono"><i class="bi bi-person-check"></i></div><div><span>Asistieron</span><strong id="kpiAsistieron">—</strong><small id="detalleAsistieron">En la fecha consultada</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard ambar" data-resumen="tardanzas" role="button" tabindex="0" aria-label="Ver colaboradores con tardanza"><div class="kpi-icono"><i class="bi bi-clock-history"></i></div><div><span>Tardanzas</span><strong id="kpiTardanzas">—</strong><small id="detalleTardanzas">Requieren seguimiento</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard rojo" data-resumen="ausencias" role="button" tabindex="0" aria-label="Ver colaboradores ausentes"><div class="kpi-icono"><i class="bi bi-person-x"></i></div><div><span>Ausencias</span><strong id="kpiAusencias">—</strong><small id="detalleAusencias">Sin asistencia registrada</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard violeta" data-resumen="incompletos" role="button" tabindex="0" aria-label="Ver jornadas incompletas"><div class="kpi-icono"><i class="bi bi-exclamation-diamond"></i></div><div><span>Incompletos</span><strong id="kpiIncompletos">—</strong><small id="detalleIncompletos">Falta alguna marcación</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard celeste" data-resumen="extra" role="button" tabindex="0" aria-label="Ver horas extra pendientes"><div class="kpi-icono"><i class="bi bi-stopwatch"></i></div><div><span>Extra pendiente</span><strong id="kpiExtraPendiente">—</strong><small id="detalleExtraPendiente">Por revisar o aprobar</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
   </div>
 
   <div class="dashboard-grid-principal">
@@ -72,3 +72,10 @@
   </div>
 </section>
 
+<div id="modalResumenDashboard" class="modal-resumen-dashboard" hidden aria-hidden="true" inert>
+  <article role="dialog" aria-modal="true" aria-labelledby="tituloResumenDashboard">
+    <header><div><span>DETALLE DEL INDICADOR</span><h3 id="tituloResumenDashboard">Resumen</h3><p id="subtituloResumenDashboard">—</p></div><button id="cerrarResumenDashboard" type="button" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button></header>
+    <div id="contenidoResumenDashboard" class="contenido-resumen-dashboard"></div>
+    <footer><span id="cantidadResumenDashboard">0 registros</span><button id="irDetalleResumenDashboard" class="btn-dashboard primario" type="button">Ir al módulo</button></footer>
+  </article>
+</div>
