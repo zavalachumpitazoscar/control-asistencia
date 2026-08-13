@@ -1198,7 +1198,7 @@ function establecerCarga(v) {
       : '<i class="bi bi-arrow-clockwise"></i> Actualizar';
 }
 function mostrarMensaje(m) {
-  cuerpoResumen.innerHTML = `<tr><td colspan="12" class="asistencia-tabla-vacia">${html(m)}</td></tr>`;
+  cuerpoResumen.innerHTML = `<tr><td colspan="15" class="asistencia-tabla-vacia">${html(m)}</td></tr>`;
   actualizarBotonesExportar(false);
 }
 function esAsistencia(e) {
@@ -1274,4 +1274,3 @@ function html(v) {
   e.textContent = String(v ?? "");
   return e.innerHTML;
 }
-
