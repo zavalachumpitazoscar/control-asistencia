@@ -41,7 +41,43 @@ const titulo = document.querySelector(".topbar h1");
 
 const overlay = document.querySelector(".overlay");
 
+const contenidoPrincipal = document.querySelector(".contenido");
+
+const topbar = document.querySelector(".topbar");
+
 const ANCHO_MENU_MOVIL = 1024;
+
+// Efecto visual de la barra superior al desplazarse.
+let actualizacionTopbarPendiente = false;
+
+function actualizarEstadoTopbar(){
+
+    if(!contenidoPrincipal || !topbar) return;
+
+    topbar.classList.toggle(
+        "en-desplazamiento",
+        contenidoPrincipal.scrollTop > 18
+    );
+
+    actualizacionTopbarPendiente = false;
+
+}
+
+if(contenidoPrincipal && topbar){
+
+    contenidoPrincipal.addEventListener("scroll",()=>{
+
+        if(actualizacionTopbarPendiente) return;
+
+        actualizacionTopbarPendiente = true;
+
+        requestAnimationFrame(actualizarEstadoTopbar);
+
+    },{ passive:true });
+
+    actualizarEstadoTopbar();
+
+}
 
 // Etiquetas accesibles y ayudas al pasar el cursor cuando el menú está reducido.
 botones.forEach(btn => {
