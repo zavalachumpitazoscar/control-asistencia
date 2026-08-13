@@ -9,6 +9,7 @@ import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-
 import { iniciarAjusteRefrigerioAsistencia } from "./asistencia/ajuste-refrigerio-asistencia.js";
 import { iniciarAprobacionHorasExtraAsistencia } from "./asistencia/aprobar-horas-extra-asistencia.js";
 import { iniciarOperacionesMensualesAsistencia } from "./asistencia/operaciones-mensuales-asistencia.js?v=20260812-4";
+import { iniciarAdministracionAsistencia } from "./asistencia/administracion-asistencia.js?v=20260813-1";
 
 export async function iniciarAsistencia() {
   console.log("✅ INICIANDO MÓDULO DE ASISTENCIA · VERSIÓN 2026-08-12.5");
@@ -23,4 +24,5 @@ export async function iniciarAsistencia() {
   iniciarImportacionMarcaciones();
   iniciarAprobacionHorasExtraAsistencia();
   iniciarOperacionesMensualesAsistencia();
+  iniciarAdministracionAsistencia();
 }
