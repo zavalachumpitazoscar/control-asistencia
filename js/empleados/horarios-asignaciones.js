@@ -2278,6 +2278,20 @@ function obtenerRangoHorario(
 resultado.cantidadColaboradores =
 colaboradoresSeleccionados.size;
 
+// Guardamos una descripción legible para que la auditoría pueda indicar
+// exactamente a quiénes se asignó el horario, sin mostrar identificadores.
+resultado.colaboradoresAsignados = colaboradores
+    .filter(colaborador => colaboradoresSeleccionados.has(colaborador.id))
+    .map(colaborador => ({
+        nombre: obtenerNombreColaborador(colaborador),
+        documento: obtenerDocumentoColaborador(colaborador)
+    }));
+
+resultado.horarioNombre =
+    horario.nombre ||
+    horario.descripcion ||
+    "Horario seleccionado";
+
                 const conflictos =
 validarConflictosAsignacion(
 
