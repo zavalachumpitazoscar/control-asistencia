@@ -28,6 +28,7 @@ from
 import { iniciarCompañia } from "./compañia.js";
 import { iniciarEmpleados } from "./empleados.js";
 import { iniciarAsistencia } from "./asistencia.js?v=20260812-1";
+import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260813-1";
 
 const sidebar = document.querySelector(".sidebar");
 
@@ -209,6 +210,8 @@ onAuthStateChanged(auth, async(usuario)=>{
     }
 
     await cargarPerfilUsuario(usuario);
+
+    iniciarMonitorAuditoriaGlobal(usuario);
 
     cargarVista("dashboard");
 
@@ -430,6 +433,12 @@ async function cargarVista(
             case "asistencia":
 
                 iniciarAsistencia();
+
+            break;
+
+            case "auditoria":
+
+                iniciarAuditoria();
 
             break;
 
