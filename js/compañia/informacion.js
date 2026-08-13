@@ -339,6 +339,10 @@ modalRepresentante.style.display="none";
     // EMPRESA
     //=========================
 
+    // La vista pudo cambiar mientras terminaba la consulta asíncrona.
+    // En ese caso no escribimos sobre campos que ya fueron retirados del DOM.
+    if(!document.getElementById("ruc")) return;
+
     document.getElementById("ruc").value =
         datos.empresa?.ruc || "";
 
