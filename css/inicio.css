@@ -102,12 +102,30 @@ input {
     background: linear-gradient(145deg, #2f93ff, #1768dc);
     box-shadow: 0 8px 20px rgba(35, 136, 255, .28);
     z-index: 102;
+    overflow: hidden;
 }
 
 .logo::before {
     content: "\f293";
     font-family: "bootstrap-icons";
     font-size: 18px;
+}
+
+/* Mantiene cualquier logo cargado dentro del cuadro. */
+.logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+    border-radius: inherit;
+}
+
+/* Si existe una imagen, oculta el icono de respaldo. */
+.logo:has(img)::before {
+    display: none;
 }
 
 .marca h2 {
@@ -493,6 +511,16 @@ input {
 .overlay.mostrar {
     visibility: visible;
     opacity: 1;
+}
+
+/* En escritorio el fondo nunca debe quedar bloqueado por el overlay móvil. */
+@media (min-width: 1025px) {
+    .overlay,
+    .overlay.mostrar {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
 }
 
 /* ===========================
