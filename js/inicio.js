@@ -41,6 +41,23 @@ const titulo = document.querySelector(".topbar h1");
 
 const overlay = document.querySelector(".overlay");
 
+const ANCHO_MENU_MOVIL = 1024;
+
+// Etiquetas accesibles y ayudas al pasar el cursor cuando el menú está reducido.
+botones.forEach(btn => {
+    const etiqueta = btn.textContent.trim();
+    btn.setAttribute("aria-label", etiqueta);
+    btn.title = etiqueta;
+});
+
+// Recupera la preferencia del menú solamente para pantallas de escritorio.
+if(
+    window.innerWidth > ANCHO_MENU_MOVIL &&
+    localStorage.getItem("sidebarColapsado") === "true"
+){
+    document.body.classList.add("sidebar-colapsado");
+}
+
 
 // ============================
 // MENÚ USUARIO
@@ -172,8 +189,36 @@ onAuthStateChanged(auth, async(usuario)=>{
 
 botonMenu.addEventListener("click", () => {
 
+    if(window.innerWidth > ANCHO_MENU_MOVIL){
+
+        const colapsado =
+        document.body.classList.toggle("sidebar-colapsado");
+
+        localStorage.setItem(
+            "sidebarColapsado",
+            String(colapsado)
+        );
+
+        sidebar.classList.remove("mostrar");
+        overlay.classList.remove("mostrar");
+
+        return;
+
+    }
+
     sidebar.classList.toggle("mostrar");
     overlay.classList.toggle("mostrar");
+
+});
+
+window.addEventListener("resize",()=>{
+
+    if(window.innerWidth > ANCHO_MENU_MOVIL){
+
+        sidebar.classList.remove("mostrar");
+        overlay.classList.remove("mostrar");
+
+    }
 
 });
 
@@ -716,3 +761,4 @@ regla.innerHTML =
 }
 
 }
+
