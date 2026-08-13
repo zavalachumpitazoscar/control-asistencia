@@ -1,0 +1,42 @@
+<section class="auditoria-pagina">
+  <header class="auditoria-encabezado">
+    <div>
+      <span class="auditoria-etiqueta">TRAZABILIDAD GLOBAL</span>
+      <h2>Auditoría del sistema</h2>
+      <p>Historial de cambios realizados en todos los módulos de la empresa.</p>
+    </div>
+    <button id="actualizarAuditoria" class="btn-auditoria primario" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button>
+  </header>
+
+  <div class="auditoria-resumen">
+    <article><i class="bi bi-activity"></i><div><span>Operaciones encontradas</span><strong id="totalAuditoria">0</strong></div></article>
+    <article><i class="bi bi-person-check"></i><div><span>Usuarios responsables</span><strong id="usuariosAuditoria">0</strong></div></article>
+    <article><i class="bi bi-calendar-check"></i><div><span>Último cambio</span><strong id="ultimoCambioAuditoria">—</strong></div></article>
+  </div>
+
+  <div class="auditoria-filtros">
+    <label class="auditoria-busqueda"><span>Buscar</span><input id="buscarAuditoria" type="search" placeholder="Responsable, usuario afectado, módulo, acción o motivo"></label>
+    <label><span>Módulo</span><select id="filtroModuloAuditoria"><option value="">Todos los módulos</option></select></label>
+    <label><span>Acción</span><select id="filtroAccionAuditoria"><option value="">Todas las acciones</option><option value="CREAR">Creación</option><option value="MODIFICAR">Modificación</option><option value="ELIMINAR">Eliminación</option><option value="OPERACION">Operación administrativa</option></select></label>
+    <label><span>Desde</span><input id="fechaDesdeAuditoria" type="date"></label>
+    <label><span>Hasta</span><input id="fechaHastaAuditoria" type="date"></label>
+    <button id="limpiarFiltrosAuditoria" class="btn-auditoria secundario" type="button">Limpiar</button>
+  </div>
+
+  <div class="auditoria-tabla-card">
+    <div class="auditoria-tabla-scroll">
+      <table>
+        <thead><tr><th>Fecha y hora</th><th>Módulo</th><th>Acción</th><th>Responsable</th><th>Afectado / destino</th><th>Detalle</th><th>Motivo</th><th></th></tr></thead>
+        <tbody id="cuerpoAuditoria"><tr><td colspan="8" class="auditoria-vacio">Cargando historial...</td></tr></tbody>
+      </table>
+    </div>
+    <footer><span id="informacionAuditoria">Mostrando 0 registros</span><div><label>Mostrar <select id="limiteAuditoria"><option>10</option><option>20</option><option>50</option></select></label><button id="anteriorAuditoria" type="button">Anterior</button><span id="paginaAuditoria">Página 1 de 1</span><button id="siguienteAuditoria" type="button">Siguiente</button></div></footer>
+  </div>
+</section>
+
+<div id="modalDetalleAuditoria" class="modal-detalle-auditoria" hidden aria-hidden="true" inert>
+  <article role="dialog" aria-modal="true" aria-labelledby="tituloDetalleAuditoria">
+    <header><div><span>DETALLE DEL CAMBIO</span><h3 id="tituloDetalleAuditoria">Operación</h3></div><button id="cerrarDetalleAuditoria" type="button" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button></header>
+    <div id="contenidoDetalleAuditoria"></div>
+  </article>
+</div>
