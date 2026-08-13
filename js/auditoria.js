@@ -95,8 +95,8 @@ async function registrarCambio({ empresaId, nombreColeccion, documentoId, tipo, 
     responsableCorreo: responsable.correo,
     responsableRol: responsable.rol,
     afectadoId: datos.colaboradorId || datos.usuarioId || datos.empleadoId || documentoId,
-    afectadoNombre: datos.colaboradorNombre || datos.nombreCompleto || datos.nombre || datos.razonSocial || datos.descripcion || "Registro del sistema",
-    afectadoDocumento: datos.colaboradorDocumento || datos.documento || datos.dni || null,
+    afectadoNombre: obtenerNombreEntidad(nombreColeccion, datos),
+    afectadoDocumento: obtenerDocumentoEntidad(datos),
     motivo: datos.motivo || datos.observacion || datos.descripcionMotivo || null,
     resumen: resumenCambio(accion, nombreColeccion, datos, cambios),
     antes: limitar(antes),
@@ -109,20 +109,60 @@ async function registrarCambio({ empresaId, nombreColeccion, documentoId, tipo, 
 
 function diferencias(antes = {}, despues = {}) {
   const resultado = {};
-  new Set([...Object.keys(antes || {}), ...Object.keys(despues || {})]).forEach((campo) => {
-    if (["fechaModificacion", "fechaActualizacion", "fechaEdicion"].includes(campo)) return;
-    const a = JSON.stringify(antes?.[campo] ?? null);
-    const d = JSON.stringify(despues?.[campo] ?? null);
-    if (a !== d) resultado[campo] = { anterior: antes?.[campo] ?? null, nuevo: despues?.[campo] ?? null };
-  });
+  compararObjetos(antes || {}, despues || {}, "", resultado);
   return resultado;
 }
 
-function resumenCambio(accion, coleccion, datos, cambios) {
-  const destino = datos.colaboradorNombre || datos.nombreCompleto || datos.nombre || datos.razonSocial || datos.descripcion || datos.documento || "registro";
-  const campos = cambios ? Object.keys(cambios) : [];
-  return accion === "MODIFICAR" ? `${accion} ${destino}${campos.length ? ` · ${campos.join(", ")}` : ""}` : `${accion} ${destino} en ${nombresModulo[coleccion] || coleccion}`;
+function compararObjetos(antes, despues, ruta, resultado) {
+  const claves = new Set([...Object.keys(esObjeto(antes) ? antes : {}), ...Object.keys(esObjeto(despues) ? despues : {})]);
+  claves.forEach((campo) => {
+    const camino = ruta ? `${ruta}.${campo}` : campo;
+    if (campoTecnico(camino)) return;
+    const anterior = antes?.[campo] ?? null;
+    const nuevo = despues?.[campo] ?? null;
+    if (esObjeto(anterior) || esObjeto(nuevo)) compararObjetos(esObjeto(anterior) ? anterior : {}, esObjeto(nuevo) ? nuevo : {}, camino, resultado);
+    else if (JSON.stringify(anterior) !== JSON.stringify(nuevo)) resultado[camino] = { anterior, nuevo };
+  });
 }
+function esObjeto(valor) { return valor && typeof valor === "object" && !Array.isArray(valor); }
+
+function resumenCambio(accion, coleccion, datos, cambios) {
+  const destino = obtenerNombreEntidad(coleccion, datos);
+  const detalle = descripcionEspecifica(coleccion, datos);
+  const campos = cambios ? Object.keys(cambios).filter((c) => !campoTecnico(c)).map(nombreCampo) : [];
+  if (accion === "CREAR") return `Se creó ${destino}${detalle ? ` · ${detalle}` : ""}`;
+  if (accion === "ELIMINAR") return `Se eliminó ${destino}${detalle ? ` · ${detalle}` : ""}`;
+  return `Se modificó ${destino}${campos.length ? ` · Cambios: ${campos.join(", ")}` : ""}`;
+}
+
+function obtenerNombreEntidad(coleccion, datos = {}) {
+  const nombres = datos.datosPersonales;
+  const persona = [nombres?.nombres, nombres?.apellidos].filter(Boolean).join(" ").trim();
+  if (persona) return persona;
+  if (datos.colaboradorNombre) return datos.colaboradorNombre;
+  if (datos.nombreCompleto) return datos.nombreCompleto;
+  if (datos.razonSocial) return datos.razonSocial;
+  if (typeof datos.nombre === "string" && datos.nombre.trim()) return datos.nombre.trim();
+  if (datos.tipoPermisoNombre && datos.colaboradorNombre) return `${datos.tipoPermisoNombre} de ${datos.colaboradorNombre}`;
+  const etiquetas = { colaboradores:"Colaborador",horarios:"Horario",asignacionesHorarios:"Asignación de horario",excepcionesHorarios:"Programación diaria",permisos:"Permiso",feriados:"Feriado",marcaciones:"Marcación",areas:"Área",subareas:"Subárea",sucursales:"Sucursal",empresas:"Empresa",usuarios:"Usuario",aprobacionesHorasExtra:"Horas extra",cierresAsistencia:"Cierre de asistencia" };
+  return etiquetas[coleccion] || "Registro del sistema";
+}
+function obtenerDocumentoEntidad(datos = {}) { return datos.colaboradorDocumento || datos.documento?.numero || (typeof datos.documento === "string" ? datos.documento : null) || datos.dni || datos.numeroDocumento || null; }
+function descripcionEspecifica(coleccion, datos = {}) {
+  if (coleccion === "colaboradores") return [obtenerDocumentoEntidad(datos) && `Documento ${obtenerDocumentoEntidad(datos)}`, datos.organizacion?.sucursal && `Sucursal ${datos.organizacion.sucursal}`, datos.organizacion?.area && `Área ${datos.organizacion.area}`, datos.informacionAdicional?.cargoProfesion && `Cargo ${datos.informacionAdicional.cargoProfesion}`].filter(Boolean).join(" · ");
+  if (coleccion === "asignacionesHorarios") return [datos.horarioNombre && `Horario ${datos.horarioNombre}`, nombresAsignados(datos), datos.cantidadColaboradores && `${datos.cantidadColaboradores} colaborador(es)`, datos.fechaInicio && `desde ${fechaCorta(datos.fechaInicio)}`, datos.fechaFin && `hasta ${fechaCorta(datos.fechaFin)}`, datos.fechaInicio && datos.fechaFin && `${diasEntre(datos.fechaInicio,datos.fechaFin)} día(s) calendario`, diasAsignacion(datos), horasProgramadas(datos)].filter(Boolean).join(" · ");
+  if (coleccion === "permisos") return [datos.tipoPermisoNombre, datos.colaboradorNombre, datos.fechaInicio && `desde ${fechaCorta(datos.fechaInicio)}`, datos.fechaFin && `hasta ${fechaCorta(datos.fechaFin)}`, datos.horaInicio && `${datos.horaInicio} a ${datos.horaFin || "—"}`].filter(Boolean).join(" · ");
+  if (coleccion === "marcaciones") return [datos.colaboradorNombre, datos.fecha && fechaCorta(datos.fecha), datos.hora, datos.tipo && etiqueta(datos.tipo)].filter(Boolean).join(" · ");
+  if (coleccion === "feriados") return [datos.fechaInicio && `desde ${fechaCorta(datos.fechaInicio)}`, datos.fechaFin && `hasta ${fechaCorta(datos.fechaFin)}`, datos.tipo && etiqueta(datos.tipo)].filter(Boolean).join(" · ");
+  if (coleccion === "aprobacionesHorasExtra") return [datos.colaboradorNombre, datos.fecha && fechaCorta(datos.fecha), datos.minutosAprobados != null && `${duracionMinutos(datos.minutosAprobados)} aprobados`, datos.decision && etiqueta(datos.decision)].filter(Boolean).join(" · ");
+  return "";
+}
+function diasAsignacion(datos){const dias=datos.diasSemana||datos.dias||datos.diasSeleccionados;return Array.isArray(dias)&&dias.length?`Días: ${dias.map(etiqueta).join(", ")}`:"";}
+function nombresAsignados(datos){const lista=datos.colaboradoresAsignados;return Array.isArray(lista)&&lista.length?`Asignado a: ${lista.map((c)=>`${c.nombre}${c.documento?` (${c.documento})`:""}`).join(", ")}`:"";}
+function diasEntre(desde,hasta){const a=new Date(`${String(desde).slice(0,10)}T00:00:00`),b=new Date(`${String(hasta).slice(0,10)}T00:00:00`);return Number.isNaN(a.getTime())||Number.isNaN(b.getTime())?"—":Math.max(1,Math.round((b-a)/86400000)+1);}
+function horasProgramadas(datos){const entrada=datos.horaEntrada||datos.entrada?.programada,salida=datos.horaSalida||datos.salida?.programada;return entrada&&salida?`Horario: ${entrada} a ${salida}`:"";}
+function fechaCorta(v){if(!v)return "";const s=String(v).slice(0,10),p=s.split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:s;}
+function duracionMinutos(v){const n=Math.max(0,Number(v)||0);return `${Math.floor(n/60)} h${n%60?` ${n%60} min`:""}`;}
 
 function limpiar(valor) {
   if (valor == null) return valor;
@@ -170,7 +210,20 @@ async function cargarAuditoria() {
   }
 }
 
-function normalizarGlobal(id, r) { return { id, ...r, categoriaAccion: r.accion || "OPERACION" }; }
+function normalizarGlobal(id, r) {
+  const datos = r.despues || r.antes || {};
+  const coleccion = r.coleccion || "";
+  const nombre = obtenerNombreEntidad(coleccion, datos);
+  const documento = obtenerDocumentoEntidad(datos);
+  const accion = accionEspecifica(r.accion, r.cambios, datos);
+  return {
+    id, ...r, accion,
+    categoriaAccion: categoriaAccion(accion),
+    afectadoNombre: nombre,
+    afectadoDocumento: documento || r.afectadoDocumento || "",
+    resumen: resumenRegistroExistente(r, coleccion, datos, nombre, accion),
+  };
+}
 function normalizarAsistencia(id, r) { return { id: `asistencia_${id}`, modulo: "Asistencia", accion: r.tipo || "OPERACION", categoriaAccion: "OPERACION", responsableId: r.usuarioId, responsableNombre: r.usuarioNombre || r.usuarioEmail || r.usuarioId || "Usuario", responsableCorreo: r.usuarioEmail || "", afectadoId: r.colaboradorId || "Período", afectadoNombre: r.colaboradorNombre || (r.desde ? `${r.desde} al ${r.hasta}` : "Operación de asistencia"), resumen: r.tipo || "Operación administrativa", motivo: r.motivo || r.observacion, fecha: r.fecha, antes: null, despues: r, cambios: null }; }
 
 function obtenerFiltrados() {
@@ -200,7 +253,7 @@ function renderizarAuditoria() {
 function mostrarDetalle(e) {
   const id = e.target.closest("[data-detalle]")?.dataset.detalle; if (!id) return;
   const r = registros.find((x) => x.id === id); if (!r) return;
-  document.getElementById("tituloDetalleAuditoria").textContent = `${etiqueta(r.accion)} · ${r.modulo}`;
+  document.getElementById("tituloDetalleAuditoria").textContent = tituloOperacion(r);
   const cambiosVisibles = construirCambiosVisibles(r);
   document.getElementById("contenidoDetalleAuditoria").innerHTML = `
     <div class="detalle-auditoria-grid">
@@ -222,33 +275,40 @@ function construirCambiosVisibles(registro) {
   const cambios = registro.cambios && typeof registro.cambios === "object"
     ? Object.entries(registro.cambios)
     : [];
-  const utiles = cambios.filter(([campo]) => !campoTecnico(campo));
+  const utiles = expandirCambios(cambios).filter(([campo]) => !campoTecnico(campo));
   if (utiles.length) {
     return `<div class="lista-cambios-amigable">${utiles.map(([campo, valores]) => `
       <article>
         <strong>${html(nombreCampo(campo))}</strong>
         <div class="comparacion-cambio">
-          <span><small>Antes</small>${html(valorAmigable(valores?.anterior))}</span>
+          <span><small>Antes</small>${html(valorAmigable(valores?.anterior, campo))}</span>
           <i class="bi bi-arrow-right"></i>
-          <span class="nuevo"><small>Ahora</small>${html(valorAmigable(valores?.nuevo))}</span>
+          <span class="nuevo"><small>Ahora</small>${html(valorAmigable(valores?.nuevo, campo))}</span>
         </div>
       </article>`).join("")}</div>`;
   }
   const datos = registro.despues || registro.antes || {};
-  const resumen = camposImportantes(datos).map(([campo, valor]) => `<li><span>${html(nombreCampo(campo))}</span><strong>${html(valorAmigable(valor))}</strong></li>`).join("");
+  const resumen = camposImportantes(datos).map(([campo, valor]) => `<li><span>${html(nombreCampo(campo))}</span><strong>${html(valorAmigable(valor, campo))}</strong></li>`).join("");
   return resumen
     ? `<p class="explicacion-cambio">${html(registro.resumen || "Se registró una operación en el sistema.")}</p><ul class="datos-operacion">${resumen}</ul>`
     : `<p class="sin-detalle-cambio">${html(registro.resumen || "La operación fue registrada correctamente.")}</p>`;
 }
 
 function camposImportantes(datos) {
-  const preferidos = ["fecha", "estado", "decision", "estadoAprobacion", "minutosAprobados", "minutosCalculados", "tipo", "hora", "desde", "hasta", "cantidad", "observacion", "motivo"];
-  return preferidos.filter((campo) => datos?.[campo] != null && !campoTecnico(campo)).slice(0, 8).map((campo) => [campo, datos[campo]]);
+  const planos = aplanarDatos(datos);
+  const orden = ["datosPersonales.nombres","datosPersonales.apellidos","documento.tipo","documento.numero","datosPersonales.fechaNacimiento","datosPersonales.genero","contacto.correo","contacto.telefono","contacto.direccion","organizacion.sucursal","organizacion.area","organizacion.subarea","informacionAdicional.cargoProfesion","informacionAdicional.inicioContrato","informacionAdicional.terminoContrato","colaboradorNombre","colaboradorDocumento","horarioNombre","tipoAsignacion","nombre","descripcion","fecha","fechaInicio","fechaFin","hora","horaInicio","horaFin","diasSemana","cantidadColaboradores","estado","decision","estadoAprobacion","minutosAprobados","minutosCalculados","tipo","desde","hasta","cantidad","observacion","motivo"];
+  return orden.filter((campo) => planos[campo] != null && planos[campo] !== "" && !campoTecnico(campo)).slice(0, 18).map((campo) => [campo, planos[campo]]);
 }
 function campoTecnico(campo) { return /(^id$|Id$|fechaRegistro|fechaModificacion|fechaActualizacion|fechaDecision|fechaEdicion|creadoPor|modificadoPor|decididoPor|empresa|origen|historial|password|token)/i.test(campo); }
-function nombreCampo(campo) { const nombres={ estado:"Estado",decision:"Decisión",estadoAprobacion:"Aprobación",minutosAprobados:"Tiempo aprobado",minutosCalculados:"Tiempo calculado",motivo:"Motivo",observacion:"Observación",fecha:"Fecha",hora:"Hora",tipo:"Tipo",desde:"Desde",hasta:"Hasta",cantidad:"Cantidad",nombre:"Nombre",correo:"Correo",rol:"Rol",horarioIds:"Horario asignado" }; return nombres[campo] || String(campo).replace(/([a-z])([A-Z])/g,"$1 $2").replaceAll("_"," ").replace(/^./,(x)=>x.toUpperCase()); }
-function valorAmigable(valor) { if(valor==null||valor==="")return "Sin información";if(typeof valor==="boolean")return valor?"Sí":"No";if(Array.isArray(valor))return valor.length?`${valor.length} elemento${valor.length===1?"":"s"}`:"Ninguno";if(typeof valor==="object")return "Información actualizada";if(/minutos/i.test(String(valor)))return String(valor);return String(valor).replaceAll("_"," "); }
-function accionAmigable(accion) { const a=String(accion||"").toUpperCase();if(a.includes("CREAR")||a.includes("AGREGAR"))return "Se creó un registro";if(a.includes("ELIMINAR"))return "Se eliminó un registro";if(a.includes("APROBAR"))return "Se aprobó una solicitud";if(a.includes("RECHAZAR"))return "Se rechazó una solicitud";if(a.includes("MODIFICAR"))return "Se modificó información";return etiqueta(accion).toLowerCase().replace(/^./,(x)=>x.toUpperCase()); }
+function nombreCampo(campo) { const nombres={ "datosPersonales.nombres":"Nombres","datosPersonales.apellidos":"Apellidos","datosPersonales.fechaNacimiento":"Fecha de nacimiento","datosPersonales.genero":"Género","documento.tipo":"Tipo de documento","documento.numero":"Número de documento","contacto.correo":"Correo","contacto.telefono":"Teléfono","contacto.direccion":"Dirección","organizacion.sucursal":"Sucursal","organizacion.area":"Área","organizacion.subarea":"Subárea","informacionAdicional.cargoProfesion":"Cargo o profesión","informacionAdicional.inicioContrato":"Inicio de contrato","informacionAdicional.terminoContrato":"Fin de contrato",colaboradorNombre:"Colaborador",colaboradorDocumento:"Documento",horarioNombre:"Nombre del horario",tipoAsignacion:"Tipo de asignación",cantidadColaboradores:"Cantidad de colaboradores",diasSemana:"Días asignados",fechaInicio:"Fecha de inicio",fechaFin:"Fecha de término",horaInicio:"Hora de inicio",horaFin:"Hora de término",estado:"Estado",decision:"Decisión",estadoAprobacion:"Aprobación",minutosAprobados:"Tiempo aprobado",minutosCalculados:"Tiempo calculado",motivo:"Motivo",observacion:"Observación",fecha:"Fecha",hora:"Hora",tipo:"Tipo",desde:"Desde",hasta:"Hasta",cantidad:"Cantidad",nombre:"Nombre",correo:"Correo",rol:"Rol",horarioIds:"Horario asignado" }; return nombres[campo] || String(campo).split(".").pop().replace(/([a-z])([A-Z])/g,"$1 $2").replaceAll("_"," ").replace(/^./,(x)=>x.toUpperCase()); }
+function valorAmigable(valor, campo="") { if(valor==null||valor==="")return "Sin información";if(typeof valor==="boolean")return valor?"Sí":"No";if(Array.isArray(valor))return valor.length?valor.map((v)=>typeof v==="string"?etiqueta(v):"Dato registrado").join(", "):"Ninguno";if(typeof valor==="object")return Object.values(aplanarDatos(valor)).filter((v)=>typeof v!=="object").slice(0,5).map(String).join(" · ")||"Información actualizada";if(/minutos/i.test(campo))return duracionMinutos(valor);if(/fecha|inicioContrato|terminoContrato|desde|hasta/i.test(campo)&&/^\d{4}-\d{2}-\d{2}/.test(String(valor)))return fechaCorta(valor);return String(valor).replaceAll("_"," "); }
+function aplanarDatos(objeto, prefijo="", salida={}){if(!esObjeto(objeto))return salida;Object.entries(objeto).forEach(([clave,valor])=>{const ruta=prefijo?`${prefijo}.${clave}`:clave;if(esObjeto(valor))aplanarDatos(valor,ruta,salida);else salida[ruta]=valor;});return salida;}
+function expandirCambios(cambios){const salida=[];cambios.forEach(([campo,valores])=>{if(esObjeto(valores?.anterior)||esObjeto(valores?.nuevo)){const a=aplanarDatos(esObjeto(valores?.anterior)?valores.anterior:{}),n=aplanarDatos(esObjeto(valores?.nuevo)?valores.nuevo:{});new Set([...Object.keys(a),...Object.keys(n)]).forEach((sub)=>{if(JSON.stringify(a[sub]??null)!==JSON.stringify(n[sub]??null))salida.push([`${campo}.${sub}`,{anterior:a[sub]??null,nuevo:n[sub]??null}]);});}else salida.push([campo,valores]);});return salida;}
+function accionEspecifica(accion, cambios, datos){const estado=cambios?.estado;if(estado){const nuevo=String(estado.nuevo||datos.estado||"").toUpperCase();if(nuevo==="ACTIVO")return "ACTIVAR";if(nuevo==="INACTIVO")return "DESACTIVAR";}return accion||"OPERACION";}
+function categoriaAccion(accion){const a=String(accion||"").toUpperCase();if(a==="CREAR")return "CREAR";if(a==="ELIMINAR")return "ELIMINAR";if(["ACTIVAR","DESACTIVAR","MODIFICAR"].includes(a))return "MODIFICAR";return "OPERACION";}
+function resumenRegistroExistente(registro, coleccion, datos, nombre, accion){const detalle=descripcionEspecifica(coleccion,datos);const verbo={CREAR:"Se creó",ELIMINAR:"Se eliminó",ACTIVAR:"Se activó",DESACTIVAR:"Se desactivó",MODIFICAR:"Se modificó"}[accion]||"Se realizó una operación sobre";const campos=expandirCambios(Object.entries(registro.cambios||{})).filter(([c])=>!campoTecnico(c)).map(([c])=>nombreCampo(c));return `${verbo} ${nombre}${detalle?` · ${detalle}`:""}${accion==="MODIFICAR"&&campos.length?` · Se cambió: ${campos.join(", ")}`:""}`;}
+function accionAmigable(accion) { const a=String(accion||"").toUpperCase();if(a.includes("CREAR")||a.includes("AGREGAR"))return "Se creó un registro";if(a.includes("ELIMINAR"))return "Se eliminó un registro";if(a.includes("DESACTIVAR"))return "Se desactivó el registro";if(a.includes("ACTIVAR"))return "Se activó el registro";if(a.includes("APROBAR"))return "Se aprobó una solicitud";if(a.includes("RECHAZAR"))return "Se rechazó una solicitud";if(a.includes("MODIFICAR"))return "Se modificó información";return etiqueta(accion).toLowerCase().replace(/^./,(x)=>x.toUpperCase()); }
+function tituloOperacion(r){const a=String(r.accion||"").toUpperCase(),singular={Colaboradores:"colaborador",Horarios:"horario",Permisos:"permiso",Feriados:"feriado",Marcaciones:"marcación",Sucursales:"sucursal",Áreas:"área",Subáreas:"subárea",Compañía:"empresa","Asignación de horarios":"asignación de horario","Horas extra":"horas extra"}[r.modulo]||"registro";const verbo={CREAR:"Creación de",ELIMINAR:"Eliminación de",ACTIVAR:"Activación de",DESACTIVAR:"Desactivación de",MODIFICAR:"Modificación de"}[a]||"Detalle de";return `${verbo} ${singular}`;}
 function nombreAfectado(r) { const nombre=String(r.afectadoNombre||"").trim();return nombre&&nombre!=="Registro del sistema"?nombre:(r.modulo?`Registro de ${r.modulo}`:"Registro del sistema"); }
 function motivoVisible(motivo) { const m=String(motivo||"").trim();return !m||m==="."||m==="-"?"No se indicó un motivo":m; }
 function cerrarDetalle() { const modal=document.getElementById("modalDetalleAuditoria"); if(modal.contains(document.activeElement))document.activeElement.blur(); modal.inert=true; modal.setAttribute("inert",""); modal.setAttribute("aria-hidden","true"); modal.hidden=true; }
