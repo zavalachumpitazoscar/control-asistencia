@@ -855,4 +855,3 @@ regla.innerHTML =
 }
 
 }
-
