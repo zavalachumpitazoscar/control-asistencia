@@ -293,23 +293,9 @@ document.getElementById(
 null;
 
 
-let programacionSemanal = {
-
-    lunes:[],
-
-    martes:[],
-
-    miercoles:[],
-
-    jueves:[],
-
-    viernes:[],
-
-    sabado:[],
-
-    domingo:[]
-
-};
+let programacionesSemanales=[crearProgramacionSemanalVacia()];
+let indiceSemanaSemanal=0;
+let programacionSemanal=programacionesSemanales[0];
 
     let colaboradorCalendarioId =
 null;
@@ -1219,31 +1205,13 @@ actualizarContadorColaboradores();
             fechaCincoAniosDespues(fechaActual)
         );
 
-        asignarValor("fechaInicioRepeticionMensual", fechaActual);
-        asignarValor("fechaFinRepeticionMensual", fechaCincoAniosDespues(fechaActual));
-
-
         horarioSemanalSeleccionadoId =
 null;
 
 
-programacionSemanal = {
-
-    lunes:[],
-
-    martes:[],
-
-    miercoles:[],
-
-    jueves:[],
-
-    viernes:[],
-
-    sabado:[],
-
-    domingo:[]
-
-};
+programacionesSemanales=[crearProgramacionSemanalVacia()];
+indiceSemanaSemanal=0;
+programacionSemanal=programacionesSemanales[0];
 
 
 if(buscarHorarioSemanal){
@@ -1267,6 +1235,7 @@ document
 
 
 renderizarProgramacionSemanal();
+renderizarPestanasSemanas();
 
 actualizarHorarioSemanalSeleccionado();
         
@@ -1286,6 +1255,22 @@ actualizarHorarioSemanalSeleccionado();
         renderizarResumenMeses();
 
     }
+
+    function crearProgramacionSemanalVacia(){return {lunes:[],martes:[],miercoles:[],jueves:[],viernes:[],sabado:[],domingo:[]};}
+
+    function renderizarPestanasSemanas(){
+        const contenedor=document.getElementById("pestanasSemanasAsignacion");if(!contenedor)return;
+        contenedor.innerHTML=programacionesSemanales.map((_,indice)=>`<span class="pestana-semana-asignacion ${indice===indiceSemanaSemanal?"activa":""}"><button type="button" data-semana-indice="${indice}">Semana ${indice+1}</button>${indice>0?`<button type="button" data-eliminar-semana="${indice}" aria-label="Eliminar Semana ${indice+1}"><i class="bi bi-x"></i></button>`:""}</span>`).join("");
+        contenedor.querySelectorAll("[data-semana-indice]").forEach((boton)=>boton.addEventListener("click",()=>cambiarSemanaSemanal(Number(boton.dataset.semanaIndice))));
+        contenedor.querySelectorAll("[data-eliminar-semana]").forEach((boton)=>boton.addEventListener("click",()=>eliminarSemanaSemanal(Number(boton.dataset.eliminarSemana))));
+        const intervalo=document.getElementById("intervaloAsignacionSemanal");if(intervalo){intervalo.disabled=programacionesSemanales.length>1;if(intervalo.disabled)intervalo.value="1";intervalo.title=intervalo.disabled?"El ciclo de varias semanas se repite automáticamente dentro de cada mes.":"Selecciona la frecuencia semanal.";}
+    }
+
+    function cambiarSemanaSemanal(indice){if(!programacionesSemanales[indice])return;indiceSemanaSemanal=indice;programacionSemanal=programacionesSemanales[indice];renderizarPestanasSemanas();renderizarProgramacionSemanal();}
+
+    function agregarSemanaSemanal(){if(programacionesSemanales.length>=6){Swal.fire({icon:"info",title:"Límite alcanzado",text:"Un mes puede ocupar como máximo seis semanas de calendario."});return;}programacionesSemanales.push(crearProgramacionSemanalVacia());cambiarSemanaSemanal(programacionesSemanales.length-1);}
+
+    function eliminarSemanaSemanal(indice){if(indice<=0||!programacionesSemanales[indice])return;programacionesSemanales.splice(indice,1);cambiarSemanaSemanal(Math.min(indiceSemanaSemanal,programacionesSemanales.length-1));}
 
     function fechaCincoAniosDespues(fechaISO){
         const fecha=new Date(`${fechaISO}T00:00:00`);
@@ -2163,33 +2148,6 @@ actualizarHorarioSemanalSeleccionado();
 
     }
 
-    async function repetirPlanificacionMensual(){
-        const desde=obtenerValor("fechaInicioRepeticionMensual");
-        const hasta=obtenerValor("fechaFinRepeticionMensual");
-        if(!desde||!hasta){mostrarCamposIncompletos("Selecciona las fechas desde y hasta para repetir la planificación.");return;}
-        if(hasta<desde){await Swal.fire({icon:"warning",title:"Periodo incorrecto",text:"La fecha final no puede ser anterior a la fecha inicial."});return;}
-        const prefijo=`${añoCalendario}-${String(mesCalendario+1).padStart(2,"0")}-`;
-        const patron=Object.entries(programacionMensual).filter(([fecha])=>fecha.startsWith(prefijo)).map(([fecha,horarioId])=>({dia:Number(fecha.slice(8,10)),horarioId}));
-        if(!patron.length){await Swal.fire({icon:"warning",title:"Mes sin planificación",text:"Primero marca en el calendario los días que deseas usar como patrón."});return;}
-        const inicio=new Date(`${desde}T00:00:00`),fin=new Date(`${hasta}T00:00:00`);
-        let agregados=0;
-        for(let cursor=new Date(inicio.getFullYear(),inicio.getMonth(),1);cursor<=fin;cursor.setMonth(cursor.getMonth()+1)){
-            const anio=cursor.getFullYear(),mes=cursor.getMonth();
-            patron.forEach(({dia,horarioId})=>{
-                if(dia>obtenerUltimoDiaMes(anio,mes))return;
-                const fecha=formatearFechaISO(new Date(anio,mes,dia));
-                if(fecha<desde||fecha>hasta)return;
-                if(!programacionMensual[fecha])agregados++;
-                programacionMensual[fecha]=horarioId;
-            });
-        }
-        añoCalendario=inicio.getFullYear();mesCalendario=inicio.getMonth();
-        renderizarCalendario();renderizarResumenMeses();
-        await Swal.fire({icon:"success",title:"Planificación repetida",text:`Se aplicó el patrón entre ${formatearFechaVisible(desde)} y ${formatearFechaVisible(hasta)}. ${agregados} días nuevos fueron programados.`,confirmButtonText:"Continuar"});
-    }
-
-
-
     if(form){
 
 
@@ -2726,9 +2684,7 @@ if(!fechaFin){
 
 
     const tieneProgramacion =
-    Object.values(
-        programacionSemanal
-    )
+    programacionesSemanales.flatMap(programacion=>Object.values(programacion))
     .some(horarioIds=>
 
         Array.isArray(
@@ -2762,10 +2718,9 @@ if(!fechaFin){
     [
         ...new Set(
             Object.values(
-                programacionSemanal
+                programacionesSemanales
             )
-            .filter(Array.isArray)
-            .flat()
+            .flatMap(programacion=>Object.values(programacion).filter(Array.isArray).flat())
         )
     ];
 
@@ -2785,6 +2740,7 @@ if(!fechaFin){
         fechaFin,
 
         intervaloSemanas:
+        programacionesSemanales.length > 1 ? 1 :
         Number(
             obtenerValor(
                 "intervaloAsignacionSemanal"
@@ -2796,9 +2752,12 @@ if(!fechaFin){
         programacionSemanal:
         JSON.parse(
             JSON.stringify(
-                programacionSemanal
+                programacionesSemanales[0]
             )
-        )
+        ),
+
+        cicloSemanal:JSON.parse(JSON.stringify(programacionesSemanales)),
+        reiniciarCicloCadaMes:true
 
     };
 
@@ -3892,11 +3851,16 @@ function expandirAsignacionSemanal(
             7
         );
 
-
-        const semanaValida =
-        numeroSemana %
-        intervalo ===
-        0;
+        const ciclo=Array.isArray(asignacion.cicloSemanal)&&asignacion.cicloSemanal.length?asignacion.cicloSemanal:[asignacion.programacionSemanal||{}];
+        let indiceCiclo=0;
+        let semanaValida=numeroSemana%intervalo===0;
+        if(asignacion.reiniciarCicloCadaMes&&ciclo.length>1){
+            const primerDiaMes=new Date(cursor.getFullYear(),cursor.getMonth(),1);
+            const desplazamientoLunes=(primerDiaMes.getDay()+6)%7;
+            indiceCiclo=Math.floor((cursor.getDate()-1+desplazamientoLunes)/7)%ciclo.length;
+            semanaValida=true;
+        }
+        const programacionAplicable=ciclo[indiceCiclo]||{};
 
 
         const nombreDia =
@@ -3907,11 +3871,10 @@ function expandirAsignacionSemanal(
 
         const horarioIdsDia =
         Array.isArray(
-            asignacion.programacionSemanal
-            ?.[nombreDia]
+            programacionAplicable?.[nombreDia]
         )
         ?
-        asignacion.programacionSemanal[
+        programacionAplicable[
             nombreDia
         ]
         :
@@ -7371,6 +7334,7 @@ if(
     "SEMANAL"
 ){
 
+    const cantidadSemanasCiclo=Array.isArray(asignacion.cicloSemanal)&&asignacion.cicloSemanal.length?asignacion.cicloSemanal.length:1;
     const diasConHorario =
     Object.entries(
         asignacion.programacionSemanal
@@ -7437,7 +7401,9 @@ if(
                 <p>
 
                     ${
-                        escaparHTML(
+                        cantidadSemanasCiclo>1
+                        ?`Ciclo de ${cantidadSemanasCiclo} semanas · reinicia cada mes`
+                        :escaparHTML(
                             diasConHorario.join(
                                 ", "
                             )
@@ -7769,8 +7735,8 @@ buscarColaboradorAsignacion
         limpiarMesActual
     );
 
-    document.getElementById("btnRepetirPlanificacionMensual")
-    ?.addEventListener("click", repetirPlanificacionMensual);
+    document.getElementById("btnAgregarSemanaAsignacion")
+    ?.addEventListener("click", agregarSemanaSemanal);
 
 
     cerrarAsignarHorario
@@ -8072,3 +8038,4 @@ function mostrarCamposIncompletos(
     });
 
 }
+
