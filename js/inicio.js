@@ -88,6 +88,40 @@ botones.forEach(btn => {
     btn.title = etiqueta;
 });
 
+// Ayuda táctil: al mantener presionado un acceso móvil muestra su nombre.
+const tooltipNavegacionMovil = document.createElement("div");
+tooltipNavegacionMovil.className = "tooltip-navegacion-movil";
+tooltipNavegacionMovil.setAttribute("role", "tooltip");
+document.body.appendChild(tooltipNavegacionMovil);
+
+let temporizadorTooltipMovil = null;
+let temporizadorOcultarTooltipMovil = null;
+
+function mostrarTooltipMovil(elemento){
+    if(window.innerWidth > 600) return;
+    const etiqueta = elemento.getAttribute("aria-label") || elemento.textContent.trim();
+    tooltipNavegacionMovil.textContent = etiqueta;
+    tooltipNavegacionMovil.classList.add("mostrar");
+    clearTimeout(temporizadorOcultarTooltipMovil);
+}
+
+function ocultarTooltipMovil(){
+    clearTimeout(temporizadorTooltipMovil);
+    temporizadorOcultarTooltipMovil = setTimeout(()=>tooltipNavegacionMovil.classList.remove("mostrar"), 180);
+}
+
+[...botones, document.querySelector(".salir")].filter(Boolean).forEach(elemento=>{
+    const etiqueta = elemento.classList.contains("salir") ? "Cerrar sesión" : elemento.getAttribute("aria-label");
+    elemento.setAttribute("aria-label", etiqueta);
+    elemento.addEventListener("pointerdown", ()=>{
+        clearTimeout(temporizadorTooltipMovil);
+        temporizadorTooltipMovil = setTimeout(()=>mostrarTooltipMovil(elemento), 380);
+    });
+    elemento.addEventListener("pointerup", ocultarTooltipMovil);
+    elemento.addEventListener("pointercancel", ocultarTooltipMovil);
+    elemento.addEventListener("pointerleave", ocultarTooltipMovil);
+});
+
 // Recupera la preferencia del menú solamente para pantallas de escritorio.
 if(
     window.innerWidth > ANCHO_MENU_MOVIL &&
