@@ -1,0 +1,418 @@
+/* =====================================================
+   CONSISTENCIA VISUAL Y EXPERIENCIA MÓVIL
+   Cargado al final para unificar los módulos existentes.
+===================================================== */
+
+:root {
+  --modulo-borde: #e2e8f0;
+  --modulo-fondo-suave: #f8fafc;
+  --modulo-texto: #0f172a;
+  --modulo-muted: #64748b;
+  --modulo-azul: #2563eb;
+  --modulo-radio: 14px;
+}
+
+/* Escritorio: densidad semejante a Dashboard y Auditoría */
+.compania,
+.empleados,
+.asistencia {
+  width: 100%;
+  gap: 14px;
+}
+
+.compania > .titulo-pagina,
+.empleados > .titulo-pagina {
+  padding: 0 2px;
+}
+
+.compania > .titulo-pagina p,
+.empleados > .titulo-pagina p {
+  margin: 0;
+  color: var(--modulo-muted);
+  font-size: 11px;
+}
+
+.tabs-compania,
+.tabs-empleados {
+  gap: 6px;
+  padding: 6px;
+  overflow-x: auto;
+  border: 1px solid var(--modulo-borde);
+  border-radius: 13px;
+  background: #fff;
+  flex-wrap: nowrap;
+  scrollbar-width: thin;
+}
+
+.tabs-compania .tab,
+.tabs-empleados .tab {
+  min-height: 36px;
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--modulo-muted);
+  font-size: 10px;
+}
+
+.tabs-compania .tab.activo,
+.tabs-empleados .tab.activo {
+  background: #eff6ff;
+  color: var(--modulo-azul);
+}
+
+#contenidoCompania,
+#contenidoEmpleados {
+  min-height: 420px;
+  padding: 16px;
+  border: 1px solid var(--modulo-borde);
+  border-radius: var(--modulo-radio);
+  box-shadow: none;
+}
+
+.encabezado-seccion,
+.asistencia-encabezado,
+.feriados-encabezado,
+.permisos-encabezado {
+  gap: 12px;
+}
+
+.encabezado-seccion h2,
+.asistencia-encabezado h2,
+.feriados-encabezado h2,
+.permisos-encabezado h2 {
+  font-size: 21px;
+  letter-spacing: -.02em;
+}
+
+.encabezado-seccion p,
+.asistencia-encabezado p,
+.feriados-encabezado p,
+.permisos-encabezado p {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.asistencia-etiqueta {
+  margin-bottom: 3px;
+  font-size: 8px;
+}
+
+.asistencia-tabs {
+  gap: 4px;
+  padding: 5px;
+  border-radius: 13px;
+  box-shadow: none;
+}
+
+.asistencia-tab {
+  min-height: 36px;
+  gap: 6px;
+  padding: 0 11px;
+  border-radius: 9px;
+  font-size: 10px;
+}
+
+.asistencia-tab i { font-size: 13px; }
+
+.asistencia-contenido,
+.dashboard-card,
+.auditoria-contenedor,
+.panel-listado-horarios,
+.panel-detalle-horario,
+.feriados-panel-lista,
+.feriados-panel-calendario,
+.feriados-panel-detalle {
+  border-radius: var(--modulo-radio);
+}
+
+.barra-herramientas,
+.barra-horarios,
+.asistencia-filtros,
+.asistencia-filtros-secundarios {
+  gap: 8px;
+}
+
+.btn-principal,
+.btn-asistencia-principal,
+.btn-asistencia-secundario,
+.btn-guardar,
+.acciones-masivas button {
+  min-height: 38px;
+  padding-inline: 13px;
+  border-radius: 9px;
+  font-size: 10px;
+}
+
+/* Evita que un módulo obligue a ensanchar toda la página. */
+#contenedorVista,
+#contenidoCompania,
+#contenidoEmpleados,
+.asistencia,
+.colaboradores,
+.horarios,
+.permisos,
+.feriados {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tabla-contenedor,
+.tabla-responsive,
+.contenedor-tabla,
+.tabla-colaboradores,
+.asistencia-tabla-contenedor,
+.auditoria-tabla-scroll,
+.feriados-tabla-contenedor {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  #contenedorVista { padding: 16px; }
+
+  #contenidoCompania,
+  #contenidoEmpleados { padding: 13px; }
+
+  .barra-herramientas,
+  .barra-horarios,
+  .asistencia-filtros,
+  .asistencia-filtros-secundarios {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .horarios-layout,
+  .feriados-contenedor,
+  .permisos-contenedor {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Móvil: navegación y comportamiento tipo aplicación */
+@media (max-width: 600px) {
+  html, body { background: #f5f7fb; }
+
+  body { padding-bottom: 78px; }
+
+  .contenido {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    padding: 8px 8px 88px;
+  }
+
+  .topbar {
+    min-height: 52px;
+    margin-bottom: 8px;
+    padding: 0 10px;
+    border-radius: 12px;
+  }
+
+  .topbar h1 { font-size: 16px; }
+  .btn-menu { display: none !important; }
+
+  #contenedorVista {
+    min-height: calc(100vh - 145px);
+    padding: 10px;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, .05);
+  }
+
+  .overlay,
+  .overlay.mostrar { display: none !important; }
+
+  .sidebar,
+  .sidebar.mostrar {
+    position: fixed !important;
+    inset: auto 7px 7px 7px !important;
+    width: auto !important;
+    height: 68px !important;
+    padding: 5px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(148, 163, 184, .22);
+    border-radius: 17px;
+    background: rgba(23, 25, 29, .96);
+    box-shadow: 0 14px 36px rgba(15, 23, 42, .28);
+    transform: none !important;
+    z-index: 1200;
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  .sidebar::before,
+  .sidebar .marca,
+  .sidebar .salir,
+  .menu::before { display: none !important; }
+
+  .sidebar .menu {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 3px;
+    width: 100%;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .sidebar .menu::-webkit-scrollbar { display: none; }
+
+  .sidebar .item {
+    min-width: 64px;
+    min-height: 56px;
+    flex: 1 0 64px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px 6px;
+    border-radius: 12px;
+    font-size: 8px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .sidebar .item span,
+  .sidebar .item span::before {
+    width: auto;
+    font-size: 17px;
+  }
+
+  .sidebar .item:hover { transform: none; }
+  .sidebar .item.activo { background: rgba(37, 99, 235, .28); }
+
+  .compania,
+  .empleados,
+  .asistencia { gap: 10px; }
+
+  .compania > .titulo-pagina,
+  .empleados > .titulo-pagina { display: none; }
+
+  .tabs-compania,
+  .tabs-empleados,
+  .asistencia-tabs {
+    margin-inline: -2px;
+    padding: 4px;
+    border-radius: 11px;
+  }
+
+  .tabs-compania .tab,
+  .tabs-empleados .tab,
+  .asistencia-tab {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 10px;
+  }
+
+  #contenidoCompania,
+  #contenidoEmpleados {
+    min-height: 0;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .encabezado-seccion,
+  .asistencia-encabezado,
+  .feriados-encabezado,
+  .permisos-encabezado,
+  .card-header {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .encabezado-seccion h2,
+  .asistencia-encabezado h2,
+  .feriados-encabezado h2,
+  .permisos-encabezado h2 { font-size: 19px; }
+
+  .asistencia-acciones-encabezado,
+  .acciones-masivas,
+  .barra-herramientas,
+  .barra-horarios,
+  .asistencia-filtros,
+  .asistencia-filtros-secundarios {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100%;
+  }
+
+  .asistencia-acciones-encabezado { grid-template-columns: 1fr 1fr !important; }
+
+  .btn-principal,
+  .btn-asistencia-principal,
+  .btn-asistencia-secundario,
+  .btn-guardar,
+  .acciones-masivas button {
+    min-height: 44px;
+    justify-content: center;
+    width: 100%;
+    font-size: 11px;
+  }
+
+  input,
+  select,
+  textarea { font-size: 16px !important; }
+
+  .grid-formulario,
+  .form-grid,
+  .formulario-grid,
+  .filtros-colaboradores,
+  .indicadores-mes,
+  .dashboard-grid-principal,
+  .dashboard-grid-secundario {
+    grid-template-columns: 1fr !important;
+  }
+
+  .campo-completo { grid-column: auto !important; }
+
+  table { min-width: 680px; }
+
+  .modal,
+  .modal-horario,
+  .modal-colaborador,
+  .modal-permisos,
+  .modal-feriados,
+  .modal-ajuste-refrigerio,
+  .modal-marcacion-manual,
+  .modal-horas-extra,
+  .modal-descarga-reporte,
+  .modal-vista-previa-reporte,
+  .modal-asignar-horario,
+  .modal-calendario-colaborador,
+  .modal-editar-dia-colaborador,
+  .modal-configurar-feriado,
+  .modal-colaboradores-feriado,
+  .modal-descanso-sustitutorio {
+    padding: 0 !important;
+  }
+
+  [class*="modal-contenido"],
+  [class*="modal-content"],
+  .modal > article,
+  .modal-resumen-dashboard > article {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+
+  .modal-resumen-dashboard { padding: 0; }
+  .contenido-resumen-dashboard { max-height: calc(100dvh - 150px); }
+
+  .menu-usuario {
+    top: 62px;
+    bottom: 83px;
+    max-height: calc(100dvh - 155px);
+  }
+}
+
+@media (max-width: 380px) {
+  .sidebar .item { min-width: 59px; flex-basis: 59px; font-size: 7.5px; }
+  .asistencia-acciones-encabezado { grid-template-columns: 1fr !important; }
+}
