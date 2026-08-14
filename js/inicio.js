@@ -26,10 +26,10 @@ from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import { iniciarCompañia } from "./compañia.js";
-import { iniciarEmpleados } from "./empleados.js";
+import { iniciarEmpleados } from "./empleados.js?v=20260814-2";
 import { iniciarAsistencia } from "./asistencia.js?v=20260813-3";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260813-3";
-import { iniciarDashboard } from "./dashboard.js?v=20260814-1";
+import { iniciarDashboard } from "./dashboard.js?v=20260814-2";
 
 const sidebar = document.querySelector(".sidebar");
 
