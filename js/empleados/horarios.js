@@ -24,7 +24,7 @@ from "./horarios-formulario.js";
 import {
     iniciarAsignacionesHorarios
 }
-from "./horarios-asignaciones.js";
+from "./horarios-asignaciones.js?v=20260814-2";
 
 
 import {
