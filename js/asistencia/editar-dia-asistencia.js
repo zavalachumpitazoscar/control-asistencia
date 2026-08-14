@@ -821,11 +821,8 @@ function obtenerHorariosSemanales(
         );
 
 
-    if(
-        numeroSemana %
-        intervalo !==
-        0
-    ){
+    const ciclo=Array.isArray(asignacion.cicloSemanal)&&asignacion.cicloSemanal.length?asignacion.cicloSemanal:[asignacion.programacionSemanal||{}];
+    if(ciclo.length===1&&numeroSemana%intervalo!==0){
 
         return [];
 
@@ -851,9 +848,9 @@ function obtenerHorariosSemanales(
         ];
 
 
-    const horarioIds =
-        asignacion.programacionSemanal
-        ?.[nombreDia];
+    let indiceCiclo=0;
+    if(asignacion.reiniciarCicloCadaMes&&ciclo.length>1){const primerDiaMes=new Date(fechaActual.getFullYear(),fechaActual.getMonth(),1);const desplazamientoLunes=(primerDiaMes.getDay()+6)%7;indiceCiclo=Math.floor((fechaActual.getDate()-1+desplazamientoLunes)/7)%ciclo.length;}
+    const horarioIds=ciclo[indiceCiclo]?.[nombreDia];
 
 
     return Array.isArray(
