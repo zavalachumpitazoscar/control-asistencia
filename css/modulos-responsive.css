@@ -248,6 +248,11 @@
     box-shadow: 0 14px 36px rgba(15, 23, 42, .28);
     transform: none !important;
     z-index: 1200;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 3px !important;
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
   }
@@ -260,9 +265,9 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
-    flex: 0 0 58px;
-    width: 58px;
-    min-width: 58px;
+    flex: 0 0 49px;
+    width: 49px;
+    min-width: 49px;
     height: 56px;
     margin: 0 0 0 3px;
     padding: 4px;
@@ -297,7 +302,10 @@
     flex-direction: row;
     align-items: stretch;
     gap: 3px;
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    height: 56px;
     padding: 0;
     overflow-x: auto;
     overflow-y: hidden;
@@ -307,9 +315,9 @@
   .sidebar .menu::-webkit-scrollbar { display: none; }
 
   .sidebar .item {
-    min-width: 64px;
+    min-width: 49px;
     min-height: 56px;
-    flex: 1 0 64px;
+    flex: 1 1 49px;
     flex-direction: column;
     justify-content: center;
     gap: 4px;
@@ -496,6 +504,8 @@
 }
 
 @media (max-width: 380px) {
-  .sidebar .item { min-width: 59px; flex-basis: 59px; font-size: 7.5px; }
+  .sidebar .item { min-width: 46px; flex-basis: 46px; padding-inline: 2px; font-size: 7px; }
+  .sidebar .salir { flex-basis: 45px; width: 45px; min-width: 45px; }
   .asistencia-acciones-encabezado { grid-template-columns: 1fr !important; }
 }
+
