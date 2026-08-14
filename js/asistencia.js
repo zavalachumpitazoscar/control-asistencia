@@ -9,6 +9,7 @@ import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-
 import { iniciarAjusteRefrigerioAsistencia } from "./asistencia/ajuste-refrigerio-asistencia.js";
 import { iniciarAprobacionHorasExtraAsistencia } from "./asistencia/aprobar-horas-extra-asistencia.js";
 import { iniciarOperacionesMensualesAsistencia } from "./asistencia/operaciones-mensuales-asistencia.js?v=20260812-4";
+import { iniciarRegularizacionesCierresAsistencia } from "./asistencia/regularizaciones-cierres-asistencia.js?v=20260814-1";
 
 export async function iniciarAsistencia() {
   // Retira cualquier panel obsoleto que hubiera quedado en caché de versiones anteriores.
@@ -25,4 +26,5 @@ export async function iniciarAsistencia() {
   iniciarImportacionMarcaciones();
   iniciarAprobacionHorasExtraAsistencia();
   iniciarOperacionesMensualesAsistencia();
+  iniciarRegularizacionesCierresAsistencia();
 }
