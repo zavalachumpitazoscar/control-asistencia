@@ -29,7 +29,7 @@ import { iniciarCompañia } from "./compañia.js";
 import { iniciarEmpleados } from "./empleados.js";
 import { iniciarAsistencia } from "./asistencia.js?v=20260813-3";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260813-3";
-import { iniciarDashboard } from "./dashboard.js?v=20260813-2";
+import { iniciarDashboard } from "./dashboard.js?v=20260814-1";
 
 const sidebar = document.querySelector(".sidebar");
 
@@ -512,6 +512,14 @@ async function cargarPerfilUsuario(usuario){
 
     document.querySelector(".badge-rol").textContent =
     datos.rol || "";
+
+    sessionStorage.setItem("rolUsuarioDashboard", datos.rol || "Administrador");
+    const organizacionUsuario = datos.organizacion || {};
+    [["sucursalUsuarioDashboard", organizacionUsuario.sucursal || datos.sucursal], ["areaUsuarioDashboard", organizacionUsuario.area || datos.area], ["subareaUsuarioDashboard", organizacionUsuario.subarea || datos.subarea]].forEach(([clave, valor]) => {
+        const texto = valor && typeof valor === "object" ? (valor.nombre || valor.id || "") : (valor || "");
+        if (texto) sessionStorage.setItem(clave, texto); else sessionStorage.removeItem(clave);
+    });
+    document.dispatchEvent(new CustomEvent("perfilUsuarioActualizado"));
 }
 
 
@@ -813,4 +821,3 @@ regla.innerHTML =
 }
 
 }
-
