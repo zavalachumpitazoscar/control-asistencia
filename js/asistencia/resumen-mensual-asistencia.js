@@ -1,7 +1,7 @@
 import {
   consultarColeccionEmpresa,
   construirRegistrosResumen,
-} from "./resumen-asistencia.js";
+} from "./resumen-asistencia.js?v=20260814-1";
 
 let fechaDesde, fechaHasta, buscarResumen, cuerpoResumen, btnActualizar;
 let paginaResumenMensual = 1;
