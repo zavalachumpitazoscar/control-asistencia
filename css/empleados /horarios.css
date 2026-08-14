@@ -2030,7 +2030,7 @@
 
 }
 
-.repeticion-mensual-horario{margin-top:18px;padding:16px;border:1px solid #dbeafe;border-radius:14px;background:#f8fbff}.campo-accion-repeticion{justify-content:end}.campo-accion-repeticion .btn-principal{min-height:40px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}.ayuda-repeticion-mensual{display:block;margin-top:9px;color:#64748b;font-size:10px;line-height:1.5}
+.ciclo-semanal-controles{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;padding:13px;border:1px solid #dbeafe;border-radius:12px;background:#f8fbff}.ciclo-semanal-controles>div:first-child{display:grid;margin-right:auto}.ciclo-semanal-controles>div:first-child span{color:#1e293b;font-size:11px;font-weight:800}.ciclo-semanal-controles>div:first-child small{margin-top:2px;color:#64748b;font-size:9px}.pestanas-semanas-asignacion{display:flex;gap:5px;flex-wrap:wrap}.pestana-semana-asignacion{display:inline-flex;overflow:hidden;border:1px solid #cbd5e1;border-radius:8px;background:#fff}.pestana-semana-asignacion button{padding:7px 9px;border:0;background:transparent;color:#475569;font-size:9px;font-weight:800;cursor:pointer}.pestana-semana-asignacion button+button{padding-left:4px;color:#94a3b8}.pestana-semana-asignacion.activa{border-color:#2563eb;background:#eff6ff}.pestana-semana-asignacion.activa button{color:#1d4ed8}.ciclo-semanal-controles>.btn-principal{padding:8px 10px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-size:9px;font-weight:800;cursor:pointer}@media(max-width:650px){.ciclo-semanal-controles{align-items:stretch;flex-direction:column}.ciclo-semanal-controles>.btn-principal{width:100%}}
 
 /*=====================================================
     AJUSTES NUEVA VISTA DE HORARIOS
