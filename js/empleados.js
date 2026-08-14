@@ -1,7 +1,7 @@
 import { iniciarColaboradores } from "./empleados/colaboradores.js";
-import { iniciarHorarios } from "./empleados/horarios.js?v=20260814-2";
+import { iniciarHorarios } from "./empleados/horarios.js?v=20260814-3";
 import { iniciarPermisos } from "./empleados/permisos.js";
-import { iniciarFeriados } from "./empleados/feriados.js";
+import { iniciarFeriados } from "./empleados/feriados.js?v=20260814-1";
 
 export function iniciarEmpleados(
     tabInicial = "colaboradores"
@@ -71,7 +71,7 @@ async function cargarTab(tab){
         const respuesta =
         await fetch(
 
-            `vistas/empleados/${tab}.html?v=20260814-2`
+            `vistas/empleados/${tab}.html?v=20260814-3`
 
         );
 
