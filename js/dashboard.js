@@ -4,6 +4,8 @@ let cargaActual = 0;
 let detallesDashboard = {};
 let destinoModalDashboard = "asistencia";
 let controlDashboard = null;
+let datosDashboard = null;
+let fechaUltimaCargaDashboard = null;
 const coleccionesDashboard = [
   "colaboradores", "marcaciones", "asignacionesHorarios", "horarios",
   "excepcionesHorarios", "ajustesAsistenciaDiaria", "aprobacionesHorasExtra",
@@ -20,11 +22,14 @@ export function iniciarDashboard() {
   actualizarSaludo();
   document.getElementById("actualizarDashboard")?.addEventListener("click", cargarDashboard, opcionesEvento);
   fecha.addEventListener("change", cargarDashboard, opcionesEvento);
+  ["filtroSucursalDashboard", "filtroAreaDashboard", "filtroSubareaDashboard"].forEach((id) => document.getElementById(id)?.addEventListener("change", renderizarDashboardFiltrado, opcionesEvento));
+  document.getElementById("limpiarFiltrosDashboard")?.addEventListener("click", limpiarFiltrosDashboard, opcionesEvento);
+  document.addEventListener("perfilUsuarioActualizado", cargarDashboard, opcionesEvento);
   document.querySelector(".dashboard-pagina")?.addEventListener("click", (evento) => {
     const tarjeta = evento.target.closest("[data-resumen]");
     if (tarjeta) return abrirResumenDashboard(tarjeta.dataset.resumen);
     const destino = evento.target.closest("[data-ir]")?.dataset.ir;
-    if (destino) navegarDashboard(destino);
+    if (destino) navegarDashboard(destino, evento.target.closest("[data-colaborador]")?.dataset);
   }, opcionesEvento);
   document.querySelector(".dashboard-pagina")?.addEventListener("keydown", (evento) => {
     const tarjeta = evento.target.closest("[data-resumen]");
@@ -46,22 +51,35 @@ async function cargarDashboard() {
   try {
     const resultados = await Promise.all(coleccionesDashboard.map((nombre) => consultarColeccionEmpresa(nombre, empresaId)));
     if (turno !== cargaActual || !document.querySelector(".dashboard-pagina")) return;
-    const datos = Object.fromEntries(coleccionesDashboard.map((nombre, i) => [nombre, resultados[i]]));
-    const activos = datos.colaboradores.filter((c) => String(c.estado || "ACTIVO").toUpperCase() !== "INACTIVO");
-    const registrosDia = construirDia(fecha, datos);
-    prepararDetalles(activos, registrosDia, fecha);
-    renderizarKpis(activos, registrosDia);
-    renderizarEstadoDia(registrosDia);
-    renderizarAlertas(registrosDia);
-    renderizarMarcaciones(datos.marcaciones, activos, fecha);
-    calcularMes(fecha, datos);
-    document.getElementById("fechaDashboard").textContent = `${fechaLarga(fecha)} · Información actualizada ${new Date().toLocaleTimeString("es-PE", { hour:"2-digit", minute:"2-digit" })}`;
+    datosDashboard = Object.fromEntries(coleccionesDashboard.map((nombre, i) => [nombre, resultados[i]]));
+    fechaUltimaCargaDashboard = new Date();
+    prepararFiltrosDashboard(datosDashboard.colaboradores);
+    renderizarDashboardFiltrado();
   } catch (error) {
     console.error("Error cargando dashboard:", error);
     mostrarError(error.message || "No se pudo cargar la información.");
   } finally {
     if (turno === cargaActual) mostrarCarga(false);
   }
+}
+
+function renderizarDashboardFiltrado() {
+  const fecha = document.getElementById("fechaConsultaDashboard")?.value;
+  if (!datosDashboard || !fecha) return;
+  const colaboradores = filtrarColaboradoresPorAlcance(datosDashboard.colaboradores);
+  const datos = { ...datosDashboard, colaboradores };
+  const activos = colaboradores.filter((c) => String(c.estado || "ACTIVO").toUpperCase() !== "INACTIVO");
+  const registrosDia = construirDia(fecha, datos);
+  const ayer = new Date(`${fecha}T00:00:00`); ayer.setDate(ayer.getDate() - 1);
+  const registrosAyer = construirDia(fechaLocal(ayer), datos);
+  prepararDetalles(activos, registrosDia, fecha);
+  renderizarKpis(activos, registrosDia, registrosAyer);
+  renderizarEstadoDia(registrosDia);
+  renderizarAlertas(registrosDia, fecha);
+  renderizarMarcaciones(datos.marcaciones, activos, fecha);
+  renderizarConfiguracion(activos, registrosDia, datos, fecha);
+  calcularMes(fecha, datos);
+  actualizarEstadoActualizacion(fecha);
 }
 
 function prepararDetalles(activos, registros, fecha) {
@@ -94,7 +112,7 @@ function construirDia(fecha, d) {
   });
 }
 
-function renderizarKpis(activos, registros) {
+function renderizarKpis(activos, registros, registrosAyer) {
   const asistentes = registros.filter((r) => esAsistencia(r.estado));
   const tardanzas = registros.filter((r) => /TARDANZA/.test(r.estado));
   const ausencias = registros.filter((r) => r.estado === "AUSENTE");
@@ -111,6 +129,26 @@ function renderizarKpis(activos, registros) {
   asignar("detalleAusencias", ausencias.length ? "Revisar permisos o justificaciones" : "Sin ausencias pendientes");
   asignar("detalleIncompletos", incompletos.length ? "Revisar entradas y salidas" : "Sin jornadas incompletas");
   asignar("detalleExtraPendiente", extraPendiente ? "Pendiente de decisión" : "Sin horas pendientes");
+  const ayer = {
+    asistieron: registrosAyer.filter((r) => esAsistencia(r.estado)).length,
+    tardanzas: registrosAyer.filter((r) => /TARDANZA/.test(r.estado)).length,
+    ausencias: registrosAyer.filter((r) => r.estado === "AUSENTE").length,
+    incompletos: registrosAyer.filter((r) => /INCOMPLETO/.test(r.estado)).length,
+    extra: registrosAyer.reduce((s, r) => s + minutosExtraPendiente(r), 0),
+  };
+  comparacionDiaria("comparacionAsistieron", asistentes.length, ayer.asistieron, "asistencia", true);
+  comparacionDiaria("comparacionTardanzas", tardanzas.length, ayer.tardanzas, "tardanza");
+  comparacionDiaria("comparacionAusencias", ausencias.length, ayer.ausencias, "ausencia");
+  comparacionDiaria("comparacionIncompletos", incompletos.length, ayer.incompletos, "jornada incompleta");
+  comparacionDiaria("comparacionExtra", extraPendiente, ayer.extra, "min de extra");
+}
+
+function comparacionDiaria(id, actual, anterior, etiqueta, positivoSiSube=false) {
+  const elemento = document.getElementById(id);
+  if (!elemento) return;
+  const diferencia = actual - anterior;
+  elemento.className = `kpi-comparacion ${diferencia === 0 ? "neutro" : ((diferencia > 0) === positivoSiSube ? "mejora" : "alerta")}`;
+  elemento.textContent = diferencia === 0 ? `Igual que ayer: ${anterior}` : `${diferencia > 0 ? "+" : ""}${diferencia} ${etiqueta}${Math.abs(diferencia) === 1 ? "" : "s"} vs. ayer`;
 }
 
 function abrirResumenDashboard(tipo) {
@@ -139,15 +177,18 @@ function abrirResumenDashboard(tipo) {
 function cerrarResumenDashboard() { const modal=document.getElementById("modalResumenDashboard");if(!modal||modal.hidden)return;if(modal.contains(document.activeElement))document.activeElement.blur();modal.inert=true;modal.setAttribute("inert","");modal.setAttribute("aria-hidden","true");modal.hidden=true; }
 function cerrarModalConEscape(e){if(e.key==="Escape")cerrarResumenDashboard();}
 
-function navegarDashboard(destino) {
+function navegarDashboard(destino, contexto) {
+  if (contexto?.fecha) sessionStorage.setItem("dashboardContextoAsistencia", JSON.stringify(contexto));
   if (destino === "colaboradores" || destino === "horarios") {
     document.querySelector('.item[data-vista="empleados"]')?.click();
     if (destino === "horarios") abrirHorariosCuandoEsteListo();
     return;
   }
   document.querySelector(`.item[data-vista="${destino}"]`)?.click();
+  if (destino === "asistencia" && contexto?.fecha) aplicarContextoAsistencia(contexto);
 }
 function abrirHorariosCuandoEsteListo(intentos=0){const tab=document.querySelector('.tab[data-tab="horarios"]');if(tab)return tab.click();if(intentos<20)setTimeout(()=>abrirHorariosCuandoEsteListo(intentos+1),100);}
+function aplicarContextoAsistencia(contexto,intentos=0){const fecha=document.getElementById("selectorFechaAsistencia"),buscar=document.getElementById("buscarResumenAsistencia");if(fecha&&buscar){fecha.value=contexto.fecha;fecha.dispatchEvent(new Event("change",{bubbles:true}));buscar.value=contexto.nombre||"";buscar.dispatchEvent(new Event("input",{bubbles:true}));return;}if(intentos<25)setTimeout(()=>aplicarContextoAsistencia(contexto,intentos+1),100);}
 
 function renderizarEstadoDia(registros) {
   const programados = registrosProgramados(registros);
@@ -164,19 +205,19 @@ function renderizarEstadoDia(registros) {
   document.getElementById("anilloAsistencia")?.style.setProperty("--porcentaje", asistencia);
 }
 
-function renderizarAlertas(registros) {
+function renderizarAlertas(registros, fecha) {
   const alertas = [];
   registros.forEach((r) => {
-    if (r.estado === "AUSENTE") alertas.push({ prioridad:1, icono:"bi-person-x", nombre:r.nombre, detalle:"Ausencia sin marcaciones", valor:"Ausente" });
-    else if (/INCOMPLETO/.test(r.estado)) alertas.push({ prioridad:2, icono:"bi-exclamation-triangle", nombre:r.nombre, detalle:"Jornada con marcación incompleta", valor:"Revisar" });
-    else if (/TARDANZA/.test(r.estado)) alertas.push({ prioridad:3, icono:"bi-clock-history", nombre:r.nombre, detalle:`Llegó ${r.tardanzaMinutos || 0} min tarde`, valor:"Tardanza" });
+    if (r.estado === "AUSENTE") alertas.push({ prioridad:1, icono:"bi-person-x", nombre:r.nombre, colaboradorId:r.colaboradorId, detalle:"Ausencia sin marcaciones", valor:"Revisar ausencia" });
+    else if (/INCOMPLETO/.test(r.estado)) alertas.push({ prioridad:2, icono:"bi-exclamation-triangle", nombre:r.nombre, colaboradorId:r.colaboradorId, detalle:"Jornada con marcación incompleta", valor:"Completar" });
+    else if (/TARDANZA/.test(r.estado)) alertas.push({ prioridad:3, icono:"bi-clock-history", nombre:r.nombre, colaboradorId:r.colaboradorId, detalle:`Llegó ${r.tardanzaMinutos || 0} min tarde`, valor:"Ver tardanza" });
     const extra = minutosExtraPendiente(r);
-    if (extra > 0) alertas.push({ prioridad:4, icono:"bi-stopwatch", nombre:r.nombre, detalle:`${duracion(extra)} de horas extra sin decisión`, valor:"Pendiente" });
+    if (extra > 0) alertas.push({ prioridad:4, icono:"bi-stopwatch", nombre:r.nombre, colaboradorId:r.colaboradorId, detalle:`${duracion(extra)} de horas extra sin decisión`, valor:"Decidir" });
   });
   alertas.sort((a,b) => a.prioridad-b.prioridad);
   asignar("contadorAlertas", alertas.length);
   const lista = document.getElementById("listaAlertasDashboard");
-  lista.innerHTML = alertas.length ? alertas.slice(0,8).map((a) => `<button class="alerta-dashboard" data-ir="asistencia" type="button"><i class="bi ${a.icono}"></i><span><strong>${html(a.nombre)}</strong><small>${html(a.detalle)}</small></span><b>${html(a.valor)}</b></button>`).join("") : '<p class="dashboard-vacio"><i class="bi bi-check-circle"></i><br>No existen alertas pendientes para esta fecha.</p>';
+  lista.innerHTML = alertas.length ? alertas.slice(0,8).map((a) => `<button class="alerta-dashboard" data-ir="asistencia" data-colaborador="${html(a.colaboradorId || "")}" data-nombre="${html(a.nombre)}" data-fecha="${html(fecha)}" type="button"><i class="bi ${a.icono}"></i><span><strong>${html(a.nombre)}</strong><small>${html(a.detalle)} · Pulsa para atender</small></span><b>${html(a.valor)}</b></button>`).join("") : '<p class="dashboard-vacio"><i class="bi bi-check-circle"></i><br>Todo en orden: no existen alertas para esta fecha.</p>';
 }
 
 function renderizarMarcaciones(marcaciones, colaboradores, fecha) {
@@ -186,12 +227,100 @@ function renderizarMarcaciones(marcaciones, colaboradores, fecha) {
   lista.innerHTML = recientes.length ? recientes.map((m) => { const nombre=m.colaboradorNombre||nombres.get(m.colaboradorId)||"Colaborador";return `<div class="marcacion-dashboard"><div class="marcacion-avatar">${html(iniciales(nombre))}</div><span><strong>${html(nombre)}</strong><small>${html(tipoMarcacion(m.tipo))}</small></span><time>${html(String(m.hora||"").slice(0,5)||"—")}</time></div>`; }).join("") : '<p class="dashboard-vacio">No hay marcaciones registradas en esta fecha.</p>';
 }
 
+function prepararFiltrosDashboard(colaboradores) {
+  const alcance = aplicarAlcanceUsuario(colaboradores);
+  llenarFiltro("filtroSucursalDashboard", alcance.map((c)=>valorOrg(c,"sucursal")));
+  llenarFiltro("filtroAreaDashboard", alcance.map((c)=>valorOrg(c,"area")));
+  llenarFiltro("filtroSubareaDashboard", alcance.map((c)=>valorOrg(c,"subarea")));
+  const rol = sessionStorage.getItem("rolUsuarioDashboard") || "Perfil en verificación";
+  asignar("alcanceDashboard", /admin|propiet|gerent/i.test(rol) ? "Toda la empresa" : `Información autorizada para ${rol}`);
+}
+
+function llenarFiltro(id, valores) {
+  const select=document.getElementById(id); if(!select)return;
+  const actual=select.value;
+  const opciones=[...new Set(valores.filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+  select.innerHTML=`<option value="">Todas</option>${opciones.map((v)=>`<option value="${html(v)}">${html(v)}</option>`).join("")}`;
+  if(opciones.includes(actual))select.value=actual;
+}
+
+function filtrarColaboradoresPorAlcance(colaboradores) {
+  const base=aplicarAlcanceUsuario(colaboradores);
+  const filtros={sucursal:document.getElementById("filtroSucursalDashboard")?.value,area:document.getElementById("filtroAreaDashboard")?.value,subarea:document.getElementById("filtroSubareaDashboard")?.value};
+  return base.filter((c)=>Object.entries(filtros).every(([tipo,valor])=>!valor||valorOrg(c,tipo)===valor));
+}
+
+function aplicarAlcanceUsuario(colaboradores) {
+  const rol=sessionStorage.getItem("rolUsuarioDashboard");
+  if(!rol)return [];
+  if(/admin|propiet|gerent/i.test(rol))return colaboradores;
+  const alcance={sucursal:sessionStorage.getItem("sucursalUsuarioDashboard"),area:sessionStorage.getItem("areaUsuarioDashboard"),subarea:sessionStorage.getItem("subareaUsuarioDashboard")};
+  const definidos=Object.entries(alcance).filter(([,v])=>v);
+  return definidos.length?colaboradores.filter((c)=>definidos.every(([tipo,v])=>normalizar(valorOrg(c,tipo))===normalizar(v))):[];
+}
+
+function limpiarFiltrosDashboard(){["filtroSucursalDashboard","filtroAreaDashboard","filtroSubareaDashboard"].forEach((id)=>{const e=document.getElementById(id);if(e)e.value="";});renderizarDashboardFiltrado();}
+
+function valorOrg(c,tipo){const o=c.organizacion||{};const valor=o[tipo]??o[`${tipo}Nombre`]??c[tipo]??c[`${tipo}Nombre`];if(valor&&typeof valor==="object")return valor.nombre||valor.descripcion||valor.id||"";return String(valor||"").trim();}
+function normalizar(v){return String(v||"").trim().toLowerCase();}
+
+function renderizarConfiguracion(activos, registros, datos, fecha) {
+  const avisos=[];
+  const sinHorario=registros.filter((r)=>r.estado==="SIN_HORARIO");
+  const sinOrganizacion=activos.filter((c)=>!valorOrg(c,"sucursal")||!valorOrg(c,"area"));
+  const feriadosPendientes=registros.filter((r)=>r.estado==="FERIADO_PENDIENTE");
+  const incompletos=registros.filter((r)=>/INCOMPLETO/.test(r.estado));
+  const limite=new Date(`${fecha}T00:00:00`);limite.setDate(limite.getDate()+7);
+  const porVencer=(datos.asignacionesHorarios||[]).filter((a)=>{const f=a.fechaFin||a.hasta||a.fin;if(!f)return false;const d=new Date(`${String(f).slice(0,10)}T00:00:00`);return d>=new Date(`${fecha}T00:00:00`)&&d<=limite;});
+  if(sinHorario.length)avisos.push({icono:"bi-calendar-x",titulo:`${sinHorario.length} sin horario para la fecha`,detalle:"Asigna una programación para calcular su jornada.",destino:"horarios"});
+  if(sinOrganizacion.length)avisos.push({icono:"bi-diagram-3",titulo:`${sinOrganizacion.length} sin ubicación completa`,detalle:"Completa sucursal y área del colaborador.",destino:"colaboradores"});
+  if(feriadosPendientes.length)avisos.push({icono:"bi-calendar-event",titulo:`${feriadosPendientes.length} feriados por configurar`,detalle:"Define el tratamiento de la jornada.",destino:"horarios"});
+  if(incompletos.length)avisos.push({icono:"bi-exclamation-square",titulo:`${incompletos.length} marcaciones sin completar`,detalle:"Revisa entradas o salidas faltantes.",destino:"asistencia"});
+  if(porVencer.length)avisos.push({icono:"bi-hourglass-split",titulo:`${porVencer.length} asignaciones próximas a vencer`,detalle:"Vencen dentro de los siguientes 7 días.",destino:"horarios"});
+  asignar("contadorConfiguracion",avisos.length);
+  const lista=document.getElementById("listaConfiguracionDashboard");if(!lista)return;
+  lista.innerHTML=avisos.length?avisos.map((a)=>`<button data-ir="${a.destino}" type="button"><i class="bi ${a.icono}"></i><span><strong>${html(a.titulo)}</strong><small>${html(a.detalle)}</small></span><i class="bi bi-chevron-right"></i></button>`).join(""):'<p class="dashboard-vacio"><i class="bi bi-check-circle"></i><br>Todo está correctamente configurado.</p>';
+}
+
+function actualizarEstadoActualizacion(fecha) {
+  const hora=fechaUltimaCargaDashboard?.toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit",second:"2-digit"})||"—";
+  asignar("fechaDashboard",`${fechaLarga(fecha)} · Vista diaria con acumulado mensual`);
+  const e=document.getElementById("actualizacionDashboard");if(e)e.innerHTML=`<i class="bi bi-cloud-check"></i> Datos actualizados hoy a las ${html(hora)}`;
+}
+
 function calcularMes(fecha, datos) {
   const seleccionada = new Date(`${fecha}T00:00:00`);
   const inicio = new Date(seleccionada.getFullYear(), seleccionada.getMonth(), 1);
   const hoy = new Date(); hoy.setHours(0,0,0,0);
   const finNatural = new Date(seleccionada.getFullYear(), seleccionada.getMonth()+1, 0);
   const fin = seleccionada.getFullYear() === hoy.getFullYear() && seleccionada.getMonth() === hoy.getMonth() ? hoy : finNatural;
+  const totales = totalesPeriodo(inicio, fin, datos);
+  const inicioAnterior = new Date(inicio.getFullYear(), inicio.getMonth()-1, 1);
+  const diasTranscurridos = Math.floor((fin-inicio)/86400000)+1;
+  const finAnteriorNatural = new Date(inicio.getFullYear(), inicio.getMonth(), 0);
+  const finAnterior = new Date(inicioAnterior); finAnterior.setDate(Math.min(diasTranscurridos, finAnteriorNatural.getDate()));
+  const anteriores = totalesPeriodo(inicioAnterior, finAnterior, datos);
+  const cumplimiento = porcentaje(totales.asistencias,totales.programados);
+  const cumplimientoAnterior = porcentaje(anteriores.asistencias,anteriores.programados);
+  asignar("periodoDashboard", `${inicio.toLocaleDateString("es-PE",{month:"long",year:"numeric"})} · comparación equivalente`);
+  asignar("mesAsistencias", totales.asistencias);
+  asignar("mesTardanzas", totales.tardanzas);
+  asignar("mesAusencias", totales.ausencias);
+  asignar("mesHorasTrabajadas", duracion(totales.trabajados));
+  asignar("mesHorasExtra", duracion(totales.extra));
+  asignar("mesCumplimiento", `${cumplimiento}%`);
+  comparacionMensual("compMesAsistencias", totales.asistencias, anteriores.asistencias, "asistencias", true);
+  comparacionMensual("compMesTardanzas", totales.tardanzas, anteriores.tardanzas, "tardanzas");
+  comparacionMensual("compMesAusencias", totales.ausencias, anteriores.ausencias, "ausencias");
+  comparacionMensual("compMesHoras", totales.trabajados, anteriores.trabajados, "min trabajados", true);
+  comparacionMensual("compMesExtra", totales.extra, anteriores.extra, "min extra");
+  comparacionMensual("compMesCumplimiento", cumplimiento, cumplimientoAnterior, "puntos", true);
+  barra("barraAsistencias", cumplimiento);
+  barra("barraTardanzas", porcentaje(totales.tardanzas,totales.programados));
+  barra("barraAusencias", porcentaje(totales.ausencias,totales.programados));
+}
+
+function totalesPeriodo(inicio, fin, datos) {
   const totales = { programados:0, asistencias:0, tardanzas:0, ausencias:0, trabajados:0, extra:0 };
   for (const d=new Date(inicio); d<=fin; d.setDate(d.getDate()+1)) {
     const registros = construirDia(fechaLocal(d), datos);
@@ -204,16 +333,14 @@ function calcularMes(fecha, datos) {
       totales.extra += Number(r.minutosExtra)||0;
     });
   }
-  asignar("periodoDashboard", inicio.toLocaleDateString("es-PE",{month:"long",year:"numeric"}));
-  asignar("mesAsistencias", totales.asistencias);
-  asignar("mesTardanzas", totales.tardanzas);
-  asignar("mesAusencias", totales.ausencias);
-  asignar("mesHorasTrabajadas", duracion(totales.trabajados));
-  asignar("mesHorasExtra", duracion(totales.extra));
-  asignar("mesCumplimiento", `${porcentaje(totales.asistencias,totales.programados)}%`);
-  barra("barraAsistencias", porcentaje(totales.asistencias,totales.programados));
-  barra("barraTardanzas", porcentaje(totales.tardanzas,totales.programados));
-  barra("barraAusencias", porcentaje(totales.ausencias,totales.programados));
+  return totales;
+}
+
+function comparacionMensual(id, actual, anterior, etiqueta, positivoSiSube=false) {
+  const e = document.getElementById(id); if (!e) return;
+  const diferencia = Math.round(actual-anterior);
+  e.className = diferencia === 0 ? "neutro" : ((diferencia>0) === positivoSiSube ? "mejora" : "alerta");
+  e.textContent = diferencia === 0 ? "Igual al periodo anterior" : `${diferencia>0?"+":""}${diferencia} ${etiqueta} vs. mes anterior`;
 }
 
 function registrosProgramados(rs){return rs.filter((r)=>!["SIN_HORARIO","FERIADO","DESCANSO_SUSTITUTORIO"].includes(r.estado));}
