@@ -285,13 +285,14 @@ function normalizar(v){return String(v||"").trim().toLowerCase();}
 
 function renderizarConfiguracion(activos, registros, datos, fecha) {
   const avisos=[];
+  const colaboradoresPorId=new Map(activos.map((c)=>[c.id,c]));
   const sinHorario=registros.filter((r)=>r.estado==="SIN_HORARIO");
   const sinOrganizacion=activos.filter((c)=>!valorOrg(c,"sucursal")||!valorOrg(c,"area"));
   const feriadosPendientes=registros.filter((r)=>r.estado==="FERIADO_PENDIENTE");
   const incompletos=registros.filter((r)=>/INCOMPLETO/.test(r.estado));
   const limite=new Date(`${fecha}T00:00:00`);limite.setDate(limite.getDate()+7);
   const porVencer=(datos.asignacionesHorarios||[]).filter((a)=>{const f=a.fechaFin||a.hasta||a.fin;if(!f)return false;const d=new Date(`${String(f).slice(0,10)}T00:00:00`);return d>=new Date(`${fecha}T00:00:00`)&&d<=limite;});
-  detallesDashboard.sinHorario=sinHorario.map((r)=>({id:r.colaboradorId,nombre:r.nombre,documento:r.documento||"Sin documento",detalle:`Sin programación el ${fechaVisible(fecha)}`,valor:"Asignar horario",accion:"ASIGNAR_HORARIO",tono:"ambar"}));
+  detallesDashboard.sinHorario=sinHorario.map((r)=>{const colaborador=colaboradoresPorId.get(r.colaboradorId);return {id:r.colaboradorId,nombre:colaborador?nombreColaborador(colaborador):nombreApellidoPrimero(r.nombre),documento:r.documento||"Sin documento",detalle:`Sin programación el ${fechaVisible(fecha)}`,valor:"Asignar horario",accion:"ASIGNAR_HORARIO",tono:"ambar"};});
   detallesDashboard.sinOrganizacion=sinOrganizacion.map((c)=>({id:c.id,nombre:nombreColaborador(c),documento:documentoColaborador(c),detalle:[!valorOrg(c,"sucursal")?"Falta sucursal":"",!valorOrg(c,"area")?"Falta área":""].filter(Boolean).join(" · "),valor:"Completar ubicación",accion:"COMPLETAR_UBICACION",tono:"ambar"}));
   if(sinHorario.length)avisos.push({icono:"bi-calendar-x",titulo:`${sinHorario.length} sin horario para la fecha`,detalle:"Ver quiénes son y asignarles un horario.",config:"sinHorario"});
   if(sinOrganizacion.length)avisos.push({icono:"bi-diagram-3",titulo:`${sinOrganizacion.length} sin ubicación completa`,detalle:"Ver quiénes son y completar sus datos.",config:"sinOrganizacion"});
@@ -373,7 +374,8 @@ function porcentaje(a,b){return b?Math.min(100,Math.round(a*100/b)):0;}
 function duracion(v){const n=Math.max(0,Math.round(Number(v)||0));return `${Math.floor(n/60)} h${n%60?` ${n%60} min`:""}`;}
 function barra(id,p){const e=document.getElementById(id);if(e)e.style.width=`${Math.min(100,p)}%`;}
 function asignar(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
-function nombreColaborador(c){return [c.datosPersonales?.nombres,c.datosPersonales?.apellidos].filter(Boolean).join(" ")||c.nombreCompleto||c.nombre||"Colaborador";}
+function nombreColaborador(c){return [c.datosPersonales?.apellidos||c.apellidos||c.apellido,c.datosPersonales?.nombres||c.nombres||c.nombre].filter(Boolean).join(" ")||c.nombreCompleto||c.nombre||"Colaborador";}
+function nombreApellidoPrimero(nombre){const partes=String(nombre||"").trim().split(/\s+/);return partes.length===2?`${partes[1]} ${partes[0]}`:String(nombre||"Colaborador");}
 function iniciales(n){return String(n).trim().split(/\s+/).slice(0,2).map((x)=>x[0]||"").join("").toUpperCase();}
 function documentoColaborador(c){return c.documento?.numero||c.numeroDocumento||c.dni||"Sin documento";}
 function horaMarca(m){return m?.hora?String(m.hora).slice(0,5):"—";}
