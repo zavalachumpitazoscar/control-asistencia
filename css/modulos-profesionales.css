@@ -1,0 +1,326 @@
+/* =====================================================
+   COMPAÑÍA · EMPLEADOS · ASISTENCIA
+   Normalización visual final, cargada después de los estilos heredados.
+===================================================== */
+
+:root {
+  --ui-azul: #2563eb;
+  --ui-texto: #142033;
+  --ui-muted: #64748b;
+  --ui-borde: #dce5f0;
+  --ui-suave: #f7f9fc;
+  --ui-radio: 14px;
+  --ui-sombra: 0 8px 24px rgba(15, 23, 42, .055);
+}
+
+.compania, .empleados, .asistencia,
+#contenidoCompania, #contenidoEmpleados,
+.colaboradores, .horarios, .permisos, .feriados,
+.areas, .subareas, .sucursales {
+  box-sizing: border-box;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.compania, .empleados, .asistencia {
+  display: flex;
+  flex-direction: column;
+  gap: 12px !important;
+}
+
+.compania > .titulo-pagina,
+.empleados > .titulo-pagina,
+.asistencia-encabezado {
+  padding: 2px 4px !important;
+}
+
+.compania > .titulo-pagina h1,
+.empleados > .titulo-pagina h1,
+.asistencia-encabezado h2 {
+  margin: 0;
+  color: var(--ui-texto);
+  font-size: clamp(20px, 2vw, 27px) !important;
+  line-height: 1.15;
+  letter-spacing: -.035em;
+}
+
+.compania > .titulo-pagina p,
+.empleados > .titulo-pagina p,
+.asistencia-encabezado p {
+  max-width: 760px;
+  margin: 5px 0 0 !important;
+  color: var(--ui-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.45;
+}
+
+.tabs-compania, .tabs-empleados, .asistencia-tabs {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin;
+  border: 1px solid var(--ui-borde) !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.tabs-compania .tab, .tabs-empleados .tab, .asistencia-tab {
+  min-height: 38px !important;
+  border-radius: 9px !important;
+  font-size: 10px !important;
+  white-space: nowrap;
+}
+
+#contenidoCompania, #contenidoEmpleados, .asistencia-contenido {
+  min-height: 420px;
+  padding: 15px !important;
+  overflow: visible;
+  border: 1px solid var(--ui-borde) !important;
+  border-radius: var(--ui-radio) !important;
+  background: #fff;
+  box-shadow: var(--ui-sombra) !important;
+}
+
+.encabezado-seccion, .encabezado-feriados, .encabezado-permisos {
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+}
+
+.encabezado-seccion h2, .encabezado-feriados h2, .encabezado-permisos h2 {
+  color: var(--ui-texto);
+  font-size: 18px !important;
+  letter-spacing: -.025em;
+}
+
+.encabezado-seccion p, .encabezado-feriados p, .encabezado-permisos p {
+  color: var(--ui-muted) !important;
+  font-size: 10px !important;
+}
+
+.card, .card-empresa, .panel-listado-horarios, .panel-detalle-horario,
+.permisos-colaboradores, .permisos-calendario-panel,
+.feriados-panel-lista, .feriados-panel-calendario, .feriados-panel-detalle,
+.asistencia-selector-fecha, .asistencia-buscador,
+.asistencia-filtros-secundarios, .asistencia-tabla-card,
+.asistencia-resumen-card {
+  border-color: var(--ui-borde) !important;
+  border-radius: var(--ui-radio) !important;
+  box-shadow: none !important;
+}
+
+button, input, select, textarea { box-sizing: border-box; }
+
+.btn-principal, .btn-guardar, .btn-asistencia-principal,
+.btn-asistencia-secundario, .btn-principal-feriados,
+.btn-secundario-feriados, .acciones-masivas button {
+  min-height: 38px !important;
+  border-radius: 9px !important;
+  font-size: 10px !important;
+}
+
+.barra-herramientas, .barra-horarios,
+.asistencia-filtros, .asistencia-filtros-secundarios {
+  min-width: 0;
+  max-width: 100%;
+  gap: 8px !important;
+}
+
+.tabla-contenedor, .tabla-responsive, .contenedor-tabla,
+.tabla-colaboradores, .asistencia-tabla-contenedor,
+.feriados-tabla-contenedor, .lista-areas, .lista-subareas,
+.lista-sucursales {
+  width: 100%;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Evita que cualquier tabla de asistencia ensanche el documento completo. */
+.asistencia table { width: max-content; max-width: none; }
+.asistencia-tabla-contenedor { contain: inline-size; }
+
+@media (min-width: 901px) {
+  #contenidoCompania, #contenidoEmpleados, .asistencia-contenido {
+    padding: 16px !important;
+  }
+
+  .asistencia-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 600px) {
+  html, body, .app, .contenido, #contenedorVista {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip !important;
+  }
+
+  body {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .contenido {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+  }
+
+  #contenedorVista {
+    padding: 10px !important;
+    padding-bottom: 22px !important;
+  }
+
+  /* Siempre encima de las vistas; no depende del alto de su contenido. */
+  .sidebar, .sidebar.mostrar {
+    position: fixed !important;
+    top: auto !important;
+    right: 7px !important;
+    bottom: calc(7px + env(safe-area-inset-bottom)) !important;
+    left: 7px !important;
+    z-index: 2147483000 !important;
+    transform: translate3d(0, 0, 0) !important;
+  }
+
+  .menu-usuario {
+    z-index: 2147483100 !important;
+  }
+
+  .compania, .empleados, .asistencia { gap: 9px !important; }
+
+  .compania > .titulo-pagina,
+  .empleados > .titulo-pagina {
+    display: block !important;
+    padding: 3px 2px !important;
+  }
+
+  .compania > .titulo-pagina h1,
+  .empleados > .titulo-pagina h1,
+  .asistencia-encabezado h2 {
+    font-size: 21px !important;
+  }
+
+  .compania > .titulo-pagina p,
+  .empleados > .titulo-pagina p,
+  .asistencia-encabezado p {
+    font-size: 10px !important;
+  }
+
+  #contenidoCompania, #contenidoEmpleados, .asistencia-contenido {
+    min-height: 0;
+    padding: 11px !important;
+    border-radius: 13px !important;
+  }
+
+  .tabs-compania, .tabs-empleados, .asistencia-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 3px !important;
+    padding: 4px !important;
+  }
+
+  .tabs-compania .tab, .tabs-empleados .tab, .asistencia-tab {
+    flex: 0 0 auto !important;
+    min-height: 35px !important;
+    padding: 0 10px !important;
+    font-size: 9px !important;
+  }
+
+  .asistencia-encabezado {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .asistencia-acciones-encabezado {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    width: 100% !important;
+    gap: 7px !important;
+  }
+
+  .asistencia-acciones-encabezado button {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    padding: 7px 8px !important;
+  }
+
+  .encabezado-seccion, .encabezado-feriados, .encabezado-permisos {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .encabezado-seccion .btn-principal,
+  .encabezado-feriados button,
+  .encabezado-permisos button {
+    width: 100% !important;
+  }
+
+  .barra-herramientas, .barra-horarios,
+  .asistencia-filtros, .asistencia-filtros-secundarios {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .asistencia-selector-fecha {
+    display: grid !important;
+    grid-template-columns: 38px minmax(0, 1fr) 38px !important;
+    gap: 6px !important;
+    padding: 8px !important;
+  }
+
+  .asistencia-fecha-actual {
+    min-width: 0 !important;
+    padding: 6px !important;
+    text-align: center;
+  }
+
+  .asistencia-ir-fecha {
+    grid-column: 1 / -1;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .asistencia-buscador,
+  .asistencia-filtros-secundarios select,
+  .barra-herramientas input, .barra-herramientas select,
+  .barra-horarios input, .barra-horarios select {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .asistencia-resumen {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .asistencia-resumen-card {
+    min-width: 0 !important;
+    padding: 10px !important;
+  }
+
+  .grid-formulario { grid-template-columns: 1fr !important; }
+  .horarios-layout, .permisos-contenedor, .feriados-contenedor {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal, [class*="modal-"] { max-width: 100vw; }
+  .modal-contenido {
+    width: calc(100vw - 18px) !important;
+    max-width: calc(100vw - 18px) !important;
+    max-height: calc(100dvh - 28px) !important;
+    overflow-y: auto !important;
+    border-radius: 15px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .asistencia-acciones-encabezado { grid-template-columns: 1fr !important; }
+  .asistencia-resumen { grid-template-columns: 1fr !important; }
+}
