@@ -1,0 +1,8 @@
+#panelOperacionesMensualesAsistencia .estado-cierre,
+#panelOperacionesMensualesAsistencia .operacion-tarjeta:last-child {
+  display: none !important;
+}
+
+#panelOperacionesMensualesAsistencia .operaciones-grid {
+  grid-template-columns: 1fr !important;
+}
