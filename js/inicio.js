@@ -27,8 +27,8 @@ from
 
 import { iniciarCompañia } from "./compañia.js";
 import { iniciarEmpleados } from "./empleados.js?v=20260814-4";
-import { iniciarAsistencia } from "./asistencia.js?v=20260814-1";
-import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260813-3";
+import { iniciarAsistencia } from "./asistencia.js?v=20260814-2";
+import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260814-1";
 import { iniciarDashboard } from "./dashboard.js?v=20260814-4";
 
 const sidebar = document.querySelector(".sidebar");
@@ -421,7 +421,7 @@ async function cargarVista(
 
 
         const ruta =
-            `vistas/${vistaPrincipal}.html`;
+            `vistas/${vistaPrincipal}.html?v=20260814-2`;
 
 
         const respuesta =
@@ -855,3 +855,4 @@ regla.innerHTML =
 }
 
 }
+
