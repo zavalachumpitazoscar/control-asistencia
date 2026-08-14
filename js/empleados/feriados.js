@@ -5650,11 +5650,8 @@ function obtenerHorariosSemanalesDescanso(
         );
 
 
-    if(
-        numeroSemana %
-        intervalo !==
-        0
-    ){
+    const ciclo=Array.isArray(asignacion.cicloSemanal)&&asignacion.cicloSemanal.length?asignacion.cicloSemanal:[asignacion.programacionSemanal||{}];
+    if(ciclo.length===1&&numeroSemana%intervalo!==0){
 
         return [];
 
@@ -5680,9 +5677,9 @@ function obtenerHorariosSemanalesDescanso(
         ];
 
 
-    const horarioIds =
-        asignacion.programacionSemanal
-        ?.[nombreDia];
+    let indiceCiclo=0;
+    if(asignacion.reiniciarCicloCadaMes&&ciclo.length>1){const primerDiaMes=new Date(seleccionada.getFullYear(),seleccionada.getMonth(),1);const desplazamientoLunes=(primerDiaMes.getDay()+6)%7;indiceCiclo=Math.floor((seleccionada.getDate()-1+desplazamientoLunes)/7)%ciclo.length;}
+    const horarioIds=ciclo[indiceCiclo]?.[nombreDia];
 
 
     return Array.isArray(
