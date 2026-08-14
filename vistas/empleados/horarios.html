@@ -32,8 +32,6 @@
 
     </div>
 
-
-
     <!--======================================
         BUSCADOR Y FILTROS
     =======================================-->
@@ -1562,6 +1560,17 @@
 
     </div>
 
+    <div class="ciclo-semanal-controles">
+        <div>
+            <span>Ciclo de semanas</span>
+            <small>Cada mes comenzará nuevamente desde la Semana 1.</small>
+        </div>
+        <div id="pestanasSemanasAsignacion" class="pestanas-semanas-asignacion"></div>
+        <button id="btnAgregarSemanaAsignacion" type="button" class="btn-principal">
+            <i class="bi bi-plus-circle"></i> Agregar otra semana
+        </button>
+    </div>
+
 
     <!-- BUSCADOR DE HORARIO -->
 
@@ -2020,43 +2029,6 @@
                             </label>
 
                         </div>
-
-
-                        <!-- REPETICIÓN DEL PATRÓN MENSUAL -->
-
-                        <div class="subseccion-horario repeticion-mensual-horario">
-
-                            <div class="subseccion-horario-titulo">
-                                <i class="bi bi-arrow-repeat"></i>
-                                <div>
-                                    <h5>Repetir esta planificación</h5>
-                                    <p>Diseña un mes y repite los mismos días del mes durante el periodo indicado.</p>
-                                </div>
-                            </div>
-
-                            <div class="form-grid form-grid-tres">
-                                <div class="campo-formulario">
-                                    <label for="fechaInicioRepeticionMensual">Desde <span>*</span></label>
-                                    <input id="fechaInicioRepeticionMensual" type="date">
-                                </div>
-                                <div class="campo-formulario">
-                                    <label for="fechaFinRepeticionMensual">Hasta <span>*</span></label>
-                                    <input id="fechaFinRepeticionMensual" type="date">
-                                </div>
-                                <div class="campo-formulario campo-accion-repeticion">
-                                    <label>Aplicación</label>
-                                    <button id="btnRepetirPlanificacionMensual" type="button" class="btn-principal">
-                                        <i class="bi bi-calendar2-plus"></i> Repetir patrón
-                                    </button>
-                                </div>
-                            </div>
-
-                            <small class="ayuda-repeticion-mensual">
-                                Ejemplo: si marcas los días 1 al 20 del mes, se aplicarán esos mismos días en cada mes del periodo.
-                            </small>
-
-                        </div>
-
 
 
                         <!-- SELECTOR DE HORARIO -->
