@@ -320,6 +320,74 @@ button, input, select, textarea { box-sizing: border-box; }
   }
 }
 
+.selector-marcacion-rapida {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.selector-marcacion-rapida label {
+  display: grid;
+  gap: 6px;
+  color: var(--ui-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.selector-marcacion-rapida select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 1px solid var(--ui-borde);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ui-texto);
+}
+
+.detalle-asistencia-rapido {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.detalle-asistencia-rapido div {
+  padding: 11px;
+  border-radius: 9px;
+  background: var(--ui-suave);
+}
+
+.detalle-asistencia-rapido span,
+.detalle-asistencia-rapido strong { display: block; }
+.detalle-asistencia-rapido span { color: var(--ui-muted); font-size: 9px; text-transform: uppercase; }
+.detalle-asistencia-rapido strong { margin-top: 4px; color: var(--ui-texto); font-size: 12px; }
+
+@media (max-width: 600px) {
+  .modal-detalle-auditoria {
+    z-index: 2147483200 !important;
+    padding: 8px !important;
+  }
+
+  .modal-detalle-auditoria article {
+    width: 100% !important;
+    max-height: calc(100dvh - 16px) !important;
+    border-radius: 15px !important;
+  }
+
+  .modal-detalle-auditoria header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 13px 14px !important;
+    background: #fff;
+  }
+
+  .modal-detalle-auditoria #contenidoDetalleAuditoria { padding: 12px !important; }
+  .detalle-asistencia-rapido { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 380px) {
   .asistencia-acciones-encabezado { grid-template-columns: 1fr !important; }
   .asistencia-resumen { grid-template-columns: 1fr !important; }
