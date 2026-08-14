@@ -37,7 +37,7 @@ function instalarInterfaz() {
   panel.innerHTML = `
     <style>${estilos()}</style>
     <header class="operaciones-cabecera">
-      <div><span>Administración del período</span><h3>Horas extra y cierre mensual</h3><p>Decisiones masivas con trazabilidad y bloqueo administrativo.</p></div>
+      <div><span>Administración del período</span><h3>Revisión de horas extra</h3><p>Decisiones con trazabilidad para el periodo consultado.</p></div>
       <div id="estadoCierreAsistencia" class="estado-cierre abierto">PERÍODO ABIERTO</div>
     </header>
     <div class="operaciones-grid">
