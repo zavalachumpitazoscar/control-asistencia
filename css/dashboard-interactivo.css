@@ -1,3 +1,6 @@
+.dashboard-kpis {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .kpi-dashboard {
   cursor: pointer;
   transition: border-color .18s, box-shadow .18s, transform .18s;
@@ -9,7 +12,11 @@
   outline: 0;
   transform: translateY(-2px);
 }
-.kpi-dashboard > div:nth-child(2) { flex: 1; }
+.kpi-dashboard > div:nth-child(2) {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
 .kpi-flecha { color: #cbd5e1; font-size: 11px; }
 .modal-resumen-dashboard[hidden] { display: none !important; }
 .modal-resumen-dashboard {
@@ -55,6 +62,7 @@
 .estado-chip-dashboard.ambar { background: #fffbeb; color: #d97706; }
 .estado-chip-dashboard.verde { background: #ecfdf5; color: #059669; }
 @media (max-width: 560px) {
+  .dashboard-kpis { grid-template-columns: 1fr; }
   .fila-resumen-dashboard { grid-template-columns: auto 1fr; }
   .fila-resumen-dashboard > em { grid-column: 2; max-width: none; text-align: left; }
 }
