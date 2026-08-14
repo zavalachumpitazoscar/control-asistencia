@@ -37,6 +37,10 @@ export function iniciarDashboard() {
   }, opcionesEvento);
   document.getElementById("cerrarResumenDashboard")?.addEventListener("click", cerrarResumenDashboard, opcionesEvento);
   document.getElementById("modalResumenDashboard")?.addEventListener("click", (e) => { if (e.target === e.currentTarget) cerrarResumenDashboard(); }, opcionesEvento);
+  document.getElementById("contenidoResumenDashboard")?.addEventListener("click", (e) => {
+    const accion=e.target.closest("[data-accion-configuracion]");
+    if(accion)resolverConfiguracionDashboard(accion.dataset.accionConfiguracion,accion.dataset.colaborador,accion.dataset.nombre);
+  }, opcionesEvento);
   document.getElementById("irDetalleResumenDashboard")?.addEventListener("click", () => { cerrarResumenDashboard(); navegarDashboard(destinoModalDashboard); }, opcionesEvento);
   document.addEventListener("keydown", cerrarModalConEscape, opcionesEvento);
   cargarDashboard();
@@ -159,6 +163,8 @@ function abrirResumenDashboard(tipo) {
     ausencias:["Colaboradores ausentes", "Personal programado sin marcaciones de asistencia", "asistencia"],
     incompletos:["Jornadas incompletas", "Marcaciones que requieren revisión o corrección", "asistencia"],
     extra:["Horas extra pendientes", "Tiempo adicional que todavía necesita una decisión", "asistencia"],
+    sinHorario:["Colaboradores sin horario", "Personal sin programación para la fecha consultada", "horarios"],
+    sinOrganizacion:["Ubicación organizacional incompleta", "Personal que necesita sucursal o área", "colaboradores"],
   }[tipo];
   if (!configuracion) return;
   const [titulo, subtitulo, destino] = configuracion;
@@ -167,8 +173,8 @@ function abrirResumenDashboard(tipo) {
   asignar("tituloResumenDashboard", titulo);
   asignar("subtituloResumenDashboard", subtitulo);
   asignar("cantidadResumenDashboard", `${filas.length} ${filas.length === 1 ? "registro" : "registros"}`);
-  document.getElementById("irDetalleResumenDashboard").textContent = destino === "colaboradores" ? "Gestionar colaboradores" : "Ir a Asistencia";
-  document.getElementById("contenidoResumenDashboard").innerHTML = filas.length ? filas.map((f) => `<div class="fila-resumen-dashboard"><div class="avatar-resumen">${html(iniciales(f.nombre))}</div><span><strong>${html(f.nombre)}</strong><small>${html(f.documento)} · ${html(f.detalle)}</small></span><em><span class="estado-chip-dashboard ${html(f.tono)}">${html(f.valor)}</span></em></div>`).join("") : '<div class="modal-resumen-vacio"><i class="bi bi-check-circle"></i>No existen personas en este indicador.</div>';
+  document.getElementById("irDetalleResumenDashboard").textContent = destino === "colaboradores" ? "Gestionar colaboradores" : destino === "horarios" ? "Ir a Horarios" : "Ir a Asistencia";
+  document.getElementById("contenidoResumenDashboard").innerHTML = filas.length ? filas.map((f) => `<div class="fila-resumen-dashboard"><div class="avatar-resumen">${html(iniciales(f.nombre))}</div><span><strong>${html(f.nombre)}</strong><small>${html(f.documento)} · ${html(f.detalle)}</small></span><em>${f.accion?`<button class="accion-configuracion-dashboard" data-accion-configuracion="${html(f.accion)}" data-colaborador="${html(f.id||"")}" data-nombre="${html(f.nombre)}" type="button">${html(f.valor)}</button>`:`<span class="estado-chip-dashboard ${html(f.tono)}">${html(f.valor)}</span>`}</em></div>`).join("") : '<div class="modal-resumen-vacio"><i class="bi bi-check-circle"></i>No existen personas en este indicador.</div>';
   const modal = document.getElementById("modalResumenDashboard");
   modal.hidden = false; modal.inert = false; modal.removeAttribute("inert"); modal.setAttribute("aria-hidden", "false");
   document.getElementById("cerrarResumenDashboard").focus();
@@ -176,6 +182,19 @@ function abrirResumenDashboard(tipo) {
 
 function cerrarResumenDashboard() { const modal=document.getElementById("modalResumenDashboard");if(!modal||modal.hidden)return;if(modal.contains(document.activeElement))document.activeElement.blur();modal.inert=true;modal.setAttribute("inert","");modal.setAttribute("aria-hidden","true");modal.hidden=true; }
 function cerrarModalConEscape(e){if(e.key==="Escape")cerrarResumenDashboard();}
+
+function resolverConfiguracionDashboard(accion,id,nombre){
+  cerrarResumenDashboard();
+  if(accion==="ASIGNAR_HORARIO"){
+    sessionStorage.setItem("dashboardColaboradorHorario",JSON.stringify({id,nombre}));
+    navegarDashboard("horarios");
+    return;
+  }
+  sessionStorage.setItem("dashboardColaboradorEdicion",JSON.stringify({id,nombre}));
+  navegarDashboard("colaboradores");
+  abrirColaboradorCuandoEsteListo(id,nombre);
+}
+function abrirColaboradorCuandoEsteListo(id,nombre,intentos=0){const buscar=document.getElementById("buscarColaborador");const boton=document.querySelector(`.btn-editar-colaborador[data-id="${CSS.escape(id||"")}"]`);if(buscar){buscar.value=nombre||"";buscar.dispatchEvent(new Event("input",{bubbles:true}));setTimeout(()=>document.querySelector(`.btn-editar-colaborador[data-id="${CSS.escape(id||"")}"]`)?.click(),120);return;}if(boton)return boton.click();if(intentos<25)setTimeout(()=>abrirColaboradorCuandoEsteListo(id,nombre,intentos+1),100);}
 
 function navegarDashboard(destino, contexto) {
   if (contexto?.fecha) sessionStorage.setItem("dashboardContextoAsistencia", JSON.stringify(contexto));
@@ -187,7 +206,7 @@ function navegarDashboard(destino, contexto) {
   document.querySelector(`.item[data-vista="${destino}"]`)?.click();
   if (destino === "asistencia" && contexto?.fecha) aplicarContextoAsistencia(contexto);
 }
-function abrirHorariosCuandoEsteListo(intentos=0){const tab=document.querySelector('.tab[data-tab="horarios"]');if(tab)return tab.click();if(intentos<20)setTimeout(()=>abrirHorariosCuandoEsteListo(intentos+1),100);}
+function abrirHorariosCuandoEsteListo(intentos=0){const tab=document.querySelector('.tab[data-tab="horarios"]');if(tab){tab.click();const contexto=sessionStorage.getItem("dashboardColaboradorHorario");if(contexto&&window.Swal)setTimeout(()=>Swal.fire({icon:"info",title:"Colaborador preparado",text:"Selecciona un horario activo y pulsa Asignar. El colaborador del Dashboard quedará preseleccionado.",confirmButtonText:"Entendido"}),350);return;}if(intentos<20)setTimeout(()=>abrirHorariosCuandoEsteListo(intentos+1),100);}
 function aplicarContextoAsistencia(contexto,intentos=0){const fecha=document.getElementById("selectorFechaAsistencia"),buscar=document.getElementById("buscarResumenAsistencia");if(fecha&&buscar){fecha.value=contexto.fecha;fecha.dispatchEvent(new Event("change",{bubbles:true}));buscar.value=contexto.nombre||"";buscar.dispatchEvent(new Event("input",{bubbles:true}));return;}if(intentos<25)setTimeout(()=>aplicarContextoAsistencia(contexto,intentos+1),100);}
 
 function renderizarEstadoDia(registros) {
@@ -272,14 +291,16 @@ function renderizarConfiguracion(activos, registros, datos, fecha) {
   const incompletos=registros.filter((r)=>/INCOMPLETO/.test(r.estado));
   const limite=new Date(`${fecha}T00:00:00`);limite.setDate(limite.getDate()+7);
   const porVencer=(datos.asignacionesHorarios||[]).filter((a)=>{const f=a.fechaFin||a.hasta||a.fin;if(!f)return false;const d=new Date(`${String(f).slice(0,10)}T00:00:00`);return d>=new Date(`${fecha}T00:00:00`)&&d<=limite;});
-  if(sinHorario.length)avisos.push({icono:"bi-calendar-x",titulo:`${sinHorario.length} sin horario para la fecha`,detalle:"Asigna una programación para calcular su jornada.",destino:"horarios"});
-  if(sinOrganizacion.length)avisos.push({icono:"bi-diagram-3",titulo:`${sinOrganizacion.length} sin ubicación completa`,detalle:"Completa sucursal y área del colaborador.",destino:"colaboradores"});
+  detallesDashboard.sinHorario=sinHorario.map((r)=>({id:r.colaboradorId,nombre:r.nombre,documento:r.documento||"Sin documento",detalle:`Sin programación el ${fechaVisible(fecha)}`,valor:"Asignar horario",accion:"ASIGNAR_HORARIO",tono:"ambar"}));
+  detallesDashboard.sinOrganizacion=sinOrganizacion.map((c)=>({id:c.id,nombre:nombreColaborador(c),documento:documentoColaborador(c),detalle:[!valorOrg(c,"sucursal")?"Falta sucursal":"",!valorOrg(c,"area")?"Falta área":""].filter(Boolean).join(" · "),valor:"Completar ubicación",accion:"COMPLETAR_UBICACION",tono:"ambar"}));
+  if(sinHorario.length)avisos.push({icono:"bi-calendar-x",titulo:`${sinHorario.length} sin horario para la fecha`,detalle:"Ver quiénes son y asignarles un horario.",config:"sinHorario"});
+  if(sinOrganizacion.length)avisos.push({icono:"bi-diagram-3",titulo:`${sinOrganizacion.length} sin ubicación completa`,detalle:"Ver quiénes son y completar sus datos.",config:"sinOrganizacion"});
   if(feriadosPendientes.length)avisos.push({icono:"bi-calendar-event",titulo:`${feriadosPendientes.length} feriados por configurar`,detalle:"Define el tratamiento de la jornada.",destino:"horarios"});
   if(incompletos.length)avisos.push({icono:"bi-exclamation-square",titulo:`${incompletos.length} marcaciones sin completar`,detalle:"Revisa entradas o salidas faltantes.",destino:"asistencia"});
   if(porVencer.length)avisos.push({icono:"bi-hourglass-split",titulo:`${porVencer.length} asignaciones próximas a vencer`,detalle:"Vencen dentro de los siguientes 7 días.",destino:"horarios"});
   asignar("contadorConfiguracion",avisos.length);
   const lista=document.getElementById("listaConfiguracionDashboard");if(!lista)return;
-  lista.innerHTML=avisos.length?avisos.map((a)=>`<button data-ir="${a.destino}" type="button"><i class="bi ${a.icono}"></i><span><strong>${html(a.titulo)}</strong><small>${html(a.detalle)}</small></span><i class="bi bi-chevron-right"></i></button>`).join(""):'<p class="dashboard-vacio"><i class="bi bi-check-circle"></i><br>Todo está correctamente configurado.</p>';
+  lista.innerHTML=avisos.length?avisos.map((a)=>`<button ${a.config?`data-resumen="${a.config}"`:`data-ir="${a.destino}"`} type="button"><i class="bi ${a.icono}"></i><span><strong>${html(a.titulo)}</strong><small>${html(a.detalle)}</small></span><i class="bi bi-chevron-right"></i></button>`).join(""):'<p class="dashboard-vacio"><i class="bi bi-check-circle"></i><br>Todo está correctamente configurado.</p>';
 }
 
 function actualizarEstadoActualizacion(fecha) {
