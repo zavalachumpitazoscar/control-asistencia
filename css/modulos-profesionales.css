@@ -392,3 +392,165 @@ button, input, select, textarea { box-sizing: border-box; }
   .asistencia-acciones-encabezado { grid-template-columns: 1fr !important; }
   .asistencia-resumen { grid-template-columns: 1fr !important; }
 }
+
+/* =====================================================
+   MODALES MÓVILES: capa superior, ancho seguro y acciones visibles
+===================================================== */
+@media (max-width: 600px) {
+  .modal,
+  .modal-permisos,
+  .modal-feriados,
+  .modal-detalle-auditoria,
+  .modal-resumen-dashboard {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483200 !important;
+    box-sizing: border-box !important;
+    max-width: 100vw !important;
+    padding: 8px !important;
+    overflow: hidden !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .swal2-container { z-index: 2147483300 !important; }
+
+  .modal-contenido,
+  .modal-permisos-contenido,
+  .modal-feriados-contenido,
+  [class*="modal-contenido"],
+  [class*="modal-content"],
+  .modal > article,
+  .modal-resumen-dashboard > article {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 720px !important;
+    height: auto !important;
+    max-height: calc(100dvh - 16px) !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    border-radius: 17px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .modal-colaborador,
+  .modal-horario,
+  .modal-asignar-horario,
+  .modal-marcacion-manual,
+  .modal-ajuste-refrigerio,
+  .modal-horas-extra,
+  .modal-editar-dia-colaborador,
+  .modal-calendario-colaborador,
+  .modal-configurar-feriado,
+  .modal-colaboradores-feriado,
+  .modal-descanso-sustitutorio {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 720px !important;
+    height: auto !important;
+    max-height: calc(100dvh - 16px) !important;
+    overflow: hidden !important;
+  }
+
+  .modal *,
+  .modal-permisos *,
+  .modal-feriados * {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  .modal-header,
+  .modal-permisos-header,
+  .modal-feriados-header,
+  .modal-detalle-auditoria header {
+    position: relative !important;
+    top: auto !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    padding: 14px 15px !important;
+    background: #fff !important;
+  }
+
+  .tabs-modal-colaborador {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .modal-body,
+  .marcacion-manual-body,
+  .modal-permisos-body,
+  .modal-feriados-body,
+  .contenido-resumen-dashboard,
+  #contenidoDetalleAuditoria {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 14px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-footer,
+  .modal-permisos-footer,
+  .modal-feriados-footer,
+  .modal-resumen-dashboard > article > footer {
+    position: relative !important;
+    bottom: auto !important;
+    z-index: 5 !important;
+    flex: 0 0 auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    padding: 11px 13px calc(11px + env(safe-area-inset-bottom)) !important;
+    gap: 8px !important;
+    border-top: 1px solid var(--ui-borde) !important;
+    background: #fff !important;
+    box-shadow: 0 -8px 22px rgba(15, 23, 42, .07) !important;
+  }
+
+  .modal-footer button,
+  .modal-permisos-footer button,
+  .modal-feriados-footer button {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 8px !important;
+    justify-content: center !important;
+  }
+
+  .modal input,
+  .modal select,
+  .modal textarea,
+  .modal-permisos input,
+  .modal-permisos select,
+  .modal-permisos textarea,
+  .modal-feriados input,
+  .modal-feriados select,
+  .modal-feriados textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .seccion-formulario,
+  .resumen-marcacion-manual,
+  .horario-marcacion-manual,
+  .tipo-marcacion-manual {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .modal-footer,
+  .modal-permisos-footer,
+  .modal-feriados-footer {
+    grid-template-columns: 1fr !important;
+  }
+}
