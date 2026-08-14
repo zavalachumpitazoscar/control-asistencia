@@ -56,6 +56,20 @@ export function iniciarResumenAsistencia() {
 
   btnLimpiarFiltros = document.getElementById("btnLimpiarFiltrosAsistencia");
 
+  document
+    .getElementById("btnRecalcularAsistencia")
+    ?.addEventListener("click", recalcularResumenSeleccionado);
+
+  document
+    .getElementById("btnRegistrarMarcacionEncabezado")
+    ?.addEventListener("click", solicitarMarcacionDesdeEncabezado);
+
+  document
+    .getElementById("btnVerHistorialMarcaciones")
+    ?.addEventListener("click", () => {
+      document.querySelector('.asistencia-tab[data-tab="marcaciones"]')?.click();
+    });
+
   if (!cuerpoResumen) {
     console.warn("No se encontró cuerpoResumenAsistencia.");
 
@@ -95,6 +109,13 @@ export function iniciarResumenAsistencia() {
   });
 
   cuerpoResumen.addEventListener("click", (evento) => {
+    const botonVer = evento.target.closest(".btn-ver-asistencia");
+
+    if (botonVer) {
+      mostrarDetalleDiario(botonVer.dataset.colaboradorId);
+      return;
+    }
+
     const boton = evento.target.closest(
       '[data-accion="gestionar-ajuste-refrigerio"]',
     );
@@ -336,6 +357,124 @@ export function iniciarResumenAsistencia() {
         },
       }),
     );
+  });
+}
+
+async function recalcularResumenSeleccionado() {
+  if (!fechaResumenSeleccionada) {
+    Swal.fire({
+      icon: "info",
+      title: "Selecciona una fecha",
+      text: "Elige el día que deseas recalcular.",
+      confirmButtonColor: "#2563eb",
+    });
+    return;
+  }
+
+  await cargarResumenAsistencia(fechaResumenSeleccionada);
+
+  Swal.fire({
+    icon: "success",
+    title: "Resumen actualizado",
+    text: "Se recalcularon las marcaciones y estados del día seleccionado.",
+    timer: 1800,
+    showConfirmButton: false,
+  });
+}
+
+async function solicitarMarcacionDesdeEncabezado() {
+  if (!fechaResumenSeleccionada || !registrosResumen.length) {
+    Swal.fire({
+      icon: "info",
+      title: "No hay colaboradores disponibles",
+      text: "Espera a que termine de cargar el resumen o selecciona otra fecha.",
+      confirmButtonColor: "#2563eb",
+    });
+    return;
+  }
+
+  const opciones = [...registrosResumen]
+    .sort((a, b) => String(a.nombre || "").localeCompare(String(b.nombre || ""), "es"))
+    .map((registro) => `<option value="${escaparHTML(registro.colaboradorId)}">${escaparHTML(registro.nombre || "Colaborador")}</option>`)
+    .join("");
+
+  const resultado = await Swal.fire({
+    title: "Registrar marcación",
+    html: `
+      <div class="selector-marcacion-rapida">
+        <label>Colaborador<select id="swalColaboradorMarcacion">${opciones}</select></label>
+        <label>Tipo de marcación<select id="swalTipoMarcacion">
+          <option value="ENTRADA">Entrada</option>
+          <option value="INICIO_REFRIGERIO">Inicio de refrigerio</option>
+          <option value="FIN_REFRIGERIO">Fin de refrigerio</option>
+          <option value="SALIDA">Salida</option>
+        </select></label>
+      </div>`,
+    showCancelButton: true,
+    confirmButtonText: "Continuar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#2563eb",
+    focusConfirm: false,
+    preConfirm: () => ({
+      colaboradorId: document.getElementById("swalColaboradorMarcacion")?.value,
+      tipo: document.getElementById("swalTipoMarcacion")?.value,
+    }),
+  });
+
+  if (!resultado.isConfirmed) return;
+
+  const registro = registrosResumen.find(
+    (item) => item.colaboradorId === resultado.value?.colaboradorId,
+  );
+
+  if (!registro) return;
+
+  document.dispatchEvent(
+    new CustomEvent("asistencia:agregar-marcacion-manual", {
+      detail: {
+        colaboradorId: registro.colaboradorId,
+        colaboradorNombre: registro.nombre,
+        fecha: fechaResumenSeleccionada,
+        tipo: resultado.value.tipo,
+        horarioId: registro.horarioPrincipal?.id || null,
+        horario: registro.horarioPrincipal || null,
+        entradaActual: registro.entrada || null,
+        salidaActual: registro.salida || null,
+        inicioRefrigerioActual: registro.clasificacion?.inicioRefrigerio || null,
+        finRefrigerioActual: registro.clasificacion?.finRefrigerio || null,
+        refrigerio: registro.horarioPrincipal?.refrigerio || null,
+      },
+    }),
+  );
+}
+
+function mostrarDetalleDiario(colaboradorId) {
+  const registro = registrosResumen.find(
+    (item) => item.colaboradorId === colaboradorId,
+  );
+
+  if (!registro) return;
+
+  const hora = (valor) => escaparHTML(valor?.hora || valor?.fechaHora?.slice?.(11, 16) || "Sin marcación");
+  const horario = registro.horarioPrincipal;
+  const nombreHorario = horario?.nombre || horario?.descripcion || "Sin horario asignado";
+  const estado = registro.estado || registro.estadoAsistencia || "Pendiente";
+
+  Swal.fire({
+    title: escaparHTML(registro.nombre || "Detalle diario"),
+    html: `
+      <div class="detalle-asistencia-rapido">
+        <div><span>Fecha</span><strong>${escaparHTML(fechaResumenSeleccionada)}</strong></div>
+        <div><span>Estado</span><strong>${escaparHTML(estado)}</strong></div>
+        <div><span>Horario</span><strong>${escaparHTML(nombreHorario)}</strong></div>
+        <div><span>Entrada</span><strong>${hora(registro.entrada)}</strong></div>
+        <div><span>Inicio de refrigerio</span><strong>${hora(registro.clasificacion?.inicioRefrigerio)}</strong></div>
+        <div><span>Fin de refrigerio</span><strong>${hora(registro.clasificacion?.finRefrigerio)}</strong></div>
+        <div><span>Salida</span><strong>${hora(registro.salida)}</strong></div>
+      </div>`,
+    confirmButtonText: "Cerrar",
+    confirmButtonColor: "#2563eb",
+    width: 620,
   });
 }
 
@@ -4459,3 +4598,4 @@ function escaparHTML(valor) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
