@@ -15,7 +15,7 @@ const COLECCIONES_AUDITADAS = [
   "empresas", "usuarios", "sucursales", "areas", "subareas", "colaboradores", "horarios",
   "asignacionesHorarios", "excepcionesHorarios", "permisos", "feriados",
   "descansosSustitutorios", "marcaciones", "ajustesAsistenciaDiaria",
-  "aprobacionesHorasExtra", "cierresAsistencia",
+  "aprobacionesHorasExtra", "regularizacionesAsistencia", "cierresAsistencia",
 ];
 const nombresModulo = {
   empresas: "Compañía", usuarios: "Usuarios y perfiles", sucursales: "Sucursales", areas: "Áreas", subareas: "Subáreas",
@@ -23,6 +23,7 @@ const nombresModulo = {
   excepcionesHorarios: "Programación diaria", permisos: "Permisos", feriados: "Feriados",
   descansosSustitutorios: "Descansos sustitutorios", marcaciones: "Marcaciones",
   ajustesAsistenciaDiaria: "Ajustes de asistencia", aprobacionesHorasExtra: "Horas extra",
+  regularizacionesAsistencia: "Regularizaciones",
   cierresAsistencia: "Cierres de asistencia",
 };
 
@@ -309,7 +310,7 @@ function accionEspecifica(accion, cambios, datos){const estado=cambios?.estado;i
 function categoriaAccion(accion){const a=String(accion||"").toUpperCase();if(a==="CREAR")return "CREAR";if(a==="ELIMINAR")return "ELIMINAR";if(["ACTIVAR","DESACTIVAR","MODIFICAR"].includes(a))return "MODIFICAR";return "OPERACION";}
 function resumenRegistroExistente(registro, coleccion, datos, nombre, accion){const detalle=descripcionEspecifica(coleccion,datos);const verbo={CREAR:"Se creó",ELIMINAR:"Se eliminó",ACTIVAR:"Se activó",DESACTIVAR:"Se desactivó",MODIFICAR:"Se modificó"}[accion]||"Se realizó una operación sobre";const campos=expandirCambios(Object.entries(registro.cambios||{})).filter(([c])=>!campoTecnico(c)).map(([c])=>nombreCampo(c));return `${verbo} ${nombre}${detalle?` · ${detalle}`:""}${accion==="MODIFICAR"&&campos.length?` · Se cambió: ${campos.join(", ")}`:""}`;}
 function accionAmigable(accion) { const a=String(accion||"").toUpperCase();if(a.includes("CREAR")||a.includes("AGREGAR"))return "Se creó un registro";if(a.includes("ELIMINAR"))return "Se eliminó un registro";if(a.includes("DESACTIVAR"))return "Se desactivó el registro";if(a.includes("ACTIVAR"))return "Se activó el registro";if(a.includes("APROBAR"))return "Se aprobó una solicitud";if(a.includes("RECHAZAR"))return "Se rechazó una solicitud";if(a.includes("MODIFICAR"))return "Se modificó información";return etiqueta(accion).toLowerCase().replace(/^./,(x)=>x.toUpperCase()); }
-function tituloOperacion(r){const a=String(r.accion||"").toUpperCase(),singular={Colaboradores:"colaborador",Horarios:"horario",Permisos:"permiso",Feriados:"feriado",Marcaciones:"marcación",Sucursales:"sucursal",Áreas:"área",Subáreas:"subárea",Compañía:"empresa","Asignación de horarios":"asignación de horario","Horas extra":"horas extra"}[r.modulo]||"registro";const verbo={CREAR:"Creación de",ELIMINAR:"Eliminación de",ACTIVAR:"Activación de",DESACTIVAR:"Desactivación de",MODIFICAR:"Modificación de"}[a]||"Detalle de";return `${verbo} ${singular}`;}
+function tituloOperacion(r){const a=String(r.accion||"").toUpperCase(),singular={Colaboradores:"colaborador",Horarios:"horario",Permisos:"permiso",Feriados:"feriado",Marcaciones:"marcación",Regularizaciones:"regularización",Sucursales:"sucursal",Áreas:"área",Subáreas:"subárea",Compañía:"empresa","Asignación de horarios":"asignación de horario","Horas extra":"horas extra","Cierres de asistencia":"cierre de asistencia"}[r.modulo]||"registro";const verbo={CREAR:"Creación de",ELIMINAR:"Eliminación de",ACTIVAR:"Activación de",DESACTIVAR:"Desactivación de",MODIFICAR:"Modificación de"}[a]||"Detalle de";return `${verbo} ${singular}`;}
 function nombreAfectado(r) { const nombre=String(r.afectadoNombre||"").trim();return nombre&&nombre!=="Registro del sistema"?nombre:(r.modulo?`Registro de ${r.modulo}`:"Registro del sistema"); }
 function motivoVisible(motivo) { const m=String(motivo||"").trim();return !m||m==="."||m==="-"?"No se indicó un motivo":m; }
 function cerrarDetalle() { const modal=document.getElementById("modalDetalleAuditoria"); if(modal.contains(document.activeElement))document.activeElement.blur(); modal.inert=true; modal.setAttribute("inert",""); modal.setAttribute("aria-hidden","true"); modal.hidden=true; }
