@@ -1,0 +1,73 @@
+<section class="configuracion-pagina">
+  <header class="configuracion-encabezado">
+    <div>
+      <span>PERSONALIZACIÓN Y SOPORTE</span>
+      <h2>Configuración</h2>
+      <p>Adapta la presentación del sistema y consulta su información técnica.</p>
+    </div>
+    <button type="button" class="btn-configuracion secundario" id="btnAbrirManualConfiguracion">
+      <i class="bi bi-book"></i> Abrir manual
+    </button>
+  </header>
+
+  <div class="configuracion-grid">
+    <article class="configuracion-card">
+      <header><i class="bi bi-palette"></i><div><h3>Apariencia</h3><p>Preferencias visuales de este dispositivo.</p></div></header>
+      <div class="configuracion-cuerpo">
+        <fieldset>
+          <legend>Color principal</legend>
+          <div class="colores-configuracion" id="coloresConfiguracion">
+            <button type="button" data-color="#2563eb" style="--muestra:#2563eb" aria-label="Azul"></button>
+            <button type="button" data-color="#4f46e5" style="--muestra:#4f46e5" aria-label="Índigo"></button>
+            <button type="button" data-color="#0f766e" style="--muestra:#0f766e" aria-label="Verde petróleo"></button>
+            <button type="button" data-color="#7c3aed" style="--muestra:#7c3aed" aria-label="Violeta"></button>
+            <button type="button" data-color="#be123c" style="--muestra:#be123c" aria-label="Carmín"></button>
+          </div>
+        </fieldset>
+
+        <label class="campo-configuracion">Densidad de la interfaz
+          <select id="densidadConfiguracion">
+            <option value="compacta">Compacta</option>
+            <option value="comoda">Cómoda</option>
+          </select>
+          <small>La vista compacta permite mostrar más información en pantalla.</small>
+        </label>
+
+        <label class="campo-configuracion">Vista inicial
+          <select id="vistaInicialConfiguracion">
+            <option value="dashboard">Dashboard</option>
+            <option value="compañia">Compañía</option>
+            <option value="empleados">Empleados</option>
+            <option value="asistencia">Asistencia</option>
+            <option value="auditoria">Auditoría</option>
+          </select>
+          <small>Se abrirá automáticamente al ingresar desde este dispositivo.</small>
+        </label>
+      </div>
+      <footer>
+        <button type="button" class="btn-configuracion secundario" id="btnRestaurarApariencia">Restaurar</button>
+        <button type="button" class="btn-configuracion primario" id="btnGuardarApariencia"><i class="bi bi-check2"></i> Guardar apariencia</button>
+      </footer>
+    </article>
+
+    <article class="configuracion-card">
+      <header><i class="bi bi-info-circle"></i><div><h3>Información del sistema</h3><p>Estado actual de la aplicación y de la sesión.</p></div></header>
+      <dl class="informacion-sistema" id="informacionSistema">
+        <div><dt>Aplicación</dt><dd>Control de Asistencia</dd></div>
+        <div><dt>Versión</dt><dd>2026.08.14</dd></div>
+        <div><dt>Estado</dt><dd><span class="estado-sistema correcto">Operativo</span></dd></div>
+        <div><dt>Empresa activa</dt><dd id="infoEmpresaSistema">Verificando…</dd></div>
+        <div><dt>Usuario</dt><dd id="infoUsuarioSistema">Verificando…</dd></div>
+        <div><dt>Zona horaria</dt><dd>America/Lima</dd></div>
+        <div><dt>Base de datos</dt><dd>Firebase Firestore</dd></div>
+        <div><dt>Alojamiento</dt><dd>GitHub Pages</dd></div>
+        <div><dt>Dispositivo</dt><dd id="infoDispositivoSistema">—</dd></div>
+        <div><dt>Última actualización</dt><dd>14/08/2026</dd></div>
+      </dl>
+      <footer>
+        <button type="button" class="btn-configuracion secundario" id="btnCopiarInfoSistema"><i class="bi bi-copy"></i> Copiar información</button>
+        <button type="button" class="btn-configuracion primario" id="btnActualizarInfoSistema"><i class="bi bi-arrow-clockwise"></i> Actualizar estado</button>
+      </footer>
+    </article>
+  </div>
+</section>
