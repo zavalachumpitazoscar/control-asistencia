@@ -10,7 +10,7 @@
       <h2>Asistencia</h2>
 
       <p>
-        Consulta marcaciones, tardanzas, permisos e incidencias de los
+        Consulta marcaciones, tardanzas, permisos y regularizaciones de los
         colaboradores.
       </p>
     </div>
@@ -50,12 +50,6 @@
       <i class="bi bi-fingerprint"></i>
 
       <span> Marcaciones </span>
-    </button>
-
-    <button type="button" class="asistencia-tab" data-tab="incidencias">
-      <i class="bi bi-exclamation-triangle"></i>
-
-      <span> Incidencias </span>
     </button>
 
     <button type="button" class="asistencia-tab" data-tab="regularizaciones">
@@ -808,45 +802,23 @@
     </div>
   </div>
 
-  <!-- SECCIONES EN PREPARACIÓN -->
-
-  <div class="asistencia-panel-tab" data-contenido-tab="incidencias">
-    <div class="asistencia-vista-provisional">
-      <div class="asistencia-vista-provisional-icono advertencia">
-        <i class="bi bi-exclamation-triangle"></i>
-      </div>
-      <h3>Incidencias</h3>
-      <p>
-        No hay incidencias disponibles. Aquí se revisarán faltas, tardanzas,
-        marcaciones incompletas e inconsistencias.
-      </p>
-    </div>
-  </div>
-
   <div class="asistencia-panel-tab" data-contenido-tab="regularizaciones">
-    <div class="asistencia-vista-provisional">
-      <div class="asistencia-vista-provisional-icono regularizacion">
-        <i class="bi bi-pencil-square"></i>
-      </div>
-      <h3>Regularizaciones</h3>
-      <p>
-        Esta sección permitirá justificar y corregir registros, conservando
-        siempre la marcación original.
-      </p>
-    </div>
+    <section class="control-asistencia-panel">
+      <header><div><span>CONTROL DE CORRECCIONES</span><h3>Regularizaciones</h3><p>Solicita y revisa correcciones conservando la trazabilidad.</p></div><button type="button" class="btn-control-asistencia principal" id="btnNuevaRegularizacion"><i class="bi bi-plus-lg"></i> Nueva solicitud</button></header>
+      <div class="control-filtros"><input type="search" id="buscarRegularizaciones" placeholder="Buscar colaborador, documento o motivo"><select id="estadoRegularizaciones"><option value="">Todos los estados</option><option value="PENDIENTE">Pendientes</option><option value="APROBADA">Aprobadas</option><option value="RECHAZADA">Rechazadas</option></select><button type="button" id="actualizarRegularizaciones" class="btn-control-asistencia"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
+      <div class="control-tabla"><table><thead><tr><th>Colaborador</th><th>Fecha</th><th>Corrección solicitada</th><th>Motivo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="cuerpoRegularizaciones"><tr><td colspan="6" class="control-vacio">Cargando regularizaciones…</td></tr></tbody></table></div>
+      <footer class="control-footer"><span id="totalRegularizaciones">0 solicitudes</span></footer>
+    </section>
   </div>
 
   <div class="asistencia-panel-tab" data-contenido-tab="cierres">
-    <div class="asistencia-vista-provisional">
-      <div class="asistencia-vista-provisional-icono cierre">
-        <i class="bi bi-lock"></i>
-      </div>
-      <h3>Cierres</h3>
-      <p>
-        Esta sección permitirá revisar y cerrar periodos mensuales para evitar
-        modificaciones posteriores.
-      </p>
-    </div>
+    <section class="control-asistencia-panel">
+      <header><div><span>PROTECCIÓN DE PERIODOS</span><h3>Cierres de asistencia</h3><p>Verifica pendientes y bloquea periodos revisados.</p></div></header>
+      <div class="cierre-controles"><label>Desde<input type="date" id="fechaDesdeCierre"></label><label>Hasta<input type="date" id="fechaHastaCierre"></label><button type="button" class="btn-control-asistencia principal" id="btnVerificarCierre"><i class="bi bi-shield-check"></i> Verificar periodo</button></div>
+      <div class="cierre-verificacion" id="resultadoVerificacionCierre"><i class="bi bi-info-circle"></i><p>Selecciona un periodo para comprobar si está listo para cerrar.</p></div>
+      <div class="cierre-accion"><label>Observación<textarea id="observacionNuevoCierre" rows="2" placeholder="Motivo del cierre o comentario administrativo"></textarea></label><button type="button" class="btn-control-asistencia peligro" id="btnCerrarPeriodoControl" disabled><i class="bi bi-lock"></i> Cerrar periodo</button></div>
+      <div class="control-tabla"><table><thead><tr><th>Periodo</th><th>Estado</th><th>Responsable</th><th>Observación</th><th>Acción</th></tr></thead><tbody id="cuerpoCierresAsistencia"><tr><td colspan="5" class="control-vacio">Cargando cierres…</td></tr></tbody></table></div>
+    </section>
   </div>
 
   <!--======================================
