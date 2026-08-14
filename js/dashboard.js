@@ -1,4 +1,4 @@
-import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260813-3";
+import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260814-1";
 
 let cargaActual = 0;
 let detallesDashboard = {};
