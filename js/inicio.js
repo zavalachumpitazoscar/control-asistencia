@@ -31,7 +31,7 @@ import { iniciarAsistencia } from "./asistencia.js?v=20260814-2";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260814-1";
 import { iniciarDashboard } from "./dashboard.js?v=20260814-4";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
-import { iniciarManual, abrirManual } from "./manual.js?v=20260814-1";
+import { iniciarManual, abrirManual } from "./manual.js?v=20260814-2";
 
 aplicarAparienciaGuardada();
 iniciarManual();
