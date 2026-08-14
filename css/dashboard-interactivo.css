@@ -80,6 +80,8 @@
 .fila-resumen-dashboard strong { overflow: hidden; color: #1e293b; font-size: 11px; white-space: nowrap; text-overflow: ellipsis; }
 .fila-resumen-dashboard small { margin-top: 3px; color: #64748b; font-size: 9px; }
 .fila-resumen-dashboard > em { max-width: 210px; color: #475569; font-size: 9px; font-style: normal; font-weight: 800; text-align: right; }
+.accion-configuracion-dashboard { padding:7px 9px; border:0; border-radius:8px; background:#2563eb; color:#fff; font-size:8px; font-weight:800; cursor:pointer; white-space:nowrap; }
+.accion-configuracion-dashboard:hover { background:#1d4ed8; }
 .modal-resumen-dashboard > article > footer {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 12px 18px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 10px;
