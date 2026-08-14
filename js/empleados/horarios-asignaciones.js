@@ -1113,6 +1113,7 @@ function actualizarSeleccionarTodos(){
 
 
         reiniciarFormulario();
+        aplicarColaboradorDesdeDashboard();
         renderizarColaboradoresAsignacion();
 
 
@@ -1215,8 +1216,11 @@ actualizarContadorColaboradores();
 
         asignarValor(
             "fechaFinAsignacionSemanal",
-            ""
+            fechaCincoAniosDespues(fechaActual)
         );
+
+        asignarValor("fechaInicioRepeticionMensual", fechaActual);
+        asignarValor("fechaFinRepeticionMensual", fechaCincoAniosDespues(fechaActual));
 
 
         horarioSemanalSeleccionadoId =
@@ -1281,6 +1285,24 @@ actualizarHorarioSemanalSeleccionado();
 
         renderizarResumenMeses();
 
+    }
+
+    function fechaCincoAniosDespues(fechaISO){
+        const fecha=new Date(`${fechaISO}T00:00:00`);
+        fecha.setFullYear(fecha.getFullYear()+5);
+        return formatearFechaISO(fecha);
+    }
+
+    function aplicarColaboradorDesdeDashboard(){
+        let contexto=null;
+        try{contexto=JSON.parse(sessionStorage.getItem("dashboardColaboradorHorario")||"null");}catch(error){console.warn("No se pudo leer el colaborador del Dashboard",error);}
+        if(!contexto?.id)return;
+        const existe=colaboradores.some((c)=>c.id===contexto.id);
+        if(!existe)return;
+        colaboradoresSeleccionados.add(contexto.id);
+        if(buscarColaboradorAsignacion)buscarColaboradorAsignacion.value=contexto.nombre||"";
+        sessionStorage.removeItem("dashboardColaboradorHorario");
+        actualizarContadorColaboradores();
     }
 
 
@@ -2139,6 +2161,31 @@ actualizarHorarioSemanalSeleccionado();
 
         renderizarResumenMeses();
 
+    }
+
+    async function repetirPlanificacionMensual(){
+        const desde=obtenerValor("fechaInicioRepeticionMensual");
+        const hasta=obtenerValor("fechaFinRepeticionMensual");
+        if(!desde||!hasta){mostrarCamposIncompletos("Selecciona las fechas desde y hasta para repetir la planificación.");return;}
+        if(hasta<desde){await Swal.fire({icon:"warning",title:"Periodo incorrecto",text:"La fecha final no puede ser anterior a la fecha inicial."});return;}
+        const prefijo=`${añoCalendario}-${String(mesCalendario+1).padStart(2,"0")}-`;
+        const patron=Object.entries(programacionMensual).filter(([fecha])=>fecha.startsWith(prefijo)).map(([fecha,horarioId])=>({dia:Number(fecha.slice(8,10)),horarioId}));
+        if(!patron.length){await Swal.fire({icon:"warning",title:"Mes sin planificación",text:"Primero marca en el calendario los días que deseas usar como patrón."});return;}
+        const inicio=new Date(`${desde}T00:00:00`),fin=new Date(`${hasta}T00:00:00`);
+        let agregados=0;
+        for(let cursor=new Date(inicio.getFullYear(),inicio.getMonth(),1);cursor<=fin;cursor.setMonth(cursor.getMonth()+1)){
+            const anio=cursor.getFullYear(),mes=cursor.getMonth();
+            patron.forEach(({dia,horarioId})=>{
+                if(dia>obtenerUltimoDiaMes(anio,mes))return;
+                const fecha=formatearFechaISO(new Date(anio,mes,dia));
+                if(fecha<desde||fecha>hasta)return;
+                if(!programacionMensual[fecha])agregados++;
+                programacionMensual[fecha]=horarioId;
+            });
+        }
+        añoCalendario=inicio.getFullYear();mesCalendario=inicio.getMonth();
+        renderizarCalendario();renderizarResumenMeses();
+        await Swal.fire({icon:"success",title:"Planificación repetida",text:`Se aplicó el patrón entre ${formatearFechaVisible(desde)} y ${formatearFechaVisible(hasta)}. ${agregados} días nuevos fueron programados.`,confirmButtonText:"Continuar"});
     }
 
 
@@ -7721,6 +7768,9 @@ buscarColaboradorAsignacion
         "click",
         limpiarMesActual
     );
+
+    document.getElementById("btnRepetirPlanificacionMensual")
+    ?.addEventListener("click", repetirPlanificacionMensual);
 
 
     cerrarAsignarHorario
