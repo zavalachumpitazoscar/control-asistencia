@@ -4,6 +4,7 @@
       <span class="dashboard-etiqueta">RESUMEN OPERATIVO</span>
       <h2 id="saludoDashboard">Buen día</h2>
       <p id="fechaDashboard">Consulta rápida del estado de tu empresa.</p>
+      <small id="actualizacionDashboard" class="actualizacion-dashboard"><i class="bi bi-cloud-check"></i> Preparando actualización…</small>
     </div>
     <div class="dashboard-acciones-cabecera">
       <label><span>Fecha de consulta</span><input id="fechaConsultaDashboard" type="date"></label>
@@ -13,13 +14,21 @@
 
   <div id="estadoCargaDashboard" class="dashboard-carga"><span></span> Preparando información...</div>
 
+  <section class="filtros-dashboard" aria-label="Filtros organizacionales">
+    <div><i class="bi bi-funnel"></i><span><strong>Ver información de</strong><small id="alcanceDashboard">Toda la empresa</small></span></div>
+    <label>Sucursal<select id="filtroSucursalDashboard"><option value="">Todas</option></select></label>
+    <label>Área<select id="filtroAreaDashboard"><option value="">Todas</option></select></label>
+    <label>Subárea<select id="filtroSubareaDashboard"><option value="">Todas</option></select></label>
+    <button id="limpiarFiltrosDashboard" type="button"><i class="bi bi-arrow-counterclockwise"></i> Limpiar</button>
+  </section>
+
   <div class="dashboard-kpis">
-    <article class="kpi-dashboard azul" data-resumen="activos" role="button" tabindex="0" aria-label="Ver colaboradores activos"><div class="kpi-icono"><i class="bi bi-people"></i></div><div><span>Colaboradores activos</span><strong id="kpiColaboradores">—</strong><small id="detalleColaboradores">Pulsa para ver el personal</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
-    <article class="kpi-dashboard verde" data-resumen="asistieron" role="button" tabindex="0" aria-label="Ver colaboradores que asistieron"><div class="kpi-icono"><i class="bi bi-person-check"></i></div><div><span>Asistieron</span><strong id="kpiAsistieron">—</strong><small id="detalleAsistieron">En la fecha consultada</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
-    <article class="kpi-dashboard ambar" data-resumen="tardanzas" role="button" tabindex="0" aria-label="Ver colaboradores con tardanza"><div class="kpi-icono"><i class="bi bi-clock-history"></i></div><div><span>Tardanzas</span><strong id="kpiTardanzas">—</strong><small id="detalleTardanzas">Requieren seguimiento</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
-    <article class="kpi-dashboard rojo" data-resumen="ausencias" role="button" tabindex="0" aria-label="Ver colaboradores ausentes"><div class="kpi-icono"><i class="bi bi-person-x"></i></div><div><span>Ausencias</span><strong id="kpiAusencias">—</strong><small id="detalleAusencias">Sin asistencia registrada</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
-    <article class="kpi-dashboard violeta" data-resumen="incompletos" role="button" tabindex="0" aria-label="Ver jornadas incompletas"><div class="kpi-icono"><i class="bi bi-exclamation-diamond"></i></div><div><span>Incompletos</span><strong id="kpiIncompletos">—</strong><small id="detalleIncompletos">Falta alguna marcación</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
-    <article class="kpi-dashboard celeste" data-resumen="extra" role="button" tabindex="0" aria-label="Ver horas extra pendientes"><div class="kpi-icono"><i class="bi bi-stopwatch"></i></div><div><span>Extra pendiente</span><strong id="kpiExtraPendiente">—</strong><small id="detalleExtraPendiente">Por revisar o aprobar</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard azul" data-resumen="activos" role="button" tabindex="0" aria-label="Ver colaboradores activos"><div class="kpi-icono"><i class="bi bi-people"></i></div><div><span>Colaboradores activos</span><strong id="kpiColaboradores">—</strong><small id="detalleColaboradores">Pulsa para ver el personal</small><small id="comparacionColaboradores" class="kpi-comparacion">Personal habilitado</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard verde" data-resumen="asistieron" role="button" tabindex="0" aria-label="Ver colaboradores que asistieron"><div class="kpi-icono"><i class="bi bi-person-check"></i></div><div><span>Asistieron</span><strong id="kpiAsistieron">—</strong><small id="detalleAsistieron">En la fecha consultada</small><small id="comparacionAsistieron" class="kpi-comparacion">Comparando con ayer</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard ambar" data-resumen="tardanzas" role="button" tabindex="0" aria-label="Ver colaboradores con tardanza"><div class="kpi-icono"><i class="bi bi-clock-history"></i></div><div><span>Tardanzas</span><strong id="kpiTardanzas">—</strong><small id="detalleTardanzas">Requieren seguimiento</small><small id="comparacionTardanzas" class="kpi-comparacion">Comparando con ayer</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard rojo" data-resumen="ausencias" role="button" tabindex="0" aria-label="Ver colaboradores ausentes"><div class="kpi-icono"><i class="bi bi-person-x"></i></div><div><span>Ausencias</span><strong id="kpiAusencias">—</strong><small id="detalleAusencias">Sin asistencia registrada</small><small id="comparacionAusencias" class="kpi-comparacion">Comparando con ayer</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard violeta" data-resumen="incompletos" role="button" tabindex="0" aria-label="Ver jornadas incompletas"><div class="kpi-icono"><i class="bi bi-exclamation-diamond"></i></div><div><span>Incompletos</span><strong id="kpiIncompletos">—</strong><small id="detalleIncompletos">Falta alguna marcación</small><small id="comparacionIncompletos" class="kpi-comparacion">Comparando con ayer</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
+    <article class="kpi-dashboard celeste" data-resumen="extra" role="button" tabindex="0" aria-label="Ver horas extra pendientes"><div class="kpi-icono"><i class="bi bi-stopwatch"></i></div><div><span>Extra pendiente</span><strong id="kpiExtraPendiente">—</strong><small id="detalleExtraPendiente">Por revisar o aprobar</small><small id="comparacionExtra" class="kpi-comparacion">Comparando con ayer</small></div><i class="bi bi-chevron-right kpi-flecha"></i></article>
   </div>
 
   <div class="dashboard-grid-principal">
@@ -46,12 +55,12 @@
     <article class="dashboard-card resumen-mes-card">
       <header><div><span>MES EN CURSO</span><h3>Indicadores acumulados</h3></div><small id="periodoDashboard">—</small></header>
       <div class="indicadores-mes">
-        <div><span>Asistencias</span><strong id="mesAsistencias">0</strong><div class="barra-indicador"><i id="barraAsistencias"></i></div></div>
-        <div><span>Tardanzas</span><strong id="mesTardanzas">0</strong><div class="barra-indicador ambar"><i id="barraTardanzas"></i></div></div>
-        <div><span>Ausencias</span><strong id="mesAusencias">0</strong><div class="barra-indicador rojo"><i id="barraAusencias"></i></div></div>
-        <div><span>Horas trabajadas</span><strong id="mesHorasTrabajadas">0 h</strong></div>
-        <div><span>Horas extra generadas</span><strong id="mesHorasExtra">0 h</strong></div>
-        <div><span>Cumplimiento</span><strong id="mesCumplimiento">0%</strong></div>
+        <div><span>Asistencias</span><strong id="mesAsistencias">0</strong><small id="compMesAsistencias">—</small><div class="barra-indicador"><i id="barraAsistencias"></i></div></div>
+        <div><span>Tardanzas</span><strong id="mesTardanzas">0</strong><small id="compMesTardanzas">—</small><div class="barra-indicador ambar"><i id="barraTardanzas"></i></div></div>
+        <div><span>Ausencias</span><strong id="mesAusencias">0</strong><small id="compMesAusencias">—</small><div class="barra-indicador rojo"><i id="barraAusencias"></i></div></div>
+        <div><span>Horas trabajadas</span><strong id="mesHorasTrabajadas">0 h</strong><small id="compMesHoras">—</small></div>
+        <div><span>Horas extra generadas</span><strong id="mesHorasExtra">0 h</strong><small id="compMesExtra">—</small></div>
+        <div><span>Cumplimiento</span><strong id="mesCumplimiento">0%</strong><small id="compMesCumplimiento">—</small></div>
       </div>
     </article>
 
@@ -68,6 +77,11 @@
         <button data-ir="horarios" type="button"><i class="bi bi-calendar-week"></i><span><strong>Asignar horarios</strong><small>Programación del personal</small></span></button>
         <button data-ir="auditoria" type="button"><i class="bi bi-shield-check"></i><span><strong>Consultar auditoría</strong><small>Historial de cambios</small></span></button>
       </div>
+    </article>
+
+    <article class="dashboard-card configuracion-card">
+      <header><div><span>CALIDAD DE DATOS</span><h3>Configuración pendiente</h3></div><b id="contadorConfiguracion">0</b></header>
+      <div id="listaConfiguracionDashboard" class="lista-configuracion-dashboard"><p class="dashboard-vacio">La configuración está completa.</p></div>
     </article>
   </div>
 </section>
