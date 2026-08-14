@@ -30,6 +30,11 @@ import { iniciarEmpleados } from "./empleados.js?v=20260814-4";
 import { iniciarAsistencia } from "./asistencia.js?v=20260814-2";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260814-1";
 import { iniciarDashboard } from "./dashboard.js?v=20260814-4";
+import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
+import { iniciarManual, abrirManual } from "./manual.js?v=20260814-1";
+
+aplicarAparienciaGuardada();
+iniciarManual();
 
 const sidebar = document.querySelector(".sidebar");
 
@@ -248,7 +253,11 @@ onAuthStateChanged(auth, async(usuario)=>{
 
     iniciarMonitorAuditoriaGlobal(usuario);
 
-    cargarVista("dashboard");
+    const vistaInicial = obtenerAparienciaGuardada().vistaInicial || "dashboard";
+    botones.forEach((boton)=>boton.classList.toggle("activo",boton.dataset.vista===vistaInicial));
+    const botonInicial = document.querySelector(`.item[data-vista="${vistaInicial}"]`);
+    if(botonInicial) titulo.textContent = botonInicial.innerText;
+    cargarVista(vistaInicial);
 
 });
 
@@ -483,6 +492,12 @@ async function cargarVista(
 
             break;
 
+            case "configuracion":
+
+                iniciarConfiguracion({ abrirManual });
+
+            break;
+
         }
 
     }
@@ -507,9 +522,7 @@ async function cargarVista(
 
 
 
-// cargar dashboard al iniciar
-
-cargarVista("dashboard");
+document.getElementById("btnManualGlobal")?.addEventListener("click", abrirManual);
 
 
 async function cargarPerfilUsuario(usuario){
@@ -855,4 +868,3 @@ regla.innerHTML =
 }
 
 }
-
