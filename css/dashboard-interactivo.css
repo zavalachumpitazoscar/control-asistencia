@@ -1,6 +1,35 @@
 .dashboard-kpis {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+.selector-tamano-dashboard { display:grid; gap:5px; }
+.selector-tamano-dashboard>span { color:#64748b; font-size:8px; font-weight:800; text-transform:uppercase; }
+.selector-tamano-dashboard>div { display:flex; padding:3px; border:1px solid #dbe3ee; border-radius:9px; background:#f8fafc; }
+.selector-tamano-dashboard button { min-height:28px; padding:0 9px; border:0; border-radius:6px; background:transparent; color:#64748b; font-size:8px; font-weight:800; cursor:pointer; }
+.selector-tamano-dashboard button.activo { background:#fff; color:#2563eb; box-shadow:0 2px 7px rgba(15,23,42,.1); }
+@media (min-width:1025px) {
+  .dashboard-pagina[data-tamano="pequeno"] { zoom:.92; }
+  .dashboard-pagina[data-tamano="mediano"] { zoom:1; }
+  .dashboard-pagina[data-tamano="grande"] { zoom:1.12; }
+}
+@media (max-width:1024px) { .selector-tamano-dashboard { display:none; } }
+
+.listado-colaboradores-organizacion { display:grid; gap:12px; text-align:left; }
+.busqueda-colaboradores-organizacion { display:flex; align-items:center; gap:9px; padding:9px 11px; border:1px solid #dbe3ee; border-radius:10px; color:#64748b; }
+.busqueda-colaboradores-organizacion input { width:100%; border:0; outline:0; color:#334155; }
+.fila-colaborador-organizacion { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; padding:10px; border:1px solid #e2e8f0; border-radius:10px; }
+.fila-colaborador-organizacion>span { display:grid; place-items:center; width:36px; height:36px; border-radius:10px; background:#eff6ff; color:#2563eb; font-size:10px; font-weight:800; }
+.fila-colaborador-organizacion>div { display:grid; min-width:0; }
+.fila-colaborador-organizacion strong { overflow:hidden; color:#1e293b; font-size:11px; white-space:nowrap; text-overflow:ellipsis; }
+.fila-colaborador-organizacion small { margin-top:3px; color:#64748b; font-size:9px; }
+.fila-colaborador-organizacion em { padding:4px 7px; border-radius:999px; background:#f1f5f9; color:#64748b; font-size:8px; font-style:normal; font-weight:800; }
+.fila-colaborador-organizacion em.activo { background:#ecfdf5; color:#059669; }
+.sin-colaboradores-organizacion { padding:30px; color:#94a3b8; text-align:center; }
+.sin-colaboradores-organizacion i { font-size:26px; }
+.listado-colaboradores-organizacion footer { display:flex; align-items:center; justify-content:space-between; color:#64748b; font-size:9px; }
+.listado-colaboradores-organizacion footer>div { display:flex; align-items:center; gap:8px; }
+.listado-colaboradores-organizacion footer button { display:grid; place-items:center; width:30px; height:30px; border:1px solid #dbe3ee; border-radius:8px; background:#fff; color:#2563eb; cursor:pointer; }
+.listado-colaboradores-organizacion footer button:disabled { color:#cbd5e1; cursor:not-allowed; }
+@media(max-width:560px){ .fila-colaborador-organizacion { grid-template-columns:auto 1fr; } .fila-colaborador-organizacion em { grid-column:2; justify-self:start; } }
 .actualizacion-dashboard { display:inline-flex; align-items:center; gap:5px; margin-top:6px; color:#059669; font-size:9px; }
 .filtros-dashboard { display:grid; grid-template-columns:minmax(190px,1fr) repeat(3,minmax(120px,170px)) auto; align-items:end; gap:10px; margin-bottom:14px; padding:12px 14px; border:1px solid #e2e8f0; border-radius:12px; background:#fff; }
 .filtros-dashboard>div { display:flex; align-items:center; gap:9px; min-width:0; }
