@@ -11,6 +11,12 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+import {
+    normalizarDNI,
+    normalizarDNIParaComparacion
+}
+from "./utilidades-asistencia.js?v=20260817-4";
+
 
 import {
     auth,
@@ -94,6 +100,8 @@ export async function guardarMarcacionesImportadas(
 
         colaboradoresInactivos:[],
 
+        coincidenciasDniSinCeros:[],
+
         errores:[]
 
     };
@@ -103,7 +111,7 @@ export async function guardarMarcacionesImportadas(
         1. Obtener colaboradores de la empresa.
     */
 
-    const colaboradoresPorDNI =
+    const indiceColaboradores =
         await obtenerColaboradoresPorDNI(
             empresaId
         );
@@ -120,10 +128,14 @@ export async function guardarMarcacionesImportadas(
     marcaciones.forEach(
         marcacion=>{
 
-            const colaborador =
-                colaboradoresPorDNI.get(
+            const coincidencia =
+                buscarColaboradorPorDNI(
+                    indiceColaboradores,
                     marcacion.dni
                 );
+
+            const colaborador =
+                coincidencia?.colaborador;
 
 
             if(!colaborador){
@@ -146,6 +158,19 @@ export async function guardarMarcacionesImportadas(
 
 
                 return;
+
+            }
+
+            if(coincidencia.sinCerosIniciales){
+
+                resultado.coincidenciasDniSinCeros.push({
+                    fila:marcacion.fila,
+                    dniReloj:marcacion.dni,
+                    dniColaborador:colaborador.dni,
+                    colaboradorId:colaborador.id,
+                    colaboradorNombre:colaborador.nombreCompleto,
+                    fechaHoraTexto:marcacion.fechaHoraTexto
+                });
 
             }
 
@@ -225,6 +250,9 @@ export async function guardarMarcacionesImportadas(
                     colaborador.nombreCompleto,
 
                 colaboradorDocumento:
+                    colaborador.dni,
+
+                documentoReloj:
                     marcacion.dni,
 
                 sucursalId:
@@ -352,8 +380,9 @@ async function obtenerColaboradoresPorDNI(
     empresaId
 ){
 
-    const colaboradoresPorDNI =
-        new Map();
+    const exactos = new Map();
+
+    const normalizados = new Map();
 
 
     const consulta =
@@ -434,9 +463,7 @@ async function obtenerColaboradoresPorDNI(
                 "Colaborador";
 
 
-            colaboradoresPorDNI.set(
-                dni,
-                {
+            const colaborador = {
 
                     id:
                         documento.id,
@@ -464,14 +491,70 @@ async function obtenerColaboradoresPorDNI(
                         datos.subareaId ||
                         null
 
-                }
-            );
+                };
+
+            exactos.set(dni, colaborador);
+
+            const claveComparacion =
+                normalizarDNIParaComparacion(dni);
+
+            if(claveComparacion && !normalizados.has(claveComparacion)){
+                normalizados.set(claveComparacion, colaborador);
+            }
 
         }
     );
 
 
-    return colaboradoresPorDNI;
+    return { exactos, normalizados };
+
+}
+
+
+function buscarColaboradorPorDNI(indice, dniReloj){
+
+    const dni = normalizarDNI(dniReloj);
+
+    const exacto = indice.exactos.get(dni);
+
+    if(exacto){
+        return { colaborador:exacto, sinCerosIniciales:false };
+    }
+
+    const clave = normalizarDNIParaComparacion(dni);
+
+    const normalizado = clave
+        ? indice.normalizados.get(clave)
+        : null;
+
+    return normalizado
+        ? { colaborador:normalizado, sinCerosIniciales:normalizado.dni !== dni }
+        : null;
+
+}
+
+
+export async function obtenerCoincidenciasDNIImportacion(dnis){
+
+    const empresaId = sessionStorage.getItem("empresaId");
+
+    if(!empresaId){
+        throw new Error("No se encontró la empresa activa.");
+    }
+
+    const indice = await obtenerColaboradoresPorDNI(empresaId);
+
+    return dnis.map(dni=>{
+        const coincidencia = buscarColaboradorPorDNI(indice, dni);
+        if(!coincidencia) return null;
+        return {
+            dniReloj:normalizarDNI(dni),
+            dniColaborador:coincidencia.colaborador.dni,
+            colaboradorId:coincidencia.colaborador.id,
+            colaboradorNombre:coincidencia.colaborador.nombreCompleto,
+            sinCerosIniciales:coincidencia.sinCerosIniciales
+        };
+    });
 
 }
 
@@ -605,6 +688,10 @@ async function guardarMarcacionesPorLotes(
                         colaboradorDocumento:
                             marcacion.colaboradorDocumento,
 
+                        documentoReloj:
+                            marcacion.documentoReloj ||
+                            marcacion.colaboradorDocumento,
+
                         fecha:
                             marcacion.fecha,
 
@@ -643,7 +730,9 @@ async function guardarMarcacionesPorLotes(
                             "VALIDA",
 
                         observaciones:
-                            null,
+                            marcacion.documentoReloj !== marcacion.colaboradorDocumento
+                            ? `DNI del reloj ${marcacion.documentoReloj} asociado al DNI registrado ${marcacion.colaboradorDocumento}.`
+                            : null,
 
                         archivoFila:
                             marcacion.fila,
@@ -960,6 +1049,9 @@ function completarResumen(
 
         cantidadInactivos:
             resultado.colaboradoresInactivos.length,
+
+        cantidadCoincidenciasDniSinCeros:
+            resultado.coincidenciasDniSinCeros.length,
 
         cantidadErrores:
             resultado.errores.length
