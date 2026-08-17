@@ -7,7 +7,7 @@ from "../firebase-config.js";
 import {
     clasificarMarcaciones
 }
-from "../asistencia/clasificar-marcaciones.js";
+from "../asistencia/clasificar-marcaciones.js?v=20260817-1";
 
 
 import {
@@ -6109,4 +6109,3 @@ async function mostrarExito(
     });
 
 }
-
