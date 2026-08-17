@@ -50,7 +50,7 @@ export function iniciarDashboard() {
 function iniciarSelectorTamanoDashboard(opcionesEvento){
   const pagina = document.querySelector(".dashboard-pagina");
   if(!pagina) return;
-  const permitidos = ["pequeno", "mediano", "grande"];
+  const permitidos = ["pequeno", "mediano", "grande", "muy-grande"];
   const guardado = localStorage.getItem("tamanoDashboard");
   const aplicar = (tamano) => {
     const valor = permitidos.includes(tamano) ? tamano : "mediano";
@@ -194,7 +194,7 @@ function abrirResumenDashboard(tipo) {
   asignar("subtituloResumenDashboard", subtitulo);
   asignar("cantidadResumenDashboard", `${filas.length} ${filas.length === 1 ? "registro" : "registros"}`);
   document.getElementById("irDetalleResumenDashboard").textContent = destino === "colaboradores" ? "Gestionar colaboradores" : destino === "horarios" ? "Ir a Horarios" : "Ir a Asistencia";
-  document.getElementById("contenidoResumenDashboard").innerHTML = filas.length ? filas.map((f) => `<div class="fila-resumen-dashboard"><div class="avatar-resumen">${html(iniciales(f.nombre))}</div><span><strong>${html(f.nombre)}</strong><small>${html(f.documento)} · ${html(f.detalle)}</small></span><em>${f.accion?`<button class="accion-configuracion-dashboard" data-accion-configuracion="${html(f.accion)}" data-colaborador="${html(f.id||"")}" data-nombre="${html(f.nombre)}" type="button">${html(f.valor)}</button>`:`<span class="estado-chip-dashboard ${html(f.tono)}">${html(f.valor)}</span>`}</em></div>`).join("") : '<div class="modal-resumen-vacio"><i class="bi bi-check-circle"></i>No existen personas en este indicador.</div>';
+  document.getElementById("contenidoResumenDashboard").innerHTML = filas.length ? filas.map((f) => `<div class="fila-resumen-dashboard"><div class="avatar-resumen">${html(iniciales(f.nombre))}</div><span><strong>${html(f.nombre)}</strong><small>${html(f.documento)} · ${html(f.detalle)}</small></span><em>${f.accion?`<button class="accion-configuracion-dashboard" data-accion-configuracion="${html(f.accion)}" data-colaborador="${html(f.id||"")}" data-nombre="${html(f.busqueda||f.nombre)}" type="button">${html(f.valor)}</button>`:`<span class="estado-chip-dashboard ${html(f.tono)}">${html(f.valor)}</span>`}</em></div>`).join("") : '<div class="modal-resumen-vacio"><i class="bi bi-check-circle"></i>No existen personas en este indicador.</div>';
   const modal = document.getElementById("modalResumenDashboard");
   modal.hidden = false; modal.inert = false; modal.removeAttribute("inert"); modal.setAttribute("aria-hidden", "false");
   document.getElementById("cerrarResumenDashboard").focus();
@@ -313,7 +313,7 @@ function renderizarConfiguracion(activos, registros, datos, fecha) {
   const limite=new Date(`${fecha}T00:00:00`);limite.setDate(limite.getDate()+7);
   const porVencer=(datos.asignacionesHorarios||[]).filter((a)=>{const f=a.fechaFin||a.hasta||a.fin;if(!f)return false;const d=new Date(`${String(f).slice(0,10)}T00:00:00`);return d>=new Date(`${fecha}T00:00:00`)&&d<=limite;});
   detallesDashboard.sinHorario=sinHorario.map((r)=>{const colaborador=colaboradoresPorId.get(r.colaboradorId);return {id:r.colaboradorId,nombre:colaborador?nombreColaborador(colaborador):nombreApellidoPrimero(r.nombre),documento:r.documento||"Sin documento",detalle:`Sin programación el ${fechaVisible(fecha)}`,valor:"Asignar horario",accion:"ASIGNAR_HORARIO",tono:"ambar"};});
-  detallesDashboard.sinOrganizacion=sinOrganizacion.map((c)=>({id:c.id,nombre:nombreColaborador(c),documento:documentoColaborador(c),detalle:[!valorOrg(c,"sucursal")?"Falta sucursal":"",!valorOrg(c,"area")?"Falta área":""].filter(Boolean).join(" · "),valor:"Completar ubicación",accion:"COMPLETAR_UBICACION",tono:"ambar"}));
+  detallesDashboard.sinOrganizacion=sinOrganizacion.map((c)=>({id:c.id,nombre:nombreColaborador(c),busqueda:nombreColaboradorNombresPrimero(c),documento:documentoColaborador(c),detalle:[!valorOrg(c,"sucursal")?"Falta sucursal":"",!valorOrg(c,"area")?"Falta área":""].filter(Boolean).join(" · "),valor:"Completar ubicación",accion:"COMPLETAR_UBICACION",tono:"ambar"}));
   if(sinHorario.length)avisos.push({icono:"bi-calendar-x",titulo:`${sinHorario.length} sin horario para la fecha`,detalle:"Ver quiénes son y asignarles un horario.",config:"sinHorario"});
   if(sinOrganizacion.length)avisos.push({icono:"bi-diagram-3",titulo:`${sinOrganizacion.length} sin ubicación completa`,detalle:"Ver quiénes son y completar sus datos.",config:"sinOrganizacion"});
   if(feriadosPendientes.length)avisos.push({icono:"bi-calendar-event",titulo:`${feriadosPendientes.length} feriados por configurar`,detalle:"Define el tratamiento de la jornada.",destino:"horarios"});
@@ -395,6 +395,7 @@ function duracion(v){const n=Math.max(0,Math.round(Number(v)||0));return `${Math
 function barra(id,p){const e=document.getElementById(id);if(e)e.style.width=`${Math.min(100,p)}%`;}
 function asignar(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
 function nombreColaborador(c){return [c.datosPersonales?.apellidos||c.apellidos||c.apellido,c.datosPersonales?.nombres||c.nombres||c.nombre].filter(Boolean).join(" ")||c.nombreCompleto||c.nombre||"Colaborador";}
+function nombreColaboradorNombresPrimero(c){return [c.datosPersonales?.nombres||c.nombres||c.nombre,c.datosPersonales?.apellidos||c.apellidos||c.apellido].filter(Boolean).join(" ")||c.nombreCompleto||c.nombre||"Colaborador";}
 function nombreApellidoPrimero(nombre){const partes=String(nombre||"").trim().split(/\s+/);return partes.length===2?`${partes[1]} ${partes[0]}`:String(nombre||"Colaborador");}
 function iniciales(n){return String(n).trim().split(/\s+/).slice(0,2).map((x)=>x[0]||"").join("").toUpperCase();}
 function documentoColaborador(c){return c.documento?.numero||c.numeroDocumento||c.dni||"Sin documento";}
