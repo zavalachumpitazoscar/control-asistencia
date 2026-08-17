@@ -15,6 +15,8 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+import { activarListadoColaboradores } from "./colaboradores-organizacion.js";
+
 
 
 export function iniciarSubareas(){
@@ -710,29 +712,10 @@ export function iniciarSubareas(){
 
 
 
-            //=========================
-            // VER COLABORADORES
-            // (POR IMPLEMENTAR)
-            //=========================
-
-            document
-            .querySelectorAll(".btnColaboradoresSubarea")
-            .forEach(boton=>{
-
-                boton.onclick = ()=>{
-
-                    Swal.fire({
-
-                        icon:"info",
-
-                        title:"Próximamente",
-
-                        text:"Aquí se mostrarán los colaboradores de la subárea."
-
-                    });
-
-                };
-
+            activarListadoColaboradores({
+                empresaId,
+                selector: ".btnColaboradoresSubarea",
+                tipo: "subarea"
             });
 
         }
