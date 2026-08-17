@@ -4,20 +4,80 @@ service cloud.firestore {
     function autenticado() { return request.auth != null; }
     function perfil() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
     function administraEmpresa(empresaId) {
-      return autenticado() && perfil().empresaId == empresaId && perfil().rol in ['ADMINISTRADOR', 'PROPIETARIO', 'GERENTE'];
+      return autenticado()
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && perfil().empresaId == empresaId
+        && perfil().rol in ['ADMINISTRADOR', 'PROPIETARIO', 'GERENTE'];
+    }
+    function perfilMovil() {
+      return get(/databases/$(database)/documents/usuariosMoviles/$(request.auth.uid)).data;
+    }
+    function esMovilEmpresa(empresaId) {
+      return autenticado()
+        && exists(/databases/$(database)/documents/usuariosMoviles/$(request.auth.uid))
+        && perfilMovil().empresaId == empresaId;
     }
 
     match /usuarios/{uid} {
       allow read: if autenticado() && request.auth.uid == uid;
+      allow create: if autenticado() && request.auth.uid == uid;
       allow update: if autenticado() && request.auth.uid == uid
         && request.resource.data.empresaId == resource.data.empresaId
         && request.resource.data.rol == resource.data.rol;
-      allow create: if autenticado() && request.auth.uid == uid;
     }
 
     match /usuariosMoviles/{uid} {
       allow read: if autenticado() && request.auth.uid == uid;
-      allow write: if false;
+      allow create: if autenticado() && request.auth.uid == uid
+        && request.resource.data.correo == request.auth.token.email
+        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.correo == request.auth.token.email
+        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.empresaId == request.resource.data.empresaId;
+      allow update: if false;
+      allow delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /accesosMoviles/{colaboradorId} {
+      allow read: if administraEmpresa(resource.data.empresaId)
+        || (autenticado() && resource.data.correo == request.auth.token.email);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update: if administraEmpresa(resource.data.empresaId)
+        || (autenticado()
+          && resource.data.correo == request.auth.token.email
+          && request.resource.data.correo == resource.data.correo
+          && request.resource.data.empresaId == resource.data.empresaId
+          && request.resource.data.colaboradorId == resource.data.colaboradorId
+          && request.resource.data.usuarioId == request.auth.uid);
+      allow delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /solicitudesDispositivoMovil/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId)
+        || (autenticado() && resource.data.usuarioId == request.auth.uid);
+      allow create: if autenticado()
+        && request.resource.data.usuarioId == request.auth.uid
+        && esMovilEmpresa(request.resource.data.empresaId)
+        && request.resource.data.colaboradorId == perfilMovil().colaboradorId;
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /marcaciones/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId)
+        || (esMovilEmpresa(resource.data.empresaId)
+          && resource.data.colaboradorId == perfilMovil().colaboradorId);
+      allow create: if esMovilEmpresa(request.resource.data.empresaId)
+        && request.resource.data.colaboradorId == perfilMovil().colaboradorId
+        && request.resource.data.usuarioId == request.auth.uid
+        && request.resource.data.origen == 'MOVIL'
+        && request.resource.data.fechaHora == request.time
+        && request.resource.data.creadoEn == request.time
+        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.dispositivoAutorizadoId == request.resource.data.dispositivoId;
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /sucursales/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId) || esMovilEmpresa(resource.data.empresaId);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
     }
 
     match /companias/{empresaId} {
@@ -31,7 +91,8 @@ service cloud.firestore {
     match /{coleccion}/{id} {
       allow read: if administraEmpresa(resource.data.empresaId);
       allow create: if administraEmpresa(request.resource.data.empresaId);
-      allow update: if administraEmpresa(resource.data.empresaId) && request.resource.data.empresaId == resource.data.empresaId;
+      allow update: if administraEmpresa(resource.data.empresaId)
+        && request.resource.data.empresaId == resource.data.empresaId;
       allow delete: if administraEmpresa(resource.data.empresaId);
     }
   }
