@@ -26,10 +26,10 @@ from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import { iniciarCompañia } from "./compañia.js?v=20260817-1";
-import { iniciarEmpleados } from "./empleados.js?v=20260814-4";
+import { iniciarEmpleados } from "./empleados.js?v=20260817-3";
 import { iniciarAsistencia } from "./asistencia.js?v=20260814-3";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260814-2";
-import { iniciarDashboard } from "./dashboard.js?v=20260817-2";
+import { iniciarDashboard } from "./dashboard.js?v=20260817-3";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260814-3";
 
@@ -868,4 +868,3 @@ regla.innerHTML =
 }
 
 }
-
