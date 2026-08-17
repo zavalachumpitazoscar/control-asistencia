@@ -43,6 +43,26 @@ export function normalizarDNI(
 
 }
 
+/*=====================================================
+NORMALIZAR DNI PARA ASOCIAR DATOS DEL RELOJ
+
+No modifica el DNI guardado. Solo crea una clave de
+comparación sin ceros iniciales para reconocer códigos
+recortados por algunos relojes biométricos.
+=====================================================*/
+
+export function normalizarDNIParaComparacion(valor){
+
+    const dni = normalizarDNI(valor);
+
+    if(!/^\d+$/.test(dni)){
+        return "";
+    }
+
+    return dni.replace(/^0+(?=\d)/, "");
+
+}
+
 
 
 /*=====================================================
