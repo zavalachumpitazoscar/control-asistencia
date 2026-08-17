@@ -17,6 +17,8 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+import { activarListadoColaboradores } from "./colaboradores-organizacion.js";
+
 
 
 export function iniciarAreas(){
@@ -875,8 +877,15 @@ icon:"error",
 
 title:"No fue posible actualizar el estado"
 });
+
 }
 };
+});
+
+activarListadoColaboradores({
+empresaId,
+selector: ".btnColaboradoresAreas",
+tipo: "area"
 });
 }
 );
