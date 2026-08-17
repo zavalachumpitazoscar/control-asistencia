@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function autenticado() { return request.auth != null; }
+    function perfil() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
+    function administraEmpresa(empresaId) {
+      return autenticado() && perfil().empresaId == empresaId && perfil().rol in ['ADMINISTRADOR', 'PROPIETARIO', 'GERENTE'];
+    }
+
+    match /usuarios/{uid} {
+      allow read: if autenticado() && request.auth.uid == uid;
+      allow update: if autenticado() && request.auth.uid == uid
+        && request.resource.data.empresaId == resource.data.empresaId
+        && request.resource.data.rol == resource.data.rol;
+      allow create: if autenticado() && request.auth.uid == uid;
+    }
+
+    match /usuariosMoviles/{uid} {
+      allow read: if autenticado() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /companias/{empresaId} {
+      allow create: if autenticado() && request.resource.data.empresaId == empresaId;
+      allow read, update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /mail/{id} { allow read, write: if false; }
+    match /desafiosMoviles/{id} { allow read, write: if false; }
+
+    match /{coleccion}/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update: if administraEmpresa(resource.data.empresaId) && request.resource.data.empresaId == resource.data.empresaId;
+      allow delete: if administraEmpresa(resource.data.empresaId);
+    }
+  }
+}
