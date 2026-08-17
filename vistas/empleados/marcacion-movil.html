@@ -1,0 +1,23 @@
+<section class="admin-movil">
+  <header class="admin-movil-cabecera">
+    <div><span>ACCESO PARA COLABORADORES</span><h2>Marcación móvil</h2><p>Invita colaboradores, autoriza un dispositivo y controla sus accesos.</p></div>
+    <a href="movil.html" target="_blank" rel="noopener"><i class="bi bi-phone"></i> Abrir portal móvil</a>
+  </header>
+
+  <div class="admin-movil-resumen">
+    <article><i class="bi bi-envelope-plus"></i><span>Sin habilitar<strong id="movilSinHabilitar">0</strong></span></article>
+    <article><i class="bi bi-phone-vibrate"></i><span>Por autorizar<strong id="movilPendientes">0</strong></span></article>
+    <article><i class="bi bi-shield-check"></i><span>Autorizados<strong id="movilAutorizados">0</strong></span></article>
+    <article><i class="bi bi-exclamation-triangle"></i><span>Observaciones<strong id="movilObservaciones">0</strong></span></article>
+  </div>
+
+  <article class="admin-movil-panel">
+    <header><div><span>COLABORADORES</span><h3>Accesos móviles</h3></div><input id="buscarAccesoMovil" type="search" placeholder="Buscar nombre, DNI o correo"></header>
+    <div id="listaAccesosMoviles" class="lista-accesos-moviles"><p class="movil-vacio">Cargando colaboradores…</p></div>
+  </article>
+
+  <article class="admin-movil-panel">
+    <header><div><span>GEOLOCALIZACIÓN</span><h3>Perímetros por sucursal</h3><p>Define el punto autorizado y la distancia máxima para marcar.</p></div></header>
+    <div id="listaGeocercasMoviles" class="lista-geocercas-moviles"><p class="movil-vacio">Cargando sucursales…</p></div>
+  </article>
+</section>
