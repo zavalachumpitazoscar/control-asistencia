@@ -1,11 +1,11 @@
 import { iniciarNavegacionAsistencia } from "./asistencia/navegacion-asistencia.js";
 import { iniciarFechaAsistencia } from "./asistencia/fecha-asistencia.js";
 import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js?v=20260817-5";
-import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260814-2";
+import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260817-3";
 import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js";
-import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260812-5";
+import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260817-1";
 import { iniciarEditarDiaAsistencia } from "./asistencia/editar-dia-asistencia.js?v=20260814-1";
-import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-asistencia.js";
+import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-asistencia.js?v=20260817-1";
 import { iniciarAjusteRefrigerioAsistencia } from "./asistencia/ajuste-refrigerio-asistencia.js";
 import { iniciarAprobacionHorasExtraAsistencia } from "./asistencia/aprobar-horas-extra-asistencia.js";
 import { iniciarOperacionesMensualesAsistencia } from "./asistencia/operaciones-mensuales-asistencia.js?v=20260812-4";
