@@ -9,7 +9,8 @@
 @media (min-width:1025px) {
   .dashboard-pagina[data-tamano="pequeno"] { zoom:.92; }
   .dashboard-pagina[data-tamano="mediano"] { zoom:1; }
-  .dashboard-pagina[data-tamano="grande"] { zoom:1.12; }
+  .dashboard-pagina[data-tamano="grande"] { zoom:1.16; }
+  .dashboard-pagina[data-tamano="muy-grande"] { zoom:1.3; }
 }
 @media (max-width:1024px) { .selector-tamano-dashboard { display:none; } }
 
