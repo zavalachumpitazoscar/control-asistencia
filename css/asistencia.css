@@ -1990,6 +1990,35 @@ IMPORTACIÓN DE MARCACIONES
   color: #15803d;
 }
 
+.importacion-estado.advertencia {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.importacion-dni-asociado {
+  display: block;
+  margin-top: 3px;
+  color: #b45309;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.importacion-advertencia-dni {
+  display: flex;
+  gap: 11px;
+  padding: 12px 14px;
+  border: 1px solid #fcd34d;
+  border-radius: 11px;
+  background: #fffbeb;
+  color: #92400e;
+  text-align: left;
+}
+
+.importacion-advertencia-dni > i { font-size: 20px; }
+.importacion-advertencia-dni strong { font-size: 11px; }
+.importacion-advertencia-dni p { margin: 3px 0 7px; color: #a16207; font-size: 9px; }
+.importacion-advertencia-dni ul { margin: 0; padding-left: 17px; font-size: 9px; }
+
 .importacion-mas-registros {
   margin: 0;
 
@@ -4290,4 +4319,3 @@ Corrige la regla antigua de botones cuadrados.
     max-width: 120px;
   }
 }
-
