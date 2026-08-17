@@ -20,6 +20,7 @@ export function iniciarDashboard() {
   if (!fecha) return;
   fecha.value = fechaLocal(new Date());
   actualizarSaludo();
+  iniciarSelectorTamanoDashboard(opcionesEvento);
   document.getElementById("actualizarDashboard")?.addEventListener("click", cargarDashboard, opcionesEvento);
   fecha.addEventListener("change", cargarDashboard, opcionesEvento);
   ["filtroSucursalDashboard", "filtroAreaDashboard", "filtroSubareaDashboard"].forEach((id) => document.getElementById(id)?.addEventListener("change", renderizarDashboardFiltrado, opcionesEvento));
@@ -44,6 +45,25 @@ export function iniciarDashboard() {
   document.getElementById("irDetalleResumenDashboard")?.addEventListener("click", () => { cerrarResumenDashboard(); navegarDashboard(destinoModalDashboard); }, opcionesEvento);
   document.addEventListener("keydown", cerrarModalConEscape, opcionesEvento);
   cargarDashboard();
+}
+
+function iniciarSelectorTamanoDashboard(opcionesEvento){
+  const pagina = document.querySelector(".dashboard-pagina");
+  if(!pagina) return;
+  const permitidos = ["pequeno", "mediano", "grande"];
+  const guardado = localStorage.getItem("tamanoDashboard");
+  const aplicar = (tamano) => {
+    const valor = permitidos.includes(tamano) ? tamano : "mediano";
+    pagina.dataset.tamano = valor;
+    document.querySelectorAll("[data-tamano-dashboard]").forEach(boton => {
+      const activo = boton.dataset.tamanoDashboard === valor;
+      boton.classList.toggle("activo", activo);
+      boton.setAttribute("aria-pressed", String(activo));
+    });
+    localStorage.setItem("tamanoDashboard", valor);
+  };
+  document.querySelectorAll("[data-tamano-dashboard]").forEach(boton => boton.addEventListener("click", () => aplicar(boton.dataset.tamanoDashboard), opcionesEvento));
+  aplicar(guardado || "mediano");
 }
 
 async function cargarDashboard() {
