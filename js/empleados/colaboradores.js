@@ -1347,6 +1347,11 @@ colaboradores.filter(col=>{
         `${nombres} ${apellidos}`
     );
 
+    const nombreCompletoApellidoPrimero =
+    normalizar(
+        `${apellidos} ${nombres}`
+    );
+
 
     const numeroDocumento =
     normalizar(
@@ -1386,8 +1391,16 @@ colaboradores.filter(col=>{
 
     const coincideBusqueda =
 
+        (
         nombreCompleto.includes(
             normalizar(texto)
+        )
+
+        ||
+
+        nombreCompletoApellidoPrimero.includes(
+            normalizar(texto)
+        )
         )
 
         ||
@@ -2266,6 +2279,10 @@ if(paginaSiguiente){
             `${nombres} ${apellidos}`
             .toLowerCase();
 
+            const nombreCompletoApellidoPrimero =
+            `${apellidos} ${nombres}`
+            .toLowerCase();
+
 
             const numeroDocumento =
             (
@@ -2278,8 +2295,16 @@ if(paginaSiguiente){
 
             return (
 
+                (
                 nombreCompleto.includes(
                     texto
+                )
+
+                ||
+
+                nombreCompletoApellidoPrimero.includes(
+                    texto
+                )
                 )
 
                 ||
@@ -3389,5 +3414,4 @@ iniciarEliminacionMasiva({
     
     
 }
-
 
