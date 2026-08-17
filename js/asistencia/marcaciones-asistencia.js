@@ -133,10 +133,11 @@ function renderizarMarcaciones() {
                 </td>
                 <td>${escaparHTML(marcacion.colaboradorDocumento)}</td>
                 <td>${escaparHTML(formatearFecha(marcacion.fecha))}</td>
-                <td><span class="marcacion-hora">${escaparHTML(formatearHora(marcacion.hora))}</span></td>
+                <td><span class="marcacion-hora">${escaparHTML(formatearHoraMarcacion(marcacion))}</span></td>
                 <td><span class="marcacion-tipo">${escaparHTML(tipo)}</span></td>
                 <td><span class="marcacion-origen">${escaparHTML(origen)}</span></td>
                 <td><span class="marcacion-estado ${claseEstado}">${escaparHTML(formatearEtiqueta(estado))}</span></td>
+                <td>${renderizarUbicacion(marcacion)}</td>
                 <td><span class="asistencia-estado-desarrollo">Solo lectura</span></td>
             </tr>
         `;
@@ -149,7 +150,7 @@ function renderizarMarcaciones() {
 function mostrarMensaje(mensaje) {
   cuerpoMarcaciones.innerHTML = `
         <tr>
-            <td colspan="8" class="asistencia-tabla-vacia">
+            <td colspan="9" class="asistencia-tabla-vacia">
                 ${escaparHTML(mensaje)}
             </td>
         </tr>
@@ -193,8 +194,26 @@ function formatearFecha(fecha) {
   return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : "—";
 }
 
-function formatearHora(hora) {
-  return String(hora || "—").slice(0, 5);
+function formatearHoraMarcacion(marcacion) {
+  const valor = marcacion?.fechaHora;
+  const fecha = valor?.toDate?.() || (valor instanceof Date ? valor : null);
+  if (fecha && !Number.isNaN(fecha.getTime())) {
+    return fecha.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "America/Lima" });
+  }
+  const texto = marcacion?.hora || marcacion?.horaMarcacion || marcacion?.fechaHoraISO;
+  const coincidencia = String(texto || "").match(/(?:T|\s)?(\d{2}:\d{2}(?::\d{2})?)/);
+  return coincidencia?.[1] || "—";
+}
+
+function renderizarUbicacion(marcacion) {
+  const ubicacion = marcacion?.ubicacion;
+  const latitud = Number(ubicacion?.latitud);
+  const longitud = Number(ubicacion?.longitud);
+  if (!Number.isFinite(latitud) || !Number.isFinite(longitud)) return "—";
+  const precision = Number(ubicacion?.precisionMetros);
+  const detalle = Number.isFinite(precision) ? `Precisión ${Math.round(precision)} m` : "Ver coordenadas";
+  const enlace = `https://www.google.com/maps?q=${encodeURIComponent(`${latitud},${longitud}`)}`;
+  return `<a class="marcacion-ubicacion" href="${enlace}" target="_blank" rel="noopener noreferrer" title="${escaparHTML(`${latitud}, ${longitud}`)}"><i class="bi bi-geo-alt-fill"></i><span>Ver mapa<small>${escaparHTML(detalle)}</small></span></a>`;
 }
 
 function formatearEtiqueta(valor) {
