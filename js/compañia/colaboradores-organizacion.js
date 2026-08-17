@@ -107,3 +107,4 @@ export async function activarListadoColaboradores({ empresaId, selector, tipo })
         botones.forEach(boton => { boton.disabled = false; boton.innerHTML = '<i class="bi bi-exclamation-circle"></i> Ver colaboradores'; });
     }
 }
+
