@@ -7,7 +7,7 @@ import {
 
 import { db } from "../firebase-config.js";
 
-import { clasificarMarcaciones } from "./clasificar-marcaciones.js";
+import { clasificarMarcaciones } from "./clasificar-marcaciones.js?v=20260817-1";
 
 import { calcularJornadaAsistencia } from "./calcular-jornada-asistencia.js";
 
@@ -4598,5 +4598,3 @@ function escaparHTML(valor) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
-
