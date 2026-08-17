@@ -20,7 +20,7 @@ from "../firebase-config.js";
 import {
     interpretarHoraSegunHorarios
 }
-from "./clasificar-marcaciones.js";
+from "./clasificar-marcaciones.js?v=20260817-1";
 
 
 /*=====================================================
