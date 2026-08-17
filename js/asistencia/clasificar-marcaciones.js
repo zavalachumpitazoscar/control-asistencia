@@ -463,6 +463,10 @@ if(!finRefrigerio){
         marcaciones.find(
             marcacion=>
 
+                inicioRefrigerio
+
+                &&
+
                 !marcacion.tipoInterpretado
 
                 &&
@@ -515,24 +519,6 @@ if(automaticas.fin){
     );
 
 }
-
-        if(automaticas.inicio){
-
-            marcaciones.push(
-                automaticas.inicio
-            );
-
-        }
-
-
-        if(automaticas.fin){
-
-            marcaciones.push(
-                automaticas.fin
-            );
-
-        }
-
 
         marcaciones.sort(
             (
@@ -639,24 +625,6 @@ if(automaticas.fin){
     );
 
 }
-
-        if(automaticas.inicio){
-
-            marcaciones.push(
-                automaticas.inicio
-            );
-
-        }
-
-
-        if(automaticas.fin){
-
-            marcaciones.push(
-                automaticas.fin
-            );
-
-        }
-
 
         marcaciones.sort(
             (
@@ -1364,3 +1332,4 @@ function convertirMinutosAHora(
     }:00`;
 
 }
+
