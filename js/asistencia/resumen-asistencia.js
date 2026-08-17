@@ -3881,7 +3881,14 @@ function obtenerMilisegundosMarcacion(marcacion) {
 }
 
 function obtenerHoraMarcacion(marcacion) {
-  return String(marcacion?.hora || "").slice(0, 5);
+  const valor = marcacion?.fechaHora;
+  const fecha = valor?.toDate?.() || (valor instanceof Date ? valor : null);
+  if (fecha && !Number.isNaN(fecha.getTime())) {
+    return fecha.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "America/Lima" });
+  }
+  const texto = marcacion?.hora || marcacion?.horaMarcacion || marcacion?.fechaHoraISO;
+  const coincidencia = String(texto || "").match(/(?:T|\s)?(\d{2}:\d{2})/);
+  return coincidencia?.[1] || "";
 }
 
 function formatearMinutosTrabajados(registro) {
