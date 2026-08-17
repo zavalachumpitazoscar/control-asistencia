@@ -1,19 +1,21 @@
 import {
     normalizarTexto,
     normalizarDNI,
+    normalizarDNIParaComparacion,
     validarDNI,
     interpretarMarcacion,
     formatearFechaHora,
     convertirFechaAISO,
     convertirFechaHoraAISO
 }
-from "./utilidades-asistencia.js";
+from "./utilidades-asistencia.js?v=20260817-4";
 
 
 import {
-    guardarMarcacionesImportadas
+    guardarMarcacionesImportadas,
+    obtenerCoincidenciasDNIImportacion
 }
-from "./guardar-marcaciones.js";
+from "./guardar-marcaciones.js?v=20260817-4";
 
 
 
@@ -203,6 +205,8 @@ async function procesarArchivoSeleccionado(){
                 filas
             );
 
+        await asociarCoincidenciasDNIConColaboradores(resultado);
+
 
         marcacionesProcesadas =
             resultado.validas;
@@ -388,10 +392,10 @@ function validarFilasMarcaciones(
                 );
 
             }
-            else if(!validarDNI(dni)){
+            else if(!/^\d{1,8}$/.test(dni)){
 
                 errores.push(
-                    "El DNI debe contener 8 dígitos"
+                    "El DNI debe contener entre 1 y 8 dígitos"
                 );
 
             }
@@ -443,7 +447,7 @@ function validarFilasMarcaciones(
 
 
             const clave =
-                `${dni}_${fechaHoraISO}`;
+                `${normalizarDNIParaComparacion(dni)}_${fechaHoraISO}`;
 
 
             if(
@@ -521,6 +525,32 @@ function validarFilasMarcaciones(
         duplicadas
 
     };
+
+}
+
+
+async function asociarCoincidenciasDNIConColaboradores(resultado){
+
+    const coincidencias =
+        await obtenerCoincidenciasDNIImportacion(
+            resultado.validas.map(marcacion=>marcacion.dni)
+        );
+
+    resultado.validas.forEach((marcacion, indice)=>{
+        const coincidencia = coincidencias[indice];
+        if(coincidencia?.sinCerosIniciales){
+            marcacion.coincidenciaDni = coincidencia;
+            marcacion.estadoValidacion = "RECONOCIDA_SIN_CEROS";
+        }
+    });
+
+    const unicas = new Map();
+
+    coincidencias.filter(item=>item?.sinCerosIniciales).forEach(item=>{
+        unicas.set(`${item.dniReloj}_${item.dniColaborador}`, item);
+    });
+
+    resultado.coincidenciasDniSinCeros = [...unicas.values()];
 
 }
 
@@ -625,9 +655,8 @@ function mostrarVistaPreviaImportacion(
                     </td>
 
                     <td>
-                        ${escaparHTML(
-                            marcacion.dni
-                        )}
+                        ${escaparHTML(marcacion.dni)}
+                        ${marcacion.coincidenciaDni ? `<small class="importacion-dni-asociado">DNI registrado: ${escaparHTML(marcacion.coincidenciaDni.dniColaborador)}</small>` : ""}
                     </td>
 
                     <td>
@@ -637,8 +666,8 @@ function mostrarVistaPreviaImportacion(
                     </td>
 
                     <td>
-                        <span class="importacion-estado valida">
-                            Válida
+                        <span class="importacion-estado ${marcacion.coincidenciaDni ? "advertencia" : "valida"}">
+                            ${marcacion.coincidenciaDni ? "Reconocida sin ceros" : "Válida"}
                         </span>
                     </td>
 
@@ -711,6 +740,19 @@ function mostrarVistaPreviaImportacion(
                     <div class="importacion-indicador advertencia">
 
                         <span>
+                            DNI recuperados
+                        </span>
+
+                        <strong>
+                            ${resultado.coincidenciasDniSinCeros?.length || 0}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="importacion-indicador advertencia">
+
+                        <span>
                             Duplicadas
                         </span>
 
@@ -734,6 +776,16 @@ function mostrarVistaPreviaImportacion(
                     </div>
 
                 </div>
+
+                ${resultado.coincidenciasDniSinCeros?.length ? `
+                    <div class="importacion-advertencia-dni">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <div>
+                            <strong>Se reconocieron DNI sin ceros iniciales</strong>
+                            <p>El sistema conservará el DNI registrado del colaborador y asociará estas marcaciones:</p>
+                            <ul>${resultado.coincidenciasDniSinCeros.map(item=>`<li><b>${escaparHTML(item.dniReloj)}</b> → <b>${escaparHTML(item.dniColaborador)}</b> · ${escaparHTML(item.colaboradorNombre)}</li>`).join("")}</ul>
+                        </div>
+                    </div>` : ""}
 
 
                 <div class="importacion-vista-previa">
@@ -882,6 +934,7 @@ function mostrarResultadoGuardado(
         resultado.cantidadDuplicadas > 0 ||
         resultado.cantidadDniNoEncontrados > 0 ||
         resultado.cantidadInactivos > 0 ||
+        resultado.cantidadCoincidenciasDniSinCeros > 0 ||
         resultado.cantidadErrores > 0;
 
 
@@ -944,6 +997,13 @@ function mostrarResultadoGuardado(
         )
         .join("");
 
+    const coincidenciasSinCeros = [...new Map(
+        resultado.coincidenciasDniSinCeros.map(item=>[
+            `${item.dniReloj}_${item.dniColaborador}`,
+            item
+        ])
+    ).values()];
+
 
     Swal.fire({
 
@@ -972,6 +1032,15 @@ function mostrarResultadoGuardado(
                         <strong>
                             ${resultado.cantidadGuardadas}
                         </strong>
+
+                    </div>
+
+
+                    <div class="resultado-importacion-card duplicadas">
+
+                        <span>DNI recuperados</span>
+
+                        <strong>${coincidenciasSinCeros.length}</strong>
 
                     </div>
 
@@ -1028,6 +1097,12 @@ function mostrarResultadoGuardado(
                     </div>
 
                 </div>
+
+                ${coincidenciasSinCeros.length ? `
+                    <div class="resultado-importacion-detalle">
+                        <h4>DNI asociados sin ceros iniciales</h4>
+                        <ul>${coincidenciasSinCeros.map(item=>`<li><strong>${escaparHTML(item.colaboradorNombre)}</strong><span>${escaparHTML(item.dniReloj)} → ${escaparHTML(item.dniColaborador)}</span></li>`).join("")}</ul>
+                    </div>` : ""}
 
 
                 ${
