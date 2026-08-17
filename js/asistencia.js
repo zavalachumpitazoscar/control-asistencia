@@ -1,6 +1,6 @@
 import { iniciarNavegacionAsistencia } from "./asistencia/navegacion-asistencia.js";
 import { iniciarFechaAsistencia } from "./asistencia/fecha-asistencia.js";
-import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js?v=20260817-4";
+import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js?v=20260817-5";
 import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260814-2";
 import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js";
 import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260812-5";
