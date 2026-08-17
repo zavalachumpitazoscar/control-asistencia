@@ -4319,3 +4319,4 @@ Corrige la regla antigua de botones cuadrados.
     max-width: 120px;
   }
 }
+.marcacion-ubicacion{display:inline-flex;align-items:center;gap:8px;color:#2563eb;text-decoration:none;font-weight:800;white-space:nowrap}.marcacion-ubicacion i{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#eff6ff}.marcacion-ubicacion span{display:grid;gap:2px}.marcacion-ubicacion small{color:#64748b;font-size:9px;font-weight:600}.marcacion-ubicacion:hover{color:#1d4ed8}
