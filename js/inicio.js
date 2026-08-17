@@ -29,7 +29,7 @@ import { iniciarCompañia } from "./compañia.js?v=20260817-1";
 import { iniciarEmpleados } from "./empleados.js?v=20260814-4";
 import { iniciarAsistencia } from "./asistencia.js?v=20260814-3";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260814-2";
-import { iniciarDashboard } from "./dashboard.js?v=20260817-1";
+import { iniciarDashboard } from "./dashboard.js?v=20260817-2";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260814-3";
 
@@ -430,7 +430,7 @@ async function cargarVista(
 
 
         const ruta =
-            `vistas/${vistaPrincipal}.html?v=20260817-1`;
+            `vistas/${vistaPrincipal}.html?v=20260817-2`;
 
 
         const respuesta =
@@ -868,3 +868,4 @@ regla.innerHTML =
 }
 
 }
+
