@@ -10,6 +10,7 @@ const coleccionesDashboard = [
   "colaboradores", "marcaciones", "asignacionesHorarios", "horarios",
   "excepcionesHorarios", "ajustesAsistenciaDiaria", "aprobacionesHorasExtra",
   "permisos", "feriados", "descansosSustitutoriosFeriados",
+  "solicitudesDispositivoMovil",
 ];
 
 export function iniciarDashboard() {
@@ -218,15 +219,17 @@ function abrirColaboradorCuandoEsteListo(id,nombre,intentos=0){const buscar=docu
 
 function navegarDashboard(destino, contexto) {
   if (contexto?.fecha) sessionStorage.setItem("dashboardContextoAsistencia", JSON.stringify(contexto));
-  if (destino === "colaboradores" || destino === "horarios") {
+  if (["colaboradores","horarios","marcacion-movil"].includes(destino)) {
     document.querySelector('.item[data-vista="empleados"]')?.click();
     if (destino === "horarios") abrirHorariosCuandoEsteListo();
+    if (destino === "marcacion-movil") abrirMarcacionMovilCuandoEsteListo();
     return;
   }
   document.querySelector(`.item[data-vista="${destino}"]`)?.click();
   if (destino === "asistencia" && contexto?.fecha) aplicarContextoAsistencia(contexto);
 }
 function abrirHorariosCuandoEsteListo(intentos=0){const tab=document.querySelector('.tab[data-tab="horarios"]');if(tab){tab.click();const contexto=sessionStorage.getItem("dashboardColaboradorHorario");if(contexto&&window.Swal)setTimeout(()=>Swal.fire({icon:"info",title:"Colaborador preparado",text:"Selecciona un horario activo y pulsa Asignar. El colaborador del Dashboard quedará preseleccionado.",confirmButtonText:"Entendido"}),350);return;}if(intentos<20)setTimeout(()=>abrirHorariosCuandoEsteListo(intentos+1),100);}
+function abrirMarcacionMovilCuandoEsteListo(intentos=0){const tab=document.querySelector('.tab[data-tab="marcacion-movil"]');if(tab){tab.click();return;}if(intentos<20)setTimeout(()=>abrirMarcacionMovilCuandoEsteListo(intentos+1),100);}
 function aplicarContextoAsistencia(contexto,intentos=0){const fecha=document.getElementById("selectorFechaAsistencia"),buscar=document.getElementById("buscarResumenAsistencia");if(fecha&&buscar){fecha.value=contexto.fecha;fecha.dispatchEvent(new Event("change",{bubbles:true}));buscar.value=contexto.nombre||"";buscar.dispatchEvent(new Event("input",{bubbles:true}));return;}if(intentos<25)setTimeout(()=>aplicarContextoAsistencia(contexto,intentos+1),100);}
 
 function renderizarEstadoDia(registros) {
@@ -312,6 +315,7 @@ function renderizarConfiguracion(activos, registros, datos, fecha) {
   const incompletos=registros.filter((r)=>/INCOMPLETO/.test(r.estado));
   const limite=new Date(`${fecha}T00:00:00`);limite.setDate(limite.getDate()+7);
   const porVencer=(datos.asignacionesHorarios||[]).filter((a)=>{const f=a.fechaFin||a.hasta||a.fin;if(!f)return false;const d=new Date(`${String(f).slice(0,10)}T00:00:00`);return d>=new Date(`${fecha}T00:00:00`)&&d<=limite;});
+  const dispositivosPendientes=(datos.solicitudesDispositivoMovil||[]).filter(s=>s.estado==="PENDIENTE");
   detallesDashboard.sinHorario=sinHorario.map((r)=>{const colaborador=colaboradoresPorId.get(r.colaboradorId);return {id:r.colaboradorId,nombre:colaborador?nombreColaborador(colaborador):nombreApellidoPrimero(r.nombre),documento:r.documento||"Sin documento",detalle:`Sin programación el ${fechaVisible(fecha)}`,valor:"Asignar horario",accion:"ASIGNAR_HORARIO",tono:"ambar"};});
   detallesDashboard.sinOrganizacion=sinOrganizacion.map((c)=>({id:c.id,nombre:nombreColaborador(c),busqueda:nombreColaboradorNombresPrimero(c),documento:documentoColaborador(c),detalle:[!valorOrg(c,"sucursal")?"Falta sucursal":"",!valorOrg(c,"area")?"Falta área":""].filter(Boolean).join(" · "),valor:"Completar ubicación",accion:"COMPLETAR_UBICACION",tono:"ambar"}));
   if(sinHorario.length)avisos.push({icono:"bi-calendar-x",titulo:`${sinHorario.length} sin horario para la fecha`,detalle:"Ver quiénes son y asignarles un horario.",config:"sinHorario"});
@@ -319,6 +323,7 @@ function renderizarConfiguracion(activos, registros, datos, fecha) {
   if(feriadosPendientes.length)avisos.push({icono:"bi-calendar-event",titulo:`${feriadosPendientes.length} feriados por configurar`,detalle:"Define el tratamiento de la jornada.",destino:"horarios"});
   if(incompletos.length)avisos.push({icono:"bi-exclamation-square",titulo:`${incompletos.length} marcaciones sin completar`,detalle:"Revisa entradas o salidas faltantes.",destino:"asistencia"});
   if(porVencer.length)avisos.push({icono:"bi-hourglass-split",titulo:`${porVencer.length} asignaciones próximas a vencer`,detalle:"Vencen dentro de los siguientes 7 días.",destino:"horarios"});
+  if(dispositivosPendientes.length)avisos.push({icono:"bi-phone-vibrate",titulo:`${dispositivosPendientes.length} dispositivos móviles por autorizar`,detalle:"Revisa qué colaboradores solicitaron acceso.",destino:"marcacion-movil"});
   asignar("contadorConfiguracion",avisos.length);
   const lista=document.getElementById("listaConfiguracionDashboard");if(!lista)return;
   lista.innerHTML=avisos.length?avisos.map((a)=>`<button ${a.config?`data-resumen="${a.config}"`:`data-ir="${a.destino}"`} type="button"><i class="bi ${a.icono}"></i><span><strong>${html(a.titulo)}</strong><small>${html(a.detalle)}</small></span><i class="bi bi-chevron-right"></i></button>`).join(""):'<p class="dashboard-vacio"><i class="bi bi-check-circle"></i><br>Todo está correctamente configurado.</p>';
