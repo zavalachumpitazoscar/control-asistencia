@@ -1,7 +1,7 @@
 import { iniciarInformacion } from "./compañia/informacion.js";
-import { iniciarSucursales } from "./compañia/sucursales.js";
-import { iniciarAreas } from "./compañia/areas.js";
-import { iniciarSubareas } from "./compañia/subareas.js";
+import { iniciarSucursales } from "./compañia/sucursales.js?v=20260817-1";
+import { iniciarAreas } from "./compañia/areas.js?v=20260817-1";
+import { iniciarSubareas } from "./compañia/subareas.js?v=20260817-1";
 
 
 export function iniciarCompañia() {
@@ -45,7 +45,7 @@ async function cargarTab(tab) {
 
         const respuesta =
             await fetch(
-                `vistas/compañia/${tab}.html`
+                `vistas/compañia/${tab}.html?v=20260817-1`
             );
 
         const html =
