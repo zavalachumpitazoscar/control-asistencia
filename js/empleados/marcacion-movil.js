@@ -182,7 +182,7 @@ async function cambiarCorreo(colaboradorId) {
 
   const confirmacion = await Swal.fire({
     title: "¿Confirmar cambio de correo?",
-    text: "El correo anterior y el celular autorizado perderán el acceso. El nuevo correo deberá crear su cuenta, validarse y solicitar autorización nuevamente.",
+    text: "El correo anterior y el celular autorizado perderán el acceso. El nuevo correo deberá crear su contraseña y solicitar autorización nuevamente.",
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Sí, cambiar correo",
@@ -221,7 +221,7 @@ async function cambiarCorreo(colaboradorId) {
   } catch {}
   await alerta(
     "Cambio completado",
-    "El acceso anterior quedó bloqueado. El colaborador debe crear o recuperar su cuenta con el nuevo correo.",
+    "El acceso anterior quedó bloqueado. El colaborador debe crear su contraseña con el nuevo correo y solicitar autorización.",
     "success",
   );
   await cargar();
@@ -294,7 +294,7 @@ async function copiarEnlace(titulo = "Enlace copiado") {
   } catch {}
   await alerta(
     titulo,
-    "Envía el enlace al colaborador para que cree su contraseña y valide su correo.",
+    "Envía el enlace al colaborador para que cree su contraseña y solicite autorización del celular.",
     "success",
   );
   await cargar();
