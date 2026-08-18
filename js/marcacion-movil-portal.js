@@ -3,8 +3,6 @@ import {
   createUserWithEmailAndPassword,
   deleteUser,
   onAuthStateChanged,
-  sendEmailVerification,
-  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -28,11 +26,9 @@ let tiposPermitidos = ["ENTRADA", "SALIDA"];
 let cargando = false;
 let observadorUbicacion = null;
 const dispositivoId = obtenerDispositivoId();
-auth.languageCode = "es";
 
 document.getElementById("ingresarMovil").onclick = ingresar;
 document.getElementById("crearAccesoMovil").onclick = crearAcceso;
-document.getElementById("recuperarPasswordMovil").onclick = recuperar;
 document.getElementById("solicitarDispositivoMovil").onclick = solicitarDispositivo;
 document.getElementById("actualizarUbicacionMovil").onclick = obtenerUbicacion;
 document.querySelectorAll("[data-salir-movil]").forEach(
@@ -74,14 +70,10 @@ async function crearAcceso() {
       await deleteUser(credencial.user);
       throw new Error("Tu empresa todavía no habilitó este correo.");
     }
-    await sendEmailVerification(credencial.user, {
-      url: new URL("movil.html", location.href).href,
-      handleCodeInApp: false,
-    });
     await vincularUsuario(credencial.user, habilitado);
     await aviso(
       "Cuenta creada",
-      "Revisa tu correo y confirma la activación de la app móvil.",
+      "Tu contraseña quedó registrada. Ahora solicita la autorización de este celular.",
       "success",
     );
   } catch (error) {
@@ -103,20 +95,6 @@ async function ingresar() {
     mensajeLogin("No se pudo ingresar. Revisa tus credenciales.");
   } finally {
     cargando = false;
-  }
-}
-
-async function recuperar() {
-  const correo = valor("correoMovil");
-  if (!correo) return mensajeLogin("Escribe primero tu correo.");
-  try {
-    await sendPasswordResetEmail(auth, correo, {
-      url: new URL("movil.html", location.href).href,
-      handleCodeInApp: false,
-    });
-    mensajeLogin("Firebase envió el enlace de recuperación.", true);
-  } catch {
-    mensajeLogin("No se pudo enviar el enlace.");
   }
 }
 
@@ -156,14 +134,6 @@ async function cargarPortal(usuario) {
     throw new Error("Este correo ya está vinculado a otra cuenta.");
   }
   perfil = { ...acceso, nombre: acceso.nombre || usuario.displayName || usuario.email };
-
-  if (!usuario.emailVerified) {
-    document.getElementById("textoPendienteMovil").textContent =
-      "Confirma primero el correo de activación y luego vuelve a ingresar.";
-    document.getElementById("solicitarDispositivoMovil").hidden = true;
-    mostrar("pantallaPendiente");
-    return;
-  }
 
   if (acceso.dispositivoAutorizadoId !== dispositivoId) {
     const solicitud = await getDoc(
@@ -622,7 +592,7 @@ function mensajeLogin(mensaje, correcto = false) {
 function limpiarError(error) {
   const mensaje = String(error?.message || "Error inesperado");
   if (mensaje.includes("auth/email-already-in-use")) {
-    return "Este correo ya tiene una cuenta. Pulsa Ingresar o usa ¿Olvidaste tu contraseña?";
+    return "Este correo ya tiene una contraseña registrada. Pulsa Ingresar. Si no la conoces, solicita al administrador reiniciar tu cuenta móvil.";
   }
   if (mensaje.includes("auth/requires-recent-login")) {
     return "Por seguridad, cierra sesión e ingresa nuevamente antes de continuar.";
