@@ -1,4 +1,4 @@
-import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260817-4";
+import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260818-7";
 
 let cargaActual = 0;
 let detallesDashboard = {};
@@ -101,7 +101,7 @@ function renderizarDashboardFiltrado() {
   renderizarKpis(activos, registrosDia, registrosAyer);
   renderizarEstadoDia(registrosDia);
   renderizarAlertas(registrosDia, fecha);
-  renderizarMarcaciones(datos.marcaciones, activos, fecha);
+  renderizarMarcaciones(datos.marcaciones, activos, fecha, registrosDia);
   renderizarConfiguracion(activos, registrosDia, datos, fecha);
   calcularMes(fecha, datos);
   actualizarEstadoActualizacion(fecha);
@@ -250,6 +250,9 @@ function renderizarEstadoDia(registros) {
 function renderizarAlertas(registros, fecha) {
   const alertas = [];
   registros.forEach((r) => {
+    (r.clasificacion?.sinClasificar || []).forEach(() =>
+      alertas.push({ prioridad:1, icono:"bi-clock-history", nombre:r.nombre, colaboradorId:r.colaboradorId, detalle:"Marcación fuera de los rangos del horario", valor:"Regularizar" }),
+    );
     if (r.estado === "AUSENTE") alertas.push({ prioridad:1, icono:"bi-person-x", nombre:r.nombre, colaboradorId:r.colaboradorId, detalle:"Ausencia sin marcaciones", valor:"Revisar ausencia" });
     else if (/INCOMPLETO/.test(r.estado)) alertas.push({ prioridad:2, icono:"bi-exclamation-triangle", nombre:r.nombre, colaboradorId:r.colaboradorId, detalle:"Jornada con marcación incompleta", valor:"Completar" });
     else if (/TARDANZA/.test(r.estado)) alertas.push({ prioridad:3, icono:"bi-clock-history", nombre:r.nombre, colaboradorId:r.colaboradorId, detalle:`Llegó ${r.tardanzaMinutos || 0} min tarde`, valor:"Ver tardanza" });
@@ -262,11 +265,19 @@ function renderizarAlertas(registros, fecha) {
   lista.innerHTML = alertas.length ? alertas.slice(0,8).map((a) => `<button class="alerta-dashboard" data-ir="asistencia" data-colaborador="${html(a.colaboradorId || "")}" data-nombre="${html(a.nombre)}" data-fecha="${html(fecha)}" type="button"><i class="bi ${a.icono}"></i><span><strong>${html(a.nombre)}</strong><small>${html(a.detalle)} · Pulsa para atender</small></span><b>${html(a.valor)}</b></button>`).join("") : '<p class="dashboard-vacio"><i class="bi bi-check-circle"></i><br>Todo en orden: no existen alertas para esta fecha.</p>';
 }
 
-function renderizarMarcaciones(marcaciones, colaboradores, fecha) {
+function renderizarMarcaciones(marcaciones, colaboradores, fecha, registros = []) {
   const nombres = new Map(colaboradores.map((c) => [c.id, nombreColaborador(c)]));
+  const tiposInterpretados = new Map();
+  registros.forEach((registro) =>
+    (registro.clasificacion?.todas || []).forEach((marca) => {
+      if (!marca.id) return;
+      if (marca.tipoInterpretado) tiposInterpretados.set(marca.id, marca.tipoInterpretado);
+      else if (String(marca.origen || "").toUpperCase() === "MOVIL") tiposInterpretados.set(marca.id, "SIN_CLASIFICAR");
+    }),
+  );
   const recientes = marcaciones.filter((m) => m.fecha === fecha).sort((a,b) => tiempoMarca(b)-tiempoMarca(a)).slice(0,8);
   const lista = document.getElementById("listaMarcacionesDashboard");
-  lista.innerHTML = recientes.length ? recientes.map((m) => { const nombre=m.colaboradorNombre||nombres.get(m.colaboradorId)||"Colaborador";return `<div class="marcacion-dashboard"><div class="marcacion-avatar">${html(iniciales(nombre))}</div><span><strong>${html(nombre)}</strong><small>${html(tipoMarcacion(m.tipo))}</small></span><time>${html(String(m.hora||"").slice(0,5)||"—")}</time></div>`; }).join("") : '<p class="dashboard-vacio">No hay marcaciones registradas en esta fecha.</p>';
+  lista.innerHTML = recientes.length ? recientes.map((m) => { const nombre=m.colaboradorNombre||nombres.get(m.colaboradorId)||"Colaborador";const interpretado=tiposInterpretados.get(m.id);const tipo=interpretado||m.tipo;const nota=interpretado==="SIN_CLASIFICAR"?" · Fuera de rango":interpretado&&interpretado!==m.tipo?" · Interpretada por horario":"";return `<div class="marcacion-dashboard"><div class="marcacion-avatar">${html(iniciales(nombre))}</div><span><strong>${html(nombre)}</strong><small>${html(tipoMarcacion(tipo))}${nota}</small></span><time>${html(horaMarca(m))}</time></div>`; }).join("") : '<p class="dashboard-vacio">No hay marcaciones registradas en esta fecha.</p>';
 }
 
 function prepararFiltrosDashboard(colaboradores) {
@@ -404,7 +415,11 @@ function nombreColaboradorNombresPrimero(c){return [c.datosPersonales?.nombres||
 function nombreApellidoPrimero(nombre){const partes=String(nombre||"").trim().split(/\s+/);return partes.length===2?`${partes[1]} ${partes[0]}`:String(nombre||"Colaborador");}
 function iniciales(n){return String(n).trim().split(/\s+/).slice(0,2).map((x)=>x[0]||"").join("").toUpperCase();}
 function documentoColaborador(c){return c.documento?.numero||c.numeroDocumento||c.dni||"Sin documento";}
-function horaMarca(m){return m?.hora?String(m.hora).slice(0,5):"—";}
+function horaMarca(m){
+  if(m?.hora)return String(m.hora).slice(0,5);
+  const fecha=m?.fechaHora?.toDate?.();
+  return fecha?fecha.toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit",timeZone:"America/Lima"}):"—";
+}
 function fechaVisible(v){const p=String(v||"").split("-");return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:v;}
 function etiquetaEstado(v){return String(v||"Sin estado").replaceAll("_"," ").toLowerCase().replace(/^./,(c)=>c.toUpperCase());}
 function tipoMarcacion(t){const x=String(t||"MARCIÓN").replaceAll("_"," ").toLowerCase();return x.replace(/^./,(c)=>c.toUpperCase());}
