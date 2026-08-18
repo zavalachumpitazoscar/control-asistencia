@@ -9,10 +9,13 @@
 .selector-tamano-global-opciones button:hover{background:#eff6ff;color:#2563eb}.selector-tamano-global-opciones button.activo{background:#2563eb;color:#fff;box-shadow:0 5px 14px rgba(37,99,235,.24)}
 
 @media(min-width:1025px){
-  body[data-tamano-sistema="pequeno"] #contenedorVista{width:108.696%;zoom:.92}
+  body[data-tamano-sistema="pequeno"] #contenedorVista{width:100%;zoom:.92}
   body[data-tamano-sistema="mediano"] #contenedorVista{width:100%;zoom:1}
-  body[data-tamano-sistema="grande"] #contenedorVista{width:86.207%;zoom:1.16}
-  body[data-tamano-sistema="muy-grande"] #contenedorVista{width:76.923%;zoom:1.3}
+  body[data-tamano-sistema="grande"] #contenedorVista{width:100%;zoom:1.16}
+  body[data-tamano-sistema="muy-grande"] #contenedorVista{width:100%;zoom:1.3}
+  body[data-tamano-sistema="pequeno"] #contenedorVista>.modal-detalle-auditoria{zoom:1.087}
+  body[data-tamano-sistema="grande"] #contenedorVista>.modal-detalle-auditoria{zoom:.862}
+  body[data-tamano-sistema="muy-grande"] #contenedorVista>.modal-detalle-auditoria{zoom:.769}
   body[data-tamano-sistema="grande"] .menu-usuario{font-size:1.05em}
   body[data-tamano-sistema="muy-grande"] .menu-usuario{font-size:1.1em}
 }
@@ -25,4 +28,5 @@
   .selector-tamano-global{display:none}
   .topbar-acciones-global{gap:6px}
   #contenedorVista{width:100%!important;zoom:1!important}
+  #contenedorVista>.modal-detalle-auditoria{zoom:1!important}
 }
