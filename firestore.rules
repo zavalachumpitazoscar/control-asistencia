@@ -46,7 +46,9 @@ service cloud.firestore {
           && request.resource.data.correo == resource.data.correo
           && request.resource.data.empresaId == resource.data.empresaId
           && request.resource.data.colaboradorId == resource.data.colaboradorId
-          && request.resource.data.usuarioId == request.auth.uid);
+          && request.resource.data.usuarioId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['usuarioId', 'estado', 'actualizadoEn']));
       allow delete: if administraEmpresa(resource.data.empresaId);
     }
 
@@ -70,11 +72,31 @@ service cloud.firestore {
         && request.resource.data.origen == 'MOVIL'
         && request.resource.data.fechaHora == request.time
         && request.resource.data.creadoEn == request.time
+        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.usuarioId == request.auth.uid
+        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.estado == 'AUTORIZADO'
         && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.dispositivoAutorizadoId == request.resource.data.dispositivoId;
       allow update, delete: if administraEmpresa(resource.data.empresaId);
     }
 
     match /sucursales/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId) || esMovilEmpresa(resource.data.empresaId);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /horarios/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId) || esMovilEmpresa(resource.data.empresaId);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /asignacionesHorarios/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId) || esMovilEmpresa(resource.data.empresaId);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /excepcionesHorarios/{id} {
       allow read: if administraEmpresa(resource.data.empresaId) || esMovilEmpresa(resource.data.empresaId);
       allow create: if administraEmpresa(request.resource.data.empresaId);
       allow update, delete: if administraEmpresa(resource.data.empresaId);
