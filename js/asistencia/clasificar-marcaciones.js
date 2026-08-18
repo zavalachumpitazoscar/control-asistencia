@@ -68,6 +68,8 @@ export function clasificarMarcaciones({
 
         );
 
+    const existenHorarios = Array.isArray(horarios) && horarios.some(Boolean);
+
 
     /*
         Primero respetamos las marcaciones manuales
@@ -89,6 +91,17 @@ export function clasificarMarcaciones({
         if(tipo === "INICIO_ALMUERZO") tipo = "INICIO_REFRIGERIO";
         if(tipo === "FIN_ALMUERZO") tipo = "FIN_REFRIGERIO";
 
+
+        const esMarcacionMovil =
+            String(marcacion.origen || "").trim().toUpperCase() === "MOVIL";
+
+        // Con horario asignado, una marcación móvil se interpreta por la
+        // hora oficial guardada y las ventanas del horario. El botón pulsado
+        // se conserva como referencia, pero no decide la clasificación.
+        if(esMarcacionMovil && existenHorarios){
+            marcacion.tipoSolicitado = tipo;
+            return;
+        }
 
         if(
             [
