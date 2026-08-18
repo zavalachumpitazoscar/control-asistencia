@@ -111,7 +111,7 @@ function renderizar() {
                 ${!acceso ? `<button class="primario" data-habilitar="${colaborador.id}">Habilitar</button>` : ""}
                 ${dispositivo ? `<button data-ver-dispositivo="${solicitud?.id || colaborador.id}"><i class="bi bi-phone"></i> Ver dispositivo</button>` : ""}
                 ${solicitud ? `<button class="primario" data-autorizar="${solicitud.id}">Autorizar dispositivo</button><button data-rechazar="${solicitud.id}">Rechazar</button>` : ""}
-                ${acceso ? `<button data-cambiar-correo="${colaborador.id}"><i class="bi bi-envelope-at"></i> Cambiar correo</button><button data-copiar="${colaborador.id}">Copiar enlace</button><button class="peligro" data-revocar="${colaborador.id}">Revocar</button>` : ""}
+                ${acceso ? `<button data-whatsapp="${colaborador.id}"><i class="bi bi-whatsapp"></i> Enviar acceso</button><button data-cambiar-correo="${colaborador.id}"><i class="bi bi-envelope-at"></i> Cambiar correo</button><button data-copiar="${colaborador.id}">Copiar enlace</button><button class="peligro" data-revocar="${colaborador.id}">Revocar</button>` : ""}
               </div>
             </article>`;
         })
@@ -124,6 +124,7 @@ async function procesarAccion(evento) {
   if (!boton) return;
   try {
     if (boton.dataset.copiar) return copiarEnlace();
+    if (boton.dataset.whatsapp) return enviarAccesoWhatsApp(boton.dataset.whatsapp);
     if (boton.dataset.verDispositivo) return verDispositivo(boton.dataset.verDispositivo);
     if (boton.dataset.habilitar) return habilitar(boton.dataset.habilitar);
     if (boton.dataset.cambiarCorreo) return cambiarCorreo(boton.dataset.cambiarCorreo);
@@ -323,7 +324,54 @@ async function autorizar(solicitudId) {
     estado: "AUTORIZADO",
     resueltoEn: serverTimestamp(),
   });
+  const colaborador = colaboradores.find((c) => c.id === solicitud.colaboradorId);
+  const resultado = await Swal.fire({
+    title: "Dispositivo autorizado",
+    text: "El colaborador ya puede ingresar y marcar desde este dispositivo.",
+    icon: "success",
+    showCancelButton: true,
+    confirmButtonText: "Enviar acceso por WhatsApp",
+    cancelButtonText: "Cerrar",
+    confirmButtonColor: "#16a34a",
+  });
+  if (resultado.isConfirmed && colaborador) enviarAccesoWhatsApp(colaborador.id);
   await cargar();
+}
+
+function telefonoColaborador(colaborador) {
+  return String(colaborador?.contacto?.telefono || colaborador?.telefono || "").trim();
+}
+
+function telefonoWhatsApp(valor) {
+  let numero = String(valor || "").replace(/\D/g, "");
+  if (numero.startsWith("00")) numero = numero.slice(2);
+  // Los celulares peruanos suelen guardarse con 9 dígitos. WhatsApp requiere 51.
+  if (numero.length === 9) numero = `51${numero}`;
+  return numero;
+}
+
+async function enviarAccesoWhatsApp(colaboradorId) {
+  const colaborador = colaboradores.find((c) => c.id === colaboradorId);
+  if (!colaborador) throw new Error("No se encontró al colaborador.");
+  const telefonoOriginal = telefonoColaborador(colaborador);
+  const telefono = telefonoWhatsApp(telefonoOriginal);
+  if (!telefono || telefono.length < 10) {
+    return alerta(
+      "Falta el teléfono",
+      "Registra un número de celular válido en los datos del colaborador y vuelve a intentarlo.",
+      "warning",
+    );
+  }
+  const portal = new URL("movil.html", location.href).href;
+  const nombre = nombreColaborador(colaborador);
+  const mensaje = [
+    `Hola ${nombre}, tu dispositivo fue autorizado para usar la marcación móvil.`,
+    "Ingresa al portal con el correo habilitado por tu empresa:",
+    portal,
+    "Por seguridad, utiliza únicamente el dispositivo autorizado.",
+  ].join("\n\n");
+  const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 async function rechazar(solicitudId) {
