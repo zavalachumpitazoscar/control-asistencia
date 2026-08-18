@@ -178,6 +178,11 @@ function limitar(valor) { const texto = JSON.stringify(valor); return texto?.len
 export function iniciarAuditoria() {
   const ids = ["actualizarAuditoria", "buscarAuditoria", "filtroModuloAuditoria", "filtroAccionAuditoria", "fechaDesdeAuditoria", "fechaHastaAuditoria", "limpiarFiltrosAuditoria", "limiteAuditoria", "anteriorAuditoria", "siguienteAuditoria", "cuerpoAuditoria"];
   if (ids.some((id) => !document.getElementById(id))) return;
+  // El modal vive fuera del contenedor escalable para conservar siempre el
+  // tamaño del viewport y permitir desplazamiento independiente.
+  const modalAuditoria = document.querySelector("#contenedorVista #modalDetalleAuditoria");
+  document.querySelectorAll("body > #modalDetalleAuditoria").forEach((anterior) => anterior.remove());
+  if (modalAuditoria) document.body.appendChild(modalAuditoria);
   document.getElementById("actualizarAuditoria").addEventListener("click", cargarAuditoria);
   ["buscarAuditoria", "filtroModuloAuditoria", "filtroAccionAuditoria", "fechaDesdeAuditoria", "fechaHastaAuditoria"].forEach((id) => document.getElementById(id).addEventListener(id === "buscarAuditoria" ? "input" : "change", () => { pagina = 1; renderizarAuditoria(); }));
   document.getElementById("limiteAuditoria").addEventListener("change", (e) => { limite = Number(e.target.value) || 10; pagina = 1; renderizarAuditoria(); });
@@ -186,7 +191,7 @@ export function iniciarAuditoria() {
   document.getElementById("limpiarFiltrosAuditoria").addEventListener("click", limpiarFiltros);
   document.getElementById("cuerpoAuditoria").addEventListener("click", mostrarDetalle);
   document.getElementById("cerrarDetalleAuditoria").addEventListener("click", cerrarDetalle);
-  document.getElementById("modalDetalleAuditoria").addEventListener("click", (e) => { if (e.target === e.currentTarget) cerrarDetalle(); });
+  modalAuditoria?.addEventListener("click", (e) => { if (e.target === e.currentTarget) cerrarDetalle(); });
   cargarAuditoria();
 }
 
