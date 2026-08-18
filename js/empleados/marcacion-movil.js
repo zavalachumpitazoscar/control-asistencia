@@ -91,6 +91,11 @@ function renderizar() {
                 : acceso
                   ? "Esperando registro"
                   : "No habilitado";
+          const dispositivo = solicitud?.dispositivo || acceso?.dispositivo;
+          const modelo = dispositivo
+            ? dispositivo.modelo || modeloDesdeNavegador(dispositivo.navegador) || dispositivo.descripcion
+            : null;
+          const actividad = acceso ? estadoActividad(acceso.actualizadoEn) : null;
           return `
             <article class="fila-acceso-movil">
               <div class="avatar-acceso-movil">${html(iniciales(nombre))}</div>
@@ -99,9 +104,12 @@ function renderizar() {
                 <small>${html(dni)} · ${html(correoAcceso || "Sin correo")}</small>
                 <em class="estado-acceso-movil ${html(estado)}">${html(etiqueta)}</em>
                 ${solicitud ? `<small><i class="bi bi-phone"></i> ${html(solicitud.dispositivo?.descripcion || "Dispositivo móvil")}</small>` : ""}
+                ${dispositivo ? `<small class="resumen-dispositivo-movil"><i class="bi bi-phone"></i> ${html(modelo || "Modelo no informado")} · ${html(dispositivo.plataforma || "Plataforma desconocida")}</small>` : ""}
+                ${actividad ? `<small class="actividad-dispositivo ${actividad.activo ? "activo" : "inactivo"}"><i class="bi bi-circle-fill"></i> ${html(actividad.texto)}</small>` : ""}
               </div>
               <div class="acciones-acceso-movil">
                 ${!acceso ? `<button class="primario" data-habilitar="${colaborador.id}">Habilitar</button>` : ""}
+                ${dispositivo ? `<button data-ver-dispositivo="${solicitud?.id || colaborador.id}"><i class="bi bi-phone"></i> Ver dispositivo</button>` : ""}
                 ${solicitud ? `<button class="primario" data-autorizar="${solicitud.id}">Autorizar dispositivo</button><button data-rechazar="${solicitud.id}">Rechazar</button>` : ""}
                 ${acceso ? `<button data-cambiar-correo="${colaborador.id}"><i class="bi bi-envelope-at"></i> Cambiar correo</button><button data-copiar="${colaborador.id}">Copiar enlace</button><button class="peligro" data-revocar="${colaborador.id}">Revocar</button>` : ""}
               </div>
@@ -116,6 +124,7 @@ async function procesarAccion(evento) {
   if (!boton) return;
   try {
     if (boton.dataset.copiar) return copiarEnlace();
+    if (boton.dataset.verDispositivo) return verDispositivo(boton.dataset.verDispositivo);
     if (boton.dataset.habilitar) return habilitar(boton.dataset.habilitar);
     if (boton.dataset.cambiarCorreo) return cambiarCorreo(boton.dataset.cambiarCorreo);
     if (boton.dataset.autorizar) return autorizar(boton.dataset.autorizar);
@@ -238,6 +247,66 @@ function validarCorreoUnico(correo, colaboradorId) {
   if (repetidoEnAccesos || repetidoEnColaboradores) {
     throw new Error("Ese correo ya pertenece a otro colaborador.");
   }
+}
+
+async function verDispositivo(referencia) {
+  const solicitud = solicitudes.find((item) => item.id === referencia);
+  const acceso = accesos.find(
+    (item) => item.colaboradorId === (solicitud?.colaboradorId || referencia),
+  );
+  const dispositivo = solicitud?.dispositivo || acceso?.dispositivo || {};
+  const modelo = dispositivo.modelo || modeloDesdeNavegador(dispositivo.navegador);
+  const estado = solicitud?.estado === "PENDIENTE"
+    ? "Pendiente de autorización"
+    : acceso?.estado === "AUTORIZADO"
+      ? "Autorizado"
+      : acceso?.estado || solicitud?.estado || "Sin estado";
+  const actividad = acceso ? estadoActividad(acceso.actualizadoEn) : null;
+  await Swal.fire({
+    title: "Información del dispositivo",
+    width: 680,
+    confirmButtonText: "Cerrar",
+    confirmButtonColor: "#2563eb",
+    html: `<div class="detalle-dispositivo-modal">
+      <div class="dispositivo-modal-cabecera"><i class="bi bi-phone"></i><span><strong>${html(modelo || dispositivo.descripcion || "Modelo no informado")}</strong><small>${html(estado)}</small></span></div>
+      <dl>
+        <div><dt>Descripción</dt><dd>${html(dispositivo.descripcion || "No informada")}</dd></div>
+        <div><dt>Modelo</dt><dd>${html(modelo || "El navegador no lo informa")}</dd></div>
+        <div><dt>Plataforma</dt><dd>${html(dispositivo.plataforma || "No informada")}</dd></div>
+        <div><dt>Pantalla</dt><dd>${html(dispositivo.pantalla || "No informada")}</dd></div>
+        <div><dt>Zona horaria</dt><dd>${html(dispositivo.zonaHoraria || "No informada")}</dd></div>
+        <div><dt>Idioma</dt><dd>${html(dispositivo.idioma || "No informado")}</dd></div>
+        <div><dt>Memoria / núcleos</dt><dd>${html(dispositivo.memoriaGB ? `${dispositivo.memoriaGB} GB` : "—")} / ${html(dispositivo.nucleos || "—")}</dd></div>
+        <div><dt>Última actividad</dt><dd>${html(actividad?.texto || "Sin actividad registrada")}</dd></div>
+        <div><dt>Solicitado</dt><dd>${html(formatearFechaHora(solicitud?.creadoEn))}</dd></div>
+        <div><dt>Autorizado</dt><dd>${html(formatearFechaHora(acceso?.autorizadoEn))}</dd></div>
+      </dl>
+      <details><summary>Información del navegador</summary><p>${html(dispositivo.navegador || "No informada")}</p></details>
+    </div>`,
+  });
+}
+
+function estadoActividad(timestamp) {
+  const fecha = timestamp?.toDate?.();
+  if (!fecha) return { activo: false, texto: "Sin actividad registrada" };
+  const minutos = Math.max(0, Math.round((Date.now() - fecha.getTime()) / 60000));
+  if (minutos <= 10) return { activo: true, texto: "Activo recientemente" };
+  return { activo: false, texto: `Última actividad: ${formatearFechaHora(timestamp)}` };
+}
+
+function modeloDesdeNavegador(navegador = "") {
+  const android = String(navegador).match(/Android[^;]*;\s*([^;)]+?)(?:\s+Build\/[^;)]+)?[;)]/i);
+  if (android?.[1]) return android[1].trim();
+  if (/iPhone/i.test(navegador)) return "Apple iPhone";
+  if (/iPad/i.test(navegador)) return "Apple iPad";
+  return "";
+}
+
+function formatearFechaHora(timestamp) {
+  const fecha = timestamp?.toDate?.();
+  return fecha
+    ? fecha.toLocaleString("es-PE", { dateStyle: "medium", timeStyle: "short" })
+    : "No registrada";
 }
 
 async function autorizar(solicitudId) {
