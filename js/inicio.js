@@ -54,6 +54,44 @@ const topbar = document.querySelector(".topbar");
 
 const ANCHO_MENU_MOVIL = 1024;
 
+// Tamaño global de todos los módulos cargados en el sistema.
+const tamanosSistemaPermitidos = ["pequeno", "mediano", "grande", "muy-grande"];
+const selectorTamanoGlobal = document.querySelector(".selector-tamano-global");
+const disparadorTamanoGlobal = document.querySelector(".selector-tamano-global-disparador");
+
+function aplicarTamanoSistema(tamano){
+    const valor = tamanosSistemaPermitidos.includes(tamano) ? tamano : "mediano";
+    document.body.dataset.tamanoSistema = valor;
+    localStorage.setItem("tamanoSistema", valor);
+    document.querySelectorAll("[data-tamano-sistema]").forEach(boton=>{
+        const activo = boton.dataset.tamanoSistema === valor;
+        boton.classList.toggle("activo", activo);
+        boton.setAttribute("aria-pressed", String(activo));
+    });
+    const etiquetas = { pequeno:"Pequeño", mediano:"Mediano", grande:"Grande", "muy-grande":"Muy grande" };
+    const texto = disparadorTamanoGlobal?.querySelector("span");
+    if(texto) texto.textContent = `Vista: ${etiquetas[valor]}`;
+}
+
+document.querySelectorAll("[data-tamano-sistema]").forEach(boton=>{
+    boton.addEventListener("click", evento=>{
+        evento.stopPropagation();
+        aplicarTamanoSistema(boton.dataset.tamanoSistema);
+        selectorTamanoGlobal?.classList.remove("abierto");
+    });
+});
+disparadorTamanoGlobal?.addEventListener("click", evento=>{
+    evento.stopPropagation();
+    selectorTamanoGlobal?.classList.toggle("abierto");
+});
+document.addEventListener("click", ()=>selectorTamanoGlobal?.classList.remove("abierto"));
+
+aplicarTamanoSistema(
+    localStorage.getItem("tamanoSistema") ||
+    localStorage.getItem("tamanoDashboard") ||
+    "mediano"
+);
+
 // Efecto visual de la barra superior al desplazarse.
 let actualizacionTopbarPendiente = false;
 
