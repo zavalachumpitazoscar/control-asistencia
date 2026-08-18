@@ -2,7 +2,7 @@ import { iniciarColaboradores } from "./empleados/colaboradores.js?v=20260817-3"
 import { iniciarHorarios } from "./empleados/horarios.js?v=20260814-4";
 import { iniciarPermisos } from "./empleados/permisos.js";
 import { iniciarFeriados } from "./empleados/feriados.js?v=20260817-1";
-import { iniciarAdministracionMarcacionMovil } from "./empleados/marcacion-movil.js?v=20260818-1";
+import { iniciarAdministracionMarcacionMovil } from "./empleados/marcacion-movil.js?v=20260818-2";
 
 export function iniciarEmpleados(
     tabInicial = "colaboradores"
@@ -72,7 +72,7 @@ async function cargarTab(tab){
         const respuesta =
         await fetch(
 
-            `vistas/empleados/${tab}.html?v=20260818-1`
+            `vistas/empleados/${tab}.html?v=20260818-2`
 
         );
 
@@ -147,4 +147,5 @@ async function cargarTab(tab){
     }
 
 }
+
 
