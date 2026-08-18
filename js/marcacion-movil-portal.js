@@ -26,6 +26,8 @@ let tiposPermitidos = ["ENTRADA", "SALIDA"];
 let cargando = false;
 let creandoCuenta = false;
 let observadorUbicacion = null;
+let marcacionesPortal = [];
+let vistaHistorial = "hoy";
 const dispositivoId = obtenerDispositivoId();
 
 document.getElementById("ingresarMovil").onclick = ingresar;
@@ -39,6 +41,15 @@ document.querySelector(".botones-marcacion").onclick = (evento) => {
   const boton = evento.target.closest("[data-tipo-marca]");
   if (boton) marcar(boton.dataset.tipoMarca, boton);
 };
+document.querySelector(".filtros-historial-movil")?.addEventListener("click", (evento) => {
+  const boton = evento.target.closest("[data-vista-historial]");
+  if (!boton) return;
+  vistaHistorial = boton.dataset.vistaHistorial;
+  document.querySelectorAll("[data-vista-historial]").forEach((item) =>
+    item.classList.toggle("activo", item === boton),
+  );
+  pintarHistorial();
+});
 
 setInterval(actualizarReloj, 1000);
 actualizarReloj();
@@ -157,6 +168,11 @@ async function cargarPortal(usuario) {
     await crearPerfilMovil(usuario, acceso);
   }
   perfil = { ...acceso, nombre: acceso.nombre || usuario.displayName || usuario.email };
+  await setDoc(
+    doc(db, "accesosMoviles", acceso.id),
+    { actualizadoEn: serverTimestamp() },
+    { merge: true },
+  );
 
   if (acceso.dispositivoAutorizadoId !== dispositivoId) {
     const solicitud = await getDoc(
@@ -330,37 +346,62 @@ async function pintarPortal() {
   document.getElementById("organizacionColaboradorMovil").textContent = horarioHoy
     ? `Horario: ${horarioHoy.nombre || "asignado"}`
     : "Sin horario asignado · Solo entrada y salida";
+  pintarResumenHorario();
 
   const resultado = await getDocs(
     query(
       collection(db, "marcaciones"),
       where("empresaId", "==", acceso.empresaId),
       where("colaboradorId", "==", acceso.colaboradorId),
-      where("fecha", "==", fechaLocal()),
     ),
   );
-  const marcas = resultado.docs
-    .map((documento) => documento.data())
-    .sort((a, b) => (a.fechaHora?.seconds || 0) - (b.fechaHora?.seconds || 0));
-
-  document.getElementById("historialMarcacionesMovil").innerHTML = marcas.length
-    ? marcas
-        .map(
-          (marca) =>
-            `<div class="marca-historial"><strong>${html(etiqueta(marca.tipo))}</strong><time>${marca.fechaHora?.toDate?.().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }) || "Registrando…"}</time></div>`,
-        )
-        .join("")
-    : "<p>Aún no existen marcaciones.</p>";
-
-  const siguiente = tiposPermitidos.find(
-    (tipo) => !marcas.some((marca) => marca.tipo === tipo),
-  );
+  marcacionesPortal = resultado.docs
+    .map((documento) => ({ id: documento.id, ...documento.data() }))
+    .sort((a, b) => segundosMarca(b) - segundosMarca(a));
+  pintarHistorial();
   document.querySelectorAll("[data-tipo-marca]").forEach((boton) => {
     const visible = tiposPermitidos.includes(boton.dataset.tipoMarca);
     boton.hidden = !visible;
-    boton.disabled = !siguiente || boton.dataset.tipoMarca !== siguiente;
-    boton.classList.toggle("siguiente", boton.dataset.tipoMarca === siguiente);
+    boton.disabled = false;
+    boton.classList.remove("siguiente");
   });
+}
+
+function pintarHistorial() {
+  const hoy = fechaLocal();
+  const marcas = (vistaHistorial === "hoy"
+    ? marcacionesPortal.filter((marca) => marca.fecha === hoy)
+    : marcacionesPortal
+  ).slice(0, 60);
+  document.getElementById("historialMarcacionesMovil").innerHTML = marcas.length
+    ? marcas.map((marca) => {
+        const momento = marca.fechaHora?.toDate?.();
+        const fecha = momento?.toLocaleDateString("es-PE", {
+          day: "2-digit", month: "short", year: "numeric",
+        }) || marca.fecha || "—";
+        const hora = momento?.toLocaleTimeString("es-PE", {
+          hour: "2-digit", minute: "2-digit",
+        }) || "Registrando…";
+        const origen = String(marca.origen || "SISTEMA").toUpperCase() === "MOVIL"
+          ? "Móvil"
+          : "Sistema";
+        const gps = marca.ubicacion
+          ? ` · GPS ±${Math.round(marca.ubicacion.precisionMetros || 0)} m`
+          : "";
+        return `<div class="marca-historial"><i class="bi ${iconoTipo(marca.tipo)}"></i><span><strong>${html(etiqueta(marca.tipo))}</strong><small>${html(fecha)} · ${html(origen)}${html(gps)}</small></span><time>${html(hora)}</time></div>`;
+      }).join("")
+    : `<p>No existen marcaciones ${vistaHistorial === "hoy" ? "para hoy" : "registradas"}.</p>`;
+}
+
+function pintarResumenHorario() {
+  const contenedor = document.getElementById("resumenHorarioMovil");
+  if (!horarioHoy) {
+    contenedor.innerHTML = `<div class="sin-horario-movil"><i class="bi bi-calendar2-week"></i><span><strong>Sin horario para hoy</strong><small>Puedes registrar entrada y salida.</small></span></div>`;
+    return;
+  }
+  const refrigerio = horarioHoy.refrigerio;
+  const tieneRefrigerio = Boolean(refrigerio && refrigerio.habilitado !== false);
+  contenedor.innerHTML = `<header><span>JORNADA DE HOY</span><strong>${html(horarioHoy.nombre || "Horario asignado")}</strong></header><div class="detalle-horario-movil"><span><i class="bi bi-box-arrow-in-right"></i> Entrada <b>${html(horaCorta(horarioHoy.entrada?.programada))}</b></span>${tieneRefrigerio ? `<span><i class="bi bi-cup-hot"></i> Almuerzo <b>${html(horaCorta(refrigerio.permitirInicioDesde))}–${html(horaCorta(refrigerio.permitirInicioHasta))}</b></span>` : ""}<span><i class="bi bi-box-arrow-right"></i> Salida <b>${html(horaCorta(horarioHoy.salida?.programada))}</b></span></div>`;
 }
 
 async function obtenerHorarioDelDia() {
@@ -437,17 +478,20 @@ function horariosAsignadosEnFecha(asignacion, fecha) {
 
 function configurarBotonesHorario(horario) {
   const requiereRefrigerio =
-    Boolean(horario?.refrigerio?.habilitado) &&
-    String(horario?.refrigerio?.modo || "MARCACION").toUpperCase() === "MARCACION";
+    Boolean(horario?.refrigerio && horario.refrigerio.habilitado !== false);
   tiposPermitidos = requiereRefrigerio
-    ? ["ENTRADA", "INICIO_ALMUERZO", "FIN_ALMUERZO", "SALIDA"]
+    ? ["ENTRADA", "INICIO_REFRIGERIO", "FIN_REFRIGERIO", "SALIDA"]
     : ["ENTRADA", "SALIDA"];
   const textos = {
     ENTRADA: horario?.entrada?.programada
       ? `Entrada · ${String(horario.entrada.programada).slice(0, 5)}`
       : "Entrada",
-    INICIO_ALMUERZO: "Inicio de almuerzo",
-    FIN_ALMUERZO: "Fin de almuerzo",
+    INICIO_REFRIGERIO: horario?.refrigerio?.permitirInicioDesde
+      ? `Inicio almuerzo · ${String(horario.refrigerio.permitirInicioDesde).slice(0, 5)}`
+      : "Inicio de almuerzo",
+    FIN_REFRIGERIO: horario?.refrigerio?.duracionMinutos
+      ? `Fin almuerzo · ${horario.refrigerio.duracionMinutos} min`
+      : "Fin de almuerzo",
     SALIDA: horario?.salida?.programada
       ? `Salida · ${String(horario.salida.programada).slice(0, 5)}`
       : "Salida",
@@ -539,6 +583,10 @@ function datosDispositivo() {
     navegador: navigator.userAgent,
     zonaHoraria: Intl.DateTimeFormat().resolvedOptions().timeZone,
     pantalla: `${screen.width}x${screen.height}`,
+    modelo: modeloDispositivo(),
+    idioma: navigator.language || "Desconocido",
+    memoriaGB: navigator.deviceMemory || null,
+    nucleos: navigator.hardwareConcurrency || null,
   };
 }
 function descripcionDispositivo() {
@@ -548,6 +596,14 @@ function descripcionDispositivo() {
       ? "iPhone"
       : "Navegador móvil";
   return `${navigator.userAgentData?.platform || navigator.platform || "Celular"} · ${tipo}`;
+}
+function modeloDispositivo() {
+  const ua = navigator.userAgent || "";
+  const android = ua.match(/Android[^;]*;\s*([^;)]+?)(?:\s+Build\/[^;)]+)?[;)]/i);
+  if (android?.[1]) return android[1].trim();
+  if (/iPhone/i.test(ua)) return "Apple iPhone";
+  if (/iPad/i.test(ua)) return "Apple iPad";
+  return navigator.userAgentData?.platform || navigator.platform || "Modelo no informado";
 }
 function fechaLocal() {
   return new Intl.DateTimeFormat("en-CA", {
@@ -602,10 +658,28 @@ function valor(id) {
 function etiqueta(tipo) {
   return {
     ENTRADA: "Entrada",
+    INICIO_REFRIGERIO: "Inicio de almuerzo",
+    FIN_REFRIGERIO: "Fin de almuerzo",
     INICIO_ALMUERZO: "Inicio de almuerzo",
     FIN_ALMUERZO: "Fin de almuerzo",
     SALIDA: "Salida",
   }[tipo] || tipo;
+}
+function iconoTipo(tipo) {
+  return {
+    ENTRADA: "bi-box-arrow-in-right",
+    INICIO_REFRIGERIO: "bi-cup-hot",
+    INICIO_ALMUERZO: "bi-cup-hot",
+    FIN_REFRIGERIO: "bi-arrow-return-left",
+    FIN_ALMUERZO: "bi-arrow-return-left",
+    SALIDA: "bi-box-arrow-right",
+  }[tipo] || "bi-clock";
+}
+function segundosMarca(marca) {
+  return Number(marca?.fechaHora?.seconds || marca?.creadoEn?.seconds || 0);
+}
+function horaCorta(hora) {
+  return hora ? String(hora).slice(0, 5) : "—";
 }
 function mensajeLogin(mensaje, correcto = false) {
   const elemento = document.getElementById("mensajeLoginMovil");
