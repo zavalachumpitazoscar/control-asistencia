@@ -125,6 +125,10 @@ async function vincularUsuario(usuario, datosAcceso) {
     },
     { merge: true },
   );
+  await crearPerfilMovil(usuario, datosAcceso);
+}
+
+async function crearPerfilMovil(usuario, datosAcceso) {
   await setDoc(doc(db, "usuariosMoviles", usuario.uid), {
     empresaId: datosAcceso.empresaId,
     colaboradorId: datosAcceso.colaboradorId,
@@ -137,9 +141,20 @@ async function vincularUsuario(usuario, datosAcceso) {
 async function cargarPortal(usuario) {
   acceso = await buscarAcceso(usuario.email.toLowerCase());
   if (!acceso) throw new Error("Tu empresa todavía no habilitó la marcación móvil.");
-  if (!acceso.usuarioId) await vincularUsuario(usuario, acceso);
-  else if (acceso.usuarioId !== usuario.uid) {
+  if (!acceso.usuarioId) {
+    await vincularUsuario(usuario, acceso);
+    acceso.usuarioId = usuario.uid;
+    acceso.estado = "ESPERANDO_DISPOSITIVO";
+  } else if (acceso.usuarioId !== usuario.uid) {
     throw new Error("Este correo ya está vinculado a otra cuenta.");
+  }
+
+  // Recupera automáticamente cuentas que quedaron a medio vincular:
+  // accesosMoviles ya tiene el UID, pero usuariosMoviles/{uid} no existe.
+  const perfilMovilRef = doc(db, "usuariosMoviles", usuario.uid);
+  const perfilMovilSnap = await getDoc(perfilMovilRef);
+  if (!perfilMovilSnap.exists()) {
+    await crearPerfilMovil(usuario, acceso);
   }
   perfil = { ...acceso, nombre: acceso.nombre || usuario.displayName || usuario.email };
 
