@@ -28,7 +28,7 @@ from
 import { iniciarCompañia } from "./compañia.js?v=20260817-1";
 import { iniciarEmpleados } from "./empleados.js?v=20260818-2";
 import { iniciarAsistencia } from "./asistencia.js?v=20260818-7";
-import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260814-2";
+import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260818-9";
 import { iniciarDashboard } from "./dashboard.js?v=20260818-7";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260814-3";
@@ -425,6 +425,8 @@ async function cargarVista(
     vista
 ){
 
+    document.querySelector("body > #modalDetalleAuditoria")?.remove();
+
     try{
 
         const tabsEmpleados = [
@@ -470,7 +472,7 @@ async function cargarVista(
 
 
         const ruta =
-            `vistas/${vistaPrincipal}.html?v=20260817-3`;
+            `vistas/${vistaPrincipal}.html?v=20260818-9`;
 
 
         const respuesta =
