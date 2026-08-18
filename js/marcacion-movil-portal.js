@@ -51,7 +51,10 @@ document.querySelector(".filtros-historial-movil")?.addEventListener("click", (e
   pintarHistorial();
 });
 
-setInterval(actualizarReloj, 1000);
+setInterval(() => {
+  actualizarReloj();
+  actualizarDisponibilidadBotones();
+}, 1000);
 actualizarReloj();
 
 onAuthStateChanged(auth, async (usuario) => {
@@ -219,6 +222,13 @@ async function solicitarDispositivo() {
 
 async function marcar(tipo, boton) {
   if (cargando) return;
+  if (!tipoDisponibleAhora(tipo)) {
+    return aviso(
+      "Fuera del horario permitido",
+      mensajeVentanaTipo(tipo),
+      "warning",
+    );
+  }
   if (!ubicacion) {
     obtenerUbicacion();
     return aviso(
@@ -365,6 +375,7 @@ async function pintarPortal() {
     boton.disabled = false;
     boton.classList.remove("siguiente");
   });
+  actualizarDisponibilidadBotones();
 }
 
 function pintarHistorial() {
@@ -499,8 +510,82 @@ function configurarBotonesHorario(horario) {
   document.querySelectorAll("[data-tipo-marca]").forEach((boton) => {
     boton.hidden = !tiposPermitidos.includes(boton.dataset.tipoMarca);
     const texto = boton.querySelector("span");
-    if (texto) texto.textContent = textos[boton.dataset.tipoMarca];
+    if (texto) {
+      texto.textContent = textos[boton.dataset.tipoMarca];
+      boton.dataset.textoHorario = textos[boton.dataset.tipoMarca];
+    }
   });
+  actualizarDisponibilidadBotones();
+}
+
+function actualizarDisponibilidadBotones() {
+  document.querySelectorAll("[data-tipo-marca]").forEach((boton) => {
+    if (boton.hidden) return;
+    const disponible = tipoDisponibleAhora(boton.dataset.tipoMarca);
+    boton.disabled = !disponible;
+    boton.classList.toggle("fuera-rango", !disponible);
+    const texto = boton.querySelector("span");
+    if (texto) texto.textContent = disponible
+      ? boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca)
+      : `${boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca)} · Fuera de rango`;
+  });
+}
+
+function tipoDisponibleAhora(tipo) {
+  if (!horarioHoy) return ["ENTRADA", "SALIDA"].includes(tipo);
+  const minuto = minutoActualLima();
+  const entrada = horarioHoy.entrada || {};
+  const salida = horarioHoy.salida || {};
+  const refrigerio = horarioHoy.refrigerio || {};
+  if (tipo === "ENTRADA") {
+    return dentroRangoMinutos(minuto, minutosHora(entrada.permitirDesde || entrada.programada), minutosHora(entrada.permitirHasta || entrada.programada));
+  }
+  if (tipo === "SALIDA") {
+    return dentroRangoMinutos(minuto, minutosHora(salida.permitirDesde || salida.programada), minutosHora(salida.permitirHasta || salida.programada));
+  }
+  if (tipo === "INICIO_REFRIGERIO") {
+    return dentroRangoMinutos(minuto, minutosHora(refrigerio.permitirInicioDesde), minutosHora(refrigerio.permitirInicioHasta));
+  }
+  if (tipo === "FIN_REFRIGERIO") {
+    const desde = minutosHora(refrigerio.permitirInicioDesde);
+    const hastaInicio = minutosHora(refrigerio.permitirInicioHasta);
+    const hasta = Math.min(minutosHora(salida.permitirDesde || salida.programada), hastaInicio + Number(refrigerio.duracionMinutos || 0));
+    return dentroRangoMinutos(minuto, desde, hasta);
+  }
+  return false;
+}
+
+function mensajeVentanaTipo(tipo) {
+  if (!horarioHoy) return "Esta marcación no corresponde a una opción disponible.";
+  const datos = {
+    ENTRADA: [horarioHoy.entrada?.permitirDesde || horarioHoy.entrada?.programada, horarioHoy.entrada?.permitirHasta || horarioHoy.entrada?.programada],
+    SALIDA: [horarioHoy.salida?.permitirDesde || horarioHoy.salida?.programada, horarioHoy.salida?.permitirHasta || horarioHoy.salida?.programada],
+    INICIO_REFRIGERIO: [horarioHoy.refrigerio?.permitirInicioDesde, horarioHoy.refrigerio?.permitirInicioHasta],
+    FIN_REFRIGERIO: [horarioHoy.refrigerio?.permitirInicioDesde, sumarMinutosHora(horarioHoy.refrigerio?.permitirInicioHasta, horarioHoy.refrigerio?.duracionMinutos)],
+  }[tipo] || [];
+  return `La ventana permitida para ${etiqueta(tipo).toLowerCase()} es de ${horaCorta(datos[0])} a ${horaCorta(datos[1])}.`;
+}
+
+function minutoActualLima() {
+  const partes = new Intl.DateTimeFormat("en-GB", { timeZone: "America/Lima", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
+  const valor = Object.fromEntries(partes.map((parte) => [parte.type, parte.value]));
+  return Number(valor.hour) * 60 + Number(valor.minute);
+}
+function minutosHora(hora) {
+  if (!hora) return null;
+  const [h, m] = String(hora).split(":").map(Number);
+  return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
+}
+function dentroRangoMinutos(valor, desde, hasta) {
+  if (desde === null || hasta === null) return false;
+  if (hasta >= desde) return valor >= desde && valor <= hasta;
+  return valor >= desde || valor <= hasta;
+}
+function sumarMinutosHora(hora, cantidad) {
+  const base = minutosHora(hora);
+  if (base === null) return null;
+  const total = (base + Number(cantidad || 0)) % 1440;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
 async function obtenerUbicacion() {
