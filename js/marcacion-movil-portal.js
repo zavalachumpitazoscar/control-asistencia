@@ -591,6 +591,12 @@ function mensajeLogin(mensaje, correcto = false) {
 }
 function limpiarError(error) {
   const mensaje = String(error?.message || "Error inesperado");
+  if (
+    mensaje.includes("Missing or insufficient permissions") ||
+    mensaje.includes("permission-denied")
+  ) {
+    return "No se pudo vincular la cuenta. El administrador debe publicar las reglas actualizadas de Firestore.";
+  }
   if (mensaje.includes("auth/email-already-in-use")) {
     return "Este correo ya tiene una contraseña registrada. Pulsa Ingresar. Si no la conoces, solicita al administrador reiniciar tu cuenta móvil.";
   }
