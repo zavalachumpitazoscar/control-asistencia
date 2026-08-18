@@ -7,7 +7,7 @@ import {
 
 import { db } from "../firebase-config.js";
 
-import { clasificarMarcaciones } from "./clasificar-marcaciones.js?v=20260817-1";
+import { clasificarMarcaciones } from "./clasificar-marcaciones.js?v=20260818-7";
 
 import { calcularJornadaAsistencia } from "./calcular-jornada-asistencia.js";
 
