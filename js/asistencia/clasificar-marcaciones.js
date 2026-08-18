@@ -76,13 +76,18 @@ export function clasificarMarcaciones({
 
     marcas.forEach(marcacion=>{
 
-        const tipo =
+        let tipo =
             String(
                 marcacion.tipo ||
                 ""
             )
             .trim()
             .toUpperCase();
+
+        // Compatibilidad con las primeras marcaciones generadas por el
+        // portal móvil, que usaban la palabra ALMUERZO.
+        if(tipo === "INICIO_ALMUERZO") tipo = "INICIO_REFRIGERIO";
+        if(tipo === "FIN_ALMUERZO") tipo = "FIN_REFRIGERIO";
 
 
         if(
@@ -1332,4 +1337,3 @@ function convertirMinutosAHora(
     }:00`;
 
 }
-
