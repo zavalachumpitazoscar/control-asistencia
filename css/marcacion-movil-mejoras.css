@@ -7,6 +7,7 @@
 .detalle-horario-movil i{color:#2563eb}.detalle-horario-movil b{color:#1e293b;font-size:9px}
 .sin-horario-movil{display:flex;align-items:center;gap:10px}.sin-horario-movil>i{color:#2563eb;font-size:20px}.sin-horario-movil span{display:grid}.sin-horario-movil strong{font-size:10px}.sin-horario-movil small{margin-top:3px;color:#64748b;font-size:8px}
 .botones-marcacion button:not([hidden]){cursor:pointer;opacity:1}.botones-marcacion button:active{transform:scale(.98);background:#eff6ff}
+.botones-marcacion button.fuera-rango{cursor:not-allowed;opacity:.45!important;background:#f8fafc}.botones-marcacion button.fuera-rango span{color:#64748b;font-size:9px;line-height:1.35}
 .cabecera-historial-movil{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.cabecera-historial-movil h3{margin:3px 0}
 .filtros-historial-movil{display:flex;padding:3px;border-radius:9px;background:#f1f5f9}.filtros-historial-movil button{padding:6px 8px;border:0;border-radius:7px;background:transparent;color:#64748b;font-size:8px;font-weight:800}.filtros-historial-movil button.activo{background:#fff;color:#2563eb;box-shadow:0 2px 7px rgba(15,23,42,.08)}
 .marca-historial{gap:9px}.marca-historial>i{display:grid;place-items:center;flex:0 0 31px;height:31px;border-radius:9px;background:#eff6ff;color:#2563eb;font-size:14px}.marca-historial>span{display:grid;flex:1}.marca-historial small{margin-top:3px;color:#94a3b8;font-size:8px}
