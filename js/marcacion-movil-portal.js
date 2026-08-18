@@ -24,6 +24,7 @@ let ubicacion;
 let horarioHoy = null;
 let tiposPermitidos = ["ENTRADA", "SALIDA"];
 let cargando = false;
+let creandoCuenta = false;
 let observadorUbicacion = null;
 const dispositivoId = obtenerDispositivoId();
 
@@ -48,6 +49,10 @@ onAuthStateChanged(auth, async (usuario) => {
     mostrar("pantallaLogin");
     return;
   }
+  // createUserWithEmailAndPassword dispara este observador antes de que
+  // crearAcceso termine de vincular al colaborador. Evitamos que ambos
+  // procesos intenten crear usuariosMoviles/{uid} al mismo tiempo.
+  if (creandoCuenta) return;
   try {
     await cargarPortal(usuario);
   } catch (error) {
@@ -63,6 +68,7 @@ async function crearAcceso() {
     return mensajeLogin("Ingresa el correo habilitado y una contraseña de al menos 6 caracteres.");
   }
   cargando = true;
+  creandoCuenta = true;
   try {
     const credencial = await createUserWithEmailAndPassword(auth, correo, password);
     const habilitado = await buscarAcceso(correo);
@@ -71,6 +77,7 @@ async function crearAcceso() {
       throw new Error("Tu empresa todavía no habilitó este correo.");
     }
     await vincularUsuario(credencial.user, habilitado);
+    await cargarPortal(credencial.user);
     await aviso(
       "Cuenta creada",
       "Tu contraseña quedó registrada. Ahora solicita la autorización de este celular.",
@@ -79,6 +86,7 @@ async function crearAcceso() {
   } catch (error) {
     mensajeLogin(limpiarError(error));
   } finally {
+    creandoCuenta = false;
     cargando = false;
   }
 }
