@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="css/auditoria-fix.css?v=20260813-3">
 <link rel="stylesheet" href="css/dashboard.css?v=20260813-1">
 <link rel="stylesheet" href="css/dashboard-interactivo.css?v=20260817-2">
+<link rel="stylesheet" href="css/escala-global.css?v=20260818-8">
 
 
 
@@ -147,6 +148,17 @@
 
         </div>
 
+<div class="topbar-acciones-global">
+<div class="selector-tamano-global" aria-label="Tamaño de visualización del sistema">
+    <button type="button" class="selector-tamano-global-disparador" title="Cambiar tamaño de todo el sistema"><i class="bi bi-arrows-angle-expand"></i><span>Vista</span></button>
+    <div class="selector-tamano-global-opciones" role="group" aria-label="Seleccionar tamaño de visualización">
+        <button type="button" data-tamano-sistema="pequeno">Pequeño</button>
+        <button type="button" data-tamano-sistema="mediano">Mediano</button>
+        <button type="button" data-tamano-sistema="grande">Grande</button>
+        <button type="button" data-tamano-sistema="muy-grande">Muy grande</button>
+    </div>
+</div>
+
 <button type="button" class="btn-manual-global" id="btnManualGlobal" title="Abrir manual del sistema">
     <i class="bi bi-book"></i><span>Manual</span>
 </button>
@@ -173,6 +185,7 @@
         ▼
     </span>
 
+</div>
 </div>
 
 <div
@@ -299,9 +312,8 @@ class="menu-usuario">
 
 </div>
 
-<script type="module" src="js/inicio.js?v=20260818-4"></script>
+<script type="module" src="js/inicio.js?v=20260818-8"></script>
 
 </body>
 
 </html>
-
