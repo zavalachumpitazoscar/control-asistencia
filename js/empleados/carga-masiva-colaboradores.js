@@ -19,6 +19,8 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260819-1";
+
 let empresaIdActual = null;
 
 
@@ -1810,6 +1812,12 @@ async function importarColaboradores(
 
         }
 
+        await validarCupoColaboradores(
+            empresaIdActual,
+            colaboradoresImportar.length,
+            resultadoColaboradores.size
+        );
+
 
         /*
         Firestore permite hasta 500 operaciones
@@ -1891,14 +1899,17 @@ async function importarColaboradores(
         );
 
 
+        const limitePlan = error?.code === "limite-plan-colaboradores";
+
         await Swal.fire({
 
             icon:"error",
 
-            title:"No se pudo importar",
+            title: limitePlan ? "Límite del plan alcanzado" : "No se pudo importar",
 
-            text:
-            "Ocurrió un error al registrar los colaboradores."
+            text: limitePlan
+            ? error.message + " Reduce la cantidad del archivo o solicita la ampliación del plan."
+            : "Ocurrió un error al registrar los colaboradores."
 
         });
 
@@ -2160,4 +2171,3 @@ function mostrarErrorArchivo(
     `;
 
 }
-
