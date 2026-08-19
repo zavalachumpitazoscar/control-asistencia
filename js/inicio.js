@@ -26,10 +26,10 @@ from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import { iniciarCompañia } from "./compañia.js?v=20260817-1";
-import { iniciarEmpleados } from "./empleados.js?v=20260819-1";
+import { iniciarEmpleados } from "./empleados.js?v=20260819-2";
 import { iniciarAsistencia } from "./asistencia.js?v=20260819-4";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260818-9";
-import { iniciarDashboard } from "./dashboard.js?v=20260818-7";
+import { iniciarDashboard } from "./dashboard.js?v=20260819-2";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260814-3";
 
@@ -472,7 +472,7 @@ async function cargarVista(
 
 
         const ruta =
-            `vistas/${vistaPrincipal}.html?v=20260819-1`;
+            `vistas/${vistaPrincipal}.html?v=20260819-2`;
 
 
         const respuesta =
