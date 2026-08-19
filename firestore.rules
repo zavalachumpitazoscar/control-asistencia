@@ -114,9 +114,15 @@ service cloud.firestore {
     }
 
     match /companias/{empresaId} {
-      allow create: if autenticado() && request.resource.data.empresaId == empresaId;
+      // Las empresas nuevas solo se crean mediante registrarEmpresaSegura.
+      allow create: if false;
       allow read, update, delete: if administraEmpresa(resource.data.empresaId);
     }
+
+    // Índices globales de unicidad. Solo Cloud Functions usa Admin SDK.
+    match /indicesRuc/{id} { allow read, write: if false; }
+    match /indicesCorreo/{id} { allow read, write: if false; }
+    match /auditoriaSuperadmin/{id} { allow read, write: if false; }
 
     match /mail/{id} { allow read, write: if false; }
     match /desafiosMoviles/{id} { allow read, write: if false; }
