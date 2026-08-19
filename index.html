@@ -64,7 +64,16 @@
           <button id="btnLogin" class="login-button" type="submit"><span>Ingresar al sistema</span><b aria-hidden="true">→</b></button>
         </form>
 
-        <div class="register-row"><span>¿Tu empresa aún no tiene una cuenta?</span><a href="registro.html">Registrar empresa</a></div>
+        <div class="access-options">
+          <div class="register-row"><span>¿Tu empresa aún no tiene una cuenta?</span><a href="registro.html">Registrar empresa</a></div>
+          <a class="superadmin-access" href="superadmin.html">
+            <span class="superadmin-access__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.6-2.8 8-7 10-4.2-2-7-5.4-7-10V6l7-3z"/><path d="M9.5 12l1.6 1.6 3.6-3.7"/></svg>
+            </span>
+            <span><strong>Acceso de administrador general</strong><small>Administración privada de la plataforma</small></span>
+            <b aria-hidden="true">→</b>
+          </a>
+        </div>
         <p class="security-note"><span>◆</span> Tus datos de acceso se transmiten de forma segura.</p>
       </div>
       <footer>© 2026 Control Empresarial · Gestión segura de asistencia</footer>
@@ -75,3 +84,4 @@
   <script type="module" src="js/login.js?v=20260819-1"></script>
 </body>
 </html>
+
