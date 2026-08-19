@@ -275,27 +275,11 @@ async function marcar(tipo, boton) {
     );
   }
 
-  const confirmacion = await Swal.fire({
-    title: `Marcar ${etiqueta(tipo)}`,
-    text: "¿Deseas confirmar esta marcación con la huella o seguridad de tu celular?",
-    icon: "question",
-    showCancelButton: true,
-    showDenyButton: true,
-    confirmButtonText: "Marcar con huella",
-    denyButtonText: "Marcar directamente",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#2563eb",
-  });
-  if (confirmacion.isDismissed) return;
-
   cargando = true;
   boton.disabled = true;
   try {
-    let validacionBiometrica = false;
-    if (confirmacion.isConfirmed) {
-      await validarBiometria();
-      validacionBiometrica = true;
-    }
+    const validacion = await resolverValidacionMarcacion(tipo);
+    if (!validacion) return;
     if (ubicacion.precisionMetros > 200) {
       throw new Error("La precisión GPS aún es insuficiente. Espera una mejor ubicación.");
     }
@@ -336,7 +320,10 @@ async function marcar(tipo, boton) {
       dispositivoId,
       ubicacion: ubicacionCompleta,
       direccion: direccionMarcacion,
-      validacionBiometrica,
+      validacionBiometrica: validacion.validacionBiometrica,
+      metodoValidacion: validacion.metodoValidacion,
+      intentosBiometricos: validacion.intentosBiometricos,
+      motivoMarcacionManual: validacion.motivoMarcacionManual,
       fechaHora: serverTimestamp(),
       creadoEn: serverTimestamp(),
       usuarioId: auth.currentUser.uid,
@@ -349,6 +336,96 @@ async function marcar(tipo, boton) {
     cargando = false;
     boton.disabled = false;
   }
+}
+
+async function resolverValidacionMarcacion(tipo) {
+  const disponible = await biometriaDisponibleEnDispositivo();
+
+  if (!disponible) {
+    return confirmarMarcacionManual({
+      tipo,
+      intentos: 0,
+      motivo: "BIOMETRIA_NO_DISPONIBLE",
+      mensaje:
+        "Este celular no ofrece validación mediante huella, rostro o seguridad local. Puedes continuar con una marcación manual.",
+    });
+  }
+
+  const maximoIntentos = 3;
+  let ultimoError = null;
+
+  for (let intento = 1; intento <= maximoIntentos; intento += 1) {
+    try {
+      await validarBiometria();
+      return {
+        validacionBiometrica: true,
+        metodoValidacion: "BIOMETRIA_DISPOSITIVO",
+        intentosBiometricos: intento,
+        motivoMarcacionManual: null,
+      };
+    } catch (error) {
+      ultimoError = error;
+
+      if (intento < maximoIntentos) {
+        const reintento = await Swal.fire({
+          icon: "warning",
+          title: "No se pudo validar tu identidad",
+          html: `<p>Intento ${intento} de ${maximoIntentos}.</p><p>Vuelve a intentarlo con la huella, rostro o seguridad configurada en tu celular.</p>`,
+          showCancelButton: true,
+          confirmButtonText: "Reintentar validación",
+          cancelButtonText: "Cancelar marcación",
+          confirmButtonColor: "#2563eb",
+        });
+        if (!reintento.isConfirmed) return null;
+      }
+    }
+  }
+
+  return confirmarMarcacionManual({
+    tipo,
+    intentos: maximoIntentos,
+    motivo: "BIOMETRIA_FALLIDA",
+    mensaje: `No se pudo validar tu identidad después de ${maximoIntentos} intentos.${ultimoError?.name === "NotAllowedError" ? " La validación fue cancelada, rechazada o bloqueada por el celular." : ""}`,
+  });
+}
+
+async function biometriaDisponibleEnDispositivo() {
+  if (!window.PublicKeyCredential || !navigator.credentials) return false;
+
+  if (
+    typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable !==
+    "function"
+  ) {
+    return true;
+  }
+
+  try {
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  } catch (error) {
+    console.warn("No se pudo comprobar la seguridad local del dispositivo:", error);
+    return true;
+  }
+}
+
+async function confirmarMarcacionManual({ tipo, intentos, motivo, mensaje }) {
+  const confirmacion = await Swal.fire({
+    icon: "question",
+    title: `Marcar ${etiqueta(tipo)} manualmente`,
+    text: mensaje,
+    showCancelButton: true,
+    confirmButtonText: "Realizar marcación manual",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#2563eb",
+  });
+
+  if (!confirmacion.isConfirmed) return null;
+
+  return {
+    validacionBiometrica: false,
+    metodoValidacion: "MANUAL",
+    intentosBiometricos: intentos,
+    motivoMarcacionManual: motivo,
+  };
 }
 
 async function validarBiometria() {
