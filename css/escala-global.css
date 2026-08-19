@@ -21,10 +21,14 @@
     Compensamos el zoom aplicado a #contenedorVista para que 90/94vh siga
     correspondiendo al alto real de la pantalla y no corte cabecera o pie.
   */
-  body[data-tamano-sistema="grande"] #contenedorVista .modal{zoom:.862!important}
-  body[data-tamano-sistema="muy-grande"] #contenedorVista .modal{zoom:.769!important}
-  body[data-tamano-sistema="grande"] #contenedorVista .modal,
-  body[data-tamano-sistema="muy-grande"] #contenedorVista .modal{
+  body[data-tamano-sistema="grande"] #contenedorVista :is(.modal,.modal-permisos,.modal-feriados,.modal-resumen-dashboard),
+  body[data-tamano-sistema="grande"] #contenedorVista>[id^="modal"]{zoom:.862!important}
+  body[data-tamano-sistema="muy-grande"] #contenedorVista :is(.modal,.modal-permisos,.modal-feriados,.modal-resumen-dashboard),
+  body[data-tamano-sistema="muy-grande"] #contenedorVista>[id^="modal"]{zoom:.769!important}
+  body[data-tamano-sistema="grande"] #contenedorVista :is(.modal,.modal-permisos,.modal-feriados,.modal-resumen-dashboard),
+  body[data-tamano-sistema="grande"] #contenedorVista>[id^="modal"],
+  body[data-tamano-sistema="muy-grande"] #contenedorVista :is(.modal,.modal-permisos,.modal-feriados,.modal-resumen-dashboard),
+  body[data-tamano-sistema="muy-grande"] #contenedorVista>[id^="modal"]{
     width:100%!important;
     height:100dvh!important;
     max-width:100vw!important;
@@ -43,6 +47,7 @@
   .selector-tamano-global{display:none}
   .topbar-acciones-global{gap:6px}
   #contenedorVista{width:100%!important;zoom:1!important}
-  #contenedorVista .modal{zoom:1!important}
+  #contenedorVista :is(.modal,.modal-permisos,.modal-feriados,.modal-resumen-dashboard),
+  #contenedorVista>[id^="modal"]{zoom:1!important}
   #contenedorVista>.modal-detalle-auditoria{zoom:1!important}
 }
