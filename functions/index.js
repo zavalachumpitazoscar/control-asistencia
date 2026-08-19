@@ -13,6 +13,9 @@ const ORIGIN=process.env.WEBAUTHN_ORIGIN||"https://zavalachumpitazoscar.github.i
 const BASE_URL=process.env.PUBLIC_BASE_URL||`${ORIGIN}/control-asistencia`;
 const SECUENCIA=["ENTRADA","INICIO_ALMUERZO","FIN_ALMUERZO","SALIDA"];
 
+// Portal general de administración y registro seguro de empresas.
+Object.assign(exports, require("./superadmin"));
+
 exports.invitarColaboradorMovil=callableAdmin(async({data,admin})=>{
   const colaboradorId=texto(data.colaboradorId);const ref=db.doc(`colaboradores/${colaboradorId}`),snap=await ref.get();
   if(!snap.exists||snap.data().empresaId!==admin.empresaId)throw new HttpsError("not-found","No se encontró el colaborador.");
