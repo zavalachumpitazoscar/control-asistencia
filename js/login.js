@@ -1,417 +1,101 @@
-import {
-    signInWithEmailAndPassword,
-    signOut
-}
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { auth, db } from "./firebase-config.js";
 
+const form = document.getElementById("loginForm");
+const btnLogin = document.getElementById("btnLogin");
+const toast = document.getElementById("toast");
+const correoInput = document.getElementById("correo");
+const passwordInput = document.getElementById("password");
+const togglePassword = document.getElementById("togglePassword");
+let ingresando = false;
+let toastTimer;
 
-import {
-    doc,
-    getDoc
-}
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
-
-import {
-    auth,
-    db
-}
-from "./firebase-config.js";
-
-
-
-const btnLogin =
-    document.getElementById("btnLogin");
-
-
-const toast =
-    document.getElementById("toast");
-
-
-
-let ingresando=false;
-
-
-
-function mostrarToast(tipo,mensaje){
-
-
-    toast.className =
-        "toast " + tipo;
-
-
-    toast.textContent =
-        mensaje;
-
-
-    toast.classList.add(
-        "mostrar"
-    );
-
-
-    setTimeout(()=>{
-
-        toast.classList.remove(
-            "mostrar"
-        );
-
-    },3000);
-
-
+function mostrarToast(tipo, mensaje) {
+  clearTimeout(toastTimer);
+  toast.className = `toast ${tipo}`;
+  toast.textContent = mensaje;
+  requestAnimationFrame(() => toast.classList.add("mostrar"));
+  toastTimer = setTimeout(() => toast.classList.remove("mostrar"), 4000);
 }
 
-
-
-
-function mostrarCarga(){
-
-
-    btnLogin.disabled=true;
-
-
-    btnLogin.classList.add(
-        "cargando"
-    );
-
-
-    btnLogin.innerHTML =
-    `
-    <span>
-        Verificando...
-    </span>
-    `;
-
-
+function mostrarCarga() {
+  btnLogin.disabled = true;
+  btnLogin.classList.add("cargando");
+  btnLogin.querySelector("span").textContent = "Verificando acceso";
 }
 
-
-
-
-function ocultarCarga(){
-
-
-    btnLogin.disabled=false;
-
-
-    btnLogin.classList.remove(
-        "cargando"
-    );
-
-
-    btnLogin.innerHTML =
-        "Ingresar";
-
-
+function ocultarCarga() {
+  btnLogin.disabled = false;
+  btnLogin.classList.remove("cargando");
+  btnLogin.querySelector("span").textContent = "Ingresar al sistema";
 }
 
+togglePassword.addEventListener("click", () => {
+  const visible = passwordInput.type === "text";
+  passwordInput.type = visible ? "password" : "text";
+  togglePassword.setAttribute("aria-pressed", String(!visible));
+  togglePassword.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
+  passwordInput.focus();
+});
 
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (ingresando) return;
 
+  const correo = correoInput.value.trim();
+  const password = passwordInput.value;
+  if (!correo || !password) {
+    mostrarToast("error", "Completa el correo y la contraseña para continuar.");
+    (!correo ? correoInput : passwordInput).focus();
+    return;
+  }
+  if (!correoInput.validity.valid) {
+    mostrarToast("error", "Ingresa un correo electrónico válido.");
+    correoInput.focus();
+    return;
+  }
 
-
-btnLogin.addEventListener(
-
-"click",
-
-async()=>{
-
-
-    if(ingresando){
-
-        return;
-
+  ingresando = true;
+  mostrarCarga();
+  try {
+    const credencial = await signInWithEmailAndPassword(auth, correo, password);
+    const uid = credencial.user.uid;
+    const documento = await getDoc(doc(db, "usuarios", uid));
+    if (!documento.exists()) {
+      await signOut(auth);
+      mostrarToast("error", "No encontramos información de la empresa asociada.");
+      return;
     }
 
-
-    const correo =
-
-        document
-        .getElementById("correo")
-        .value
-        .trim();
-
-
-
-    const password =
-
-        document
-        .getElementById("password")
-        .value;
-
-
-
-    if(
-        correo === "" ||
-        password === ""
-    ){
-
-
-        mostrarToast(
-
-            "error",
-
-            "Ingrese correo y contraseña."
-
-        );
-
-
-        return;
-
+    const usuario = documento.data();
+    if (usuario.estado !== "ACTIVO") {
+      await signOut(auth);
+      mostrarToast("info", "Esta cuenta se encuentra inactiva. Comunícate con el administrador.");
+      return;
     }
 
-
-
-    ingresando=true;
-
-
-    mostrarCarga();
-
-
-
-    try{
-
-
-        const credencial =
-
-            await signInWithEmailAndPassword(
-
-                auth,
-
-                correo,
-
-                password
-
-            );
-
-
-
-        const uid =
-
-            credencial.user.uid;
-
-
-
-        const referencia =
-
-            doc(
-
-                db,
-
-                "usuarios",
-
-                uid
-
-            );
-
-
-
-        const documento =
-
-            await getDoc(
-                referencia
-            );
-
-
-
-
-        if(!documento.exists()){
-
-
-            await signOut(auth);
-
-
-            mostrarToast(
-
-                "error",
-
-                "No existe información de la empresa."
-
-            );
-
-
-            return;
-
-        }
-
-
-
-
-// Guardar información de la sesión
-
-const usuario =
-    documento.data();
-
-sessionStorage.setItem(
-    "empresaId",
-    usuario.empresaId
-);
-
-sessionStorage.setItem(
-    "uid",
-    usuario.uid
-);
-
-sessionStorage.setItem(
-    "rol",
-    usuario.rol
-);
-
-sessionStorage.setItem(
-    "principal",
-    usuario.principal
-);
-
-sessionStorage.setItem(
-    "nombre",
-    usuario.nombre || ""
-);
-
-sessionStorage.setItem(
-    "correo",
-    usuario.correo || ""
-);
-
-        // Validar estado
-
-        if(usuario.estado !== "ACTIVO"){
-
-
-
-            await signOut(auth);
-
-
-
-            mostrarToast(
-
-                "info",
-
-                "La cuenta se encuentra inactiva."
-
-            );
-
-
-
-            return;
-
-        }
-
-
-
-
-
-        // Validar tipo de cuenta
-
-
-
-
-
-
-        mostrarToast(
-
-            "exito",
-
-            "Bienvenido nuevamente."
-
-        );
-
-
-
-
-        setTimeout(()=>{
-
-            window.location.href =
-                "inicio.html";
-
-
-        },1000);
-
-
-
-
-
-    }
-
-
-    catch(error){
-
-
-        console.error(error);
-
-
-
-        switch(error.code){
-
-
-
-            case "auth/invalid-credential":
-
-
-            case "auth/wrong-password":
-
-
-            case "auth/user-not-found":
-
-
-                mostrarToast(
-
-                    "error",
-
-                    "Correo o contraseña incorrectos."
-
-                );
-
-            break;
-
-
-
-
-            case "auth/invalid-email":
-
-
-                mostrarToast(
-
-                    "error",
-
-                    "Correo electrónico inválido."
-
-                );
-
-
-            break;
-
-
-
-
-            default:
-
-
-                mostrarToast(
-
-                    "error",
-
-                    "No se pudo iniciar sesión."
-
-                );
-
-
-        }
-
-
-    }
-
-
-    finally{
-
-
-        ingresando=false;
-
-
-        ocultarCarga();
-
-
-    }
-
-
-
-}
-
-);
+    sessionStorage.setItem("empresaId", usuario.empresaId);
+    sessionStorage.setItem("uid", usuario.uid || uid);
+    sessionStorage.setItem("rol", usuario.rol);
+    sessionStorage.setItem("principal", usuario.principal);
+    sessionStorage.setItem("nombre", usuario.nombre || "");
+    sessionStorage.setItem("correo", usuario.correo || correo);
+    mostrarToast("exito", "Acceso correcto. Estamos preparando tu panel.");
+    setTimeout(() => { window.location.href = "inicio.html"; }, 850);
+  } catch (error) {
+    console.error(error);
+    const mensajes = {
+      "auth/invalid-credential": "El correo o la contraseña son incorrectos.",
+      "auth/wrong-password": "El correo o la contraseña son incorrectos.",
+      "auth/user-not-found": "El correo o la contraseña son incorrectos.",
+      "auth/invalid-email": "Ingresa un correo electrónico válido.",
+      "auth/too-many-requests": "Se realizaron demasiados intentos. Espera un momento y vuelve a intentarlo.",
+      "auth/network-request-failed": "No se pudo conectar. Revisa tu conexión a internet."
+    };
+    mostrarToast("error", mensajes[error.code] || "No se pudo iniciar sesión. Inténtalo nuevamente.");
+  } finally {
+    ingresando = false;
+    ocultarCarga();
+  }
+});
