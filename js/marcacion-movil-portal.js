@@ -2,7 +2,9 @@ import { auth, db } from "./firebase-config.js";
 import {
   createUserWithEmailAndPassword,
   deleteUser,
+  browserSessionPersistence,
   onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut,
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -28,6 +30,11 @@ let creandoCuenta = false;
 let observadorUbicacion = null;
 let marcacionesPortal = [];
 let vistaHistorial = "hoy";
+let controlSesionIntervalo = null;
+let ultimoAvisoInactividad = false;
+const INACTIVIDAD_MAXIMA_MS = 10 * 60 * 1000;
+const AVISO_INACTIVIDAD_MS = 9 * 60 * 1000;
+const DURACION_MAXIMA_SESION_MS = 8 * 60 * 60 * 1000;
 const accesoDesdeCelular = esCelularPermitido();
 const dispositivoId = accesoDesdeCelular ? obtenerDispositivoId() : null;
 
@@ -38,7 +45,7 @@ document.getElementById("crearAccesoMovil").onclick = crearAcceso;
 document.getElementById("solicitarDispositivoMovil").onclick = solicitarDispositivo;
 document.getElementById("actualizarUbicacionMovil").onclick = obtenerUbicacion;
 document.querySelectorAll("[data-salir-movil]").forEach(
-  (boton) => (boton.onclick = () => signOut(auth)),
+  (boton) => (boton.onclick = cerrarSesionManual),
 );
 document.querySelector(".botones-marcacion").onclick = (evento) => {
   const boton = evento.target.closest("[data-tipo-marca]");
@@ -66,10 +73,12 @@ onAuthStateChanged(auth, async (usuario) => {
     return;
   }
   if (!usuario) {
+    detenerControlSesion();
     detenerUbicacion();
     mostrar("pantallaLogin");
     return;
   }
+  iniciarControlSesion();
   // createUserWithEmailAndPassword dispara este observador antes de que
   // crearAcceso termine de vincular al colaborador. Evitamos que ambos
   // procesos intenten crear usuariosMoviles/{uid} al mismo tiempo.
@@ -96,6 +105,7 @@ async function crearAcceso() {
   estadoBotonAcceso("crearAccesoMovil", true, "Creando contraseña…");
   estadoBotonAcceso("ingresarMovil", true);
   try {
+    await setPersistence(auth, browserSessionPersistence);
     const credencial = await createUserWithEmailAndPassword(auth, correo, password);
     cuentaFirebaseCreada = true;
     const habilitado = await buscarAcceso(correo);
@@ -136,6 +146,7 @@ async function ingresar() {
   estadoBotonAcceso("ingresarMovil", true, "Ingresando…");
   estadoBotonAcceso("crearAccesoMovil", true);
   try {
+    await setPersistence(auth, browserSessionPersistence);
     await signInWithEmailAndPassword(auth, correo, password);
   } catch {
     mensajeLogin("No se pudo ingresar. Revisa tus credenciales.");
@@ -304,6 +315,17 @@ async function marcar(tipo, boton) {
       }
     }
     const fecha = fechaLocal();
+    const direccionMarcacion = await obtenerDireccionMarcacion(ubicacion);
+    const ubicacionCompleta = {
+      ...ubicacion,
+      direccion: direccionMarcacion.direccionCompleta,
+      calle: direccionMarcacion.calle,
+      numero: direccionMarcacion.numero,
+      distrito: direccionMarcacion.distrito,
+      provincia: direccionMarcacion.provincia,
+      departamento: direccionMarcacion.departamento,
+      pais: direccionMarcacion.pais,
+    };
     await setDoc(doc(db, "marcaciones", `MOVIL_${acceso.colaboradorId}_${Date.now()}`), {
       empresaId: acceso.empresaId,
       colaboradorId: acceso.colaboradorId,
@@ -312,7 +334,8 @@ async function marcar(tipo, boton) {
       tipo,
       origen: "MOVIL",
       dispositivoId,
-      ubicacion,
+      ubicacion: ubicacionCompleta,
+      direccion: direccionMarcacion,
       validacionBiometrica,
       fechaHora: serverTimestamp(),
       creadoEn: serverTimestamp(),
@@ -422,8 +445,9 @@ function pintarHistorial() {
         const origen = String(marca.origen || "SISTEMA").toUpperCase() === "MOVIL"
           ? "Móvil"
           : "Sistema";
+        const direccion = marca.direccion?.direccionCompleta || marca.ubicacion?.direccion || "";
         const gps = marca.ubicacion
-          ? ` · GPS ±${Math.round(marca.ubicacion.precisionMetros || 0)} m`
+          ? ` · GPS ±${Math.round(marca.ubicacion.precisionMetros || 0)} m${direccion ? ` · ${direccion} · © OpenStreetMap` : ""}`
           : "";
         return `<div class="marca-historial"><i class="bi ${iconoTipo(marca.tipo)}"></i><span><strong>${html(etiqueta(marca.tipo))}</strong><small>${html(fecha)} · ${html(origen)}${html(gps)}</small></span><time>${html(hora)}</time></div>`;
       }).join("")
@@ -679,6 +703,126 @@ function detenerUbicacion() {
   }
 }
 
+async function obtenerDireccionMarcacion(posicion) {
+  const vacia = {
+    direccionCompleta: "Dirección no disponible",
+    calle: null,
+    numero: null,
+    distrito: null,
+    provincia: null,
+    departamento: null,
+    pais: null,
+    proveedor: "OpenStreetMap Nominatim",
+  };
+  try {
+    const parametros = new URLSearchParams({
+      format: "jsonv2",
+      lat: String(posicion.latitud),
+      lon: String(posicion.longitud),
+      zoom: "18",
+      addressdetails: "1",
+      accept_language: "es",
+    });
+    const respuesta = await fetch(`https://nominatim.openstreetmap.org/reverse?${parametros}`, {
+      headers: { Accept: "application/json" },
+      referrerPolicy: "strict-origin-when-cross-origin",
+    });
+    if (!respuesta.ok) throw new Error("No se pudo consultar la dirección.");
+    const datos = await respuesta.json();
+    const direccion = datos.address || {};
+    const calle = direccion.road || direccion.pedestrian || direccion.footway || direccion.residential || direccion.neighbourhood || null;
+    const numero = direccion.house_number || null;
+    return {
+      direccionCompleta: datos.display_name || [calle, numero].filter(Boolean).join(" ") || vacia.direccionCompleta,
+      calle,
+      numero,
+      distrito: direccion.city_district || direccion.suburb || direccion.district || direccion.municipality || null,
+      provincia: direccion.province || direccion.county || direccion.city || direccion.town || direccion.village || null,
+      departamento: direccion.state || direccion.region || null,
+      pais: direccion.country || "Perú",
+      codigoPostal: direccion.postcode || null,
+      proveedor: "OpenStreetMap Nominatim",
+      consultadoEn: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.warn("No se pudo obtener la dirección de la marcación:", error);
+    return vacia;
+  }
+}
+
+function iniciarControlSesion() {
+  const ahora = Date.now();
+  if (!sessionStorage.getItem("inicioSesionMarcacionMovil")) {
+    sessionStorage.setItem("inicioSesionMarcacionMovil", String(ahora));
+  }
+  registrarActividadSesion();
+  if (controlSesionIntervalo) return;
+  ["pointerdown", "touchstart", "keydown", "scroll"].forEach((evento) =>
+    window.addEventListener(evento, registrarActividadSesion, { passive: true }),
+  );
+  document.addEventListener("visibilitychange", comprobarVigenciaSesion);
+  controlSesionIntervalo = setInterval(comprobarVigenciaSesion, 30000);
+}
+
+function registrarActividadSesion() {
+  sessionStorage.setItem("ultimaActividadMarcacionMovil", String(Date.now()));
+  ultimoAvisoInactividad = false;
+}
+
+async function comprobarVigenciaSesion() {
+  if (!auth.currentUser) {
+    detenerControlSesion();
+    mostrar("pantallaLogin");
+    return;
+  }
+  const ahora = Date.now();
+  const inicio = Number(sessionStorage.getItem("inicioSesionMarcacionMovil") || ahora);
+  const ultimaActividad = Number(sessionStorage.getItem("ultimaActividadMarcacionMovil") || inicio);
+  if (ahora - inicio >= DURACION_MAXIMA_SESION_MS) {
+    await cerrarSesionPorTiempo("La sesión alcanzó el máximo de 8 horas. Ingresa nuevamente.");
+    return;
+  }
+  if (ahora - ultimaActividad >= INACTIVIDAD_MAXIMA_MS) {
+    await cerrarSesionPorTiempo("La sesión se cerró por 10 minutos de inactividad.");
+    return;
+  }
+  if (ahora - ultimaActividad >= AVISO_INACTIVIDAD_MS && !ultimoAvisoInactividad) {
+    ultimoAvisoInactividad = true;
+    aviso("Sesión por cerrarse", "Tu sesión se cerrará en un minuto si no realizas ninguna acción.", "warning");
+  }
+}
+
+async function cerrarSesionPorTiempo(mensaje) {
+  detenerControlSesion();
+  detenerUbicacion();
+  sessionStorage.removeItem("inicioSesionMarcacionMovil");
+  sessionStorage.removeItem("ultimaActividadMarcacionMovil");
+  await signOut(auth);
+  mensajeLogin(mensaje);
+  mostrar("pantallaLogin");
+}
+
+async function cerrarSesionManual() {
+  detenerControlSesion();
+  detenerUbicacion();
+  sessionStorage.removeItem("inicioSesionMarcacionMovil");
+  sessionStorage.removeItem("ultimaActividadMarcacionMovil");
+  await signOut(auth);
+  mostrar("pantallaLogin");
+}
+
+function detenerControlSesion() {
+  if (controlSesionIntervalo) {
+    clearInterval(controlSesionIntervalo);
+    controlSesionIntervalo = null;
+  }
+  ["pointerdown", "touchstart", "keydown", "scroll"].forEach((evento) =>
+    window.removeEventListener(evento, registrarActividadSesion),
+  );
+  document.removeEventListener("visibilitychange", comprobarVigenciaSesion);
+  ultimoAvisoInactividad = false;
+}
+
 function obtenerDispositivoId() {
   let id = localStorage.getItem("dispositivoMarcacionMovil");
   if (!id) {
@@ -849,4 +993,3 @@ function html(valorHtml) {
       ],
   );
 }
-
