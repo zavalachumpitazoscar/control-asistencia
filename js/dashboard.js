@@ -1,4 +1,5 @@
 import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260818-7";
+import { obtenerEstadoPlan } from "./suscripcion-limites.js?v=20260819-1";
 
 let cargaActual = 0;
 let detallesDashboard = {};
@@ -57,6 +58,7 @@ async function cargarDashboard() {
     const resultados = await Promise.all(coleccionesDashboard.map((nombre) => consultarColeccionEmpresa(nombre, empresaId)));
     if (turno !== cargaActual || !document.querySelector(".dashboard-pagina")) return;
     datosDashboard = Object.fromEntries(coleccionesDashboard.map((nombre, i) => [nombre, resultados[i]]));
+    datosDashboard.estadoPlan = await obtenerEstadoPlan(empresaId, datosDashboard.colaboradores.length);
     fechaUltimaCargaDashboard = new Date();
     prepararFiltrosDashboard(datosDashboard.colaboradores);
     renderizarDashboardFiltrado();
@@ -85,6 +87,32 @@ function renderizarDashboardFiltrado() {
   renderizarConfiguracion(activos, registrosDia, datos, fecha);
   calcularMes(fecha, datos);
   actualizarEstadoActualizacion(fecha);
+  renderizarPlanDashboard(datosDashboard.estadoPlan);
+}
+
+function renderizarPlanDashboard(estado) {
+  if (!estado) return;
+  const { plan, usados, maximo, disponibles, suscripcion } = estado;
+  const ilimitado = maximo === null;
+  const porcentaje = ilimitado ? 35 : Math.min(100, Math.round((usados / maximo) * 100));
+  const excedido = !ilimitado && usados > maximo;
+  const completo = !ilimitado && usados === maximo;
+  const cerca = !ilimitado && usados / maximo >= .8 && !completo && !excedido;
+  asignar("nombrePlanDashboard", plan.nombre);
+  asignar("usoPlanDashboard", ilimitado ? `${usados} colaboradores · sin máximo` : `${usados} de ${maximo} colaboradores`);
+  asignar("cuposPlanDashboard", ilimitado ? "Colaboradores ilimitados" : excedido ? `Límite excedido por ${usados - maximo}` : `${disponibles} ${disponibles === 1 ? "cupo disponible" : "cupos disponibles"}`);
+  const barra = document.getElementById("barraPlanDashboard");
+  if (barra) barra.style.width = `${porcentaje}%`;
+  const estadoVisual = document.getElementById("estadoPlanDashboard");
+  if (estadoVisual) {
+    estadoVisual.className = `plan-estado ${excedido || completo ? "limite" : cerca ? "cerca" : "disponible"}`;
+    estadoVisual.textContent = excedido ? "Plan excedido" : completo ? "Límite alcanzado" : cerca ? "Cerca del límite" : ilimitado ? "Sin límite" : "Disponible";
+  }
+  const hoy = fechaLocal(new Date());
+  const vencida = suscripcion.fechaFin && suscripcion.fechaFin < hoy;
+  const condicion = vencida ? "Suscripción vencida" : suscripcion.condicion === "PAGADO" ? "Pagado" : suscripcion.condicion === "SIN_PAGAR" ? "Pago pendiente" : "Plan gratuito";
+  asignar("vigenciaPlanDashboard", suscripcion.fechaFin ? `${condicion} · vence ${fechaVisible(suscripcion.fechaFin)}` : condicion);
+  document.getElementById("planEmpresaDashboard")?.classList.toggle("vencido", Boolean(vencida));
 }
 
 function prepararDetalles(activos, registros, fecha) {
