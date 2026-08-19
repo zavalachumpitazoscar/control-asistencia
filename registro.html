@@ -1,400 +1,87 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-    <title>Registro de Empresa</title>
-
-    <link
-        rel="stylesheet"
-        href="css/registro.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1633">
+  <title>Registrar empresa | Control Empresarial</title>
+  <link rel="stylesheet" href="css/registro.css?v=20260819-1">
 </head>
-
 <body>
+  <div class="page-shell">
+    <aside class="side-panel">
+      <a class="brand" href="index.html"><span class="brand-mark"><img src="img/logo.png" alt="Logo"></span><span><strong>Control Empresarial</strong><small>Gestión inteligente de asistencia</small></span></a>
+      <div class="side-copy"><span class="eyebrow">Configuración inicial</span><h1>Prepara tu empresa en pocos pasos.</h1><p>Registra la información esencial para comenzar a gestionar colaboradores, horarios y marcaciones.</p></div>
+      <div class="trust"><span>✓</span><p><strong>Proceso seguro</strong><small>Tu información se almacena de manera protegida.</small></p></div>
+    </aside>
 
-    <div class="registro-container">
+    <main class="registro-container">
+      <div class="registro-card">
+        <header class="registro-header">
+          <a class="volver" href="index.html" aria-label="Volver al inicio de sesión">← <span>Volver al acceso</span></a>
+          <div class="mobile-brand"><span class="brand-mark"><img src="img/logo.png" alt="Logo"></span><strong>Control Empresarial</strong></div>
+          <span class="section-tag">Registro empresarial</span>
+          <h2>Crear una nueva empresa</h2>
+          <p>Completa los datos solicitados. Podrás administrar el resto de la configuración después.</p>
+        </header>
 
-        <!-- Tarjeta -->
+        <div class="progress" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
+        <nav class="steps" aria-label="Progreso del registro">
+          <div class="step active" data-step="1"><span>1</span><small>Acceso</small></div>
+          <div class="step" data-step="2"><span>2</span><small>Empresa</small></div>
+          <div class="step" data-step="3"><span>3</span><small>Ubicación</small></div>
+          <div class="step" data-step="4"><span>4</span><small>Representantes</small></div>
+          <div class="step" data-step="5"><span>5</span><small>Resumen</small></div>
+        </nav>
 
-        <div class="registro-card">
+        <div class="form-area">
+          <section class="form-step active" id="paso1">
+            <div class="step-heading"><span>01</span><div><h2>Datos de acceso</h2><p>Crea las credenciales de la cuenta administradora.</p></div></div>
+            <label class="field full"><span>Correo empresarial *</span><input type="email" id="correo" placeholder="administrador@empresa.com" autocomplete="email"></label>
+            <label class="field"><span>Contraseña *</span><input type="password" id="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password"></label>
+            <label class="field"><span>Confirmar contraseña *</span><input type="password" id="confirmPassword" placeholder="Repite la contraseña" autocomplete="new-password"></label>
+            <div class="password-help full"><span>i</span> Debe incluir mayúscula, minúscula, número y carácter especial.</div>
+          </section>
 
-            <!-- Encabezado -->
+          <section class="form-step" id="paso2">
+            <div class="step-heading"><span>02</span><div><h2>Información de la empresa</h2><p>Datos principales para identificar tu organización.</p></div></div>
+            <label class="field"><span>RUC *</span><input type="text" id="ruc" maxlength="11" inputmode="numeric" placeholder="11 dígitos"></label>
+            <label class="field"><span>Razón social *</span><input type="text" id="razonSocial" placeholder="Nombre legal de la empresa"></label>
+            <label class="field full"><span>Giro comercial *</span><input type="text" id="giro" placeholder="Ejemplo: Servicios empresariales"></label>
+          </section>
 
-            <div class="registro-header">
+          <section class="form-step" id="paso3">
+            <div class="step-heading"><span>03</span><div><h2>Ubicación principal</h2><p>Indica el domicilio principal de la empresa.</p></div></div>
+            <label class="field full"><span>Dirección *</span><input type="text" id="direccion" placeholder="Av., calle, número y referencia"></label>
+            <label class="field"><span>Departamento *</span><input type="text" id="departamento" placeholder="Departamento"></label>
+            <label class="field"><span>Provincia *</span><input type="text" id="provincia" placeholder="Provincia"></label>
+            <label class="field"><span>Distrito *</span><input type="text" id="distrito" placeholder="Distrito"></label>
+            <label class="field"><span>País *</span><input type="text" id="pais" value="Perú"></label>
+            <label class="field"><span>Código postal</span><input type="text" id="codigoPostal" placeholder="Opcional" inputmode="numeric"></label>
+          </section>
 
-                <div class="logo">
-
-                    🏢
-
-                </div>
-
-                <h1>
-
-                    Crear Empresa
-
-                </h1>
-
-                <p>
-
-                    Complete la información para registrar su empresa.
-
-                </p>
-
+          <section class="form-step" id="paso4">
+            <div class="step-heading"><span>04</span><div><h2>Representantes legales</h2><p>Registra al menos una persona responsable de la empresa.</p></div></div>
+            <div id="contenedorRepresentantes" class="full">
+              <div class="representante" data-index="1"><h3>Representante 1</h3><input type="text" class="repNombre" placeholder="Nombre completo"><input type="text" class="repDni" maxlength="8" inputmode="numeric" placeholder="DNI"><input type="email" class="repCorreo" placeholder="Correo electrónico"><input type="text" class="repTelefono" inputmode="tel" placeholder="Teléfono"><button type="button" class="btnEliminarRepresentante oculto">Eliminar representante</button></div>
             </div>
-
-            <!-- Barra de progreso -->
-
-            <div class="progress">
-
-                <div
-                    id="progressBar"
-                    class="progress-bar">
-
-                </div>
-
-            </div>
-
-            <!-- Indicadores -->
-
-            <div class="steps">
-
-                <div class="step active" data-step="1">
-
-                    <span>1</span>
-
-                    <small>Acceso</small>
-
-                </div>
-
-                <div class="step" data-step="2">
-
-                    <span>2</span>
-
-                    <small>Empresa</small>
-
-                </div>
-
-                <div class="step" data-step="3">
-
-                    <span>3</span>
-
-                    <small>Ubicación</small>
-
-                </div>
-
-                <div class="step" data-step="4">
-
-                    <span>4</span>
-
-                    <small>Representantes</small>
-
-                </div>
-
-                <div class="step" data-step="5">
-
-                    <span>5</span>
-
-                    <small>Resumen</small>
-
-                </div>
-
-            </div>
-
-            <!-- ============================= -->
-
-            <!-- PASO 1 -->
-
-            <!-- ============================= -->
-
-            <section
-                class="form-step active"
-                id="paso1">
-
-                <h2>
-
-                    Datos de acceso
-
-                </h2>
-
-                <input
-                    type="email"
-                    id="correo"
-                    placeholder="Correo empresarial">
-
-                <input
-                    type="password"
-                    id="password"
-                    placeholder="Contraseña">
-
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    placeholder="Confirmar contraseña">
-
-            </section>
-
-            <!-- ============================= -->
-
-            <!-- PASO 2 -->
-
-            <!-- ============================= -->
-
-            <section
-                class="form-step"
-                id="paso2">
-
-                <h2>
-
-                    Información de la empresa
-
-                </h2>
-
-                <input
-                    type="text"
-                    id="ruc"
-                    maxlength="11"
-                    placeholder="RUC">
-
-                <input
-                    type="text"
-                    id="razonSocial"
-                    placeholder="Razón Social">
-
-                <input
-                    type="text"
-                    id="giro"
-                    placeholder="Giro Comercial">
-
-            </section>
-
-            <!-- ============================= -->
-
-            <!-- PASO 3 -->
-
-            <!-- ============================= -->
-
-            <section
-                class="form-step"
-                id="paso3">
-
-                <h2>
-
-                    Ubicación
-
-                </h2>
-
-                <input
-                    type="text"
-                    id="direccion"
-                    placeholder="Dirección">
-
-                <input
-                    type="text"
-                    id="departamento"
-                    placeholder="Departamento">
-
-                <input
-                    type="text"
-                    id="provincia"
-                    placeholder="Provincia">
-
-                <input
-                    type="text"
-                    id="distrito"
-                    placeholder="Distrito">
-
-                <input
-                    type="text"
-                    id="pais"
-                    value="Perú">
-
-                <input
-                    type="text"
-                    id="codigoPostal"
-                    placeholder="Código Postal (Opcional)">
-
-            </section>
-
-            <!-- ============================= -->
-
-            <!-- PASO 4 -->
-
-            <!-- ============================= -->
-
-            <section
-                class="form-step"
-                id="paso4">
-
-                <h2>
-
-                    Representantes legales
-
-                </h2>
-
-                <div
-                    id="contenedorRepresentantes">
-
-                    <div class="representante" data-index="1">
-
-                        <h3>
-
-                            Representante 1
-
-                        </h3>
-
-                        <input
-                            type="text"
-                            class="repNombre"
-                            placeholder="Nombre Completo">
-
-                        <input
-                            type="text"
-                            class="repDni"
-                            maxlength="8"
-                            placeholder="DNI">
-
-                        <input
-                            type="email"
-                            class="repCorreo"
-                            placeholder="Correo">
-
-                        <input
-                            type="text"
-                            class="repTelefono"
-                            placeholder="Teléfono">
-
-                        <button type="button" class="btnEliminarRepresentante oculto"> Eliminar representante </button>
-
-                    </div>
-
-                </div>
-
-                <button
-                    type="button"
-                    id="btnAgregarRepresentante"
-                    class="btn-secundario">
-
-                    + Agregar otro representante
-
-                </button>
-
-            </section>
-
-            <!-- ============================= -->
-
-            <!-- PASO 5 -->
-
-            <!-- ============================= -->
-
-            <section
-                class="form-step"
-                id="paso5">
-
-                <h2>
-
-                    Confirmar información
-
-                </h2>
-
-                <div id="resumen"></div>
-
-            </section>
-
-            <!-- Botones -->
-
-            <div class="acciones">
-
-                <button
-                    id="btnAnterior"
-                    class="btn-secundario">
-
-                    ← Anterior
-
-                </button>
-
-                <button
-                    id="btnSiguiente"
-                    class="btn-principal">
-
-                    Siguiente →
-
-                </button>
-
-                <button
-                    id="btnRegistrar"
-                    class="btn-principal oculto">
-
-                    Crear Empresa
-
-                </button>
-
-            </div>
-
-            <div class="login-link">
-
-                ¿Ya tiene una cuenta?
-
-                <a href="index.html">
-
-                    Iniciar sesión
-
-                </a>
-
-            </div>
-
+            <button type="button" id="btnAgregarRepresentante" class="btn-secundario full">＋ Agregar otro representante</button>
+          </section>
+
+          <section class="form-step" id="paso5">
+            <div class="step-heading"><span>05</span><div><h2>Confirma la información</h2><p>Revisa los datos antes de crear la empresa.</p></div></div>
+            <div id="resumen" class="full"></div>
+          </section>
         </div>
 
-    </div>
+        <div class="acciones"><button id="btnAnterior" class="btn-secundario" type="button">← Anterior</button><button id="btnSiguiente" class="btn-principal" type="button">Siguiente →</button><button id="btnRegistrar" class="btn-principal oculto" type="button">Crear empresa</button></div>
+        <div class="login-link">¿Ya tienes una cuenta? <a href="index.html">Iniciar sesión</a></div>
+      </div>
+    </main>
+  </div>
 
-    <div
-        id="toast"
-        class="toast">
-
-    </div>
-
-    <script
-        type="module"
-        src="js/registro.js">
-
-    </script>
-
-
-
-
-    <div id="pantallaExito"
-class="pantalla-exito oculto">
-
-
-<div class="check">
-
-✓
-
-</div>
-
-
-<h2>
-
-Empresa creada correctamente
-
-</h2>
-
-
-<p>
-
-Tu organización está lista para comenzar.
-
-</p>
-
-
-</div>
-
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="pantallaExito" class="pantalla-exito oculto"><div class="success-card"><div class="check">✓</div><h2>Empresa creada correctamente</h2><p>Tu organización está lista para comenzar.</p><span>Redirigiendo al inicio de sesión…</span></div></div>
+  <script type="module" src="js/registro.js?v=20260819-1"></script>
 </body>
-
 </html>
