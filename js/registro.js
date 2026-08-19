@@ -4,23 +4,17 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-import {
-    doc,
-    setDoc,
-    serverTimestamp
-}
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js"; 
-
-import {
-    collection
-}
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 
 import {
     auth,
     db
 }
 from "./firebase-config.js";
+
+const functions = getFunctions(undefined, "us-central1");
+const registrarEmpresaSegura = httpsCallable(functions, "registrarEmpresaSegura");
+const validarDisponibilidadGlobal = httpsCallable(functions, "validarDisponibilidadGlobal");
 
 
 
@@ -160,148 +154,24 @@ Creando empresa...
 
                 );
 
-            const uid=
-
-                credencial.user.uid;
-
-
-const empresaId =
-    generarEmpresaId();
-
-await setDoc(
-
-    doc(
-        db,
-        "companias",
-        empresaId
-    ),
-
-    {
-
-        empresaId,
-
-        estado:"ACTIVO",
-
-        fechaRegistro:
-            serverTimestamp(),
-
-        empresa:{
-
-            ruc:
-                document
-                    .getElementById("ruc")
-                    .value.trim(),
-
-            razonSocial:
-                document
-                    .getElementById("razonSocial")
-                    .value.trim(),
-
-            giro:
-                document
-                    .getElementById("giro")
-                    .value.trim()
-
-        },
-
-        ubicacion:{
-
-            direccion:
-                document
-                    .getElementById("direccion")
-                    .value.trim(),
-
-            departamento:
-                document
-                    .getElementById("departamento")
-                    .value.trim(),
-
-            provincia:
-                document
-                    .getElementById("provincia")
-                    .value.trim(),
-
-            distrito:
-                document
-                    .getElementById("distrito")
-                    .value.trim(),
-
-            pais:
-                document
-                    .getElementById("pais")
-                    .value.trim(),
-
-            codigoPostal:
-                document
-                    .getElementById("codigoPostal")
-                    .value.trim()
-
-        },
-
-        representantes:
-            obtenerRepresentantes(),
-
-        configuracion:{
-
-            zonaHoraria:"America/Lima",
-
-            idioma:"es",
-
-            moneda:"PEN"
-
-        },
-
-        plan:{
-
-            nombre:"BASICO",
-
-            maxUsuarios:5,
-
-            maxEmpleados:25,
-
-            maxSucursales:1,
-
-            maxAreas:10,
-
-            maxSubareas:30
-
-        }
-
-    }
-
-);
-
-await setDoc(
-
-    doc(
-        db,
-        "usuarios",
-        uid
-    ),
-
-    {
-
-        uid,
-
-        empresaId,
-
-        principal:true,
-
-        nombre:
-            obtenerRepresentantes()[0]?.nombre || "",
-
-        correo:correo,
-
-        rol:"ADMINISTRADOR",
-
-        estado:"ACTIVO",
-
-        fechaRegistro:
-            serverTimestamp()
-
-    }
-
-);
+            const empresaId = generarEmpresaId();
+            await registrarEmpresaSegura({
+                empresaId,
+                correo,
+                ruc: document.getElementById("ruc").value.trim(),
+                razonSocial: document.getElementById("razonSocial").value.trim(),
+                giro: document.getElementById("giro").value.trim(),
+                nombre: obtenerRepresentantes()[0]?.nombre || "",
+                ubicacion: {
+                    direccion: document.getElementById("direccion").value.trim(),
+                    departamento: document.getElementById("departamento").value.trim(),
+                    provincia: document.getElementById("provincia").value.trim(),
+                    distrito: document.getElementById("distrito").value.trim(),
+                    pais: document.getElementById("pais").value.trim(),
+                    codigoPostal: document.getElementById("codigoPostal").value.trim()
+                },
+                representantes: obtenerRepresentantes()
+            });
 
 
 
@@ -312,7 +182,7 @@ await setDoc(
 
                 "exito",
 
-                "Empresa registrada correctamente."
+                "Solicitud registrada. La empresa está pendiente de activación."
 
             );
 
@@ -389,6 +259,12 @@ await setDoc(
                         "La contraseña debe tener al menos 8 caracteres."
 
                     );
+
+                    break;
+
+                case "functions/already-exists":
+
+                    mostrarToast("error", error.message || "El RUC o correo ya está registrado.");
 
                     break;
 
