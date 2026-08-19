@@ -18,7 +18,7 @@ from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import {
     iniciarFormularioHorarios
 }
-from "./horarios-formulario.js";
+from "./horarios-formulario.js?v=20260819-1";
 
 
 import {
@@ -1242,4 +1242,5 @@ document.getElementById(
     }
 
 }
+
 
