@@ -9,6 +9,12 @@ service cloud.firestore {
         && perfil().empresaId == empresaId
         && perfil().rol in ['ADMINISTRADOR', 'PROPIETARIO', 'GERENTE'];
     }
+    function administraMarcacionPorId(marcacionId) {
+      return autenticado()
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && perfil().rol in ['ADMINISTRADOR', 'PROPIETARIO', 'GERENTE']
+        && marcacionId.matches('^' + perfil().empresaId + '_.*$');
+    }
     function perfilMovil() {
       return get(/databases/$(database)/documents/usuariosMoviles/$(request.auth.uid)).data;
     }
@@ -63,7 +69,11 @@ service cloud.firestore {
     }
 
     match /marcaciones/{id} {
-      allow read: if administraEmpresa(resource.data.empresaId)
+      allow get: if administraMarcacionPorId(id)
+        || administraEmpresa(resource.data.empresaId)
+        || (esMovilEmpresa(resource.data.empresaId)
+          && resource.data.colaboradorId == perfilMovil().colaboradorId);
+      allow list: if administraEmpresa(resource.data.empresaId)
         || (esMovilEmpresa(resource.data.empresaId)
           && resource.data.colaboradorId == perfilMovil().colaboradorId);
       allow create: if administraEmpresa(request.resource.data.empresaId)
