@@ -3386,7 +3386,7 @@ function crearTardanzaHTML(registro) {
                 </strong>
 
 <span>
-    Llegada: +${llegadaPosterior} min
+    Llegada: +${formatearDuracionCorta(llegadaPosterior)}
 </span>
 
 <small>
@@ -3406,11 +3406,11 @@ function crearTardanzaHTML(registro) {
     <div class="detalle-tardanza tardanza-real">
 
         <strong>
-            ${tardanza} min
+            ${formatearDuracionCorta(tardanza)}
         </strong>
 
         <span>
-            Llegada: +${llegadaPosterior} min
+            Llegada: +${formatearDuracionCorta(llegadaPosterior)}
         </span>
 
     </div>
@@ -3455,7 +3455,7 @@ function crearDetalleDescuentoJornada(registro) {
     motivos.push({
       icono: "bi-box-arrow-in-right",
 
-      texto: `${llegadaPosterior} min por llegada posterior`,
+      texto: `${formatearDuracionCorta(llegadaPosterior)} por llegada posterior`,
 
       clase: calculo.minutosTardanza > 0 ? "negativo" : "informativo",
     });
@@ -3465,7 +3465,7 @@ function crearDetalleDescuentoJornada(registro) {
     motivos.push({
       icono: "bi-box-arrow-right",
 
-      texto: `${salidaAnticipada} min por salida anticipada`,
+      texto: `${formatearDuracionCorta(salidaAnticipada)} por salida anticipada`,
 
       clase: "negativo",
     });
@@ -3475,7 +3475,7 @@ function crearDetalleDescuentoJornada(registro) {
     motivos.push({
       icono: "bi-cup-hot",
 
-      texto: `${excesoRefrigerio} min por exceso de refrigerio`,
+      texto: `${formatearDuracionCorta(excesoRefrigerio)} por exceso de refrigerio`,
 
       clase: "negativo",
     });
@@ -3799,11 +3799,15 @@ function actualizarContadores(registros) {
 }
 
 function formatearDuracionCorta(minutosTotales) {
-  const total = Math.max(0, Number(minutosTotales || 0));
+  const total = Math.max(0, Math.round(Number(minutosTotales || 0)));
 
   const horas = Math.floor(total / 60);
 
   const minutos = total % 60;
+
+  if (horas === 0) {
+    return `${minutos} min`;
+  }
 
   if (minutos === 0) {
     return `${horas} h`;
