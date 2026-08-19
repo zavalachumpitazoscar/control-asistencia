@@ -2,7 +2,7 @@ import { iniciarNavegacionAsistencia } from "./asistencia/navegacion-asistencia.
 import { iniciarFechaAsistencia } from "./asistencia/fecha-asistencia.js";
 import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js?v=20260817-5";
 import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260818-7";
-import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js?v=20260817-1";
+import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js?v=20260819-1";
 import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260818-7";
 import { iniciarEditarDiaAsistencia } from "./asistencia/editar-dia-asistencia.js?v=20260814-1";
 import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-asistencia.js?v=20260817-1";
