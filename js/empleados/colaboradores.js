@@ -50,6 +50,8 @@ import {
 }
 from "./horarios-asignaciones.js";
 
+import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260819-1";
+
 export function iniciarColaboradores(){
 
 
@@ -3001,6 +3003,10 @@ colaboradores.some(
 
                 `;
 
+if(!colaboradorEditandoId){
+    await validarCupoColaboradores(empresaId, 1);
+}
+
 
 const datosColaborador = {
 
@@ -3182,11 +3188,17 @@ catch(error){
     );
 
 
+    const limitePlan = error?.code === "limite-plan-colaboradores";
+
     Swal.fire({
 
         icon:"error",
 
         title:
+        limitePlan
+        ?
+        "Límite del plan alcanzado"
+        :
         colaboradorEditandoId
         ?
         "No se pudo actualizar"
@@ -3194,6 +3206,10 @@ catch(error){
         "No se pudo registrar",
 
         text:
+        limitePlan
+        ?
+        error.message + " Solicita la ampliación del plan para continuar."
+        :
         colaboradorEditandoId
         ?
         "Ocurrió un error al actualizar el colaborador."
