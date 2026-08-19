@@ -1039,6 +1039,87 @@ export function iniciarFormularioHorarios({
 
             }
 
+
+            /*
+             * Las ventanas de marcación deben ocupar tramos independientes.
+             * Se valida con los extremos más amplios posibles:
+             * entrada permitida hasta <= primer inicio de refrigerio, y
+             * último inicio de refrigerio + duración <= salida permitida desde.
+             * La misma regla se aplica al crear y al editar porque ambos flujos
+             * pasan por esta función antes de escribir en Firestore.
+             */
+            const minutosEnJornada = hora => {
+
+                let minutos = convertirHoraAMinutos(hora);
+
+                if(
+                    datos.cruzaMedianoche
+                    &&
+                    minutos < convertirHoraAMinutos(entrada.permitirDesde)
+                ){
+
+                    minutos += 24 * 60;
+
+                }
+
+                return minutos;
+
+            };
+
+
+            const finVentanaEntrada =
+            minutosEnJornada(entrada.permitirHasta);
+
+
+            const inicioVentanaRefrigerio =
+            minutosEnJornada(refrigerio.permitirInicioDesde);
+
+
+            const finMaximoRefrigerio =
+            minutosEnJornada(refrigerio.permitirInicioHasta)
+            +
+            refrigerio.duracionMinutos;
+
+
+            const inicioVentanaSalida =
+            minutosEnJornada(salida.permitirDesde);
+
+
+            if(
+                finVentanaEntrada >
+                inicioVentanaRefrigerio
+            ){
+
+                await mostrarAdvertencia(
+
+                    "Entrada y refrigerio se intersectan",
+
+                    `La entrada solo puede permitirse hasta ${refrigerio.permitirInicioDesde} como máximo, porque desde esa hora comienza la ventana de refrigerio.`
+
+                );
+
+                return false;
+
+            }
+
+
+            if(
+                finMaximoRefrigerio >
+                inicioVentanaSalida
+            ){
+
+                await mostrarAdvertencia(
+
+                    "Refrigerio y salida se intersectan",
+
+                    `La salida no puede permitirse antes de que termine el último refrigerio posible. Con el rango y duración actuales, el refrigerio podría finalizar después de ${salida.permitirDesde}.`
+
+                );
+
+                return false;
+
+            }
+
         }
 
 
