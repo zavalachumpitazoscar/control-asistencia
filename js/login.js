@@ -8,6 +8,7 @@ const toast = document.getElementById("toast");
 const correoInput = document.getElementById("correo");
 const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
+const SUPERADMIN_UID = "q9H2AzN2eIODDioC7auy92MpcHf2";
 let ingresando = false;
 let toastTimer;
 
@@ -61,6 +62,11 @@ form.addEventListener("submit", async (event) => {
   try {
     const credencial = await signInWithEmailAndPassword(auth, correo, password);
     const uid = credencial.user.uid;
+    if (uid === SUPERADMIN_UID) {
+      mostrarToast("exito", "Acceso general correcto. Abriendo superadministración.");
+      setTimeout(() => { window.location.href = "superadmin.html"; }, 700);
+      return;
+    }
     const documento = await getDoc(doc(db, "usuarios", uid));
     if (!documento.exists()) {
       await signOut(auth);
@@ -99,3 +105,4 @@ form.addEventListener("submit", async (event) => {
     ocultarCarga();
   }
 });
+
