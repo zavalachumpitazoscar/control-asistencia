@@ -1,212 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>
-        Control Empresarial - Login
-    </title>
-
-
-    <link rel="stylesheet"
-          href="css/login.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1633">
+  <title>Control Empresarial | Acceso</title>
+  <link rel="stylesheet" href="css/login.css?v=20260819-1">
 </head>
-
-
 <body>
+  <main class="login-shell">
+    <section class="brand-panel" aria-label="Presentación del sistema">
+      <div class="brand-top">
+        <div class="brand-mark"><img src="img/logo.png" alt="Logo de Control Empresarial"></div>
+        <div><strong>Control Empresarial</strong><span>Gestión inteligente de asistencia</span></div>
+      </div>
 
+      <div class="brand-copy">
+        <span class="eyebrow"><i></i> Plataforma de gestión laboral</span>
+        <h1>Tu asistencia, organizada con precisión.</h1>
+        <p>Centraliza horarios, marcaciones y colaboradores desde un entorno seguro, claro y eficiente.</p>
+        <div class="feature-grid">
+          <article><span class="feature-icon">✓</span><div><strong>Control en tiempo real</strong><small>Información disponible cuando la necesitas.</small></div></article>
+          <article><span class="feature-icon">⌖</span><div><strong>Marcaciones confiables</strong><small>Seguimiento preciso y trazable.</small></div></article>
+        </div>
+      </div>
 
-    <main class="contenedor">
+      <div class="brand-footer"><span class="status-dot"></span> Sistema disponible y protegido</div>
+    </section>
 
+    <section class="access-panel">
+      <div class="access-card">
+        <header class="mobile-brand">
+          <div class="brand-mark"><img src="img/logo.png" alt="Logo de Control Empresarial"></div>
+          <div><strong>Control Empresarial</strong><span>Gestión de asistencia</span></div>
+        </header>
 
-        <div class="logo">
-
-
-            <div class="logo-icon">
-                🏢
-            </div>
-
-
-            <h1>
-                Control Empresarial
-            </h1>
-
-
-            <p>
-                Sistema inteligente de asistencia
-            </p>
-
-
+        <div class="welcome">
+          <span class="access-badge">Acceso seguro</span>
+          <h2>Bienvenido</h2>
+          <p>Ingresa tus credenciales para continuar al panel de administración.</p>
         </div>
 
-
-
-
-        <div class="formulario">
-
-
-            <h2>
-                Iniciar sesión
-            </h2>
-
-
-            <p class="descripcion">
-
-                Ingresa con las credenciales
-                de tu empresa.
-
-            </p>
-
-
-
-            <div class="campo">
-
-
-                <label for="correo">
-                    Correo electrónico
-                </label>
-
-
-                <input
-
-                    type="email"
-
-                    id="correo"
-
-                    placeholder="empresa@correo.com"
-
-                    autocomplete="email"
-
-                >
-
-
+        <form id="loginForm" novalidate>
+          <div class="campo">
+            <label for="correo">Correo electrónico</label>
+            <div class="input-wrap">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg>
+              <input type="email" id="correo" placeholder="nombre@empresa.com" autocomplete="email" inputmode="email" required>
             </div>
+          </div>
 
-
-
-
-
-            <div class="campo">
-
-
-                <label for="password">
-
-                    Contraseña
-
-                </label>
-
-
-                <input
-
-                    type="password"
-
-                    id="password"
-
-                    placeholder="Ingrese su contraseña"
-
-                    autocomplete="current-password"
-
-                >
-
-
+          <div class="campo">
+            <div class="label-row"><label for="password">Contraseña</label></div>
+            <div class="input-wrap">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+              <input type="password" id="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" required>
+              <button class="toggle-password" id="togglePassword" type="button" aria-label="Mostrar contraseña" aria-pressed="false">
+                <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></svg>
+              </button>
             </div>
+          </div>
 
+          <button id="btnLogin" class="login-button" type="submit"><span>Ingresar al sistema</span><b aria-hidden="true">→</b></button>
+        </form>
 
+        <div class="register-row"><span>¿Tu empresa aún no tiene una cuenta?</span><a href="registro.html">Registrar empresa</a></div>
+        <p class="security-note"><span>◆</span> Tus datos de acceso se transmiten de forma segura.</p>
+      </div>
+      <footer>© 2026 Control Empresarial · Gestión segura de asistencia</footer>
+    </section>
+  </main>
 
-
-
-            <button id="btnLogin">
-
-
-                Ingresar
-
-
-            </button>
-
-
-
-
-
-            <div class="separador">
-
-                <span>
-                    ¿Aún no tienes una cuenta?
-                </span>
-
-
-            </div>
-
-
-
-
-
-            <a class="registro"
-
-               href="registro.html">
-
-
-                Registrar empresa
-
-
-            </a>
-
-
-
-
-        </div>
-
-
-
-
-        <footer>
-
-
-            <p>
-
-                © 2026 Control Empresarial
-
-                <br>
-
-                Gestión segura de asistencia
-
-            </p>
-
-
-        </footer>
-
-
-
-    </main>
-
-
-
-
-    <div id="toast"
-         class="toast">
-
-    </div>
-
-
-
-
-
-    <script
-
-        type="module"
-
-        src="js/login.js">
-
-    </script>
-
-
-
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script type="module" src="js/login.js?v=20260819-1"></script>
 </body>
-
-
 </html>
