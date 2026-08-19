@@ -1,4 +1,4 @@
-import {
+import {import {
     db
 }
 from "../firebase-config.js";
@@ -1043,8 +1043,10 @@ export function iniciarFormularioHorarios({
             /*
              * Las ventanas de marcación deben ocupar tramos independientes.
              * Se valida con los extremos más amplios posibles:
-             * entrada permitida hasta <= primer inicio de refrigerio, y
-             * último inicio de refrigerio + duración <= salida permitida desde.
+             * entrada permitida hasta < primer inicio de refrigerio, y
+             * último inicio permitido de refrigerio < salida permitida desde.
+             * La duración es una regla del descanso, no otro rango horario,
+             * por lo que no se utiliza para detectar intersecciones.
              * La misma regla se aplica al crear y al editar porque ambos flujos
              * pasan por esta función antes de escribir en Firestore.
              */
@@ -1075,10 +1077,8 @@ export function iniciarFormularioHorarios({
             minutosEnJornada(refrigerio.permitirInicioDesde);
 
 
-            const finMaximoRefrigerio =
-            minutosEnJornada(refrigerio.permitirInicioHasta)
-            +
-            refrigerio.duracionMinutos;
+            const finVentanaRefrigerio =
+            minutosEnJornada(refrigerio.permitirInicioHasta);
 
 
             const inicioVentanaSalida =
@@ -1086,15 +1086,15 @@ export function iniciarFormularioHorarios({
 
 
             if(
-                finVentanaEntrada >
+                finVentanaEntrada >=
                 inicioVentanaRefrigerio
             ){
 
                 await mostrarAdvertencia(
 
-                    "Entrada y refrigerio se intersectan",
+                    "Corrige el límite de entrada",
 
-                    `La entrada solo puede permitirse hasta ${refrigerio.permitirInicioDesde} como máximo, porque desde esa hora comienza la ventana de refrigerio.`
+                    `“Permitir entrada hasta” debe ser antes de las ${refrigerio.permitirInicioDesde}, porque a esa hora empieza el rango de refrigerio que digitaste.`
 
                 );
 
@@ -1104,15 +1104,53 @@ export function iniciarFormularioHorarios({
 
 
             if(
-                finMaximoRefrigerio >
+                finVentanaRefrigerio >=
                 inicioVentanaSalida
             ){
 
                 await mostrarAdvertencia(
 
-                    "Refrigerio y salida se intersectan",
+                    "Corrige el límite del refrigerio",
 
-                    `La salida no puede permitirse antes de que termine el último refrigerio posible. Con el rango y duración actuales, el refrigerio podría finalizar después de ${salida.permitirDesde}.`
+                    `“Puede iniciar refrigerio hasta” debe ser antes de las ${salida.permitirDesde}, porque a esa hora empieza el rango de salida que digitaste.`
+
+                );
+
+                return false;
+
+            }
+
+        }
+
+
+        if(!datos.refrigerio.habilitado){
+
+            const entradaHasta =
+            convertirHoraAMinutos(entrada.permitirHasta);
+
+
+            let salidaDesde =
+            convertirHoraAMinutos(salida.permitirDesde);
+
+
+            if(
+                datos.cruzaMedianoche
+                &&
+                salidaDesde < convertirHoraAMinutos(entrada.permitirDesde)
+            ){
+
+                salidaDesde += 24 * 60;
+
+            }
+
+
+            if(entradaHasta >= salidaDesde){
+
+                await mostrarAdvertencia(
+
+                    "Corrige el límite de entrada",
+
+                    `“Permitir entrada hasta” debe ser antes de las ${salida.permitirDesde}, porque a esa hora empieza el rango de salida que digitaste.`
 
                 );
 
