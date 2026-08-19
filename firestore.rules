@@ -66,15 +66,16 @@ service cloud.firestore {
       allow read: if administraEmpresa(resource.data.empresaId)
         || (esMovilEmpresa(resource.data.empresaId)
           && resource.data.colaboradorId == perfilMovil().colaboradorId);
-      allow create: if esMovilEmpresa(request.resource.data.empresaId)
-        && request.resource.data.colaboradorId == perfilMovil().colaboradorId
-        && request.resource.data.usuarioId == request.auth.uid
-        && request.resource.data.origen == 'MOVIL'
-        && request.resource.data.fechaHora == request.time
-        && request.resource.data.creadoEn == request.time
-        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.usuarioId == request.auth.uid
-        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.estado == 'AUTORIZADO'
-        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.dispositivoAutorizadoId == request.resource.data.dispositivoId;
+      allow create: if administraEmpresa(request.resource.data.empresaId)
+        || (esMovilEmpresa(request.resource.data.empresaId)
+          && request.resource.data.colaboradorId == perfilMovil().colaboradorId
+          && request.resource.data.usuarioId == request.auth.uid
+          && request.resource.data.origen == 'MOVIL'
+          && request.resource.data.fechaHora == request.time
+          && request.resource.data.creadoEn == request.time
+          && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.usuarioId == request.auth.uid
+          && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.estado == 'AUTORIZADO'
+          && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.dispositivoAutorizadoId == request.resource.data.dispositivoId);
       allow update, delete: if administraEmpresa(resource.data.empresaId);
     }
 
