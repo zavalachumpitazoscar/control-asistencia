@@ -28,7 +28,10 @@ let creandoCuenta = false;
 let observadorUbicacion = null;
 let marcacionesPortal = [];
 let vistaHistorial = "hoy";
-const dispositivoId = obtenerDispositivoId();
+const accesoDesdeCelular = esCelularPermitido();
+const dispositivoId = accesoDesdeCelular ? obtenerDispositivoId() : null;
+
+if (!accesoDesdeCelular) mostrar("pantallaSoloCelular");
 
 document.getElementById("ingresarMovil").onclick = ingresar;
 document.getElementById("crearAccesoMovil").onclick = crearAcceso;
@@ -58,6 +61,10 @@ setInterval(() => {
 actualizarReloj();
 
 onAuthStateChanged(auth, async (usuario) => {
+  if (!accesoDesdeCelular) {
+    mostrar("pantallaSoloCelular");
+    return;
+  }
   if (!usuario) {
     detenerUbicacion();
     mostrar("pantallaLogin");
@@ -76,6 +83,7 @@ onAuthStateChanged(auth, async (usuario) => {
 });
 
 async function crearAcceso() {
+  if (!accesoDesdeCelular || cargando) return;
   const correo = valor("correoMovil").toLowerCase();
   const password = valor("passwordMovil");
   if (!correo || password.length < 6) {
@@ -83,8 +91,13 @@ async function crearAcceso() {
   }
   cargando = true;
   creandoCuenta = true;
+  let cuentaFirebaseCreada = false;
+  mensajeLogin("");
+  estadoBotonAcceso("crearAccesoMovil", true, "Creando contraseña…");
+  estadoBotonAcceso("ingresarMovil", true);
   try {
     const credencial = await createUserWithEmailAndPassword(auth, correo, password);
+    cuentaFirebaseCreada = true;
     const habilitado = await buscarAcceso(correo);
     if (!habilitado) {
       await deleteUser(credencial.user);
@@ -92,31 +105,44 @@ async function crearAcceso() {
     }
     await vincularUsuario(credencial.user, habilitado);
     await cargarPortal(credencial.user);
+    mensajeLogin("Contraseña creada correctamente.", true);
     await aviso(
       "Cuenta creada",
       "Tu contraseña quedó registrada. Ahora solicita la autorización de este celular.",
       "success",
     );
   } catch (error) {
-    mensajeLogin(limpiarError(error));
+    if (cuentaFirebaseCreada && !String(error?.message || "").includes("todavía no habilitó")) {
+      mensajeLogin("Tu contraseña sí fue creada. No vuelvas a crearla; pulsa Ingresar para continuar.", true);
+      await aviso("Contraseña creada", "La contraseña se registró correctamente, pero la vinculación quedó pendiente. Pulsa Ingresar para continuar.", "warning");
+    } else {
+      mensajeLogin(limpiarError(error));
+    }
   } finally {
     creandoCuenta = false;
     cargando = false;
+    estadoBotonAcceso("crearAccesoMovil", false);
+    estadoBotonAcceso("ingresarMovil", false);
   }
 }
 
 async function ingresar() {
-  if (cargando) return;
+  if (!accesoDesdeCelular || cargando) return;
   const correo = valor("correoMovil");
   const password = valor("passwordMovil");
   if (!correo || !password) return mensajeLogin("Ingresa correo y contraseña.");
   cargando = true;
+  mensajeLogin("");
+  estadoBotonAcceso("ingresarMovil", true, "Ingresando…");
+  estadoBotonAcceso("crearAccesoMovil", true);
   try {
     await signInWithEmailAndPassword(auth, correo, password);
   } catch {
     mensajeLogin("No se pudo ingresar. Revisa tus credenciales.");
   } finally {
     cargando = false;
+    estadoBotonAcceso("ingresarMovil", false);
+    estadoBotonAcceso("crearAccesoMovil", false);
   }
 }
 
@@ -733,9 +759,26 @@ function actualizarReloj() {
   );
 }
 function mostrar(id) {
-  ["pantallaLogin", "pantallaPendiente", "pantallaMarcacion"].forEach(
+  if (!accesoDesdeCelular && id !== "pantallaSoloCelular") id = "pantallaSoloCelular";
+  ["pantallaSoloCelular", "pantallaLogin", "pantallaPendiente", "pantallaMarcacion"].forEach(
     (pantalla) => (document.getElementById(pantalla).hidden = pantalla !== id),
   );
+}
+function esCelularPermitido() {
+  const ua = navigator.userAgent || "";
+  const declaradoMovil = navigator.userAgentData?.mobile === true || /iPhone|iPod|Android.+Mobile|Windows Phone|webOS/i.test(ua);
+  const tactil = Number(navigator.maxTouchPoints || 0) > 0 || "ontouchstart" in window;
+  const ladoMenor = Math.min(Number(screen.width || innerWidth), Number(screen.height || innerHeight));
+  return declaradoMovil && tactil && ladoMenor <= 600;
+}
+function estadoBotonAcceso(id, activo, textoActivo = "") {
+  const boton = document.getElementById(id);
+  if (!boton) return;
+  const span = boton.querySelector("span") || boton;
+  if (!boton.dataset.textoOriginal) boton.dataset.textoOriginal = span.textContent.trim();
+  boton.disabled = activo;
+  boton.classList.toggle("cargando-acceso", activo && Boolean(textoActivo));
+  span.textContent = activo && textoActivo ? textoActivo : boton.dataset.textoOriginal;
 }
 function valor(id) {
   return document.getElementById(id).value.trim();
@@ -806,3 +849,4 @@ function html(valorHtml) {
       ],
   );
 }
+
