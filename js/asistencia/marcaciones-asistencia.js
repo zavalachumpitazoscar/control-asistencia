@@ -104,7 +104,7 @@ function renderizarMarcaciones() {
 
   const filtradas = marcacionesDia.filter((marcacion) => {
     return normalizarTexto(
-      `${marcacion.colaboradorNombre} ${marcacion.colaboradorDocumento}`,
+      `${marcacion.colaboradorNombre} ${marcacion.colaboradorDocumento} ${obtenerDireccionMarcacion(marcacion)}`,
     ).includes(texto);
   });
 
@@ -138,6 +138,7 @@ function renderizarMarcaciones() {
                 <td><span class="marcacion-origen">${escaparHTML(origen)}</span></td>
                 <td><span class="marcacion-estado ${claseEstado}">${escaparHTML(formatearEtiqueta(estado))}</span></td>
                 <td>${renderizarUbicacion(marcacion)}</td>
+                <td>${renderizarDireccion(marcacion)}</td>
                 <td><span class="asistencia-estado-desarrollo">Solo lectura</span></td>
             </tr>
         `;
@@ -150,7 +151,7 @@ function renderizarMarcaciones() {
 function mostrarMensaje(mensaje) {
   cuerpoMarcaciones.innerHTML = `
         <tr>
-            <td colspan="9" class="asistencia-tabla-vacia">
+            <td colspan="10" class="asistencia-tabla-vacia">
                 ${escaparHTML(mensaje)}
             </td>
         </tr>
@@ -214,6 +215,23 @@ function renderizarUbicacion(marcacion) {
   const detalle = Number.isFinite(precision) ? `Precisión ${Math.round(precision)} m` : "Ver coordenadas";
   const enlace = `https://www.google.com/maps?q=${encodeURIComponent(`${latitud},${longitud}`)}`;
   return `<a class="marcacion-ubicacion" href="${enlace}" target="_blank" rel="noopener noreferrer" title="${escaparHTML(`${latitud}, ${longitud}`)}"><i class="bi bi-geo-alt-fill"></i><span>Ver mapa<small>${escaparHTML(detalle)}</small></span></a>`;
+}
+
+function obtenerDireccionMarcacion(marcacion) {
+  return String(
+    marcacion?.direccion?.direccionCompleta ||
+      marcacion?.ubicacion?.direccion ||
+      marcacion?.direccionCompleta ||
+      "",
+  ).trim();
+}
+
+function renderizarDireccion(marcacion) {
+  const direccion = obtenerDireccionMarcacion(marcacion);
+  if (!direccion || direccion === "Dirección no disponible") {
+    return `<span class="marcacion-direccion no-disponible"><strong>No disponible</strong><small>Registro sin dirección guardada</small></span>`;
+  }
+  return `<span class="marcacion-direccion" title="${escaparHTML(direccion)}"><strong>${escaparHTML(direccion)}</strong><small><i class="bi bi-info-circle"></i> Dirección aproximada según GPS</small></span>`;
 }
 
 function formatearEtiqueta(valor) {
