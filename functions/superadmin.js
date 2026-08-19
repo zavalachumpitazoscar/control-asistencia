@@ -44,14 +44,28 @@ exports.validarDisponibilidadGlobal=onCall({region:REGION,enforceAppCheck:false}
   return {correoDisponible:email?!resultados[i++].exists:null,rucDisponible:numeroRuc?!resultados[i++].exists:null};
 });
 
+exports.listarEmpresasSuperadmin=onCall({region:REGION,enforceAppCheck:false},async req=>{
+  exigirSuper(req);
+  const snap=await db.collection("companias").limit(500).get();
+  const empresas=snap.docs.map(x=>{const d=x.data(),e=d.empresa||{};return{id:x.id,empresaId:d.empresaId||x.id,estado:d.estado||"PENDIENTE",ruc:e.ruc||d.ruc||"",razonSocial:e.razonSocial||d.razonSocial||"Empresa sin razón social",giro:e.giro||d.giro||"",plan:d.plan?.nombre||"BASICO",fechaRegistro:d.fechaRegistro||null};}).sort((a,b)=>a.razonSocial.localeCompare(b.razonSocial,"es"));
+  await auditar("LISTAR_EMPRESAS",req,{cantidad:empresas.length});
+  return{empresas};
+});
+
 exports.buscarEmpresaSuperadmin=onCall({region:REGION,enforceAppCheck:false},async req=>{
-  exigirSuper(req);const numeroRuc=ruc(req.data?.ruc);if(!/^\d{11}$/.test(numeroRuc))throw new HttpsError("invalid-argument","Ingresa un RUC válido de 11 dígitos.");
-  const indice=await db.doc(`indicesRuc/${numeroRuc}`).get();if(!indice.exists)return {encontrada:false};
-  const empresaId=indice.data().empresaId,empresa=await db.doc(`companias/${empresaId}`).get();if(!empresa.exists)return {encontrada:false};
+  exigirSuper(req);let empresaId=texto(req.data?.empresaId),empresa=null;
+  if(empresaId)empresa=await db.doc(`companias/${empresaId}`).get();
+  else{
+    const numeroRuc=ruc(req.data?.ruc);if(!/^\d{11}$/.test(numeroRuc))throw new HttpsError("invalid-argument","Selecciona una empresa o ingresa un RUC válido.");
+    const indice=await db.doc(`indicesRuc/${numeroRuc}`).get();
+    if(indice.exists){empresaId=indice.data().empresaId;empresa=await db.doc(`companias/${empresaId}`).get();}
+    else{const antigua=await db.collection("companias").where("empresa.ruc","==",numeroRuc).limit(1).get();if(!antigua.empty){empresa=antigua.docs[0];empresaId=empresa.id;await db.doc(`indicesRuc/${numeroRuc}`).set({valor:numeroRuc,empresaId,tipo:"EMPRESA",migradoEn:FieldValue.serverTimestamp()},{merge:true});}}
+  }
+  if(!empresa||!empresa.exists)return {encontrada:false};
   const [usuarios,colaboradores,accesos,solicitudes]=await Promise.all([
     db.collection("usuarios").where("empresaId","==",empresaId).get(),db.collection("colaboradores").where("empresaId","==",empresaId).get(),db.collection("accesosMoviles").where("empresaId","==",empresaId).get(),db.collection("solicitudesDispositivoMovil").where("empresaId","==",empresaId).get()
   ]);
-  await auditar("CONSULTAR_EMPRESA",req,{empresaId,ruc:numeroRuc});
+  await auditar("CONSULTAR_EMPRESA",req,{empresaId,ruc:empresa.data().empresa?.ruc||null});
   const docs=s=>s.docs.map(x=>({id:x.id,...x.data()}));return {encontrada:true,empresa:{id:empresa.id,...empresa.data()},usuarios:docs(usuarios),colaboradores:docs(colaboradores),accesosMoviles:docs(accesos),historialDispositivos:docs(solicitudes)};
 });
 
