@@ -74,13 +74,17 @@ export function iniciarResumenMensualAsistencia() {
   });
   [
     "asistencia:horario-dia-actualizado",
-    "asistencia:horas-extra-actualizadas",
     "asistencia:ajuste-diario-actualizado",
     "asistencia:marcacion-manual-registrada",
     "asistencia:marcaciones-importadas",
   ].forEach((nombre) =>
     document.addEventListener(nombre, () => (periodoCargado = "")),
   );
+  document.addEventListener("asistencia:horas-extra-actualizadas", () => {
+    periodoCargado = "";
+    const panelMensual = document.querySelector('[data-contenido-tab="mensual"]');
+    if (panelMensual?.classList.contains("activo")) cargarResumenPeriodo(true);
+  });
 }
 
 async function cargarResumenPeriodo(forzar = false) {
@@ -1274,3 +1278,4 @@ function html(v) {
   e.textContent = String(v ?? "");
   return e.innerHTML;
 }
+
