@@ -1515,6 +1515,31 @@ function renderizarResumenAsistencia() {
     );
   });
 
+  /*
+    El asistente interno consume únicamente el resumen ya calculado para la
+    empresa autenticada. No realiza consultas globales ni expone colecciones
+    completas. El evento también permite que otras ayudas de interfaz esperen
+    a que el cálculo diario haya terminado.
+  */
+  document.dispatchEvent(
+    new CustomEvent("asistencia:resumen-renderizado", {
+      detail: {
+        fecha: fechaResumenSeleccionada,
+        total: registrosResumen.length,
+        filtrados: filtrados.map((registro) => ({
+          colaboradorId: registro.colaboradorId,
+          nombre: registro.nombre,
+          documento: registro.documento || "",
+          estado: registro.estado,
+          tardanzaMinutos: Number(registro.tardanzaMinutos || 0),
+          sucursal: registro.sucursal || "",
+          area: registro.area || "",
+          subarea: registro.subarea || "",
+        })),
+      },
+    }),
+  );
+
   actualizarContadores(registrosResumen);
 
   const paginas = Math.max(1, Math.ceil(filtrados.length / limiteResumenDiario));
