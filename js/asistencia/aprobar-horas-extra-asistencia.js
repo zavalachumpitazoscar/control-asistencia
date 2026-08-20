@@ -593,6 +593,15 @@ async function guardarDecision(){
                 decididoPor:
                     usuario.uid,
 
+                decididoPorCorreo:
+                    usuario.email || null,
+
+                origenDecision:
+                    "DIARIO",
+
+                porcentajeAplicado:
+                    null,
+
                 fechaDecision:
                     serverTimestamp(),
 
@@ -958,3 +967,4 @@ function escaparHTML(
     );
 
 }
+
