@@ -43,7 +43,7 @@ function iniciarAsistente() {
   document.querySelectorAll(".asistente-sugerencia").forEach((boton) =>
     boton.addEventListener("click", () => procesarConsulta(boton.dataset.consulta)),
   );
-  agregarMensaje("asistente", "Hola. Puedo consultar la asistencia, abrir módulos filtrados y preparar reportes. ¿Qué necesitas?");
+  mostrarBienvenida();
 }
 
 function plantilla() {
@@ -60,7 +60,9 @@ function plantilla() {
       <div class="asistente-mensajes" id="asistenteMensajes" aria-live="polite"></div>
       <div class="asistente-sugerencias">
         <button type="button" class="asistente-sugerencia" data-consulta="¿Quiénes llegaron tarde hoy?">Tardanzas de hoy</button>
+        <button type="button" class="asistente-sugerencia" data-consulta="¿Cuántas tardanzas hubo este mes?">Tardanzas del mes</button>
         <button type="button" class="asistente-sugerencia" data-consulta="¿Qué reportes tienes?">Ver reportes</button>
+        <button type="button" class="asistente-sugerencia" data-consulta="Asistencia simplificada de todos del mes pasado">Simplificado mes pasado</button>
         <button type="button" class="asistente-sugerencia" data-consulta="Marcaciones incompletas de hoy">Incompletos</button>
       </div>
       <form class="asistente-formulario" id="formAsistenteInterno">
@@ -102,7 +104,11 @@ async function procesarConsulta(consulta) {
     const metrica = detectarMetrica(texto);
     const periodo = interpretarPeriodo(texto, estado ? "dia" : "mes");
 
-    if ((/(reporte|informe|planilla)/.test(texto) || /(descarg|genera|prepara).*(simplific|resumen|horas trabajadas)/.test(texto)) && /(simplific|resumen|horas trabajadas|descarg|excel|pdf|asistencia)/.test(texto) && !/(que|cuales|lista|mostrar|explica).*(reporte)|reporte.*(tienes|disponible)/.test(texto)) {
+    const esSolicitudReporte =
+      /(reporte|informe|planilla)/.test(texto) ||
+      /(descarg|genera|prepara|quiero|dame).*(simplific|resumen|horas trabajadas)/.test(texto) ||
+      /asistencia simplificad|simplificad.*(?:todos|individual|colaborador)/.test(texto);
+    if (esSolicitudReporte && /(simplific|resumen|horas trabajadas|descarg|excel|pdf|asistencia)/.test(texto) && !/(que|cuales|lista|mostrar|explica).*(reporte)|reporte.*(tienes|disponible)/.test(texto)) {
       const tipo = detectarTipoReporte(texto);
       const periodoReporte = interpretarPeriodo(texto, "mes");
       await prepararReporte(tipo, periodoReporte, texto);
@@ -160,6 +166,28 @@ async function procesarConsulta(consulta) {
     cargando.remove();
     agregarMensaje("asistente", "No pude completar la consulta. Comprueba tu conexión y vuelve a intentarlo.");
   }
+}
+
+function mostrarBienvenida() {
+  agregarMensaje("asistente", `
+    <strong>¿En qué puedo ayudarte?</strong>
+    <p>Puedo consultar datos reales de tu empresa y dejar cada pantalla filtrada.</p>
+    <ul>
+      <li><strong>Asistencia:</strong> tardanzas, ausencias, permisos, presentes, incompletos y personas sin horario.</li>
+      <li><strong>Horas:</strong> trabajadas, asignadas, justificadas, de ausencia y horas extra.</li>
+      <li><strong>Períodos:</strong> hoy, ayer, semanas, meses, años, nombres de meses y rangos personalizados.</li>
+      <li><strong>Reportes:</strong> resumen general, horas trabajadas y asistencia simplificada en Excel o PDF.</li>
+      <li><strong>Navegación:</strong> abrir Asistencia o Empleados y mostrar resultados.</li>
+    </ul>
+    <strong>Acciones más usadas</strong>
+    <div class="asistente-acciones">
+      <button class="asistente-accion" data-consulta-rapida="¿Quiénes llegaron tarde hoy?">Tardanzas de hoy</button>
+      <button class="asistente-accion" data-consulta-rapida="¿Quiénes faltaron ayer?">Ausencias de ayer</button>
+      <button class="asistente-accion" data-consulta-rapida="¿Cuántas tardanzas hubo este mes?">Tardanzas del mes</button>
+      <button class="asistente-accion" data-consulta-rapida="Asistencia simplificada de todos del mes pasado">Simplificado mes pasado</button>
+      <button class="asistente-accion" data-consulta-rapida="¿Qué reportes tienes?">Ver reportes</button>
+      <button class="asistente-accion" data-accion="ayuda">Ver todo lo que entiende</button>
+    </div>`);
 }
 
 function detectarEstado(texto) {
@@ -427,6 +455,11 @@ function responderAyuda() {
 }
 
 async function manejarAccion(evento) {
+  const consultaRapida = evento.target.closest("[data-consulta-rapida]");
+  if (consultaRapida) {
+    procesarConsulta(consultaRapida.dataset.consultaRapida);
+    return;
+  }
   const boton = evento.target.closest("[data-accion]");
   if (!boton) return;
   const accion = boton.dataset.accion;
