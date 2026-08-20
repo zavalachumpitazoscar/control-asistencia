@@ -122,6 +122,14 @@ service cloud.firestore {
       allow update, delete: if administraEmpresa(resource.data.empresaId);
     }
 
+    match /permisos/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId)
+        || (esMovilEmpresa(resource.data.empresaId)
+          && resource.data.colaboradorId == perfilMovil().colaboradorId);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
     match /companias/{empresaId} {
       // Las empresas nuevas solo se crean mediante registrarEmpresaSegura.
       allow create: if autenticado()
