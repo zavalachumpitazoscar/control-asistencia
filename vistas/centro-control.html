@@ -41,6 +41,7 @@
       <article class="cc-card"><header><div><span>COMPARACIÓN MENSUAL</span><h3>Mes seleccionado vs. mes anterior</h3></div></header><div id="ccComparacionMensual" class="cc-comparacion"></div></article>
       <article class="cc-card"><header><div><span>SEGUIMIENTO PREVENTIVO</span><h3>Ranking de reincidencias</h3><p>Solo informativo; no asigna sanciones.</p></div></header><div id="ccRanking" class="cc-ranking"></div></article>
     </div>
+    <div class="cc-grid-graficos"><article class="cc-card"><header><div><span>EVOLUCIÓN</span><h3>Comparación de indicadores</h3></div></header><div class="cc-grafico"><canvas id="ccGraficoComparacion"></canvas></div></article><article class="cc-card"><header><div><span>DISTRIBUCIÓN</span><h3>Incidencias del mes</h3></div></header><div class="cc-grafico dona"><canvas id="ccGraficoDistribucion"></canvas></div></article></div>
   </div>
 
   <div class="cc-panel" data-cc-panel="calendario">
@@ -60,7 +61,7 @@
   </div>
 
   <div class="cc-panel" data-cc-panel="anuncios">
-    <div class="cc-grid-2"><article class="cc-card"><header><div><span>COMUNICACIÓN INTERNA</span><h3>Publicar anuncio</h3></div></header><form id="ccFormAnuncio" class="cc-form"><label>Título<input id="ccAnuncioTitulo" maxlength="80" required></label><label>Mensaje<textarea id="ccAnuncioMensaje" maxlength="500" required></textarea></label><div class="cc-form-grid"><label>Mostrar a<select id="ccAnuncioDestino"><option value="TODOS">Administradores y móviles</option><option value="ADMIN">Solo administradores</option><option value="MOVIL">Solo colaboradores móviles</option></select></label><label>Visible hasta<input id="ccAnuncioHasta" type="date" required></label></div><button class="cc-primario" type="submit"><i class="bi bi-megaphone"></i> Publicar anuncio</button></form></article><article class="cc-card"><header><div><span>HISTORIAL</span><h3>Anuncios publicados</h3></div></header><div id="ccListaAnuncios" class="cc-lista"></div></article></div>
+    <div class="cc-grid-2"><article class="cc-card"><header><div><span>COMUNICACIÓN INTERNA</span><h3 id="ccTituloFormAnuncio">Publicar anuncio</h3></div></header><form id="ccFormAnuncio" class="cc-form"><input id="ccAnuncioId" type="hidden"><label>Título<input id="ccAnuncioTitulo" maxlength="80" required></label><label>Mensaje<textarea id="ccAnuncioMensaje" maxlength="500" required></textarea></label><div class="cc-form-grid"><label>Mostrar a<select id="ccAnuncioDestino"><option value="TODOS">Administradores y móviles</option><option value="ADMIN">Solo administradores</option><option value="MOVIL">Solo colaboradores móviles</option></select></label><label>Visible hasta<input id="ccAnuncioHasta" type="date" required></label></div><div class="cc-botones-form"><button id="ccGuardarAnuncio" class="cc-primario" type="submit"><i class="bi bi-megaphone"></i> Publicar anuncio</button><button id="ccCancelarEdicionAnuncio" type="button" hidden>Cancelar edición</button></div></form></article><article class="cc-card"><header><div><span>HISTORIAL</span><h3>Anuncios publicados</h3></div></header><div id="ccListaAnuncios" class="cc-lista"></div></article></div>
   </div>
 
   <div class="cc-panel" data-cc-panel="plantillas">
@@ -71,3 +72,4 @@
     <div class="cc-grid-2"><article class="cc-card respaldo"><i class="bi bi-cloud-arrow-down"></i><h3>Exportar copia completa</h3><p>Descarga un archivo JSON con la configuración y registros de la empresa.</p><button id="ccExportarRespaldo" class="cc-primario" type="button">Crear y descargar respaldo</button></article><article class="cc-card respaldo peligro"><i class="bi bi-cloud-arrow-up"></i><h3>Restaurar copia</h3><p>Recupera documentos desde un respaldo generado por este sistema. Requiere confirmación.</p><label class="cc-archivo">Seleccionar respaldo<input id="ccArchivoRespaldo" type="file" accept="application/json"></label><button id="ccRestaurarRespaldo" type="button" disabled>Validar y restaurar</button></article></div><article class="cc-card"><header><div><span>BITÁCORA PROTEGIDA</span><h3>Últimas operaciones críticas</h3></div><button data-ir-auditoria type="button">Ver auditoría completa</button></header><div id="ccBitacora" class="cc-lista"></div></article>
   </div>
 </section>
+
