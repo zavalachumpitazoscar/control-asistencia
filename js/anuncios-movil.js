@@ -17,12 +17,10 @@ onAuthStateChanged(auth, async (usuario) => {
       .filter((a) => a.estado === "PUBLICADO" && ["TODOS", "MOVIL"].includes(a.destino || "TODOS") && (!a.visibleDesde || a.visibleDesde <= hoy) && (!a.visibleHasta || a.visibleHasta >= hoy))
       .sort((a, b) => milis(b.creadoEn) - milis(a.creadoEn));
     if (!anuncios.length) return;
-    const vistos = JSON.parse(sessionStorage.getItem("anunciosMovilVistos") || "[]"), pendientes=anuncios.filter(a=>!vistos.includes(a.id));
-    if (!pendientes.length) return;
-    contenedor.innerHTML = `<div class="anuncio-movil-tarjeta"><div class="anuncio-movil-icono"><i class="bi bi-megaphone-fill"></i></div><span>COMUNICADO DE TU EMPRESA</span>${pendientes.slice(0,3).map((a) => `<article><h2>${esc(a.titulo || "Comunicado")}</h2><p>${esc(a.mensaje || "")}</p>${a.visibleHasta ? `<small>Visible hasta ${fecha(a.visibleHasta)}</small>` : ""}</article>`).join("")}<button type="button" id="cerrarAnunciosMovil">Entendido</button></div>`;
+    contenedor.innerHTML = `<div class="anuncio-movil-tarjeta"><div class="anuncio-movil-icono"><i class="bi bi-megaphone-fill"></i></div><span>COMUNICADO DE TU EMPRESA</span>${anuncios.slice(0,3).map((a) => `<article><h2>${esc(a.titulo || "Comunicado")}</h2><p>${esc(a.mensaje || "")}</p>${a.visibleHasta ? `<small>Visible hasta ${fecha(a.visibleHasta)}</small>` : ""}</article>`).join("")}<button type="button" id="cerrarAnunciosMovil">Entendido</button></div>`;
     contenedor.hidden = false;
     document.body.classList.add("anuncio-movil-abierto");
-    document.getElementById("cerrarAnunciosMovil").onclick=()=>{sessionStorage.setItem("anunciosMovilVistos",JSON.stringify([...new Set([...vistos,...pendientes.slice(0,3).map(a=>a.id)])]));document.body.classList.remove("anuncio-movil-abierto");contenedor.hidden=true;};
+    document.getElementById("cerrarAnunciosMovil").onclick=()=>{document.body.classList.remove("anuncio-movil-abierto");contenedor.hidden=true;};
   } catch (error) { console.warn("No se pudieron cargar los comunicados móviles:", error); }
 });
 
