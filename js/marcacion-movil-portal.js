@@ -28,6 +28,7 @@ let permisoBloqueante = null;
 let tiposPermitidos = ["ENTRADA", "SALIDA"];
 let cargando = false;
 let creandoCuenta = false;
+let iniciandoSesion = false;
 let observadorUbicacion = null;
 let marcacionesPortal = [];
 let vistaHistorial = "hoy";
@@ -55,10 +56,30 @@ document.querySelector(".botones-marcacion").onclick = (evento) => {
 document.querySelector(".filtros-historial-movil")?.addEventListener("click", (evento) => {
   const boton = evento.target.closest("[data-vista-historial]");
   if (!boton) return;
+  const fecha = document.getElementById("fechaHistorialMovil");
+  if (fecha) fecha.value = "";
+  const limpiar = document.getElementById("limpiarFechaHistorialMovil");
+  if (limpiar) limpiar.hidden = true;
   vistaHistorial = boton.dataset.vistaHistorial;
   document.querySelectorAll("[data-vista-historial]").forEach((item) =>
     item.classList.toggle("activo", item === boton),
   );
+  pintarHistorial();
+});
+document.getElementById("fechaHistorialMovil")?.addEventListener("change", (evento) => {
+  const fecha = evento.target.value;
+  document.getElementById("limpiarFechaHistorialMovil").hidden = !fecha;
+  if (fecha) {
+    vistaHistorial = "fecha";
+    document.querySelectorAll("[data-vista-historial]").forEach((item) => item.classList.remove("activo"));
+  }
+  pintarHistorial();
+});
+document.getElementById("limpiarFechaHistorialMovil")?.addEventListener("click", () => {
+  document.getElementById("fechaHistorialMovil").value = "";
+  document.getElementById("limpiarFechaHistorialMovil").hidden = true;
+  vistaHistorial = "todas";
+  document.querySelectorAll("[data-vista-historial]").forEach((item) => item.classList.toggle("activo", item.dataset.vistaHistorial === "todas"));
   pintarHistorial();
 });
 
@@ -83,7 +104,7 @@ onAuthStateChanged(auth, async (usuario) => {
   // createUserWithEmailAndPassword dispara este observador antes de que
   // crearAcceso termine de vincular al colaborador. Evitamos que ambos
   // procesos intenten crear usuariosMoviles/{uid} al mismo tiempo.
-  if (creandoCuenta) return;
+  if (creandoCuenta || iniciandoSesion) return;
   try {
     await cargarPortal(usuario);
   } catch (error) {
@@ -143,15 +164,20 @@ async function ingresar() {
   const password = valor("passwordMovil");
   if (!correo || !password) return mensajeLogin("Ingresa correo y contraseña.");
   cargando = true;
+  iniciandoSesion = true;
   mensajeLogin("");
   estadoBotonAcceso("ingresarMovil", true, "Ingresando…");
   estadoBotonAcceso("crearAccesoMovil", true);
   try {
     await setPersistence(auth, browserSessionPersistence);
-    await signInWithEmailAndPassword(auth, correo, password);
-  } catch {
+    const credencial = await signInWithEmailAndPassword(auth, correo, password);
+    estadoBotonAcceso("ingresarMovil", true, "Cargando portal…");
+    await cargarPortal(credencial.user);
+  } catch (error) {
     mensajeLogin("No se pudo ingresar. Revisa tus credenciales.");
+    if (auth.currentUser) await signOut(auth);
   } finally {
+    iniciandoSesion = false;
     cargando = false;
     estadoBotonAcceso("ingresarMovil", false);
     estadoBotonAcceso("crearAccesoMovil", false);
@@ -520,9 +546,12 @@ async function pintarPortal() {
 
 function pintarHistorial() {
   const hoy = fechaLocal();
+  const fechaBuscada = document.getElementById("fechaHistorialMovil")?.value || "";
   const marcas = (vistaHistorial === "hoy"
     ? marcacionesPortal.filter((marca) => marca.fecha === hoy)
-    : marcacionesPortal
+    : vistaHistorial === "fecha" && fechaBuscada
+      ? marcacionesPortal.filter((marca) => marca.fecha === fechaBuscada)
+      : marcacionesPortal
   ).slice(0, 60);
   document.getElementById("historialMarcacionesMovil").innerHTML = marcas.length
     ? marcas.map((marca) => {
@@ -542,7 +571,7 @@ function pintarHistorial() {
           : "";
         return `<div class="marca-historial"><i class="bi ${iconoTipo(marca.tipo)}"></i><span><strong>${html(etiqueta(marca.tipo))}</strong><small>${html(fecha)} · ${html(origen)}${html(gps)}</small></span><time>${html(hora)}</time></div>`;
       }).join("")
-    : `<p>No existen marcaciones ${vistaHistorial === "hoy" ? "para hoy" : "registradas"}.</p>`;
+    : `<p>No existen marcaciones ${vistaHistorial === "hoy" ? "para hoy" : vistaHistorial === "fecha" ? `para el ${html(fechaBuscada.split("-").reverse().join("/"))}` : "registradas"}.</p>`;
 }
 
 function pintarResumenHorario() {
