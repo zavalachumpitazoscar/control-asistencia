@@ -42,7 +42,7 @@ function instalarInterfaz() {
     </header>
     <div class="operaciones-grid">
       <article class="operacion-tarjeta">
-        <div class="operacion-titulo"><i class="bi bi-clock-history"></i><div><strong>Horas extra masivas</strong><small>Selecciona colaboradores con horas generadas.</small></div></div>
+        <div class="operacion-titulo"><i class="bi bi-clock-history"></i><div><strong>Horas extra masivas</strong><small>Selecciona colaboradores con horas extra pendientes de decisión.</small></div></div>
         <div class="operacion-herramientas">
           <label>Decisión<select id="decisionMasivaHorasExtra"><option value="APROBADO">Aprobar todo</option><option value="PARCIAL">Aprobar porcentaje</option><option value="RECHAZADO">Rechazar</option></select></label>
           <label id="grupoPorcentajeHorasExtra" hidden>Porcentaje<input id="porcentajeMasivoHorasExtra" type="number" min="1" max="99" value="50"></label>
@@ -83,7 +83,9 @@ function cambiarDecision() {
 function renderizarCandidatos() {
   if (!panel) return;
   panel.querySelector("#periodoCierreAsistencia").textContent = `${fechaVisible(reporte.desde)} al ${fechaVisible(reporte.hasta)}`;
-  candidatosHorasExtra = reporte.registros.filter((r) => Number(r.minutosExtraGenerados) > 0);
+  // Una hora extra ya aprobada, rechazada o resuelta parcialmente no debe
+  // volver a presentarse como candidata en la operación mensual.
+  candidatosHorasExtra = reporte.registros.filter((r) => Number(r.minutosExtraPendientes) > 0);
   seleccionHorasExtra.clear();
   paginaHorasExtra = 1;
   renderizarPaginaHorasExtra();
@@ -103,9 +105,9 @@ function renderizarPaginaHorasExtra() {
   const lista = panel.querySelector("#listaHorasExtraMasiva");
   lista.innerHTML = visibles.length ? visibles.map((r) => `
     <label class="fila-extra-masiva">
-      <input type="checkbox" ${seleccionHorasExtra.has(r.colaboradorId) ? "checked" : ""} data-colaborador-id="${escapar(r.colaboradorId)}" data-nombre="${escapar(r.nombre)}" data-minutos="${Number(r.minutosExtraGenerados) || 0}">
+      <input type="checkbox" ${seleccionHorasExtra.has(r.colaboradorId) ? "checked" : ""} data-colaborador-id="${escapar(r.colaboradorId)}" data-nombre="${escapar(r.nombre)}" data-minutos="${Number(r.minutosExtraPendientes) || 0}">
       <span><strong>${escapar(r.nombre)}</strong><small>${escapar(r.documento || "Sin documento")} · ${escapar(r.sucursal || "Sin sucursal")}</small></span>
-      <b>${duracion(r.minutosExtraGenerados)}</b>
+      <b>${duracion(r.minutosExtraPendientes)}</b>
     </label>`).join("") : '<p class="sin-operaciones">No existen colaboradores para mostrar.</p>';
   panel.querySelector("#informacionPaginaHorasExtra").textContent = candidatos.length ? `Mostrando ${inicio + 1}–${Math.min(inicio + limiteHorasExtra, candidatos.length)} de ${candidatos.length} · Página ${paginaHorasExtra} de ${paginas}` : "0 colaboradores";
   panel.querySelector("#paginaAnteriorHorasExtra").disabled = paginaHorasExtra <= 1;
@@ -149,9 +151,9 @@ async function aplicarDecisionMasiva() {
   const batch = writeBatch(db);
   let operaciones = 0;
   seleccionados.forEach((seleccionado) => {
-    const diasConExtra = seleccionado.detalles.filter((d) => Number(d.extraGenerada) > 0) || [];
+    const diasConExtra = seleccionado.detalles.filter((d) => Number(d.extraPendiente) > 0) || [];
     diasConExtra.forEach((detalle) => {
-      const generados = Number(detalle.extraGenerada) || 0;
+      const generados = Number(detalle.extraPendiente) || 0;
       const decision = decisionElegida === "RECHAZADO" ? "RECHAZADO" : "APROBADO";
       const minutosAprobados = decisionElegida === "RECHAZADO" ? 0 : decisionElegida === "PARCIAL" ? Math.max(1, Math.round(generados * porcentaje / 100)) : generados;
       const id = [empresaId, seleccionado.colaboradorId, detalle.fecha].map(limpiarId).join("_");
@@ -160,6 +162,7 @@ async function aplicarDecisionMasiva() {
         fecha: detalle.fecha, minutosCalculados: generados, decision,
         estadoAprobacion: decisionElegida === "PARCIAL" ? "PARCIAL" : decision,
         minutosAprobados, motivo, estado: "ACTIVO", decididoPor: usuario.uid,
+        decididoPorCorreo: usuario.email || null,
         origenDecision: "MASIVO", porcentajeAplicado: decisionElegida === "PARCIAL" ? porcentaje : null,
         fechaDecision: serverTimestamp(), fechaModificacion: serverTimestamp(),
       }, { merge: true });
@@ -171,7 +174,7 @@ async function aplicarDecisionMasiva() {
   const auditoria = doc(collection(db, "historialOperacionesAsistencia"));
   batch.set(auditoria, { empresaId, tipo: "HORAS_EXTRA_MASIVAS", desde: reporte.desde, hasta: reporte.hasta, decision: decisionElegida, motivo, cantidad: operaciones, usuarioId: usuario.uid, fecha: serverTimestamp(), fechasProcesadas: fechas.length });
   await ejecutarBoton(panel.querySelector("#aplicarDecisionMasivaHorasExtra"), async () => batch.commit());
-  document.dispatchEvent(new CustomEvent("asistencia:horas-extra-actualizadas", { detail: { masivo: true, desde: reporte.desde, hasta: reporte.hasta } }));
+  document.dispatchEvent(new CustomEvent("asistencia:horas-extra-actualizadas", { detail: { masivo: true, desde: reporte.desde, hasta: reporte.hasta, fechasAfectadas: fechas } }));
   alerta("Decisión aplicada", `Se actualizaron ${operaciones} registros diarios.`, "success");
 }
 
