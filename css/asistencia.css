@@ -1994,6 +1994,7 @@ IMPORTACIÓN DE MARCACIONES
   background: #fef3c7;
   color: #b45309;
 }
+.importacion-estado.error{display:block;white-space:normal;line-height:1.35;color:#b91c1c;background:#fee2e2}.importacion-errores-detalle{margin:12px 0;padding:10px;border:1px solid #fecaca;border-radius:10px;background:#fff7f7}.importacion-errores-detalle summary{color:#b91c1c;font-size:10px;font-weight:800;cursor:pointer}.importacion-errores-detalle .importacion-vista-previa{margin-top:9px}
 
 .importacion-dni-asociado {
   display: block;
