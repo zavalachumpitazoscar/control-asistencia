@@ -149,7 +149,7 @@ async function habilitar(colaboradorId) {
     correo,
     nombre: nombreColaborador(colaborador),
     dni: documentoColaborador(colaborador),
-    sucursalId: colaborador.sucursalId || colaborador.ubicacionOrganizacional?.sucursalId || null,
+    sucursalId: colaborador.organizacion?.sucursalId || colaborador.sucursalId || colaborador.ubicacionOrganizacional?.sucursalId || null,
     areaId: colaborador.areaId || colaborador.ubicacionOrganizacional?.areaId || null,
     estado: "ESPERANDO_REGISTRO",
     usuarioId: null,
