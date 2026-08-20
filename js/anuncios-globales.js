@@ -25,11 +25,12 @@ async function cargar(empresaId) {
       .sort((a, b) => milis(b.creadoEn) - milis(a.creadoEn));
     document.getElementById("anunciosGlobalesSistema")?.remove();
     if (!anuncios.length) return;
-    const bloque = document.createElement("section"); bloque.id = "anunciosGlobalesSistema"; bloque.className = "anuncio-global-sistema";
-    bloque.innerHTML = anuncios.slice(0, 3).map((a) => `<article><i class="bi bi-megaphone-fill"></i><div><strong>${esc(a.titulo || "Comunicado")}</strong><p>${esc(a.mensaje || "")}</p></div><button type="button" data-ocultar-anuncio="${a.id}" aria-label="Ocultar comunicado">×</button></article>`).join("");
-    (document.querySelector(".contenido") || document.querySelector("main") || document.body).prepend(bloque);
-    bloque.onclick = (e) => { const b = e.target.closest("[data-ocultar-anuncio]"); if (!b) return; const ids = [...new Set([...ocultos, b.dataset.ocultarAnuncio])]; sessionStorage.setItem("anunciosOcultos", JSON.stringify(ids)); b.closest("article")?.remove(); if (!bloque.children.length) bloque.remove(); };
+    const bloque = document.createElement("section"); bloque.id = "anunciosGlobalesSistema"; bloque.className = "anuncio-modal-sistema"; bloque.setAttribute("role", "dialog"); bloque.setAttribute("aria-modal", "true"); bloque.setAttribute("aria-label", "Comunicados importantes");
+    bloque.innerHTML = `<div class="anuncio-modal-tarjeta"><div class="anuncio-modal-icono"><i class="bi bi-megaphone-fill"></i></div><span class="anuncio-modal-etiqueta">COMUNICADO IMPORTANTE</span>${anuncios.slice(0,3).map((a) => `<article data-anuncio-id="${a.id}"><h2>${esc(a.titulo || "Comunicado")}</h2><p>${esc(a.mensaje || "")}</p>${a.visibleHasta?`<small>Disponible hasta ${fecha(a.visibleHasta)}</small>`:""}</article>`).join("")}<button type="button" class="anuncio-modal-entendido">Entendido</button><small class="anuncio-modal-contador">${anuncios.length} comunicado(s) vigente(s)</small></div>`;
+    document.body.appendChild(bloque); document.body.classList.add("modal-anuncio-abierto");
+    bloque.querySelector(".anuncio-modal-entendido").onclick = () => { const ids=[...new Set([...ocultos,...anuncios.slice(0,3).map(a=>a.id)])];sessionStorage.setItem("anunciosOcultos",JSON.stringify(ids));document.body.classList.remove("modal-anuncio-abierto");bloque.remove(); };
   } catch (error) { console.warn("No se pudieron cargar los comunicados:", error); }
 }
 function milis(v) { return v?.toMillis?.() || v?.seconds * 1000 || 0; }
 function esc(v) { const e = document.createElement("div"); e.textContent = String(v ?? ""); return e.innerHTML; }
+function fecha(v) { const [a,m,d]=String(v||"").slice(0,10).split("-"); return a&&m&&d?`${d}/${m}/${a}`:v; }
