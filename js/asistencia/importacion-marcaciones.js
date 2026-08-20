@@ -34,7 +34,12 @@ const COLUMNAS_DNI = [
     "DNI",
     "DOCUMENTO",
     "NUMERO DOCUMENTO",
-    "NUMERO DE DOCUMENTO"
+    "NUMERO DE DOCUMENTO",
+    "NRO DOCUMENTO",
+    "NRO DE DOCUMENTO",
+    "CODIGO EMPLEADO",
+    "ID EMPLEADO",
+    "USER ID"
 ];
 
 
@@ -42,8 +47,16 @@ const COLUMNAS_MARCACION = [
     "MARCACION",
     "MARCACIONES",
     "FECHA HORA",
-    "FECHA Y HORA"
+    "FECHA Y HORA",
+    "FECHA/HORA",
+    "FECHA DE MARCACION",
+    "FECHA Y HORA DE MARCACION",
+    "CHECKTIME",
+    "REGISTRO"
 ];
+
+const COLUMNAS_FECHA = ["FECHA","FECHA MARCACION","FECHA DE MARCACION","DIA"];
+const COLUMNAS_HORA = ["HORA","HORA MARCACION","HORA DE MARCACION","CHECK TIME"];
 
 
 
@@ -84,6 +97,9 @@ export function iniciarImportacionMarcaciones(){
 
     crearInputArchivo();
 
+    document.getElementById("btnDescargarPlantillaMarcaciones")
+        ?.addEventListener("click",descargarPlantillaMarcaciones);
+
 
     btnImportarMarcaciones.addEventListener(
         "click",
@@ -97,6 +113,27 @@ export function iniciarImportacionMarcaciones(){
         }
     );
 
+}
+
+async function descargarPlantillaMarcaciones(){
+    try{
+        mostrarCargando("Preparando archivo de ejemplo...");
+        const XLSX=await cargarSheetJS();
+        const filas=[
+            {DNI:"01234567",MARCACION:"20/08/2026 08:00:00"},
+            {DNI:"01234567",MARCACION:"20/08/2026 13:00:00"},
+            {DNI:"01234567",MARCACION:"20/08/2026 14:00:00"},
+            {DNI:"01234567",MARCACION:"20/08/2026 18:00:00"},
+            {DNI:"87654321",MARCACION:"20/08/2026 07:55:00"},
+            {DNI:"87654321",MARCACION:"20/08/2026 17:45:00"}
+        ];
+        const hoja=XLSX.utils.json_to_sheet(filas,{header:["DNI","MARCACION"]});
+        hoja["!cols"]=[{wch:16},{wch:27}];
+        const libro=XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libro,hoja,"Marcaciones");
+        XLSX.writeFile(libro,"plantilla-importacion-marcaciones.xlsx");
+        cerrarAlerta();
+    }catch(error){mostrarError(error.message||"No se pudo crear la plantilla.");}
 }
 
 
@@ -363,11 +400,18 @@ function validarFilasMarcaciones(
                 );
 
 
-            const valorMarcacion =
+            let valorMarcacion =
                 encontrarValorColumna(
                     filaNormalizada,
                     COLUMNAS_MARCACION
                 );
+
+            if(valorMarcacion === "" || valorMarcacion === undefined || valorMarcacion === null){
+                valorMarcacion=combinarFechaHoraSeparadas(
+                    encontrarValorColumna(filaNormalizada,COLUMNAS_FECHA),
+                    encontrarValorColumna(filaNormalizada,COLUMNAS_HORA)
+                );
+            }
 
 
             const dni =
@@ -528,6 +572,26 @@ function validarFilasMarcaciones(
 
 }
 
+function combinarFechaHoraSeparadas(fecha,hora){
+    if(fecha === "" || fecha === undefined || fecha === null || hora === "" || hora === undefined || hora === null)return "";
+    if(typeof fecha === "number"){
+        const fraccion=typeof hora === "number" ? hora-Math.floor(hora) : fraccionHoraTexto(hora);
+        if(fraccion !== null)return Math.floor(fecha)+fraccion;
+    }
+    const fechaTexto=fecha instanceof Date
+        ? `${String(fecha.getDate()).padStart(2,"0")}/${String(fecha.getMonth()+1).padStart(2,"0")}/${fecha.getFullYear()}`
+        : String(fecha).trim();
+    const horaTexto=hora instanceof Date
+        ? `${String(hora.getHours()).padStart(2,"0")}:${String(hora.getMinutes()).padStart(2,"0")}:${String(hora.getSeconds()).padStart(2,"0")}`
+        : typeof hora === "number"
+            ? horaDesdeFraccion(hora-Math.floor(hora))
+            : String(hora).trim();
+    return `${fechaTexto} ${horaTexto}`;
+}
+
+function fraccionHoraTexto(valor){const m=String(valor||"").trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);if(!m)return null;return (Number(m[1])*3600+Number(m[2])*60+Number(m[3]||0))/86400;}
+function horaDesdeFraccion(fraccion){const segundos=Math.round(fraccion*86400)%86400,h=Math.floor(segundos/3600),m=Math.floor((segundos%3600)/60),s=segundos%60;return`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;}
+
 
 async function asociarCoincidenciasDNIConColaboradores(resultado){
 
@@ -676,6 +740,11 @@ function mostrarVistaPreviaImportacion(
         )
         .join("");
 
+    const htmlInvalidas = resultado.invalidas
+        .slice(0,10)
+        .map(item=>`<tr><td>${item.fila}</td><td>${escaparHTML(item.dni||"—")}</td><td>${escaparHTML(item.marcacion||"—")}</td><td><span class="importacion-estado error">${escaparHTML(item.errores.join(" · "))}</span></td></tr>`)
+        .join("");
+
 
     Swal.fire({
 
@@ -786,6 +855,13 @@ function mostrarVistaPreviaImportacion(
                             <ul>${resultado.coincidenciasDniSinCeros.map(item=>`<li><b>${escaparHTML(item.dniReloj)}</b> → <b>${escaparHTML(item.dniColaborador)}</b> · ${escaparHTML(item.colaboradorNombre)}</li>`).join("")}</ul>
                         </div>
                     </div>` : ""}
+
+                ${resultado.invalidas.length ? `
+                    <details class="importacion-errores-detalle" ${resultado.validas.length===0?"open":""}>
+                        <summary>Ver por qué se rechazaron ${resultado.invalidas.length} fila(s)</summary>
+                        <div class="importacion-vista-previa"><table><thead><tr><th>Fila</th><th>DNI</th><th>Valor encontrado</th><th>Motivo</th></tr></thead><tbody>${htmlInvalidas}</tbody></table></div>
+                        ${resultado.invalidas.length>10?`<p class="importacion-mas-registros">Se muestran los primeros 10 errores.</p>`:""}
+                    </details>` : ""}
 
 
                 <div class="importacion-vista-previa">
