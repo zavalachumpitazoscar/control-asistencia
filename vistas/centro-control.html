@@ -1,0 +1,73 @@
+<section class="centro-control">
+  <header class="cc-hero">
+    <div><span>CENTRO OPERATIVO</span><h2>Centro de control</h2><p>Alertas, aprobaciones, análisis y herramientas administrativas en un solo lugar.</p></div>
+    <div class="cc-hero-acciones"><small id="ccUltimaActualizacion">Sin actualizar</small><button id="ccActualizar" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button></div>
+  </header>
+
+  <div id="ccCarga" class="cc-carga"><span></span> Analizando información de la empresa…</div>
+  <div id="ccAnuncioVigente" class="cc-anuncio-vigente" hidden></div>
+
+  <nav class="cc-tabs" aria-label="Secciones del centro de control">
+    <button class="activo" data-cc-tab="alertas"><i class="bi bi-bell"></i> Alertas <b id="ccBadgeAlertas">0</b></button>
+    <button data-cc-tab="pendientes"><i class="bi bi-inboxes"></i> Pendientes <b id="ccBadgePendientes">0</b></button>
+    <button data-cc-tab="analitica"><i class="bi bi-graph-up-arrow"></i> Analítica</button>
+    <button data-cc-tab="calendario"><i class="bi bi-calendar3"></i> Calendario</button>
+    <button data-cc-tab="planillas"><i class="bi bi-file-earmark-spreadsheet"></i> Planillas</button>
+    <button data-cc-tab="mapa"><i class="bi bi-geo-alt"></i> Mapa</button>
+    <button data-cc-tab="anuncios"><i class="bi bi-megaphone"></i> Anuncios</button>
+    <button data-cc-tab="plantillas"><i class="bi bi-layout-text-window"></i> Plantillas</button>
+    <button data-cc-tab="respaldo"><i class="bi bi-shield-check"></i> Respaldo</button>
+  </nav>
+
+  <div class="cc-panel activo" data-cc-panel="alertas">
+    <div class="cc-kpis">
+      <article class="rojo"><i class="bi bi-clock-history"></i><span>Tardanzas de hoy<strong id="ccTardanzas">0</strong></span></article>
+      <article class="rojo"><i class="bi bi-person-x"></i><span>Ausencias de hoy<strong id="ccAusencias">0</strong></span></article>
+      <article class="ambar"><i class="bi bi-exclamation-diamond"></i><span>Incompletos<strong id="ccIncompletos">0</strong></span></article>
+      <article class="violeta"><i class="bi bi-calendar2-minus"></i><span>Permisos por vencer<strong id="ccPermisosVencer">0</strong></span></article>
+      <article class="azul"><i class="bi bi-phone"></i><span>Dispositivos pendientes<strong id="ccDispositivos">0</strong></span></article>
+      <article class="rojo"><i class="bi bi-credit-card"></i><span>Estado del plan<strong id="ccPlan">—</strong></span></article>
+    </div>
+    <article class="cc-card"><header><div><span>ATENCIÓN REQUERIDA</span><h3>Centro de alertas</h3></div><select id="ccFiltroAlerta"><option value="">Todas</option><option value="ASISTENCIA">Asistencia</option><option value="PERMISO">Permisos</option><option value="MOVIL">Móviles</option><option value="PLAN">Suscripción</option></select></header><div id="ccListaAlertas" class="cc-lista"></div></article>
+  </div>
+
+  <div class="cc-panel" data-cc-panel="pendientes">
+    <article class="cc-card"><header><div><span>FLUJO DE APROBACIÓN</span><h3>Bandeja unificada de pendientes</h3><p>Permisos, regularizaciones, horas extra y solicitudes móviles.</p></div><select id="ccFiltroPendiente"><option value="">Todos</option><option value="PERMISO">Permisos</option><option value="REGULARIZACION">Regularizaciones</option><option value="EXTRA">Horas extra</option><option value="MOVIL">Móviles</option></select></header><div class="cc-tabla-wrap"><table class="cc-tabla"><thead><tr><th>Tipo</th><th>Colaborador</th><th>Fecha / período</th><th>Detalle</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="ccCuerpoPendientes"></tbody></table></div></article>
+  </div>
+
+  <div class="cc-panel" data-cc-panel="analitica">
+    <div class="cc-filtros"><label>Mes de análisis<input id="ccMesAnalitica" type="month"></label><button id="ccCalcularAnalitica" type="button"><i class="bi bi-calculator"></i> Calcular</button></div>
+    <div class="cc-grid-2">
+      <article class="cc-card"><header><div><span>COMPARACIÓN MENSUAL</span><h3>Mes seleccionado vs. mes anterior</h3></div></header><div id="ccComparacionMensual" class="cc-comparacion"></div></article>
+      <article class="cc-card"><header><div><span>SEGUIMIENTO PREVENTIVO</span><h3>Ranking de reincidencias</h3><p>Solo informativo; no asigna sanciones.</p></div></header><div id="ccRanking" class="cc-ranking"></div></article>
+    </div>
+  </div>
+
+  <div class="cc-panel" data-cc-panel="calendario">
+    <div class="cc-filtros"><button id="ccCalendarioAnterior" type="button"><i class="bi bi-chevron-left"></i></button><strong id="ccCalendarioTitulo">—</strong><button id="ccCalendarioSiguiente" type="button"><i class="bi bi-chevron-right"></i></button><button id="ccCalendarioHoy" type="button">Hoy</button></div>
+    <article class="cc-card"><div id="ccCalendario" class="cc-calendario"></div><div class="cc-leyenda"><span class="horario">Horario</span><span class="feriado">Feriado</span><span class="permiso">Vacación/licencia</span><span class="descanso">Descanso</span></div></article>
+  </div>
+
+  <div class="cc-panel" data-cc-panel="planillas">
+    <div class="cc-grid-2">
+      <article class="cc-card"><header><div><span>REMUNERACIONES</span><h3>Exportación para planillas</h3><p>Días trabajados, faltas, tardanzas, permisos y horas extra.</p></div></header><div class="cc-form-grid"><label>Desde<input id="ccPlanillaDesde" type="date"></label><label>Hasta<input id="ccPlanillaHasta" type="date"></label><label>Plantilla<select id="ccPlanillaPlantilla"><option value="">Formato estándar</option></select></label></div><button id="ccExportarPlanilla" class="cc-primario" type="button"><i class="bi bi-file-earmark-excel"></i> Descargar Excel de planillas</button></article>
+      <article class="cc-card"><header><div><span>CIERRE DIARIO</span><h3>Control automático de jornadas</h3></div></header><div id="ccEstadoCierre" class="cc-estado-cierre"></div><button id="ccEjecutarCierre" type="button"><i class="bi bi-play-circle"></i> Revisar cierre ahora</button><p class="cc-nota">Se ejecuta al finalizar el día si la sesión está abierta. Si no, se completa al siguiente ingreso.</p></article>
+    </div>
+  </div>
+
+  <div class="cc-panel" data-cc-panel="mapa">
+    <div class="cc-grid-mapa"><article class="cc-card"><header><div><span>UBICACIONES</span><h3>Sucursales y marcaciones</h3></div><select id="ccFiltroMapa"><option value="TODOS">Todo</option><option value="SUCURSALES">Sucursales</option><option value="FUERA">Fuera de zona</option></select></header><div id="ccMapa" class="cc-mapa"></div></article><article class="cc-card"><header><div><span>CONFIGURACIÓN</span><h3>Sucursales</h3></div></header><div id="ccListaSucursales" class="cc-lista-sucursales"></div></article></div>
+  </div>
+
+  <div class="cc-panel" data-cc-panel="anuncios">
+    <div class="cc-grid-2"><article class="cc-card"><header><div><span>COMUNICACIÓN INTERNA</span><h3>Publicar anuncio</h3></div></header><form id="ccFormAnuncio" class="cc-form"><label>Título<input id="ccAnuncioTitulo" maxlength="80" required></label><label>Mensaje<textarea id="ccAnuncioMensaje" maxlength="500" required></textarea></label><div class="cc-form-grid"><label>Mostrar a<select id="ccAnuncioDestino"><option value="TODOS">Administradores y móviles</option><option value="ADMIN">Solo administradores</option><option value="MOVIL">Solo colaboradores móviles</option></select></label><label>Visible hasta<input id="ccAnuncioHasta" type="date" required></label></div><button class="cc-primario" type="submit"><i class="bi bi-megaphone"></i> Publicar anuncio</button></form></article><article class="cc-card"><header><div><span>HISTORIAL</span><h3>Anuncios publicados</h3></div></header><div id="ccListaAnuncios" class="cc-lista"></div></article></div>
+  </div>
+
+  <div class="cc-panel" data-cc-panel="plantillas">
+    <div class="cc-grid-2"><article class="cc-card"><header><div><span>FORMATOS</span><h3>Plantilla configurable</h3></div></header><form id="ccFormPlantilla" class="cc-form"><input id="ccPlantillaId" type="hidden"><label>Nombre de plantilla<input id="ccPlantillaNombre" maxlength="60" required></label><label>Encabezado<input id="ccPlantillaEncabezado" maxlength="100" placeholder="Reporte de remuneraciones"></label><label>Color principal<input id="ccPlantillaColor" type="color" value="#1d4ed8"></label><fieldset><legend>Columnas</legend><div id="ccColumnasPlantilla" class="cc-checks"></div></fieldset><button class="cc-primario" type="submit"><i class="bi bi-save"></i> Guardar plantilla</button></form></article><article class="cc-card"><header><div><span>PLANTILLAS GUARDADAS</span><h3>Vista previa y gestión</h3></div></header><div id="ccListaPlantillas" class="cc-lista"></div><div id="ccVistaPlantilla" class="cc-vista-plantilla"></div></article></div>
+  </div>
+
+  <div class="cc-panel" data-cc-panel="respaldo">
+    <div class="cc-grid-2"><article class="cc-card respaldo"><i class="bi bi-cloud-arrow-down"></i><h3>Exportar copia completa</h3><p>Descarga un archivo JSON con la configuración y registros de la empresa.</p><button id="ccExportarRespaldo" class="cc-primario" type="button">Crear y descargar respaldo</button></article><article class="cc-card respaldo peligro"><i class="bi bi-cloud-arrow-up"></i><h3>Restaurar copia</h3><p>Recupera documentos desde un respaldo generado por este sistema. Requiere confirmación.</p><label class="cc-archivo">Seleccionar respaldo<input id="ccArchivoRespaldo" type="file" accept="application/json"></label><button id="ccRestaurarRespaldo" type="button" disabled>Validar y restaurar</button></article></div><article class="cc-card"><header><div><span>BITÁCORA PROTEGIDA</span><h3>Últimas operaciones críticas</h3></div><button data-ir-auditoria type="button">Ver auditoría completa</button></header><div id="ccBitacora" class="cc-lista"></div></article>
+  </div>
+</section>
