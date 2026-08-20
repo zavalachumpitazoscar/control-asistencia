@@ -24,7 +24,6 @@ let perfil;
 let acceso;
 let ubicacion;
 let horarioHoy = null;
-let permisosHoy = [];
 let tiposPermitidos = ["ENTRADA", "SALIDA"];
 let cargando = false;
 let creandoCuenta = false;
@@ -184,6 +183,7 @@ async function crearPerfilMovil(usuario, datosAcceso) {
   await setDoc(doc(db, "usuariosMoviles", usuario.uid), {
     empresaId: datosAcceso.empresaId,
     colaboradorId: datosAcceso.colaboradorId,
+    accesoId: datosAcceso.id || datosAcceso.colaboradorId,
     correo: datosAcceso.correo,
     nombre: datosAcceso.nombre,
     creadoEn: serverTimestamp(),
@@ -229,10 +229,7 @@ async function cargarPortal(usuario) {
     return;
   }
 
-  [horarioHoy, permisosHoy] = await Promise.all([
-    obtenerHorarioDelDia(),
-    obtenerPermisosDelDia(),
-  ]);
+  horarioHoy = await obtenerHorarioDelDia();
   configurarBotonesHorario(horarioHoy);
   await pintarPortal();
   mostrar("pantallaMarcacion");
@@ -263,18 +260,10 @@ async function solicitarDispositivo() {
 
 async function marcar(tipo, boton) {
   if (cargando) return;
-  const permiso = permisoVigenteAhora();
-  if (permiso) {
-    return aviso(
-      "Marcación no disponible",
-      textoBloqueoPermiso(permiso),
-      "info",
-    );
-  }
   if (!tipoDisponibleAhora(tipo)) {
     return aviso(
-      "Opción no disponible",
-      "Esta marcación no corresponde a las opciones habilitadas para hoy.",
+      "Fuera del horario permitido",
+      mensajeVentanaTipo(tipo),
       "warning",
     );
   }
@@ -493,9 +482,8 @@ async function pintarPortal() {
   document.getElementById("nombreColaboradorMovil").textContent = perfil.nombre;
   document.getElementById("organizacionColaboradorMovil").textContent = horarioHoy
     ? `Horario: ${horarioHoy.nombre || "asignado"}`
-    : "Día de descanso · Entrada y salida disponibles";
+    : "Sin horario asignado · Solo entrada y salida";
   pintarResumenHorario();
-  pintarPermisoMovil();
 
   const resultado = await getDocs(
     query(
@@ -547,7 +535,7 @@ function pintarHistorial() {
 function pintarResumenHorario() {
   const contenedor = document.getElementById("resumenHorarioMovil");
   if (!horarioHoy) {
-    contenedor.innerHTML = `<div class="sin-horario-movil descanso-movil"><i class="bi bi-calendar2-heart"></i><span><strong>Día de descanso</strong><small>No tienes un horario asignado para hoy. Puedes registrar entrada y salida si necesitas trabajar.</small></span></div>`;
+    contenedor.innerHTML = `<div class="sin-horario-movil"><i class="bi bi-calendar2-week"></i><span><strong>Sin horario para hoy</strong><small>Puedes registrar entrada y salida.</small></span></div>`;
     return;
   }
   const refrigerio = horarioHoy.refrigerio;
@@ -589,90 +577,6 @@ async function obtenerHorarioDelDia() {
   if (excepcion?.tipo === "AGREGAR") ids.push(...(excepcion.horarioIds || []));
 
   return [...new Set(ids)].map((id) => horarios.get(id)).find(Boolean) || null;
-}
-
-async function obtenerPermisosDelDia() {
-  const fecha = fechaLocal();
-  const resultado = await getDocs(
-    query(
-      collection(db, "permisos"),
-      where("empresaId", "==", acceso.empresaId),
-      where("colaboradorId", "==", acceso.colaboradorId),
-    ),
-  );
-  return resultado.docs
-    .map((documento) => ({ id: documento.id, ...documento.data() }))
-    .filter(
-      (permiso) =>
-        String(permiso.estado || "PENDIENTE").toUpperCase() === "APROBADO" &&
-        permiso.fechaInicio <= fecha &&
-        permiso.fechaFin >= fecha,
-    );
-}
-
-function permisoVigenteAhora() {
-  const minuto = minutoActualLima();
-  return permisosHoy.find((permiso) => {
-    const duracion = String(permiso.tipoDuracion || "DIA_COMPLETO").toUpperCase();
-    if (duracion === "HORAS") {
-      return dentroRangoMinutos(
-        minuto,
-        minutosHora(permiso.horaInicio),
-        minutosHora(permiso.horaFin),
-      );
-    }
-    if (duracion === "MEDIO_DIA") {
-      const corte = minutoMitadJornada();
-      return permiso.mitadDia === "SEGUNDA_MITAD" ? minuto >= corte : minuto < corte;
-    }
-    return true;
-  }) || null;
-}
-
-function minutoMitadJornada() {
-  const entrada = minutosHora(horarioHoy?.entrada?.programada);
-  let salida = minutosHora(horarioHoy?.salida?.programada);
-  if (entrada === null || salida === null) return 13 * 60;
-  if (salida <= entrada) salida += 1440;
-  return Math.round((entrada + salida) / 2) % 1440;
-}
-
-function nombrePermiso(permiso) {
-  return permiso.tipoPermisoNombre || String(permiso.tipoPermiso || "Permiso")
-    .replaceAll("_", " ")
-    .toLowerCase()
-    .replace(/^./, (letra) => letra.toUpperCase());
-}
-
-function periodoPermiso(permiso) {
-  const duracion = String(permiso.tipoDuracion || "DIA_COMPLETO").toUpperCase();
-  if (duracion === "HORAS") return `${horaCorta(permiso.horaInicio)} a ${horaCorta(permiso.horaFin)}`;
-  if (duracion === "MEDIO_DIA") return permiso.mitadDia === "SEGUNDA_MITAD" ? "Segunda mitad del día" : "Primera mitad del día";
-  if (permiso.fechaInicio === permiso.fechaFin) return "Todo el día";
-  return `${fechaVisibleMovil(permiso.fechaInicio)} al ${fechaVisibleMovil(permiso.fechaFin)}`;
-}
-
-function textoBloqueoPermiso(permiso) {
-  return `${nombrePermiso(permiso)} · ${periodoPermiso(permiso)}. Motivo: ${permiso.motivo || "No especificado"}.`;
-}
-
-function pintarPermisoMovil() {
-  const contenedor = document.getElementById("estadoPermisoMovil");
-  if (!contenedor) return;
-  const permisoActivo = permisoVigenteAhora();
-  const permiso = permisoActivo || permisosHoy[0];
-  contenedor.hidden = !permiso;
-  if (!permiso) {
-    contenedor.innerHTML = "";
-    return;
-  }
-  contenedor.classList.toggle("activo", Boolean(permisoActivo));
-  contenedor.innerHTML = `<i class="bi ${permisoActivo ? "bi-calendar2-x" : "bi-calendar2-event"}"></i><div><span>${permisoActivo ? "MARCACIÓN BLOQUEADA" : "PERMISO PROGRAMADO"}</span><strong>${html(nombrePermiso(permiso))}</strong><small>${html(periodoPermiso(permiso))} · Motivo: ${html(permiso.motivo || "No especificado")}</small></div>`;
-}
-
-function fechaVisibleMovil(fecha) {
-  const [anio, mes, dia] = String(fecha || "").split("-");
-  return anio && mes && dia ? `${dia}/${mes}/${anio}` : "—";
 }
 
 function horariosAsignadosEnFecha(asignacion, fecha) {
@@ -743,23 +647,40 @@ function configurarBotonesHorario(horario) {
 }
 
 function actualizarDisponibilidadBotones() {
-  const permiso = permisoVigenteAhora();
   document.querySelectorAll("[data-tipo-marca]").forEach((boton) => {
     if (boton.hidden) return;
     const disponible = tipoDisponibleAhora(boton.dataset.tipoMarca);
     boton.disabled = !disponible;
-    boton.classList.toggle("bloqueado-permiso", Boolean(permiso));
-    boton.classList.remove("fuera-rango");
+    boton.classList.toggle("fuera-rango", !disponible);
     const texto = boton.querySelector("span");
-    if (texto) texto.textContent = permiso
-      ? `${boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca)} · Con permiso`
-      : boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca);
+    if (texto) texto.textContent = disponible
+      ? boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca)
+      : `${boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca)} · Fuera de rango`;
   });
-  pintarPermisoMovil();
 }
 
 function tipoDisponibleAhora(tipo) {
-  return tiposPermitidos.includes(tipo) && !permisoVigenteAhora();
+  if (!horarioHoy) return ["ENTRADA", "SALIDA"].includes(tipo);
+  const minuto = minutoActualLima();
+  const entrada = horarioHoy.entrada || {};
+  const salida = horarioHoy.salida || {};
+  const refrigerio = horarioHoy.refrigerio || {};
+  if (tipo === "ENTRADA") {
+    return dentroRangoMinutos(minuto, minutosHora(entrada.permitirDesde || entrada.programada), minutosHora(entrada.permitirHasta || entrada.programada));
+  }
+  if (tipo === "SALIDA") {
+    return dentroRangoMinutos(minuto, minutosHora(salida.permitirDesde || salida.programada), minutosHora(salida.permitirHasta || salida.programada));
+  }
+  if (tipo === "INICIO_REFRIGERIO") {
+    return dentroRangoMinutos(minuto, minutosHora(refrigerio.permitirInicioDesde), minutosHora(refrigerio.permitirInicioHasta));
+  }
+  if (tipo === "FIN_REFRIGERIO") {
+    const desde = minutosHora(refrigerio.permitirInicioDesde);
+    const hastaInicio = minutosHora(refrigerio.permitirInicioHasta);
+    const hasta = Math.min(minutosHora(salida.permitirDesde || salida.programada), hastaInicio + Number(refrigerio.duracionMinutos || 0));
+    return dentroRangoMinutos(minuto, desde, hasta);
+  }
+  return false;
 }
 
 function mensajeVentanaTipo(tipo) {
@@ -1150,3 +1071,4 @@ function html(valorHtml) {
       ],
   );
 }
+
