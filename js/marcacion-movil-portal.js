@@ -24,6 +24,7 @@ let perfil;
 let acceso;
 let ubicacion;
 let horarioHoy = null;
+let permisoBloqueante = null;
 let tiposPermitidos = ["ENTRADA", "SALIDA"];
 let cargando = false;
 let creandoCuenta = false;
@@ -230,6 +231,7 @@ async function cargarPortal(usuario) {
   }
 
   horarioHoy = await obtenerHorarioDelDia();
+  permisoBloqueante = await obtenerPermisoBloqueante();
   configurarBotonesHorario(horarioHoy);
   await pintarPortal();
   mostrar("pantallaMarcacion");
@@ -260,10 +262,10 @@ async function solicitarDispositivo() {
 
 async function marcar(tipo, boton) {
   if (cargando) return;
-  if (!tipoDisponibleAhora(tipo)) {
+  if (permisoBloqueante) {
     return aviso(
-      "Fuera del horario permitido",
-      mensajeVentanaTipo(tipo),
+      "Marcación no disponible",
+      `${permisoBloqueante.tipo}: ${permisoBloqueante.motivo}`,
       "warning",
     );
   }
@@ -543,6 +545,27 @@ function pintarResumenHorario() {
   contenedor.innerHTML = `<header><span>JORNADA DE HOY</span><strong>${html(horarioHoy.nombre || "Horario asignado")}</strong></header><div class="detalle-horario-movil"><span><i class="bi bi-box-arrow-in-right"></i> Entrada <b>${html(horaCorta(horarioHoy.entrada?.programada))}</b></span>${tieneRefrigerio ? `<span><i class="bi bi-cup-hot"></i> Almuerzo <b>${html(horaCorta(refrigerio.permitirInicioDesde))}–${html(horaCorta(refrigerio.permitirInicioHasta))}</b></span>` : ""}<span><i class="bi bi-box-arrow-right"></i> Salida <b>${html(horaCorta(horarioHoy.salida?.programada))}</b></span></div>`;
 }
 
+async function obtenerPermisoBloqueante() {
+  try {
+    const snap = await getDocs(query(collection(db,"permisos"),where("empresaId","==",acceso.empresaId),where("colaboradorId","==",acceso.colaboradorId)));
+    const hoy=fechaLocal(),ahora=minutoActualLima();
+    const activo=snap.docs.map(d=>({id:d.id,...d.data()})).find(p=>{
+      const estado=String(p.estado||p.estadoAprobacion||"").toUpperCase(); if(estado!=="APROBADO")return false;
+      const desde=fechaPermiso(p.fechaInicio||p.fecha),hasta=fechaPermiso(p.fechaFin||p.fechaInicio||p.fecha); if(!desde||hoy<desde||hoy>hasta)return false;
+      const duracion=String(p.tipoDuracion||p.duracion||p.modalidad||"DIA_COMPLETO").toUpperCase();
+      if(/HORA/.test(duracion)){const ini=minutosHora(p.horaInicio||p.desdeHora),fin=minutosHora(p.horaFin||p.hastaHora);return ini===null||fin===null||dentroRangoMinutos(ahora,ini,fin);}
+      if(/MEDIO|MEDIA/.test(duracion)){const turno=String(p.medioDia||p.turno||p.periodo||"").toUpperCase();return /TARDE|SEGUNDA/.test(turno)?ahora>=720:ahora<720;}
+      return true;
+    });
+    const aviso=document.getElementById("avisoPermisoMovil");
+    if(!activo){if(aviso)aviso.hidden=true;return null;}
+    const tipo=activo.tipoPermisoNombre||activo.tipoPermiso||activo.tipo||"Permiso aprobado",motivo=activo.motivo||activo.descripcion||activo.observaciones||"Periodo autorizado por la empresa";
+    if(aviso){aviso.hidden=false;aviso.innerHTML=`<i class="bi bi-calendar2-x-fill"></i><div><strong>${html(tipo)}</strong><small>${html(motivo)}</small><span>Marcación deshabilitada durante el permiso vigente.</span></div>`;}
+    return{tipo,motivo};
+  }catch(error){console.warn("No se pudo consultar el permiso vigente:",error);return null;}
+}
+function fechaPermiso(v){if(!v)return"";if(v?.toDate)return v.toDate().toISOString().slice(0,10);return String(v).slice(0,10);}
+
 async function obtenerHorarioDelDia() {
   const [asignacionesSnap, horariosSnap, excepcionesSnap] = await Promise.all([
     getDocs(query(collection(db, "asignacionesHorarios"), where("empresaId", "==", acceso.empresaId))),
@@ -649,13 +672,13 @@ function configurarBotonesHorario(horario) {
 function actualizarDisponibilidadBotones() {
   document.querySelectorAll("[data-tipo-marca]").forEach((boton) => {
     if (boton.hidden) return;
-    const disponible = tipoDisponibleAhora(boton.dataset.tipoMarca);
+    const disponible = !permisoBloqueante;
     boton.disabled = !disponible;
-    boton.classList.toggle("fuera-rango", !disponible);
+    boton.classList.toggle("fuera-rango", false);
     const texto = boton.querySelector("span");
     if (texto) texto.textContent = disponible
       ? boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca)
-      : `${boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca)} · Fuera de rango`;
+      : `${boton.dataset.textoHorario || etiqueta(boton.dataset.tipoMarca)} · Permiso vigente`;
   });
 }
 
@@ -1071,4 +1094,3 @@ function html(valorHtml) {
       ],
   );
 }
-
