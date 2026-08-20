@@ -103,7 +103,11 @@ export function iniciarResumenAsistencia() {
   });
 
   document.addEventListener("asistencia:horas-extra-actualizadas", (evento) => {
-    if (evento.detail?.fecha === fechaResumenSeleccionada) {
+    const detalle = evento.detail || {};
+    const afectaFechaSeleccionada =
+      detalle.fecha === fechaResumenSeleccionada ||
+      (detalle.masivo && detalle.desde <= fechaResumenSeleccionada && detalle.hasta >= fechaResumenSeleccionada);
+    if (afectaFechaSeleccionada) {
       cargarResumenAsistencia(fechaResumenSeleccionada);
     }
   });
@@ -1717,6 +1721,34 @@ function obtenerTextoTratamientoFeriado(tratamiento) {
 HORAS EXTRA
 =====================================================*/
 
+function obtenerOrigenDecisionHorasExtra(aprobacion) {
+  return String(aprobacion?.origenDecision || "DIARIO").toUpperCase() === "MASIVO"
+    ? "Decisión aplicada desde el resumen mensual"
+    : "Decisión aplicada desde el resumen diario";
+}
+
+function formatearFechaDecisionHorasExtra(valor) {
+  const fecha = valor?.toDate?.() || (valor instanceof Date ? valor : null);
+  return fecha && !Number.isNaN(fecha.getTime())
+    ? fecha.toLocaleString("es-PE", { dateStyle: "short", timeStyle: "short" })
+    : "Fecha no disponible";
+}
+
+function obtenerDetalleDecisionHorasExtra(aprobacion) {
+  if (!aprobacion) return "";
+  const origen = obtenerOrigenDecisionHorasExtra(aprobacion);
+  const motivo = String(aprobacion.motivo || "Sin motivo registrado").trim();
+  const responsable = String(aprobacion.decididoPorCorreo || aprobacion.decididoPor || "Administrador").trim();
+  const fecha = formatearFechaDecisionHorasExtra(aprobacion.fechaDecision);
+  return `${origen} · Motivo: ${motivo} · Responsable: ${responsable} · ${fecha}`;
+}
+
+function crearResumenOrigenHorasExtra(aprobacion) {
+  const origen = obtenerOrigenDecisionHorasExtra(aprobacion);
+  const motivo = String(aprobacion?.motivo || "Sin motivo registrado").trim();
+  return `${escaparHTML(origen)} · ${escaparHTML(motivo)}`;
+}
+
 function crearHorasExtraHTML(registro) {
   if (registro.estado === "DESCANSO_SUSTITUTORIO") {
     return `
@@ -1941,9 +1973,7 @@ function crearHorasExtraHTML(registro) {
                 class="horas-extra-resumen rechazada editable"
                 data-accion="gestionar-horas-extra"
                 data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
-                title="${escaparHTML(
-                  aprobacion.motivo || "Horas extra rechazadas",
-                )}"
+                title="${escaparHTML(obtenerDetalleDecisionHorasExtra(aprobacion))}"
             >
 
                 <strong>
@@ -1956,9 +1986,7 @@ function crearHorasExtraHTML(registro) {
 
                 <small>
 
-                    ${formatearDuracionCorta(calculo.minutosExtraTotal)}
-
-                    trabajados, no aprobados
+                    ${crearResumenOrigenHorasExtra(aprobacion)}
 
                 </small>
 
@@ -1984,9 +2012,7 @@ function crearHorasExtraHTML(registro) {
                 class="horas-extra-resumen parcial editable"
                 data-accion="gestionar-horas-extra"
                 data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
-                title="${escaparHTML(
-                  aprobacion.motivo || "Aprobación parcial",
-                )}"
+                title="${escaparHTML(obtenerDetalleDecisionHorasExtra(aprobacion))}"
             >
 
                 <strong>
@@ -2005,12 +2031,7 @@ function crearHorasExtraHTML(registro) {
 
                 <small>
 
-                    ${
-                      calculo.minutosExtraTotal -
-                      (aprobacion.minutosAprobados || 0)
-                    }
-
-                    min no aprobados
+                    ${crearResumenOrigenHorasExtra(aprobacion)}
 
                 </small>
 
@@ -2033,9 +2054,7 @@ function crearHorasExtraHTML(registro) {
                 class="horas-extra-resumen aprobada editable"
                 data-accion="gestionar-horas-extra"
                 data-colaborador-id="${escaparHTML(registro.colaboradorId)}"
-                title="${escaparHTML(
-                  aprobacion.motivo || "Horas extra aprobadas",
-                )}"
+                title="${escaparHTML(obtenerDetalleDecisionHorasExtra(aprobacion))}"
             >
 
                 <strong>
@@ -2049,7 +2068,7 @@ function crearHorasExtraHTML(registro) {
                 </span>
 
                 <small>
-                    Tiempo reconocido oficialmente
+                    ${crearResumenOrigenHorasExtra(aprobacion)}
                 </small>
 
                 <em>
