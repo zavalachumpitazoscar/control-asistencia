@@ -36,8 +36,10 @@ service cloud.firestore {
       allow read: if autenticado() && request.auth.uid == uid;
       allow create: if autenticado() && request.auth.uid == uid
         && request.resource.data.correo == request.auth.token.email
-        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.correo == request.auth.token.email
-        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.colaboradorId)).data.empresaId == request.resource.data.empresaId;
+        && request.resource.data.accesoId is string
+        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.accesoId)).data.correo == request.auth.token.email
+        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.accesoId)).data.empresaId == request.resource.data.empresaId
+        && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.accesoId)).data.colaboradorId == request.resource.data.colaboradorId;
       allow update: if false;
       allow delete: if administraEmpresa(resource.data.empresaId);
     }
@@ -109,6 +111,14 @@ service cloud.firestore {
 
     match /excepcionesHorarios/{id} {
       allow read: if administraEmpresa(resource.data.empresaId) || esMovilEmpresa(resource.data.empresaId);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /permisos/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId)
+        || (esMovilEmpresa(resource.data.empresaId)
+          && resource.data.colaboradorId == perfilMovil().colaboradorId);
       allow create: if administraEmpresa(request.resource.data.empresaId);
       allow update, delete: if administraEmpresa(resource.data.empresaId);
     }
