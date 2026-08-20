@@ -230,3 +230,106 @@ body.tema-oscuro .asistente-panel { border-color: #334155; background: #0f172a; 
 body.tema-oscuro .asistente-mensajes { background: #0f172a; }
 [data-tema="oscuro"] .asistente-burbuja,
 body.tema-oscuro .asistente-burbuja { border-color: #334155; color: #cbd5e1; background: #1e293b; }
+
+/* Identidad IA 2026 — núcleo neuronal empresarial */
+.asistente-boton {
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(99, 199, 255, .32);
+  border-radius: 18px;
+  background: #0b1633;
+  box-shadow:
+    0 16px 38px rgba(4, 18, 48, .38),
+    0 0 0 4px rgba(35, 136, 255, .08);
+}
+
+.asistente-boton::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -45%;
+  opacity: .42;
+  background: conic-gradient(from 180deg, transparent, #2388ff, #63c7ff, transparent 42%);
+  animation: asistenteOrbita 7s linear infinite;
+}
+
+.asistente-boton::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 1px;
+  border-radius: 16px;
+  background: #0b1633;
+}
+
+.asistente-boton:hover {
+  transform: translateY(-3px) scale(1.025);
+  box-shadow:
+    0 20px 45px rgba(4, 18, 48, .44),
+    0 0 0 5px rgba(35, 136, 255, .12);
+}
+
+.asistente-logo-boton {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  filter: none;
+}
+
+.asistente-boton .asistente-punto {
+  z-index: 2;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #0b1633;
+  background: #63c7ff;
+  box-shadow: 0 0 0 2px rgba(99, 199, 255, .18), 0 0 9px #63c7ff;
+}
+
+.asistente-cabecera {
+  background:
+    radial-gradient(circle at 12% 0, rgba(99, 199, 255, .17), transparent 34%),
+    linear-gradient(135deg, #08142f, #0b2450 58%, #123b78);
+}
+
+.asistente-avatar {
+  flex-basis: 46px;
+  width: 46px;
+  height: 46px;
+  overflow: hidden;
+  border: 1px solid rgba(99, 199, 255, .3);
+  border-radius: 14px;
+  background: #0b1633;
+  box-shadow: 0 8px 22px rgba(3, 12, 30, .3);
+}
+
+.asistente-logo-cabecera {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  object-fit: cover;
+}
+
+.asistente-cabecera h2 {
+  letter-spacing: -.01em;
+}
+
+.asistente-cabecera p {
+  color: #a9cdfa;
+}
+
+.asistente-enviar {
+  background: linear-gradient(135deg, #2388ff, #1852d2);
+  box-shadow: 0 8px 18px rgba(35, 136, 255, .24);
+}
+
+@keyframes asistenteOrbita {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asistente-boton::before { animation: none; }
+}
