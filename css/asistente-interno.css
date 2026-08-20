@@ -16,7 +16,21 @@
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .asistente-boton:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(37, 99, 235, .44); }
-.asistente-boton i { font-size: 25px; }
+.asistente-logo-boton {
+  width: 39px;
+  height: 39px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(15, 23, 42, .3));
+}
+.asistente-boton .asistente-destello {
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  color: #fff;
+  font-size: 14px;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,.9));
+  animation: asistenteBrillo 2.2s ease-in-out infinite;
+}
 .asistente-boton .asistente-punto {
   position: absolute;
   top: 8px;
@@ -57,6 +71,7 @@
   background: linear-gradient(135deg, #172554, #1e3a8a 54%, #4338ca);
 }
 .asistente-avatar {
+  position: relative;
   display: grid;
   flex: 0 0 43px;
   place-items: center;
@@ -65,7 +80,17 @@
   border-radius: 14px;
   color: #dbeafe;
   background: rgba(255,255,255,.13);
-  font-size: 21px;
+  overflow: visible;
+}
+.asistente-logo-cabecera { width: 34px; height: 34px; object-fit: contain; }
+.asistente-destello-cabecera {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  color: #fff;
+  font-size: 11px;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.85));
+  animation: asistenteBrillo 2.2s ease-in-out infinite .3s;
 }
 .asistente-cabecera-texto { min-width: 0; flex: 1; }
 .asistente-cabecera h2 { margin: 0; font-size: 15px; }
@@ -178,6 +203,10 @@
 .asistente-escribiendo span:nth-child(2) { animation-delay: .2s; }
 .asistente-escribiendo span:nth-child(3) { animation-delay: .4s; }
 @keyframes asistentePulso { to { opacity: .25; transform: translateY(-2px); } }
+@keyframes asistenteBrillo {
+  0%, 100% { opacity: .72; transform: scale(.9) rotate(-7deg); }
+  50% { opacity: 1; transform: scale(1.18) rotate(7deg); }
+}
 
 @media (max-width: 1024px) {
   .asistente-boton { bottom: 86px; right: 15px; width: 52px; height: 52px; border-radius: 17px; }
