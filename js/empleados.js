@@ -2,7 +2,7 @@ import { iniciarColaboradores } from "./empleados/colaboradores.js?v=20260819-2"
 import { iniciarHorarios } from "./empleados/horarios.js?v=20260819-1";
 import { iniciarPermisos } from "./empleados/permisos.js";
 import { iniciarFeriados } from "./empleados/feriados.js?v=20260817-1";
-import { iniciarAdministracionMarcacionMovil } from "./empleados/marcacion-movil.js?v=20260818-10";
+import { iniciarAdministracionMarcacionMovil } from "./empleados/marcacion-movil.js?v=20260820-11";
 
 export function iniciarEmpleados(
     tabInicial = "colaboradores"
