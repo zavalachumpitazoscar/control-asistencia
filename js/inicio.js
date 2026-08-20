@@ -32,9 +32,12 @@ import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?
 import { iniciarDashboard } from "./dashboard.js?v=20260819-2";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260814-3";
+import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260820-1";
+import { iniciarAnunciosGlobales } from "./anuncios-globales.js?v=20260820-1";
 
 aplicarAparienciaGuardada();
 iniciarManual();
+iniciarAnunciosGlobales();
 
 const sidebar = document.querySelector(".sidebar");
 
@@ -289,6 +292,8 @@ onAuthStateChanged(auth, async(usuario)=>{
 
     await cargarPerfilUsuario(usuario);
 
+    programarCierreAutomatico();
+
     iniciarMonitorAuditoriaGlobal(usuario);
 
     const vistaInicial = obtenerAparienciaGuardada().vistaInicial || "dashboard";
@@ -531,6 +536,12 @@ async function cargarVista(
             case "auditoria":
 
                 iniciarAuditoria();
+
+            break;
+
+            case "centro-control":
+
+                iniciarCentroControl();
 
             break;
 
