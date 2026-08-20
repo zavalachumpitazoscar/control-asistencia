@@ -27,7 +27,7 @@ from
 
 import { iniciarCompañia } from "./compañia.js?v=20260817-1";
 import { iniciarEmpleados } from "./empleados.js?v=20260820-3";
-import { iniciarAsistencia } from "./asistencia.js?v=20260819-4";
+import { iniciarAsistencia } from "./asistencia.js?v=20260820-5";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260818-9";
 import { iniciarDashboard } from "./dashboard.js?v=20260819-2";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
@@ -477,7 +477,7 @@ async function cargarVista(
 
 
         const ruta =
-            `vistas/${vistaPrincipal}.html?v=20260820-4`;
+            `vistas/${vistaPrincipal}.html?v=20260820-5`;
 
 
         const respuesta =
@@ -921,3 +921,4 @@ regla.innerHTML =
 }
 
 }
+
