@@ -49,15 +49,13 @@ function iniciarAsistente() {
 function plantilla() {
   return `
     <button type="button" class="asistente-boton" id="btnAsistenteInterno" aria-label="Abrir asistente virtual" title="Asistente virtual">
-      <img src="img/logo.png" alt="" class="asistente-logo-boton">
-      <i class="bi bi-stars asistente-destello" aria-hidden="true"></i>
+      <img src="img/asistente-ia.png?v=20260820" alt="" class="asistente-logo-boton">
       <span class="asistente-punto"></span>
     </button>
     <section class="asistente-panel" id="asistenteInterno" aria-label="Asistente virtual" aria-hidden="true">
       <header class="asistente-cabecera">
         <div class="asistente-avatar">
-          <img src="img/logo.png" alt="" class="asistente-logo-cabecera">
-          <i class="bi bi-stars asistente-destello-cabecera" aria-hidden="true"></i>
+          <img src="img/asistente-ia.png?v=20260820" alt="" class="asistente-logo-cabecera">
         </div>
         <div class="asistente-cabecera-texto"><h2>Asistente de asistencia</h2><p>Consultas y acciones del sistema</p></div>
         <button type="button" class="asistente-cerrar" id="btnCerrarAsistente" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
@@ -563,4 +561,5 @@ function escapar(valor) {
   elemento.textContent = String(valor ?? "");
   return elemento.innerHTML;
 }
+
 
