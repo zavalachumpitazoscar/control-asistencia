@@ -32,8 +32,8 @@ import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?
 import { iniciarDashboard } from "./dashboard.js?v=20260819-2";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260814-3";
-import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260820-2";
-import { iniciarAnunciosGlobales } from "./anuncios-globales.js?v=20260820-2";
+import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260820-3";
+import { iniciarAnunciosGlobales } from "./anuncios-globales.js?v=20260820-3";
 
 aplicarAparienciaGuardada();
 iniciarManual();
@@ -477,7 +477,7 @@ async function cargarVista(
 
 
         const ruta =
-            `vistas/${vistaPrincipal}.html?v=20260820-3`;
+            `vistas/${vistaPrincipal}.html?v=20260820-4`;
 
 
         const respuesta =
@@ -921,3 +921,4 @@ regla.innerHTML =
 }
 
 }
+
