@@ -1,0 +1,90 @@
+/* Identidad visual unificada — Control Empresarial */
+:root {
+  --marca-azul: #2388ff;
+  --marca-azul-noche: #0b1633;
+}
+
+.brand-mark,
+.super-logo {
+  border: 1px solid rgba(35, 136, 255, .16) !important;
+  background: rgba(255, 255, 255, .98) !important;
+  box-shadow: 0 12px 32px rgba(4, 18, 48, .18), inset 0 0 0 1px rgba(255, 255, 255, .7) !important;
+}
+
+.brand-mark img,
+.super-logo img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 4px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+/* Sidebar principal: el símbolo respira dentro de la columna compacta. */
+.sidebar .logo {
+  border: 1px solid rgba(99, 199, 255, .22);
+  background: linear-gradient(145deg, #ffffff, #eef5ff);
+  box-shadow: 0 8px 24px rgba(35, 136, 255, .25);
+}
+
+.sidebar .logo img {
+  width: 100%;
+  height: 100%;
+  padding: 3px;
+  object-fit: contain;
+  border-radius: 9px;
+}
+
+/* Marcación móvil: reemplaza el icono genérico por la marca real. */
+.marca-movil {
+  gap: 10px !important;
+  color: var(--marca-azul-noche) !important;
+  letter-spacing: .105em !important;
+}
+
+.marca-movil__logo {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #dce8fb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, .1);
+}
+
+.marca-movil__logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 3px;
+  object-fit: contain;
+}
+
+/* Panel de superadministración. */
+#appSuper aside .brand img {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  padding: 4px;
+  object-fit: contain;
+  border: 1px solid rgba(99, 199, 255, .2);
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
+}
+
+@media (max-width: 480px) {
+  .brand-mark {
+    border-radius: 13px !important;
+  }
+
+  .marca-movil__logo {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+}
