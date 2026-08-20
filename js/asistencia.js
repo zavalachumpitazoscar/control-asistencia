@@ -1,14 +1,14 @@
 import { iniciarNavegacionAsistencia } from "./asistencia/navegacion-asistencia.js";
 import { iniciarFechaAsistencia } from "./asistencia/fecha-asistencia.js";
 import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js?v=20260820-6";
-import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260819-4";
+import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260820-5";
 import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js?v=20260819-1";
-import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260818-7";
+import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260820-8";
 import { iniciarEditarDiaAsistencia } from "./asistencia/editar-dia-asistencia.js?v=20260814-1";
 import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-asistencia.js?v=20260817-1";
 import { iniciarAjusteRefrigerioAsistencia } from "./asistencia/ajuste-refrigerio-asistencia.js";
-import { iniciarAprobacionHorasExtraAsistencia } from "./asistencia/aprobar-horas-extra-asistencia.js";
-import { iniciarOperacionesMensualesAsistencia } from "./asistencia/operaciones-mensuales-asistencia.js?v=20260812-4";
+import { iniciarAprobacionHorasExtraAsistencia } from "./asistencia/aprobar-horas-extra-asistencia.js?v=20260820-2";
+import { iniciarOperacionesMensualesAsistencia } from "./asistencia/operaciones-mensuales-asistencia.js?v=20260820-6";
 import { iniciarRegularizacionesCierresAsistencia } from "./asistencia/regularizaciones-cierres-asistencia.js?v=20260814-1";
 
 export async function iniciarAsistencia() {
