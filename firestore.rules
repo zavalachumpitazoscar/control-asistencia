@@ -2,18 +2,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function autenticado() { return request.auth != null; }
+    function esSuperadmin() {
+      return autenticado()
+        && request.auth.uid == 'q9H2AzN2eIODDioC7auy92MpcHf2'
+        && request.auth.token.email == 'superadministrador2026@gmail.com';
+    }
     function perfil() { return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data; }
     function administraEmpresa(empresaId) {
-      return autenticado()
+      return esSuperadmin() || (autenticado()
         && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
         && perfil().empresaId == empresaId
-        && perfil().rol in ['ADMINISTRADOR', 'PROPIETARIO', 'GERENTE'];
+        && perfil().rol in ['ADMINISTRADOR', 'PROPIETARIO', 'GERENTE']);
     }
     function administraMarcacionPorId(marcacionId) {
-      return autenticado()
+      return esSuperadmin() || (autenticado()
         && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
         && perfil().rol in ['ADMINISTRADOR', 'PROPIETARIO', 'GERENTE']
-        && marcacionId.matches('^' + perfil().empresaId + '_.*$');
+        && marcacionId.matches('^' + perfil().empresaId + '_.*$'));
     }
     function perfilMovil() {
       return get(/databases/$(database)/documents/usuariosMoviles/$(request.auth.uid)).data;
@@ -25,22 +30,23 @@ service cloud.firestore {
     }
 
     match /usuarios/{uid} {
-      allow read: if autenticado() && request.auth.uid == uid;
-      allow create: if autenticado() && request.auth.uid == uid;
-      allow update: if autenticado() && request.auth.uid == uid
+      allow read: if esSuperadmin() || (autenticado() && request.auth.uid == uid);
+      allow create: if esSuperadmin() || (autenticado() && request.auth.uid == uid);
+      allow update: if esSuperadmin() || (autenticado() && request.auth.uid == uid
         && request.resource.data.empresaId == resource.data.empresaId
-        && request.resource.data.rol == resource.data.rol;
+        && request.resource.data.rol == resource.data.rol);
+      allow delete: if esSuperadmin();
     }
 
     match /usuariosMoviles/{uid} {
-      allow read: if autenticado() && request.auth.uid == uid;
+      allow read: if esSuperadmin() || (autenticado() && request.auth.uid == uid);
       allow create: if autenticado() && request.auth.uid == uid
         && request.resource.data.correo == request.auth.token.email
         && request.resource.data.accesoId is string
         && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.accesoId)).data.correo == request.auth.token.email
         && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.accesoId)).data.empresaId == request.resource.data.empresaId
         && get(/databases/$(database)/documents/accesosMoviles/$(request.resource.data.accesoId)).data.colaboradorId == request.resource.data.colaboradorId;
-      allow update: if false;
+      allow update: if esSuperadmin();
       allow delete: if administraEmpresa(resource.data.empresaId);
     }
 
@@ -139,6 +145,23 @@ service cloud.firestore {
     match /companias/{empresaId} {
       allow create: if autenticado() && request.resource.data.empresaId == empresaId;
       allow read, update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
+    match /configuracionSuperadmin/{id} {
+      allow read, write: if esSuperadmin();
+    }
+
+    match /indicesRuc/{id} {
+      allow read, create, update, delete: if esSuperadmin();
+    }
+
+    match /indicesCorreo/{id} {
+      allow read, create, update, delete: if esSuperadmin();
+    }
+
+    match /auditoriaSuperadmin/{id} {
+      allow read, create: if esSuperadmin();
+      allow update, delete: if false;
     }
 
     // Comunicados: los administradores gestionan; cada móvil solo lee los de su empresa.
