@@ -4,7 +4,7 @@ import { collection, getDocs, query, where } from "https://www.gstatic.com/fireb
 
 let cargadoPara = "";
 export function iniciarAnunciosGlobales() {
-  onAuthStateChanged(auth, (usuario) => { if (usuario) esperarEmpresa(); });
+  onAuthStateChanged(auth, (usuario) => { if (usuario) esperarEmpresa(); else { cargadoPara=""; document.getElementById("anunciosGlobalesSistema")?.remove(); document.body.classList.remove("modal-anuncio-abierto"); } });
   window.addEventListener("storage", esperarEmpresa);
 }
 async function esperarEmpresa() {
@@ -19,16 +19,15 @@ async function cargar(empresaId) {
   try {
     const snap = await getDocs(query(collection(db, "anunciosEmpresa"), where("empresaId", "==", empresaId)));
     const hoy = new Date().toISOString().slice(0, 10);
-    const ocultos = JSON.parse(sessionStorage.getItem("anunciosOcultos") || "[]");
     const anuncios = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-      .filter((a) => a.estado === "PUBLICADO" && ["TODOS", "ADMIN", "ADMINISTRADORES"].includes(a.destino || "TODOS") && (!a.visibleDesde || a.visibleDesde <= hoy) && (!a.visibleHasta || a.visibleHasta >= hoy) && !ocultos.includes(a.id))
+      .filter((a) => a.estado === "PUBLICADO" && ["TODOS", "ADMIN", "ADMINISTRADORES"].includes(a.destino || "TODOS") && (!a.visibleDesde || a.visibleDesde <= hoy) && (!a.visibleHasta || a.visibleHasta >= hoy))
       .sort((a, b) => milis(b.creadoEn) - milis(a.creadoEn));
     document.getElementById("anunciosGlobalesSistema")?.remove();
     if (!anuncios.length) return;
     const bloque = document.createElement("section"); bloque.id = "anunciosGlobalesSistema"; bloque.className = "anuncio-modal-sistema"; bloque.setAttribute("role", "dialog"); bloque.setAttribute("aria-modal", "true"); bloque.setAttribute("aria-label", "Comunicados importantes");
     bloque.innerHTML = `<div class="anuncio-modal-tarjeta"><div class="anuncio-modal-icono"><i class="bi bi-megaphone-fill"></i></div><span class="anuncio-modal-etiqueta">COMUNICADO IMPORTANTE</span>${anuncios.slice(0,3).map((a) => `<article data-anuncio-id="${a.id}"><h2>${esc(a.titulo || "Comunicado")}</h2><p>${esc(a.mensaje || "")}</p>${a.visibleHasta?`<small>Disponible hasta ${fecha(a.visibleHasta)}</small>`:""}</article>`).join("")}<button type="button" class="anuncio-modal-entendido">Entendido</button><small class="anuncio-modal-contador">${anuncios.length} comunicado(s) vigente(s)</small></div>`;
     document.body.appendChild(bloque); document.body.classList.add("modal-anuncio-abierto");
-    bloque.querySelector(".anuncio-modal-entendido").onclick = () => { const ids=[...new Set([...ocultos,...anuncios.slice(0,3).map(a=>a.id)])];sessionStorage.setItem("anunciosOcultos",JSON.stringify(ids));document.body.classList.remove("modal-anuncio-abierto");bloque.remove(); };
+    bloque.querySelector(".anuncio-modal-entendido").onclick = () => { document.body.classList.remove("modal-anuncio-abierto");bloque.remove(); };
   } catch (error) { console.warn("No se pudieron cargar los comunicados:", error); }
 }
 function milis(v) { return v?.toMillis?.() || v?.seconds * 1000 || 0; }
