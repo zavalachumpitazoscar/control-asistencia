@@ -3,7 +3,7 @@ import {
     query,
     where,
     getDocs,
-    documentId,
+    getDoc,
     writeBatch,
     doc,
     serverTimestamp,
@@ -572,13 +572,7 @@ async function obtenerIdsMarcacionesExistentes(
         new Set();
 
 
-    const grupos =
-        dividirEnGrupos(
-            [
-                ...new Set(ids)
-            ],
-            MAXIMO_IDS_CONSULTA
-        );
+    const grupos = dividirEnGrupos([...new Set(ids)], MAXIMO_IDS_CONSULTA);
 
 
     for(
@@ -592,35 +586,19 @@ async function obtenerIdsMarcacionesExistentes(
         }
 
 
-        const consulta =
-            query(
-                collection(
-                    db,
-                    "marcaciones"
-                ),
-                where(
-                    documentId(),
-                    "in",
-                    grupo
-                )
-            );
-
-
-        const resultado =
-            await getDocs(
-                consulta
-            );
-
-
-        resultado.forEach(
-            documento=>{
-
-                existentes.add(
-                    documento.id
-                );
-
-            }
+        /*
+            Las reglas autorizan la lectura directa porque el identificador
+            comienza con la empresa activa. Una consulta "documentId in"
+            se evalúa como listado y Firestore no puede demostrar que todos
+            los posibles resultados pertenecen a esa empresa.
+        */
+        const documentos = await Promise.all(
+            grupo.map(id=>getDoc(doc(db,"marcaciones",id)))
         );
+
+        documentos.forEach(documento=>{
+            if(documento.exists()) existentes.add(documento.id);
+        });
 
     }
 
