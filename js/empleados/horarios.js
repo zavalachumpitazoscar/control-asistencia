@@ -24,7 +24,7 @@ from "./horarios-formulario.js?v=20260819-1";
 import {
     iniciarAsignacionesHorarios
 }
-from "./horarios-asignaciones.js?v=20260814-4";
+from "./horarios-asignaciones.js?v=20260821-2";
 
 
 import {
@@ -182,6 +182,21 @@ export function iniciarHorarios(){
 
         },
 
+        seleccionarHorario:horarioId=>{
+
+            const horario = horarios.find(item=>item.id === horarioId);
+
+            if(!horario){
+                return false;
+            }
+
+            horarioSeleccionadoId = horario.id;
+            mostrarDetalleHorario(horario);
+            renderizarHorarios();
+            return true;
+
+        },
+
         alActualizar:cantidad=>{
 
             asignarTexto(
@@ -269,6 +284,7 @@ onSnapshot(
 
 
         renderizarHorarios();
+        asignaciones?.actualizarCobertura?.();
 
 
         if(horarioSeleccionadoId){
