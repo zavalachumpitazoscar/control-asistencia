@@ -16,6 +16,7 @@ let colaboradores = [];
 let accesos = [];
 let solicitudes = [];
 let sucursales = [];
+let geocercasPersonalizadas = [];
 let control;
 
 export function iniciarAdministracionMarcacionMovil() {
@@ -25,6 +26,7 @@ export function iniciarAdministracionMarcacionMovil() {
   document.getElementById("buscarAccesoMovil")?.addEventListener("input", renderizar, opciones);
   document.getElementById("listaAccesosMoviles")?.addEventListener("click", procesarAccion, opciones);
   document.getElementById("listaGeocercasMoviles")?.addEventListener("click", procesarGeocerca, opciones);
+  document.getElementById("btnNuevaGeocercaMovil")?.addEventListener("click", crearGeocercaPersonalizada, opciones);
   cargar();
 }
 
@@ -33,12 +35,12 @@ async function cargar() {
   if (!empresaId) return;
   try {
     const resultados = await Promise.all(
-      ["colaboradores", "accesosMoviles", "solicitudesDispositivoMovil", "sucursales"].map(
+      ["colaboradores", "accesosMoviles", "solicitudesDispositivoMovil", "sucursales", "geocercasMoviles"].map(
         (nombre) =>
           getDocs(query(collection(db, nombre), where("empresaId", "==", empresaId))),
       ),
     );
-    [colaboradores, accesos, solicitudes, sucursales] = resultados.map((resultado) =>
+    [colaboradores, accesos, solicitudes, sucursales, geocercasPersonalizadas] = resultados.map((resultado) =>
       resultado.docs.map((documento) => ({ id: documento.id, ...documento.data() })),
     );
     renderizar();
@@ -112,7 +114,7 @@ function renderizar() {
                 ${!acceso ? `<button class="primario" data-habilitar="${colaborador.id}">Habilitar</button>` : ""}
                 ${dispositivo ? `<button data-ver-dispositivo="${solicitud?.id || colaborador.id}"><i class="bi bi-phone"></i> Ver dispositivo</button>` : ""}
                 ${solicitud ? `<button class="primario" data-autorizar="${solicitud.id}">Autorizar dispositivo</button><button data-rechazar="${solicitud.id}">Rechazar</button>` : ""}
-                ${acceso ? `<button data-whatsapp="${colaborador.id}"><i class="bi bi-whatsapp"></i> Enviar acceso</button>${acceso.usuarioId&&correoAcceso?`<button data-restablecer="${colaborador.id}"><i class="bi bi-key"></i> Restablecer contraseña</button>`:""}<button data-cambiar-correo="${colaborador.id}"><i class="bi bi-envelope-at"></i> Cambiar correo</button><button data-copiar="${colaborador.id}">Copiar enlace</button><button class="peligro" data-revocar="${colaborador.id}">Revocar</button>` : ""}
+                ${acceso ? `<button data-limites="${colaborador.id}"><i class="bi bi-geo-alt"></i> Límites de marcación</button><button data-whatsapp="${colaborador.id}"><i class="bi bi-whatsapp"></i> Enviar acceso</button>${acceso.usuarioId&&correoAcceso?`<button data-restablecer="${colaborador.id}"><i class="bi bi-key"></i> Restablecer contraseña</button>`:""}<button data-cambiar-correo="${colaborador.id}"><i class="bi bi-envelope-at"></i> Cambiar correo</button><button data-copiar="${colaborador.id}">Copiar enlace</button><button class="peligro" data-revocar="${colaborador.id}">Revocar</button>` : ""}
               </div>
             </article>`;
         })
@@ -127,6 +129,7 @@ async function procesarAccion(evento) {
     if (boton.dataset.copiar) return copiarEnlace();
     if (boton.dataset.whatsapp) return enviarAccesoWhatsApp(boton.dataset.whatsapp);
     if (boton.dataset.verDispositivo) return verDispositivo(boton.dataset.verDispositivo);
+    if (boton.dataset.limites) return configurarLimitesMarcacion(boton.dataset.limites);
     if (boton.dataset.habilitar) return await habilitar(boton.dataset.habilitar);
     if (boton.dataset.restablecer) return restablecerPasswordMovil(boton.dataset.restablecer);
     if (boton.dataset.cambiarCorreo) return cambiarCorreo(boton.dataset.cambiarCorreo);
@@ -468,24 +471,32 @@ async function copiarEnlace(titulo = "Enlace copiado") {
 function renderizarGeocercas() {
   const lista = document.getElementById("listaGeocercasMoviles");
   if (!lista) return;
-  lista.innerHTML = sucursales.length
-    ? sucursales
+  const geocercasSucursales = sucursales
         .map(
           (sucursal) => `
           <div class="fila-geocerca" data-sucursal="${sucursal.id}">
-            <div><strong>${html(sucursal.nombre)}</strong><p>${html(sucursal.direccion || "Sin dirección")}</p></div>
+            <div><strong>${html(sucursal.nombre)}</strong><p>Geocerca de sucursal · ${html(sucursal.direccion || "Sin dirección")}</p></div>
             <label>Latitud<input data-lat type="number" step="any" value="${html(sucursal.geocercaMovil?.latitud ?? "")}"></label>
             <label>Longitud<input data-lng type="number" step="any" value="${html(sucursal.geocercaMovil?.longitud ?? "")}"></label>
             <label>Radio (metros)<input data-radio type="number" min="20" max="5000" value="${html(sucursal.geocercaMovil?.radioMetros ?? 150)}"></label>
             <div class="geocerca-acciones"><button data-ubicacion-actual>Usar mi ubicación</button><button class="primario" data-guardar-geocerca>Guardar</button></div>
           </div>`,
         )
-        .join("")
-    : '<p class="movil-vacio">No existen sucursales.</p>';
+        .join("");
+  const personalizadas = geocercasPersonalizadas.map((zona) => `
+    <div class="fila-geocerca" data-geocerca="${zona.id}">
+      <div><strong>${html(zona.nombre || "Geocerca personalizada")}</strong><p>Geocerca independiente</p></div>
+      <label>Latitud<input data-lat type="number" step="any" value="${html(zona.latitud ?? "")}"></label>
+      <label>Longitud<input data-lng type="number" step="any" value="${html(zona.longitud ?? "")}"></label>
+      <label>Radio (metros)<input data-radio type="number" min="20" max="5000" value="${html(zona.radioMetros ?? 150)}"></label>
+      <div class="geocerca-acciones"><button data-ubicacion-actual>Usar mi ubicación</button><button class="primario" data-guardar-geocerca>Guardar</button><button class="peligro" data-eliminar-geocerca>Eliminar</button></div>
+    </div>`).join("");
+  lista.innerHTML = geocercasSucursales + personalizadas
+    || '<p class="movil-vacio">No existen geocercas. Puedes crear una ubicación independiente.</p>';
 }
 
 async function procesarGeocerca(evento) {
-  const fila = evento.target.closest("[data-sucursal]");
+  const fila = evento.target.closest("[data-sucursal], [data-geocerca]");
   if (!fila) return;
   if (evento.target.closest("[data-ubicacion-actual]")) {
     navigator.geolocation.getCurrentPosition(
@@ -498,20 +509,152 @@ async function procesarGeocerca(evento) {
     );
     return;
   }
+  if (evento.target.closest("[data-eliminar-geocerca]")) {
+    const confirmacion = await Swal.fire({
+      title: "¿Eliminar geocerca?",
+      text: "También dejará de aplicarse a los colaboradores que la tengan asignada.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#dc2626",
+    });
+    if (!confirmacion.isConfirmed) return;
+    await deleteDoc(doc(db, "geocercasMoviles", fila.dataset.geocerca));
+    await cargar();
+    return;
+  }
   if (!evento.target.closest("[data-guardar-geocerca]")) return;
   try {
-    await updateDoc(doc(db, "sucursales", fila.dataset.sucursal), {
-      geocercaMovil: {
-        latitud: Number(fila.querySelector("[data-lat]").value),
-        longitud: Number(fila.querySelector("[data-lng]").value),
-        radioMetros: Number(fila.querySelector("[data-radio]").value),
-      },
-      actualizadoEn: serverTimestamp(),
-    });
+    const valores = valoresGeocerca(fila);
+    if (fila.dataset.sucursal) {
+      await updateDoc(doc(db, "sucursales", fila.dataset.sucursal), {
+        geocercaMovil: valores,
+        actualizadoEn: serverTimestamp(),
+      });
+    } else {
+      await updateDoc(doc(db, "geocercasMoviles", fila.dataset.geocerca), {
+        ...valores,
+        actualizadoEn: serverTimestamp(),
+      });
+    }
     alerta("Perímetro guardado", "Geocerca actualizada.", "success");
+    await cargar();
   } catch (error) {
     alerta("No se pudo guardar", mensaje(error), "error");
   }
+}
+
+function valoresGeocerca(fila) {
+  const latitud = Number(fila.querySelector("[data-lat]").value);
+  const longitud = Number(fila.querySelector("[data-lng]").value);
+  const radioMetros = Number(fila.querySelector("[data-radio]").value);
+  if (!Number.isFinite(latitud) || latitud < -90 || latitud > 90) throw new Error("Ingresa una latitud válida.");
+  if (!Number.isFinite(longitud) || longitud < -180 || longitud > 180) throw new Error("Ingresa una longitud válida.");
+  if (!Number.isFinite(radioMetros) || radioMetros < 20 || radioMetros > 5000) throw new Error("El radio debe estar entre 20 y 5000 metros.");
+  return { latitud, longitud, radioMetros };
+}
+
+async function crearGeocercaPersonalizada() {
+  const resultado = await Swal.fire({
+    title: "Nueva geocerca",
+    width: 650,
+    showCancelButton: true,
+    confirmButtonText: "Crear geocerca",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#2563eb",
+    html: `<div class="form-geocerca-personalizada">
+      <label>Nombre<input id="geocercaNombre" class="swal2-input" placeholder="Ej.: Almacén central"></label>
+      <label>Latitud<input id="geocercaLat" class="swal2-input" type="number" step="any"></label>
+      <label>Longitud<input id="geocercaLng" class="swal2-input" type="number" step="any"></label>
+      <label>Radio en metros<input id="geocercaRadio" class="swal2-input" type="number" min="20" max="5000" value="150"></label>
+      <button type="button" id="usarUbicacionNueva" class="swal2-confirm swal2-styled">Usar mi ubicación actual</button>
+    </div>`,
+    didOpen: () => {
+      document.getElementById("usarUbicacionNueva")?.addEventListener("click", () => {
+        navigator.geolocation.getCurrentPosition(
+          (posicion) => {
+            document.getElementById("geocercaLat").value = posicion.coords.latitude;
+            document.getElementById("geocercaLng").value = posicion.coords.longitude;
+          },
+          () => Swal.showValidationMessage("No se pudo obtener la ubicación."),
+          { enableHighAccuracy: true },
+        );
+      });
+    },
+    preConfirm: () => {
+      const nombre = document.getElementById("geocercaNombre").value.trim();
+      const latitud = Number(document.getElementById("geocercaLat").value);
+      const longitud = Number(document.getElementById("geocercaLng").value);
+      const radioMetros = Number(document.getElementById("geocercaRadio").value);
+      if (!nombre) return Swal.showValidationMessage("Indica un nombre."), false;
+      if (!Number.isFinite(latitud) || latitud < -90 || latitud > 90) return Swal.showValidationMessage("Latitud inválida."), false;
+      if (!Number.isFinite(longitud) || longitud < -180 || longitud > 180) return Swal.showValidationMessage("Longitud inválida."), false;
+      if (!Number.isFinite(radioMetros) || radioMetros < 20 || radioMetros > 5000) return Swal.showValidationMessage("El radio debe estar entre 20 y 5000 metros."), false;
+      return { nombre, latitud, longitud, radioMetros };
+    },
+  });
+  if (!resultado.isConfirmed) return;
+  const empresaId = sessionStorage.getItem("empresaId");
+  const referencia = doc(collection(db, "geocercasMoviles"));
+  await setDoc(referencia, {
+    ...resultado.value,
+    empresaId,
+    tipo: "PERSONALIZADA",
+    activo: true,
+    creadoEn: serverTimestamp(),
+  });
+  await cargar();
+}
+
+async function configurarLimitesMarcacion(colaboradorId) {
+  const acceso = accesos.find((item) => item.colaboradorId === colaboradorId);
+  if (!acceso) return;
+  const asignadas = new Set(acceso.limitesMarcacion?.geocercas || []);
+  const opcionesSucursal = sucursales.map((sucursal) => ({
+    id: `SUCURSAL:${sucursal.id}`,
+    nombre: `${sucursal.nombre} (sucursal)`,
+    valida: geocercaValida(sucursal.geocercaMovil),
+  }));
+  const opcionesPersonalizadas = geocercasPersonalizadas.map((zona) => ({
+    id: `PERSONALIZADA:${zona.id}`,
+    nombre: `${zona.nombre} (personalizada)`,
+    valida: geocercaValida(zona),
+  }));
+  const opciones = [...opcionesSucursal, ...opcionesPersonalizadas];
+  const modoActual = acceso.limitesMarcacion?.modo === "GEOCERCAS" ? "GEOCERCAS" : "LIBRE";
+  const resultado = await Swal.fire({
+    title: "Límites de marcación",
+    width: 720,
+    showCancelButton: true,
+    confirmButtonText: "Guardar límites",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#2563eb",
+    html: `<div class="limites-marcacion-modal">
+      <label><input type="radio" name="modoLimite" value="LIBRE" ${modoActual === "LIBRE" ? "checked" : ""}> <strong>Marcación libre</strong><small>Puede marcar desde cualquier ubicación. El GPS y la dirección se registran como evidencia.</small></label>
+      <label><input type="radio" name="modoLimite" value="GEOCERCAS" ${modoActual === "GEOCERCAS" ? "checked" : ""}> <strong>Restringir por geocercas</strong><small>Solo podrá marcar dentro de al menos una ubicación seleccionada.</small></label>
+      <div class="lista-limites-geocercas">${opciones.length ? opciones.map((opcion) => `<label class="${opcion.valida ? "" : "geocerca-invalida"}"><input type="checkbox" data-zona="${html(opcion.id)}" ${asignadas.has(opcion.id) ? "checked" : ""} ${opcion.valida ? "" : "disabled"}> ${html(opcion.nombre)}${opcion.valida ? "" : " — falta configurar coordenadas y radio"}</label>`).join("") : "<p>No existen geocercas configuradas.</p>"}</div>
+    </div>`,
+    preConfirm: () => {
+      const modo = document.querySelector('input[name="modoLimite"]:checked')?.value || "LIBRE";
+      const geocercas = [...document.querySelectorAll("[data-zona]:checked")].map((elemento) => elemento.dataset.zona);
+      if (modo === "GEOCERCAS" && !geocercas.length) return Swal.showValidationMessage("Selecciona al menos una geocerca válida."), false;
+      return { modo, geocercas };
+    },
+  });
+  if (!resultado.isConfirmed) return;
+  await updateDoc(doc(db, "accesosMoviles", colaboradorId), {
+    limitesMarcacion: resultado.value,
+    actualizadoEn: serverTimestamp(),
+  });
+  await alerta("Límites guardados", resultado.value.modo === "LIBRE" ? "El colaborador puede marcar desde cualquier ubicación." : "Las geocercas seleccionadas ya están activas.", "success");
+  await cargar();
+}
+
+function geocercaValida(zona) {
+  return Number.isFinite(Number(zona?.latitud))
+    && Number.isFinite(Number(zona?.longitud))
+    && Number(zona?.radioMetros) >= 20;
 }
 
 function actualizarResumen() {
@@ -565,4 +708,3 @@ function mensaje(error) {
 function alerta(titulo, texto, icono) {
   return Swal.fire({ title: titulo, text: texto, icon: icono, confirmButtonColor: "#2563eb" });
 }
-
