@@ -627,7 +627,9 @@ async function asociarCoincidenciasDNIConColaboradores(resultado){
     const equivalencias = new Map();
     resultadoEquivalencias.forEach(documento=>{
         const datos=documento.data();
-        equivalencias.set(normalizarDNI(datos.dniRecibido),datos);
+        const recibido=normalizarDNI(datos?.dniRecibido);
+        const destino=normalizarDNI(datos?.dniColaborador);
+        if(recibido&&destino) equivalencias.set(recibido,datos);
     });
 
     const pendientes = new Map();
@@ -657,8 +659,8 @@ async function asociarCoincidenciasDNIConColaboradores(resultado){
         if(!pendientes.has(recibido)) pendientes.set(recibido,{dniRecibido:recibido,candidatos});
     });
 
-    resultado.coincidenciasDniPendientes=[...pendientes.values()];
-    resultado.equivalenciasRecordadas=[...recordadas.values()];
+    resultado.coincidenciasDniPendientes=[...pendientes.values()].filter(item=>item?.dniRecibido&&Array.isArray(item.candidatos)&&item.candidatos.length);
+    resultado.equivalenciasRecordadas=[...recordadas.values()].filter(item=>item?.dniReloj&&item?.dniColaborador);
     resultado.coincidenciasDniSinCeros=[];
 
 }
@@ -784,7 +786,7 @@ function mostrarVistaPreviaImportacion(
 
                     <td>
                         ${escaparHTML(marcacion.dni)}
-                        ${marcacion.coincidenciaDni ? `<small class="importacion-dni-asociado">DNI registrado: ${escaparHTML(marcacion.coincidenciaDni.dniColaborador)}</small>` : ""}
+                        ${marcacion.coincidenciaDni?.dniColaborador ? `<small class="importacion-dni-asociado">DNI registrado: ${escaparHTML(marcacion.coincidenciaDni.dniColaborador)}</small>` : ""}
                         ${marcacion.requiereConfirmacion ? `<small class="importacion-dni-asociado">Requiere validar posible coincidencia</small>` : ""}
                     </td>
 
@@ -925,7 +927,7 @@ function mostrarVistaPreviaImportacion(
                         <div>
                             <strong>Equivalencias reconocidas anteriormente</strong>
                             <p>Estas relaciones ya fueron confirmadas en una importación previa:</p>
-                            <ul>${resultado.equivalenciasRecordadas.map(item=>`<li>${escaparHTML(item.dniReloj)} → ${escaparHTML(item.dniColaborador)} · ${escaparHTML(item.colaboradorNombre)}</li>`).join("")}</ul>
+                            <ul>${resultado.equivalenciasRecordadas.filter(item=>item?.dniReloj&&item?.dniColaborador).map(item=>`<li>${escaparHTML(item.dniReloj)} → ${escaparHTML(item.dniColaborador)} · ${escaparHTML(item.colaboradorNombre||"Colaborador")}</li>`).join("")}</ul>
                         </div>
                     </div>` : ""}
 
@@ -1206,7 +1208,7 @@ function mostrarResultadoGuardado(
         .join("");
 
     const coincidenciasSinCeros = [...new Map(
-        resultado.coincidenciasDniSinCeros.map(item=>[
+        (Array.isArray(resultado.coincidenciasDniSinCeros)?resultado.coincidenciasDniSinCeros:[]).filter(item=>item?.dniReloj&&item?.dniColaborador).map(item=>[
             `${item.dniReloj}_${item.dniColaborador}`,
             item
         ])
