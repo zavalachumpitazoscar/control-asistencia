@@ -48,7 +48,7 @@ from "./filtros-colaboradores.js";
 import {
     iniciarAsignacionesHorarios
 }
-from "./horarios-asignaciones.js";
+from "./horarios-asignaciones.js?v=20260821-1";
 
 import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260819-1";
 
