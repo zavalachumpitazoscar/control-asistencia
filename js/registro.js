@@ -283,30 +283,6 @@ Creando empresa...
 
                     break;
 
-                case "functions/already-exists":
-
-                    mostrarToast("error", error.message || "El RUC o correo ya está registrado.");
-
-                    break;
-
-                case "functions/permission-denied":
-
-                    mostrarToast("error", "La cuenta creada no coincide con el correo del registro. Vuelve a intentarlo.");
-
-                    break;
-
-                case "functions/unauthenticated":
-
-                    mostrarToast("error", "No se pudo validar la nueva cuenta. Vuelve a iniciar el registro.");
-
-                    break;
-
-                case "functions/not-found":
-
-                    mostrarToast("error", "La función segura de registro todavía no está desplegada en Firebase.");
-
-                    break;
-
                 case "permission-denied":
 
                 case "firestore/permission-denied":
@@ -321,7 +297,7 @@ Creando empresa...
 
                         "error",
 
-                        error.message === "internal" ? "El servidor no pudo completar el registro. Verifica el despliegue de la función segura." : error.message
+                        error.message || "No se pudo completar el registro en Firestore."
 
                     );
 
