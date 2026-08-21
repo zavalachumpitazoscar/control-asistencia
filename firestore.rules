@@ -31,7 +31,18 @@ service cloud.firestore {
 
     match /usuarios/{uid} {
       allow read: if esSuperadmin() || (autenticado() && request.auth.uid == uid);
-      allow create: if esSuperadmin() || (autenticado() && request.auth.uid == uid);
+      allow create: if esSuperadmin() || (autenticado()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.correo == request.auth.token.email
+        && request.resource.data.empresaId is string
+        && request.resource.data.empresaId.matches('^EMP-[A-Z0-9-]+$')
+        && request.resource.data.principal == true
+        && request.resource.data.rol == 'ADMINISTRADOR'
+        && request.resource.data.estado == 'PENDIENTE'
+        && request.resource.data.fechaRegistro == request.time
+        && request.resource.data.keys().hasOnly(['uid','empresaId','principal','nombre','correo','rol','estado','fechaRegistro'])
+        && getAfter(/databases/$(database)/documents/companias/$(request.resource.data.empresaId)).data.empresaId == request.resource.data.empresaId);
       allow update: if esSuperadmin() || (autenticado() && request.auth.uid == uid
         && request.resource.data.empresaId == resource.data.empresaId
         && request.resource.data.rol == resource.data.rol);
@@ -143,7 +154,17 @@ service cloud.firestore {
     }
 
     match /companias/{empresaId} {
-      allow create: if autenticado() && request.resource.data.empresaId == empresaId;
+      allow create: if autenticado()
+        && empresaId.matches('^EMP-[A-Z0-9-]+$')
+        && request.resource.data.empresaId == empresaId
+        && request.resource.data.estado == 'PENDIENTE'
+        && request.resource.data.fechaRegistro == request.time
+        && request.resource.data.fechaSolicitud == request.time
+        && request.resource.data.empresa.ruc is string
+        && request.resource.data.empresa.ruc.matches('^[0-9]{11}$')
+        && getAfter(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.empresaId == empresaId
+        && getAfter(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == 'ADMINISTRADOR'
+        && getAfter(/databases/$(database)/documents/indicesRuc/$(request.resource.data.empresa.ruc)).data.uid == request.auth.uid;
       allow read, update, delete: if administraEmpresa(resource.data.empresaId);
     }
 
@@ -152,11 +173,35 @@ service cloud.firestore {
     }
 
     match /indicesRuc/{id} {
-      allow read, create, update, delete: if esSuperadmin();
+      allow get: if autenticado();
+      allow list: if esSuperadmin();
+      allow create: if esSuperadmin() || (autenticado()
+        && id.matches('^[0-9]{11}$')
+        && request.resource.data.valor == id
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.tipo == 'EMPRESA'
+        && request.resource.data.empresaId is string
+        && request.resource.data.empresaId.matches('^EMP-[A-Z0-9-]+$')
+        && request.resource.data.creadoEn == request.time
+        && request.resource.data.keys().hasOnly(['valor','empresaId','tipo','uid','creadoEn'])
+        && getAfter(/databases/$(database)/documents/companias/$(request.resource.data.empresaId)).data.empresa.ruc == id);
+      allow update, delete: if esSuperadmin();
     }
 
     match /indicesCorreo/{id} {
-      allow read, create, update, delete: if esSuperadmin();
+      allow get: if autenticado() && (id == request.auth.token.email || esSuperadmin());
+      allow list: if esSuperadmin();
+      allow create: if esSuperadmin() || (autenticado()
+        && id == request.auth.token.email
+        && request.resource.data.valor == id
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.tipo == 'ADMINISTRADOR_PRINCIPAL'
+        && request.resource.data.empresaId is string
+        && request.resource.data.empresaId.matches('^EMP-[A-Z0-9-]+$')
+        && request.resource.data.creadoEn == request.time
+        && request.resource.data.keys().hasOnly(['valor','empresaId','tipo','uid','creadoEn'])
+        && getAfter(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.correo == id);
+      allow update, delete: if esSuperadmin();
     }
 
     match /auditoriaSuperadmin/{id} {
@@ -199,3 +244,4 @@ service cloud.firestore {
     }
   }
 }
+
