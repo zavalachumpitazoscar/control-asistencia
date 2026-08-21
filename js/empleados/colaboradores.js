@@ -2951,6 +2951,31 @@ colaboradores.some(
 
             }
 
+            const colaboradorConCorreo = correo
+              ? colaboradores.find(colaborador => {
+                  const correoGuardado = String(
+                    colaborador.contacto?.correo || colaborador.correo || ""
+                  ).trim().toLowerCase();
+                  return colaborador.id !== colaboradorEditandoId && correoGuardado === correo;
+                })
+              : null;
+
+            if (colaboradorConCorreo) {
+                const nombreDuplicado = [
+                    colaboradorConCorreo.datosPersonales?.nombres || colaboradorConCorreo.nombres || "",
+                    colaboradorConCorreo.datosPersonales?.apellidos || colaboradorConCorreo.apellidos || ""
+                ].filter(Boolean).join(" ") || "Colaborador sin nombre";
+                const documentoDuplicado = colaboradorConCorreo.documento?.numero || colaboradorConCorreo.dni || "Sin documento";
+                await Swal.fire({
+                    icon: "warning",
+                    title: "Correo ya registrado",
+                    text: `El correo ${correo} ya pertenece a ${nombreDuplicado}, documento ${documentoDuplicado}. Cada colaborador debe tener un correo único.`,
+                    confirmButtonText: "Corregir correo"
+                });
+                document.getElementById("correoColaborador")?.focus();
+                return;
+            }
+
 
             if(
                 inicioContrato &&
@@ -3430,5 +3455,4 @@ iniciarEliminacionMasiva({
     
     
 }
-
 
