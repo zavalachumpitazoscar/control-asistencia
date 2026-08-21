@@ -293,7 +293,7 @@ async function solicitarDispositivo() {
         colaboradorId: acceso.colaboradorId,
         usuarioId: usuario.uid,
         dispositivoId,
-        dispositivo: datosDispositivo(),
+        dispositivo: await datosDispositivo(),
         estado: "PENDIENTE",
         creadoEn: serverTimestamp(),
       },
@@ -990,18 +990,41 @@ function obtenerDispositivoId() {
   }
   return id;
 }
-function datosDispositivo() {
+async function datosDispositivo() {
+  const informacionAvanzada = await informacionAvanzadaDispositivo();
+  const modeloTecnico = informacionAvanzada.modelo || modeloDispositivo();
   return {
     descripcion: descripcionDispositivo(),
-    plataforma: navigator.userAgentData?.platform || navigator.platform || "Desconocida",
+    plataforma: informacionAvanzada.plataforma || navigator.userAgentData?.platform || navigator.platform || "Desconocida",
     navegador: navigator.userAgent,
     zonaHoraria: Intl.DateTimeFormat().resolvedOptions().timeZone,
     pantalla: `${screen.width}x${screen.height}`,
-    modelo: modeloDispositivo(),
+    modelo: nombreComercialDispositivo(modeloTecnico),
+    modeloTecnico: modeloTecnico || null,
     idioma: navigator.language || "Desconocido",
     memoriaGB: navigator.deviceMemory || null,
     nucleos: navigator.hardwareConcurrency || null,
+    datosHardwareAproximados: true,
   };
+}
+async function informacionAvanzadaDispositivo() {
+  if (!navigator.userAgentData?.getHighEntropyValues) return {};
+  try {
+    const datos = await navigator.userAgentData.getHighEntropyValues([
+      "model",
+      "platform",
+      "platformVersion",
+      "architecture",
+      "bitness",
+    ]);
+    return {
+      modelo: limpiarModeloDispositivo(datos.model),
+      plataforma: datos.platform || "",
+    };
+  } catch (error) {
+    console.warn("El navegador no entregó información avanzada del dispositivo:", error);
+    return {};
+  }
 }
 function descripcionDispositivo() {
   const tipo = navigator.userAgent.includes("Android")
@@ -1014,10 +1037,23 @@ function descripcionDispositivo() {
 function modeloDispositivo() {
   const ua = navigator.userAgent || "";
   const android = ua.match(/Android[^;]*;\s*([^;)]+?)(?:\s+Build\/[^;)]+)?[;)]/i);
-  if (android?.[1]) return android[1].trim();
+  if (android?.[1]) return limpiarModeloDispositivo(android[1]);
   if (/iPhone/i.test(ua)) return "Apple iPhone";
   if (/iPad/i.test(ua)) return "Apple iPad";
-  return navigator.userAgentData?.platform || navigator.platform || "Modelo no informado";
+  return "";
+}
+function limpiarModeloDispositivo(modelo) {
+  const valor = String(modelo || "").replace(/\s+Build\/.*$/i, "").trim();
+  if (!valor || /^(K|Android|Linux armv\w*)$/i.test(valor)) return "";
+  return valor;
+}
+function nombreComercialDispositivo(modelo) {
+  const codigo = limpiarModeloDispositivo(modelo);
+  if (!codigo) return "Modelo no informado por el navegador";
+  if (/^SM-S938[A-Z0-9/.-]*$/i.test(codigo)) return `Samsung Galaxy S25 Ultra (${codigo})`;
+  if (/^SM-S936[A-Z0-9/.-]*$/i.test(codigo)) return `Samsung Galaxy S25+ (${codigo})`;
+  if (/^SM-S931[A-Z0-9/.-]*$/i.test(codigo)) return `Samsung Galaxy S25 (${codigo})`;
+  return codigo;
 }
 function fechaLocal() {
   return new Intl.DateTimeFormat("en-CA", {
