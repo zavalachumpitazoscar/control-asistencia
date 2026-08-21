@@ -127,7 +127,7 @@ async function procesarAccion(evento) {
     if (boton.dataset.copiar) return copiarEnlace();
     if (boton.dataset.whatsapp) return enviarAccesoWhatsApp(boton.dataset.whatsapp);
     if (boton.dataset.verDispositivo) return verDispositivo(boton.dataset.verDispositivo);
-    if (boton.dataset.habilitar) return habilitar(boton.dataset.habilitar);
+    if (boton.dataset.habilitar) return await habilitar(boton.dataset.habilitar);
     if (boton.dataset.restablecer) return restablecerPasswordMovil(boton.dataset.restablecer);
     if (boton.dataset.cambiarCorreo) return cambiarCorreo(boton.dataset.cambiarCorreo);
     if (boton.dataset.autorizar) return autorizar(boton.dataset.autorizar);
@@ -284,7 +284,10 @@ function validarCorreoUnico(correo, colaboradorId) {
     (c) => c.id !== colaboradorId && correoColaborador(c) === normalizado,
   );
   if (repetidoEnAccesos || repetidoEnColaboradores) {
-    throw new Error("Ese correo ya pertenece a otro colaborador.");
+    const duplicado = colaboradores.find(c => c.id !== colaboradorId && correoColaborador(c) === normalizado);
+    const nombre = duplicado ? nombreColaborador(duplicado) : "otro acceso móvil";
+    const documento = duplicado ? documentoColaborador(duplicado) : "sin documento disponible";
+    throw new Error(`El correo ${normalizado} ya pertenece a ${nombre} (${documento}). Corrige el correo antes de habilitar el acceso móvil.`);
   }
 }
 
@@ -555,4 +558,3 @@ function mensaje(error) {
 function alerta(titulo, texto, icono) {
   return Swal.fire({ title: titulo, text: texto, icon: icono, confirmButtonColor: "#2563eb" });
 }
-
