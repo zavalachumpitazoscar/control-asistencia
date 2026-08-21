@@ -253,10 +253,18 @@ async function cargarPortal(usuario) {
   );
 
   if (acceso.dispositivoAutorizadoId !== dispositivoId) {
-    const solicitud = await getDoc(
-      doc(db, "solicitudesDispositivoMovil", `${usuario.uid}_${dispositivoId}`),
-    );
-    const pendiente = solicitud.exists() && solicitud.data().estado === "PENDIENTE";
+    let pendiente = false;
+    try {
+      const solicitud = await getDoc(
+        doc(db, "solicitudesDispositivoMovil", `${usuario.uid}_${dispositivoId}`),
+      );
+      pendiente = solicitud.exists() && solicitud.data().estado === "PENDIENTE";
+    } catch (error) {
+      // Una solicitud inexistente puede devolver permission-denied con reglas
+      // antiguas. Eso no debe impedir que el colaborador vea y solicite la
+      // autorización de su dispositivo.
+      if (!esErrorPermisos(error)) throw error;
+    }
     document.getElementById("detalleDispositivoMovil").textContent = descripcionDispositivo();
     document.getElementById("textoPendienteMovil").textContent = pendiente
       ? "Solicitud enviada. Espera la autorización de tu empresa."
@@ -1126,6 +1134,13 @@ function limpiarError(error) {
   return mensaje
     .replace(/^FirebaseError:\s*/, "")
     .replace(/Firebase:\s*/, "");
+}
+function esErrorPermisos(error) {
+  const codigo = String(error?.code || "").toLowerCase();
+  const mensaje = String(error?.message || "").toLowerCase();
+  return codigo === "permission-denied"
+    || mensaje.includes("missing or insufficient permissions")
+    || mensaje.includes("permission-denied");
 }
 function mensajeErrorAutenticacion(error) {
   const codigo = String(error?.code || "").toLowerCase();
