@@ -27,7 +27,7 @@ from
 
 import { iniciarCompañia } from "./compañia.js?v=20260817-1";
 import { iniciarEmpleados } from "./empleados.js?v=20260821-7";
-import { iniciarAsistencia } from "./asistencia.js?v=20260821-3";
+import { iniciarAsistencia } from "./asistencia.js?v=20260821-4";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260818-9";
 import { iniciarDashboard } from "./dashboard.js?v=20260819-2";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
