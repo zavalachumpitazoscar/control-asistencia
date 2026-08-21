@@ -2,6 +2,7 @@ const {onCall,HttpsError}=require("firebase-functions/v2/https");
 const {getApps,initializeApp}=require("firebase-admin/app");
 const {getAuth}=require("firebase-admin/auth");
 const {getFirestore,FieldValue}=require("firebase-admin/firestore");
+const crypto=require("crypto");
 if(!getApps().length)initializeApp();
 const db=getFirestore();
 const REGION="us-central1";
@@ -94,5 +95,28 @@ exports.gestionarDispositivoSuperadmin=onCall({region:REGION,enforceAppCheck:fal
 });
 
 exports.enviarRestablecimientoSuperadmin=onCall({region:REGION,enforceAppCheck:false},async req=>{
-  exigirSuper(req);const email=correo(req.data?.correo),motivo=texto(req.data?.motivo);if(motivo.length<5)throw new HttpsError("invalid-argument","Indica el motivo.");const user=await getAuth().getUserByEmail(email);const enlace=await getAuth().generatePasswordResetLink(email,{url:"https://zavalachumpitazoscar.github.io/control-asistencia/index.html"});await db.collection("mail").add({to:[email],message:{subject:"Restablecimiento de acceso",html:`<p>Se solicitó restablecer tu contraseña.</p><p><a href="${enlace}">Crear nueva contraseña</a></p>`},tipo:"RESET_SUPERADMIN",creadoEn:FieldValue.serverTimestamp()});await auditar("RESTABLECER_PASSWORD",req,{uidObjetivo:user.uid,correo:email,motivo});return {ok:true};
+  exigirSuper(req);const email=correo(req.data?.correo),empresaId=texto(req.data?.empresaId),motivo=texto(req.data?.motivo);
+  if(motivo.length<5)throw new HttpsError("invalid-argument","Indica el motivo.");
+  const user=await getAuth().getUserByEmail(email),perfil=await db.doc(`usuarios/${user.uid}`).get();
+  if(!perfil.exists||perfil.data().empresaId!==empresaId)throw new HttpsError("permission-denied","La cuenta no pertenece a la empresa seleccionada.");
+  const enlace=await getAuth().generatePasswordResetLink(email,{url:"https://zavalachumpitazoscar.github.io/control-asistencia/index.html"});
+  await db.collection("mail").add({to:[email],message:{subject:"Restablecimiento de acceso",html:`<div style="font-family:Arial;max-width:560px;margin:auto"><h2>Restablece tu contraseña</h2><p>El administrador general recibió una solicitud de recuperación para tu cuenta.</p><p><a style="display:inline-block;padding:12px 18px;background:#2388ff;color:#fff;text-decoration:none;border-radius:8px" href="${enlace}">Crear nueva contraseña</a></p><p>Si no solicitaste este cambio, comunícate con tu empresa.</p></div>`},empresaId,tipo:"RESET_SUPERADMIN",creadoEn:FieldValue.serverTimestamp()});
+  await auditar("ENVIAR_RESTABLECIMIENTO_PASSWORD",req,{empresaId,uidObjetivo:user.uid,correo:email,motivo});return {ok:true};
+});
+
+exports.generarPasswordTemporalSuperadmin=onCall({region:REGION,enforceAppCheck:false},async req=>{
+  exigirSuper(req);
+  const email=correo(req.data?.correo),empresaId=texto(req.data?.empresaId),motivo=texto(req.data?.motivo),solicitada=texto(req.data?.passwordNueva);
+  if(motivo.length<5)throw new HttpsError("invalid-argument","Indica el motivo.");
+  const user=await getAuth().getUserByEmail(email);
+  if(user.uid===SUPERADMIN_UID)throw new HttpsError("permission-denied","No puedes modificar la contraseña del superadministrador desde esta opción.");
+  const perfilRef=db.doc(`usuarios/${user.uid}`),perfil=await perfilRef.get();
+  if(!perfil.exists||perfil.data().empresaId!==empresaId)throw new HttpsError("permission-denied","La cuenta no pertenece a la empresa seleccionada.");
+  const temporal=solicitada||`Ce!${crypto.randomBytes(7).toString("base64url")}9a`;
+  if(temporal.length<10||temporal.length>128||!/[a-z]/.test(temporal)||!/[A-Z]/.test(temporal)||!/[0-9]/.test(temporal)||!/[.!@#$%_-]/.test(temporal))throw new HttpsError("invalid-argument","La contraseña debe tener al menos 10 caracteres, mayúscula, minúscula, número y símbolo.");
+  await getAuth().updateUser(user.uid,{password:temporal});
+  await getAuth().revokeRefreshTokens(user.uid);
+  await perfilRef.set({requiereCambioPassword:true,passwordTemporalAsignadoEn:FieldValue.serverTimestamp(),passwordTemporalAsignadoPor:req.auth.uid},{merge:true});
+  await auditar("GENERAR_PASSWORD_TEMPORAL",req,{empresaId,uidObjetivo:user.uid,correo:email,motivo});
+  return {ok:true,correo:email,passwordTemporal:temporal};
 });
