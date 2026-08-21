@@ -42,6 +42,8 @@ export function iniciarAsignacionesHorarios({
 
     obtenerHorarioSeleccionado,
 
+    seleccionarHorario,
+
     alActualizar
 
 }){
@@ -319,6 +321,10 @@ null;
 let horariosEditarDiaSeleccionados =
 new Set();
 
+let filtroCoberturaHorarios = "TODOS";
+let paginaCoberturaHorarios = 1;
+const elementosPorPaginaCobertura = 8;
+
     
 
     const consulta =
@@ -362,6 +368,7 @@ new Set();
 
 
             actualizarDetalle();
+            renderizarCoberturaHorarios();
 
         },
 
@@ -452,6 +459,8 @@ onSnapshot(
 
             }
         );
+
+        renderizarCoberturaHorarios();
 
 
         renderizarColaboradoresAsignacion();
@@ -3067,6 +3076,270 @@ if(!fechaFin){
         );
 
     }
+
+
+function obtenerResumenHorarioColaborador(colaboradorId){
+
+    const hoy = obtenerFechaActual();
+    const relaciones = asignaciones
+    .filter(asignacion=>
+        Array.isArray(asignacion.colaboradorIds)
+        && asignacion.colaboradorIds.includes(colaboradorId)
+        && (!asignacion.fechaFin || asignacion.fechaFin >= hoy)
+    )
+    .sort((a,b)=>String(a.fechaInicio || "").localeCompare(String(b.fechaInicio || "")));
+
+    if(relaciones.length === 0){
+        return {
+            tieneHorario:false,
+            nombres:[],
+            periodo:"Sin programación vigente o futura"
+        };
+    }
+
+    const horarioIds = new Set();
+
+    relaciones.forEach(asignacion=>{
+        if(asignacion.horarioId){
+            horarioIds.add(asignacion.horarioId);
+        }
+        if(asignacion.horarioIdPrincipal){
+            horarioIds.add(asignacion.horarioIdPrincipal);
+        }
+        (Array.isArray(asignacion.horarioIds) ? asignacion.horarioIds : [])
+        .forEach(id=>horarioIds.add(id));
+    });
+
+    const nombres = [...horarioIds]
+    .map(id=>obtenerHorarios().find(horario=>horario.id === id)?.nombre)
+    .filter(Boolean);
+
+    const vigente = relaciones.find(asignacion=>
+        (!asignacion.fechaInicio || asignacion.fechaInicio <= hoy)
+        && (!asignacion.fechaFin || asignacion.fechaFin >= hoy)
+    );
+
+    const referencia = vigente || relaciones[0];
+    const periodo = vigente
+        ? `Vigente hasta ${formatearFechaVisible(referencia.fechaFin)}`
+        : `Inicia ${formatearFechaVisible(referencia.fechaInicio)}`;
+
+    return {
+        tieneHorario:true,
+        nombres:[...new Set(nombres)],
+        periodo
+    };
+
+}
+
+
+function obtenerColaboradoresCobertura(){
+
+    const busqueda = String(
+        document.getElementById("buscarCoberturaHorarios")?.value || ""
+    ).trim().toLowerCase();
+
+    return colaboradores
+    .filter(colaborador=>colaborador.estado !== "ELIMINADO")
+    .map(colaborador=>({
+        colaborador,
+        resumen:obtenerResumenHorarioColaborador(colaborador.id)
+    }))
+    .filter(item=>{
+        if(filtroCoberturaHorarios === "CON_HORARIO" && !item.resumen.tieneHorario){
+            return false;
+        }
+        if(filtroCoberturaHorarios === "SIN_HORARIO" && item.resumen.tieneHorario){
+            return false;
+        }
+        if(!busqueda){
+            return true;
+        }
+        const texto = `${obtenerNombreColaborador(item.colaborador)} ${obtenerDocumentoColaborador(item.colaborador)}`.toLowerCase();
+        return texto.includes(busqueda);
+    });
+
+}
+
+
+function crearHTMLCoberturaColaborador(item){
+
+    const { colaborador, resumen } = item;
+    const nombre = obtenerNombreColaborador(colaborador);
+    const iniciales = nombre.split(/\s+/).slice(0,2).map(parte=>parte.charAt(0)).join("").toUpperCase() || "--";
+    const dni = obtenerDocumentoColaborador(colaborador) || "Sin DNI";
+    const horariosTexto = resumen.nombres.length
+        ? resumen.nombres.slice(0,2).join(" · ")
+        : "Aún no tiene un horario asignado";
+
+    return `
+        <article class="cobertura-colaborador ${resumen.tieneHorario ? "tiene-horario" : "sin-horario"}" data-colaborador-id="${escaparHTML(colaborador.id)}">
+            <div class="cobertura-colaborador-avatar">${escaparHTML(iniciales)}</div>
+            <div class="cobertura-colaborador-info">
+                <div class="cobertura-colaborador-nombre">
+                    <strong>${escaparHTML(nombre)}</strong>
+                    <span class="estado-cobertura ${resumen.tieneHorario ? "asignado" : "pendiente"}">
+                        <i class="bi ${resumen.tieneHorario ? "bi-check-circle-fill" : "bi-exclamation-circle-fill"}"></i>
+                        ${resumen.tieneHorario ? "Con horario" : "Sin horario"}
+                    </span>
+                </div>
+                <span class="cobertura-colaborador-dni">DNI ${escaparHTML(String(dni))}</span>
+                <span class="cobertura-colaborador-horario">${escaparHTML(horariosTexto)}</span>
+                ${resumen.tieneHorario ? `<small>${escaparHTML(resumen.periodo)}</small>` : ""}
+            </div>
+            <div class="cobertura-colaborador-acciones">
+                ${resumen.tieneHorario ? `
+                    <button type="button" class="btn-ver-calendario-cobertura" data-colaborador-id="${escaparHTML(colaborador.id)}">
+                        <i class="bi bi-calendar3"></i> Ver calendario
+                    </button>
+                ` : ""}
+                <button type="button" class="btn-asignar-cobertura ${resumen.tieneHorario ? "secundario" : "principal"}" data-colaborador-id="${escaparHTML(colaborador.id)}">
+                    <i class="bi bi-calendar-plus"></i>
+                    ${resumen.tieneHorario ? "Cambiar horario" : "Asignar horario"}
+                </button>
+            </div>
+        </article>
+    `;
+
+}
+
+
+function renderizarCoberturaHorarios(){
+
+    const contenedor = document.getElementById("listaCoberturaHorarios");
+    if(!contenedor){
+        return;
+    }
+
+    const todos = colaboradores.filter(colaborador=>colaborador.estado !== "ELIMINADO");
+    const cantidadConHorario = todos.filter(colaborador=>obtenerResumenHorarioColaborador(colaborador.id).tieneHorario).length;
+
+    asignarTexto("coberturaTotalColaboradores", todos.length);
+    asignarTexto("coberturaConHorario", cantidadConHorario);
+    asignarTexto("coberturaSinHorario", todos.length - cantidadConHorario);
+
+    document.querySelectorAll("[data-filtro-cobertura]").forEach(boton=>{
+        boton.classList.toggle("activo", boton.dataset.filtroCobertura === filtroCoberturaHorarios);
+    });
+
+    const textosFiltro = {
+        TODOS:"Mostrando todos",
+        CON_HORARIO:"Mostrando colaboradores con horario",
+        SIN_HORARIO:"Mostrando colaboradores sin horario"
+    };
+    asignarTexto("textoFiltroCoberturaHorarios", textosFiltro[filtroCoberturaHorarios]);
+
+    const filtrados = obtenerColaboradoresCobertura();
+    const paginas = Math.max(1, Math.ceil(filtrados.length / elementosPorPaginaCobertura));
+    paginaCoberturaHorarios = Math.min(paginaCoberturaHorarios, paginas);
+    const inicio = (paginaCoberturaHorarios - 1) * elementosPorPaginaCobertura;
+    const visibles = filtrados.slice(inicio, inicio + elementosPorPaginaCobertura);
+
+    if(visibles.length === 0){
+        contenedor.innerHTML = `
+            <div class="cobertura-sin-resultados">
+                <i class="bi bi-people"></i>
+                <strong>No se encontraron colaboradores</strong>
+                <span>Prueba con otro nombre, DNI o filtro.</span>
+            </div>
+        `;
+    }
+    else{
+        contenedor.innerHTML = visibles.map(crearHTMLCoberturaColaborador).join("");
+    }
+
+    const paginacion = document.getElementById("paginacionCoberturaHorarios");
+    if(paginacion){
+        paginacion.hidden = filtrados.length <= elementosPorPaginaCobertura;
+    }
+    asignarTexto("infoPaginacionCoberturaHorarios", filtrados.length ? `${inicio + 1}-${Math.min(inicio + elementosPorPaginaCobertura, filtrados.length)} de ${filtrados.length}` : "0 colaboradores");
+    asignarTexto("paginaCoberturaHorarios", `${paginaCoberturaHorarios} / ${paginas}`);
+
+    const anterior = document.getElementById("anteriorCoberturaHorarios");
+    const siguiente = document.getElementById("siguienteCoberturaHorarios");
+    if(anterior){ anterior.disabled = paginaCoberturaHorarios <= 1; }
+    if(siguiente){ siguiente.disabled = paginaCoberturaHorarios >= paginas; }
+
+    contenedor.querySelectorAll(".btn-ver-calendario-cobertura").forEach(boton=>{
+        boton.addEventListener("click",()=>abrirCalendarioColaborador(boton.dataset.colaboradorId));
+    });
+    contenedor.querySelectorAll(".btn-asignar-cobertura").forEach(boton=>{
+        boton.addEventListener("click",()=>abrirAsignacionDesdeCobertura(boton.dataset.colaboradorId));
+    });
+
+}
+
+
+async function abrirAsignacionDesdeCobertura(colaboradorId){
+
+    const horariosActivos = obtenerHorarios().filter(horario=>horario.estado === "ACTIVO");
+    if(horariosActivos.length === 0){
+        await Swal.fire({
+            icon:"info",
+            title:"Primero crea un horario activo",
+            text:"Necesitas al menos un horario activo antes de asignarlo a un colaborador.",
+            confirmButtonText:"Entendido"
+        });
+        return;
+    }
+
+    const opciones = Object.fromEntries(horariosActivos.map(horario=>[horario.id, horario.nombre || "Horario"]));
+    const resultado = await Swal.fire({
+        title:"Asignar horario",
+        text:"Selecciona la jornada que deseas programar para este colaborador.",
+        input:"select",
+        inputOptions:opciones,
+        inputPlaceholder:"Selecciona un horario",
+        showCancelButton:true,
+        confirmButtonText:"Continuar",
+        cancelButtonText:"Cancelar",
+        inputValidator:valor=>valor ? undefined : "Selecciona un horario para continuar."
+    });
+
+    if(!resultado.isConfirmed || !resultado.value){
+        return;
+    }
+
+    if(typeof seleccionarHorario === "function"){
+        seleccionarHorario(resultado.value);
+    }
+
+    const colaborador = colaboradores.find(item=>item.id === colaboradorId);
+    sessionStorage.setItem("dashboardColaboradorHorario", JSON.stringify({
+        id:colaboradorId,
+        nombre:colaborador ? obtenerNombreColaborador(colaborador) : ""
+    }));
+    abrir();
+
+}
+
+
+document.querySelectorAll("[data-filtro-cobertura]").forEach(boton=>{
+    boton.addEventListener("click",()=>{
+        filtroCoberturaHorarios = boton.dataset.filtroCobertura || "TODOS";
+        paginaCoberturaHorarios = 1;
+        renderizarCoberturaHorarios();
+    });
+});
+
+document.getElementById("buscarCoberturaHorarios")?.addEventListener("input",()=>{
+    paginaCoberturaHorarios = 1;
+    renderizarCoberturaHorarios();
+});
+
+document.getElementById("anteriorCoberturaHorarios")?.addEventListener("click",()=>{
+    if(paginaCoberturaHorarios > 1){
+        paginaCoberturaHorarios -= 1;
+        renderizarCoberturaHorarios();
+    }
+});
+
+document.getElementById("siguienteCoberturaHorarios")?.addEventListener("click",()=>{
+    paginaCoberturaHorarios += 1;
+    renderizarCoberturaHorarios();
+});
+
+document.getElementById("btnActualizarCoberturaHorarios")?.addEventListener("click",renderizarCoberturaHorarios);
 
 
     function actualizarColaboradoresDetalle(
@@ -8035,6 +8308,8 @@ return {
 
     actualizarDetalle,
 
+    actualizarCobertura:renderizarCoberturaHorarios,
+
     abrirCalendarioColaborador
 
 };
@@ -8100,4 +8375,3 @@ function mostrarCamposIncompletos(
     });
 
 }
-
