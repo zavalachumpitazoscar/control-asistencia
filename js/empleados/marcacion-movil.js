@@ -1,4 +1,5 @@
 import { auth, db } from "../firebase-config.js";
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {
   collection,
   deleteDoc,
@@ -111,7 +112,7 @@ function renderizar() {
                 ${!acceso ? `<button class="primario" data-habilitar="${colaborador.id}">Habilitar</button>` : ""}
                 ${dispositivo ? `<button data-ver-dispositivo="${solicitud?.id || colaborador.id}"><i class="bi bi-phone"></i> Ver dispositivo</button>` : ""}
                 ${solicitud ? `<button class="primario" data-autorizar="${solicitud.id}">Autorizar dispositivo</button><button data-rechazar="${solicitud.id}">Rechazar</button>` : ""}
-                ${acceso ? `<button data-whatsapp="${colaborador.id}"><i class="bi bi-whatsapp"></i> Enviar acceso</button><button data-cambiar-correo="${colaborador.id}"><i class="bi bi-envelope-at"></i> Cambiar correo</button><button data-copiar="${colaborador.id}">Copiar enlace</button><button class="peligro" data-revocar="${colaborador.id}">Revocar</button>` : ""}
+                ${acceso ? `<button data-whatsapp="${colaborador.id}"><i class="bi bi-whatsapp"></i> Enviar acceso</button>${acceso.usuarioId&&correoAcceso?`<button data-restablecer="${colaborador.id}"><i class="bi bi-key"></i> Restablecer contraseña</button>`:""}<button data-cambiar-correo="${colaborador.id}"><i class="bi bi-envelope-at"></i> Cambiar correo</button><button data-copiar="${colaborador.id}">Copiar enlace</button><button class="peligro" data-revocar="${colaborador.id}">Revocar</button>` : ""}
               </div>
             </article>`;
         })
@@ -127,6 +128,7 @@ async function procesarAccion(evento) {
     if (boton.dataset.whatsapp) return enviarAccesoWhatsApp(boton.dataset.whatsapp);
     if (boton.dataset.verDispositivo) return verDispositivo(boton.dataset.verDispositivo);
     if (boton.dataset.habilitar) return habilitar(boton.dataset.habilitar);
+    if (boton.dataset.restablecer) return restablecerPasswordMovil(boton.dataset.restablecer);
     if (boton.dataset.cambiarCorreo) return cambiarCorreo(boton.dataset.cambiarCorreo);
     if (boton.dataset.autorizar) return autorizar(boton.dataset.autorizar);
     if (boton.dataset.rechazar) return rechazar(boton.dataset.rechazar);
@@ -134,6 +136,42 @@ async function procesarAccion(evento) {
   } catch (error) {
     alerta("No se pudo completar", mensaje(error), "error");
   }
+}
+
+async function restablecerPasswordMovil(colaboradorId) {
+  const acceso = accesos.find((a) => a.colaboradorId === colaboradorId);
+  const empresaId = sessionStorage.getItem("empresaId");
+  if (!acceso || acceso.empresaId !== empresaId) throw new Error("El acceso móvil no pertenece a esta empresa.");
+  if (!acceso.usuarioId || !correoValido(acceso.correo)) {
+    return alerta("Cuenta no registrada", "El colaborador todavía no ha creado su contraseña móvil.", "warning");
+  }
+  const confirmacion = await Swal.fire({
+    title: "Restablecer contraseña móvil",
+    html: `<p style="font-size:13px;color:#64748b">Firebase enviará un enlace de recuperación a:</p><strong>${html(acceso.correo)}</strong><p style="margin-top:12px;font-size:12px;color:#64748b">El dispositivo autorizado no será revocado.</p>`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Enviar correo",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#2563eb",
+  });
+  if (!confirmacion.isConfirmed) return;
+  await sendPasswordResetEmail(auth, acceso.correo);
+  await setDoc(doc(collection(db, "auditoriaSistema")), {
+    empresaId,
+    accion: "RESTABLECER_PASSWORD_MOVIL",
+    colaboradorId,
+    usuarioMovilUid: acceso.usuarioId,
+    correo: acceso.correo,
+    realizadoPor: auth.currentUser?.uid || null,
+    fecha: serverTimestamp(),
+  });
+  await Swal.fire({
+    title: "Correo enviado",
+    text: "El colaborador recibirá el enlace para crear una nueva contraseña. Revisa también Spam o Correo no deseado.",
+    icon: "success",
+    confirmButtonText: "Entendido",
+    confirmButtonColor: "#2563eb",
+  });
 }
 
 async function habilitar(colaboradorId) {
@@ -517,3 +555,4 @@ function mensaje(error) {
 function alerta(titulo, texto, icono) {
   return Swal.fire({ title: titulo, text: texto, icon: icono, confirmButtonColor: "#2563eb" });
 }
+
