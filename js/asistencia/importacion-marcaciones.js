@@ -640,7 +640,9 @@ async function asociarCoincidenciasDNIConColaboradores(resultado){
         if(porDni.has(recibido)) return;
 
         const guardada=equivalencias.get(recibido);
-        const colaboradorGuardado=guardada?.activo!==false ? porDni.get(normalizarDNI(guardada.dniColaborador)) : null;
+        const colaboradorGuardado=guardada && guardada.activo!==false && guardada.dniColaborador
+            ? porDni.get(normalizarDNI(guardada.dniColaborador))
+            : null;
         if(colaboradorGuardado){
             marcacion.dniOriginal=recibido;
             marcacion.dni=colaboradorGuardado.dni;
