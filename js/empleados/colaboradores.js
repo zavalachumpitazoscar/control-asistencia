@@ -23,7 +23,7 @@ from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import {
     iniciarCargaMasivaColaboradores
 }
-from "./carga-masiva-colaboradores.js";
+from "./carga-masiva-colaboradores.js?v=20260821-2";
 
 import {
     iniciarDesactivacionMasiva
@@ -3455,4 +3455,3 @@ iniciarEliminacionMasiva({
     
     
 }
-
