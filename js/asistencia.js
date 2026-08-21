@@ -1,6 +1,6 @@
 import { iniciarNavegacionAsistencia } from "./asistencia/navegacion-asistencia.js";
 import { iniciarFechaAsistencia } from "./asistencia/fecha-asistencia.js";
-import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js?v=20260821-1";
+import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js?v=20260821-2";
 import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260820-5";
 import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js?v=20260819-1";
 import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260820-8";
@@ -28,3 +28,4 @@ export async function iniciarAsistencia() {
   iniciarOperacionesMensualesAsistencia();
   iniciarRegularizacionesCierresAsistencia();
 }
+
