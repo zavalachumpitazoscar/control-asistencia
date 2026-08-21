@@ -98,6 +98,13 @@ service cloud.firestore {
       allow update, delete: if administraEmpresa(resource.data.empresaId);
     }
 
+    match /geocercasMoviles/{id} {
+      allow read: if administraEmpresa(resource.data.empresaId)
+        || esMovilEmpresa(resource.data.empresaId);
+      allow create: if administraEmpresa(request.resource.data.empresaId);
+      allow update, delete: if administraEmpresa(resource.data.empresaId);
+    }
+
     match /marcaciones/{id} {
       allow get: if administraMarcacionPorId(id)
         || administraEmpresa(resource.data.empresaId)
@@ -111,7 +118,8 @@ service cloud.firestore {
           && request.resource.data.colaboradorId == perfilMovil().colaboradorId
           && request.resource.data.usuarioId == request.auth.uid
           && request.resource.data.origen == 'MOVIL'
-          && request.resource.data.sucursalId is string
+          && (request.resource.data.sucursalId == null
+            || request.resource.data.sucursalId is string)
           && request.resource.data.ubicacion.latitud is number
           && request.resource.data.ubicacion.longitud is number
           && request.resource.data.ubicacion.dentroZona == true
