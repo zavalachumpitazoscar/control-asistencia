@@ -325,7 +325,7 @@ async function marcar(tipo, boton) {
   cargando = true;
   boton.disabled = true;
   try {
-    const validacionZona = await validarGeocercaObligatoria();
+    const validacionZona = await validarLimitesMarcacion();
     const validacion = await resolverValidacionMarcacion(tipo);
     if (!validacion) return;
     const fecha = fechaLocal();
@@ -341,8 +341,8 @@ async function marcar(tipo, boton) {
       pais: direccionMarcacion.pais,
       sucursalId: validacionZona.sucursalId,
       dentroZona: true,
-      radioPermitidoMetros: validacionZona.radioMetros,
-      distanciaSucursalMetros: validacionZona.distanciaMetros,
+      radioPermitidoMetros: validacionZona.radioMetros || null,
+      distanciaSucursalMetros: validacionZona.distanciaMetros ?? null,
     };
     await setDoc(doc(db, "marcaciones", `MOVIL_${acceso.colaboradorId}_${Date.now()}`), {
       empresaId: acceso.empresaId,
@@ -354,7 +354,14 @@ async function marcar(tipo, boton) {
       origen: "MOVIL",
       dispositivoId,
       ubicacion: ubicacionCompleta,
-      geocerca: { radioMetros: validacionZona.radioMetros, distanciaMetros: validacionZona.distanciaMetros, dentroZona: true },
+      geocerca: {
+        aplica: validacionZona.aplica,
+        referencia: validacionZona.referencia || null,
+        nombre: validacionZona.nombre || null,
+        radioMetros: validacionZona.radioMetros || null,
+        distanciaMetros: validacionZona.distanciaMetros ?? null,
+        dentroZona: true,
+      },
       direccion: direccionMarcacion,
       validacionBiometrica: validacion.validacionBiometrica,
       metodoValidacion: validacion.metodoValidacion,
@@ -374,26 +381,59 @@ async function marcar(tipo, boton) {
   }
 }
 
-async function validarGeocercaObligatoria() {
-  let sucursalId = null;
-  const colaborador = await getDoc(doc(db,"colaboradores",acceso.colaboradorId));
-  if (colaborador.exists()) {
-    const d=colaborador.data();
-    sucursalId=d.organizacion?.sucursalId||d.sucursalId||d.ubicacionOrganizacional?.sucursalId||null;
+async function validarLimitesMarcacion() {
+  const accesoActual = await getDoc(doc(db, "accesosMoviles", acceso.id || acceso.colaboradorId));
+  if (!accesoActual.exists()) throw new Error("El acceso móvil fue revocado.");
+  acceso = { id: accesoActual.id, ...accesoActual.data() };
+  const limites = acceso.limitesMarcacion || { modo: "LIBRE", geocercas: [] };
+  if (limites.modo !== "GEOCERCAS") {
+    return { aplica: false, sucursalId: acceso.sucursalId || null, radioMetros: null, distanciaMetros: null };
   }
-  sucursalId=sucursalId||acceso.sucursalId||null;
-  if(sucursalId)acceso.sucursalId=sucursalId;
-  if(!sucursalId)throw new Error("No tienes una sucursal asignada. Comunícate con el administrador antes de marcar.");
-  const sucursal=await getDoc(doc(db,"sucursales",sucursalId));
-  if(!sucursal.exists())throw new Error("La sucursal asignada ya no existe. Comunícate con el administrador.");
-  const geocerca=sucursal.data().geocercaMovil;
-  const lat=Number(geocerca?.latitud),lng=Number(geocerca?.longitud),radio=Number(geocerca?.radioMetros);
-  if(!Number.isFinite(lat)||!Number.isFinite(lng)||!Number.isFinite(radio)||radio<20)throw new Error("La sucursal no tiene una geocerca válida. El administrador debe configurarla antes de permitir marcaciones.");
-  const precisionMaxima=Math.max(20,Math.min(60,Math.round(radio/2)));
-  if(Number(ubicacion.precisionMetros)>precisionMaxima)throw new Error(`La precisión del GPS es ±${Math.round(ubicacion.precisionMetros)} m. Para esta geocerca se requiere ±${precisionMaxima} m o mejor. Espera unos segundos al aire libre y actualiza la ubicación.`);
-  const metros=distancia(ubicacion.latitud,ubicacion.longitud,lat,lng);
-  if(metros>radio)throw new Error(`Estás fuera del perímetro autorizado. Distancia: ${Math.round(metros)} m; máximo permitido: ${Math.round(radio)} m.`);
-  return{sucursalId,radioMetros:radio,distanciaMetros:Math.round(metros)};
+  const referencias = Array.isArray(limites.geocercas) ? limites.geocercas : [];
+  if (!referencias.length) throw new Error("No tienes geocercas permitidas. Comunícate con el administrador.");
+  const zonas = (await Promise.all(referencias.map(cargarGeocercaAsignada))).filter(Boolean);
+  if (!zonas.length) throw new Error("Las geocercas asignadas ya no existen o no están configuradas.");
+  const evaluadas = zonas.map((zona) => ({
+    ...zona,
+    distanciaMetros: Math.round(distancia(ubicacion.latitud, ubicacion.longitud, zona.latitud, zona.longitud)),
+  })).sort((a, b) => a.distanciaMetros - b.distanciaMetros);
+  const permitida = evaluadas.find((zona) => zona.distanciaMetros <= zona.radioMetros);
+  const cercana = permitida || evaluadas[0];
+  const precisionMaxima = Math.max(20, Math.min(60, Math.round(cercana.radioMetros / 2)));
+  if (Number(ubicacion.precisionMetros) > precisionMaxima) {
+    throw new Error(`La precisión del GPS es ±${Math.round(ubicacion.precisionMetros)} m. Para esta geocerca se requiere ±${precisionMaxima} m o mejor.`);
+  }
+  if (!permitida) {
+    throw new Error(`Estás fuera de las ubicaciones autorizadas. La más cercana es “${cercana.nombre}”, a ${cercana.distanciaMetros} m; radio permitido: ${cercana.radioMetros} m.`);
+  }
+  return { aplica: true, ...permitida };
+}
+
+async function cargarGeocercaAsignada(referencia) {
+  const [tipo, id] = String(referencia).split(":");
+  if (!id) return null;
+  if (tipo === "SUCURSAL") {
+    const resultado = await getDoc(doc(db, "sucursales", id));
+    if (!resultado.exists()) return null;
+    const datos = resultado.data();
+    const zona = datos.geocercaMovil;
+    if (!geocercaValida(zona)) return null;
+    return { referencia, sucursalId: id, nombre: datos.nombre || "Sucursal", latitud: Number(zona.latitud), longitud: Number(zona.longitud), radioMetros: Number(zona.radioMetros) };
+  }
+  if (tipo === "PERSONALIZADA") {
+    const resultado = await getDoc(doc(db, "geocercasMoviles", id));
+    if (!resultado.exists()) return null;
+    const zona = resultado.data();
+    if (zona.empresaId !== acceso.empresaId || zona.activo === false || !geocercaValida(zona)) return null;
+    return { referencia, sucursalId: null, nombre: zona.nombre || "Geocerca personalizada", latitud: Number(zona.latitud), longitud: Number(zona.longitud), radioMetros: Number(zona.radioMetros) };
+  }
+  return null;
+}
+
+function geocercaValida(zona) {
+  return Number.isFinite(Number(zona?.latitud))
+    && Number.isFinite(Number(zona?.longitud))
+    && Number(zona?.radioMetros) >= 20;
 }
 
 async function resolverValidacionMarcacion(tipo) {
