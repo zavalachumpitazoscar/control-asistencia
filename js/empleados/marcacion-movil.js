@@ -18,13 +18,30 @@ let solicitudes = [];
 let sucursales = [];
 let geocercasPersonalizadas = [];
 let control;
+let paginaAccesos = 1;
+let cantidadAccesos = 10;
 
 export function iniciarAdministracionMarcacionMovil() {
   control?.abort();
   control = new AbortController();
   const opciones = { signal: control.signal };
-  document.getElementById("buscarAccesoMovil")?.addEventListener("input", renderizar, opciones);
+  document.getElementById("buscarAccesoMovil")?.addEventListener("input", () => {
+    paginaAccesos = 1;
+    renderizar();
+  }, opciones);
   document.getElementById("listaAccesosMoviles")?.addEventListener("click", procesarAccion, opciones);
+  document.getElementById("cantidadAccesosMoviles")?.addEventListener("change", (evento) => {
+    cantidadAccesos = Number(evento.target.value) || 10;
+    paginaAccesos = 1;
+    renderizar();
+  }, opciones);
+  document.getElementById("botonesPaginacionAccesos")?.addEventListener("click", (evento) => {
+    const boton = evento.target.closest("[data-pagina-acceso]");
+    if (!boton || boton.disabled) return;
+    paginaAccesos = Number(boton.dataset.paginaAcceso);
+    renderizar();
+    document.querySelector(".admin-movil-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, opciones);
   document.getElementById("listaGeocercasMoviles")?.addEventListener("click", procesarGeocerca, opciones);
   document.getElementById("btnNuevaGeocercaMovil")?.addEventListener("click", crearGeocercaPersonalizada, opciones);
   cargar();
@@ -78,8 +95,12 @@ function renderizar() {
         normalizar(`${fila.nombre} ${fila.dni} ${fila.correo}`).includes(busqueda),
     );
 
-  lista.innerHTML = filas.length
-    ? filas
+  const totalPaginas = Math.max(1, Math.ceil(filas.length / cantidadAccesos));
+  paginaAccesos = Math.min(Math.max(1, paginaAccesos), totalPaginas);
+  const inicio = (paginaAccesos - 1) * cantidadAccesos;
+  const filasPagina = filas.slice(inicio, inicio + cantidadAccesos);
+  lista.innerHTML = filasPagina.length
+    ? filasPagina
         .map(({ colaborador, acceso, solicitud, nombre, dni, correo }) => {
           const correoAcceso = acceso?.correo || correo;
           const estado = solicitud
@@ -120,6 +141,28 @@ function renderizar() {
         })
         .join("")
     : '<p class="movil-vacio">No se encontraron colaboradores.</p>';
+  renderizarPaginacionAccesos(filas.length, inicio, filasPagina.length, totalPaginas);
+}
+
+function renderizarPaginacionAccesos(total, inicio, visibles, totalPaginas) {
+  const pie = document.getElementById("paginacionAccesosMoviles");
+  const resumen = document.getElementById("resumenPaginacionAccesos");
+  const botones = document.getElementById("botonesPaginacionAccesos");
+  const selector = document.getElementById("cantidadAccesosMoviles");
+  if (!pie || !resumen || !botones) return;
+  pie.hidden = total === 0;
+  if (!total) return;
+  if (selector) selector.value = String(cantidadAccesos);
+  resumen.textContent = `Mostrando ${inicio + 1}–${inicio + visibles} de ${total}`;
+  const paginas = paginasVisibles(paginaAccesos, totalPaginas);
+  botones.innerHTML = `<button data-pagina-acceso="${paginaAccesos - 1}" ${paginaAccesos === 1 ? "disabled" : ""} aria-label="Página anterior"><i class="bi bi-chevron-left"></i></button>${paginas.map((pagina) => pagina === "…" ? `<span>…</span>` : `<button data-pagina-acceso="${pagina}" class="${pagina === paginaAccesos ? "activo" : ""}" ${pagina === paginaAccesos ? 'aria-current="page"' : ""}>${pagina}</button>`).join("")}<button data-pagina-acceso="${paginaAccesos + 1}" ${paginaAccesos === totalPaginas ? "disabled" : ""} aria-label="Página siguiente"><i class="bi bi-chevron-right"></i></button>`;
+}
+
+function paginasVisibles(actual, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, indice) => indice + 1);
+  if (actual <= 4) return [1, 2, 3, 4, 5, "…", total];
+  if (actual >= total - 3) return [1, "…", total - 4, total - 3, total - 2, total - 1, total];
+  return [1, "…", actual - 1, actual, actual + 1, "…", total];
 }
 
 async function procesarAccion(evento) {
