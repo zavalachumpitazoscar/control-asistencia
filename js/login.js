@@ -14,6 +14,12 @@ const SUPERADMIN_UID = "q9H2AzN2eIODDioC7auy92MpcHf2";
 let ingresando = false;
 let toastTimer;
 
+const parametrosAcceso = new URLSearchParams(window.location.search);
+if (parametrosAcceso.get("registro") === "pendiente") {
+  document.getElementById("avisoCuentaPendiente").hidden = false;
+  history.replaceState({}, "", window.location.pathname);
+}
+
 modalCambioPassword.addEventListener("cancel", event => event.preventDefault());
 function solicitarCambioObligatorio(user) {
   return new Promise((resolve, reject) => {
@@ -112,6 +118,11 @@ form.addEventListener("submit", async (event) => {
     }
 
     const usuario = documento.data();
+    if (usuario.estado === "PENDIENTE") {
+      await signOut(auth);
+      mostrarToast("info", "Tu empresa está pendiente de activación por el administrador general.");
+      return;
+    }
     if (usuario.estado !== "ACTIVO") {
       await signOut(auth);
       mostrarToast("info", "Esta cuenta se encuentra inactiva. Comunícate con el administrador.");
@@ -144,6 +155,5 @@ form.addEventListener("submit", async (event) => {
     ocultarCarga();
   }
 });
-
 
 
