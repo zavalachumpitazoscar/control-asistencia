@@ -14,6 +14,8 @@ function correo(v){return texto(v).toLowerCase();}
 function ruc(v){return texto(v).replace(/\D/g,"");}
 function exigirAuth(req){if(!req.auth)throw new HttpsError("unauthenticated","Debes iniciar sesión.");}
 function exigirSuper(req){exigirAuth(req);if(req.auth.uid!==SUPERADMIN_UID||correo(req.auth.token.email)!==SUPERADMIN_EMAIL)throw new HttpsError("permission-denied","Acceso reservado al superadministrador general.");}
+function esAdministradorSistema(perfil){const rol=texto(perfil?.rol).toUpperCase();return perfil?.principal===true||/ADMIN|PROPIET|GERENT/.test(rol);}
+async function usuarioAuthPorCorreo(email){try{return await getAuth().getUserByEmail(email);}catch(e){console.error("No se pudo obtener la cuenta Auth",e);if(e?.code==="auth/user-not-found")throw new HttpsError("not-found","No se encontró esta cuenta en Firebase Authentication.");throw new HttpsError("internal","No se pudo consultar la cuenta de acceso.");}}
 function auditar(tipo,req,datos={}){return db.collection("auditoriaSuperadmin").add({tipo,superadminUid:req.auth.uid,superadminCorreo:req.auth.token.email||SUPERADMIN_EMAIL,...datos,fecha:FieldValue.serverTimestamp()});}
 
 exports.registrarEmpresaSegura=onCall({region:REGION,enforceAppCheck:false},async req=>{
@@ -97,8 +99,8 @@ exports.gestionarDispositivoSuperadmin=onCall({region:REGION,enforceAppCheck:fal
 exports.enviarRestablecimientoSuperadmin=onCall({region:REGION,enforceAppCheck:false},async req=>{
   exigirSuper(req);const email=correo(req.data?.correo),empresaId=texto(req.data?.empresaId),motivo=texto(req.data?.motivo);
   if(motivo.length<5)throw new HttpsError("invalid-argument","Indica el motivo.");
-  const user=await getAuth().getUserByEmail(email),perfil=await db.doc(`usuarios/${user.uid}`).get();
-  if(!perfil.exists||perfil.data().empresaId!==empresaId)throw new HttpsError("permission-denied","La cuenta no pertenece a la empresa seleccionada.");
+  const user=await usuarioAuthPorCorreo(email),perfil=await db.doc(`usuarios/${user.uid}`).get();
+  if(!perfil.exists||perfil.data().empresaId!==empresaId||!esAdministradorSistema(perfil.data()))throw new HttpsError("permission-denied","La cuenta no es un administrador de la empresa seleccionada.");
   const enlace=await getAuth().generatePasswordResetLink(email,{url:"https://zavalachumpitazoscar.github.io/control-asistencia/index.html"});
   await db.collection("mail").add({to:[email],message:{subject:"Restablecimiento de acceso",html:`<div style="font-family:Arial;max-width:560px;margin:auto"><h2>Restablece tu contraseña</h2><p>El administrador general recibió una solicitud de recuperación para tu cuenta.</p><p><a style="display:inline-block;padding:12px 18px;background:#2388ff;color:#fff;text-decoration:none;border-radius:8px" href="${enlace}">Crear nueva contraseña</a></p><p>Si no solicitaste este cambio, comunícate con tu empresa.</p></div>`},empresaId,tipo:"RESET_SUPERADMIN",creadoEn:FieldValue.serverTimestamp()});
   await auditar("ENVIAR_RESTABLECIMIENTO_PASSWORD",req,{empresaId,uidObjetivo:user.uid,correo:email,motivo});return {ok:true};
@@ -108,14 +110,13 @@ exports.generarPasswordTemporalSuperadmin=onCall({region:REGION,enforceAppCheck:
   exigirSuper(req);
   const email=correo(req.data?.correo),empresaId=texto(req.data?.empresaId),motivo=texto(req.data?.motivo),solicitada=texto(req.data?.passwordNueva);
   if(motivo.length<5)throw new HttpsError("invalid-argument","Indica el motivo.");
-  const user=await getAuth().getUserByEmail(email);
+  const user=await usuarioAuthPorCorreo(email);
   if(user.uid===SUPERADMIN_UID)throw new HttpsError("permission-denied","No puedes modificar la contraseña del superadministrador desde esta opción.");
   const perfilRef=db.doc(`usuarios/${user.uid}`),perfil=await perfilRef.get();
-  if(!perfil.exists||perfil.data().empresaId!==empresaId)throw new HttpsError("permission-denied","La cuenta no pertenece a la empresa seleccionada.");
+  if(!perfil.exists||perfil.data().empresaId!==empresaId||!esAdministradorSistema(perfil.data()))throw new HttpsError("permission-denied","La cuenta no es un administrador de la empresa seleccionada.");
   const temporal=solicitada||`Ce!${crypto.randomBytes(7).toString("base64url")}9a`;
   if(temporal.length<10||temporal.length>128||!/[a-z]/.test(temporal)||!/[A-Z]/.test(temporal)||!/[0-9]/.test(temporal)||!/[.!@#$%_-]/.test(temporal))throw new HttpsError("invalid-argument","La contraseña debe tener al menos 10 caracteres, mayúscula, minúscula, número y símbolo.");
-  await getAuth().updateUser(user.uid,{password:temporal});
-  await getAuth().revokeRefreshTokens(user.uid);
+  try{await getAuth().updateUser(user.uid,{password:temporal});await getAuth().revokeRefreshTokens(user.uid);}catch(e){console.error("No se pudo actualizar la contraseña",e);if(e?.code==="auth/invalid-password")throw new HttpsError("invalid-argument","Firebase rechazó la contraseña indicada.");throw new HttpsError("internal","No se pudo actualizar la contraseña en el servicio de acceso.");}
   await perfilRef.set({requiereCambioPassword:true,passwordTemporalAsignadoEn:FieldValue.serverTimestamp(),passwordTemporalAsignadoPor:req.auth.uid},{merge:true});
   await auditar("GENERAR_PASSWORD_TEMPORAL",req,{empresaId,uidObjetivo:user.uid,correo:email,motivo});
   return {ok:true,correo:email,passwordTemporal:temporal};
