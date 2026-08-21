@@ -12,10 +12,22 @@ from "./utilidades-asistencia.js?v=20260817-4";
 
 
 import {
-    guardarMarcacionesImportadas,
-    obtenerCoincidenciasDNIImportacion
+    guardarMarcacionesImportadas
 }
-from "./guardar-marcaciones.js?v=20260820-6";
+from "./guardar-marcaciones.js?v=20260821-1";
+
+import { auth, db } from "../firebase-config.js";
+
+import {
+    collection,
+    doc,
+    getDocs,
+    query,
+    serverTimestamp,
+    setDoc,
+    where
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 
 
@@ -594,28 +606,80 @@ function horaDesdeFraccion(fraccion){const segundos=Math.round(fraccion*86400)%8
 
 
 async function asociarCoincidenciasDNIConColaboradores(resultado){
+    const empresaId = sessionStorage.getItem("empresaId");
+    if(!empresaId) throw new Error("No se encontró la empresa activa.");
 
-    const coincidencias =
-        await obtenerCoincidenciasDNIImportacion(
-            resultado.validas.map(marcacion=>marcacion.dni)
-        );
+    const [resultadoColaboradores, resultadoEquivalencias] = await Promise.all([
+        getDocs(query(collection(db,"colaboradores"),where("empresaId","==",empresaId))),
+        getDocs(query(collection(db,"equivalenciasDniMarcaciones"),where("empresaId","==",empresaId)))
+    ]);
 
-    resultado.validas.forEach((marcacion, indice)=>{
-        const coincidencia = coincidencias[indice];
-        if(coincidencia?.sinCerosIniciales){
-            marcacion.coincidenciaDni = coincidencia;
-            marcacion.estadoValidacion = "RECONOCIDA_SIN_CEROS";
+    const colaboradores = resultadoColaboradores.docs.map(documento=>{
+        const datos = documento.data();
+        return {
+            id:documento.id,
+            dni:normalizarDNI(datos.documento?.numero||datos.numeroDocumento||datos.dni||datos.datosPersonales?.dni||""),
+            nombre:[datos.datosPersonales?.nombres||datos.nombres||"",datos.datosPersonales?.apellidos||datos.apellidos||""].filter(Boolean).join(" ").trim()||datos.nombreCompleto||"Colaborador"
+        };
+    }).filter(item=>item.dni);
+
+    const porDni = new Map(colaboradores.map(item=>[item.dni,item]));
+    const equivalencias = new Map();
+    resultadoEquivalencias.forEach(documento=>{
+        const datos=documento.data();
+        equivalencias.set(normalizarDNI(datos.dniRecibido),datos);
+    });
+
+    const pendientes = new Map();
+    const recordadas = new Map();
+
+    resultado.validas.forEach(marcacion=>{
+        const recibido=normalizarDNI(marcacion.dni);
+        if(porDni.has(recibido)) return;
+
+        const guardada=equivalencias.get(recibido);
+        const colaboradorGuardado=guardada?.activo!==false ? porDni.get(normalizarDNI(guardada.dniColaborador)) : null;
+        if(colaboradorGuardado){
+            marcacion.dniOriginal=recibido;
+            marcacion.dni=colaboradorGuardado.dni;
+            marcacion.coincidenciaDni={dniReloj:recibido,dniColaborador:colaboradorGuardado.dni,colaboradorId:colaboradorGuardado.id,colaboradorNombre:colaboradorGuardado.nombre,recordada:true};
+            marcacion.estadoValidacion="EQUIVALENCIA_RECORDADA";
+            recordadas.set(recibido,marcacion.coincidenciaDni);
+            return;
         }
+
+        const candidatos=buscarDniSimilares(recibido,colaboradores);
+        if(!candidatos.length) return;
+        marcacion.requiereConfirmacion=true;
+        marcacion.dniOriginal=recibido;
+        marcacion.candidatosDni=candidatos;
+        marcacion.estadoValidacion=candidatos.length===1?"POSIBLE_COINCIDENCIA":"COINCIDENCIA_AMBIGUA";
+        if(!pendientes.has(recibido)) pendientes.set(recibido,{dniRecibido:recibido,candidatos});
     });
 
-    const unicas = new Map();
+    resultado.coincidenciasDniPendientes=[...pendientes.values()];
+    resultado.equivalenciasRecordadas=[...recordadas.values()];
+    resultado.coincidenciasDniSinCeros=[];
 
-    coincidencias.filter(item=>item?.sinCerosIniciales).forEach(item=>{
-        unicas.set(`${item.dniReloj}_${item.dniColaborador}`, item);
+}
+
+function buscarDniSimilares(dniRecibido,colaboradores){
+    if(!/^\d{6,7}$/.test(dniRecibido)) return [];
+    return colaboradores.filter(colaborador=>{
+        const registrado=colaborador.dni;
+        if(!/^\d{8}$/.test(registrado)) return false;
+        if(dniRecibido.length===7){
+            return Array.from({length:8},(_,indice)=>registrado.slice(0,indice)+registrado.slice(indice+1)).includes(dniRecibido);
+        }
+        if(dniRecibido.length===6){
+            for(let primero=0;primero<8;primero++){
+                for(let segundo=primero+1;segundo<8;segundo++){
+                    if([...registrado].filter((_,indice)=>indice!==primero&&indice!==segundo).join("")===dniRecibido) return true;
+                }
+            }
+        }
+        return false;
     });
-
-    resultado.coincidenciasDniSinCeros = [...unicas.values()];
-
 }
 
 
@@ -721,6 +785,7 @@ function mostrarVistaPreviaImportacion(
                     <td>
                         ${escaparHTML(marcacion.dni)}
                         ${marcacion.coincidenciaDni ? `<small class="importacion-dni-asociado">DNI registrado: ${escaparHTML(marcacion.coincidenciaDni.dniColaborador)}</small>` : ""}
+                        ${marcacion.requiereConfirmacion ? `<small class="importacion-dni-asociado">Requiere validar posible coincidencia</small>` : ""}
                     </td>
 
                     <td>
@@ -730,8 +795,8 @@ function mostrarVistaPreviaImportacion(
                     </td>
 
                     <td>
-                        <span class="importacion-estado ${marcacion.coincidenciaDni ? "advertencia" : "valida"}">
-                            ${marcacion.coincidenciaDni ? "Reconocida sin ceros" : "Válida"}
+                        <span class="importacion-estado ${marcacion.requiereConfirmacion||marcacion.coincidenciaDni ? "advertencia" : "valida"}">
+                            ${marcacion.requiereConfirmacion ? "Por validar" : marcacion.coincidenciaDni?.recordada ? "Equivalencia recordada" : "Válida"}
                         </span>
                     </td>
 
@@ -755,7 +820,7 @@ function mostrarVistaPreviaImportacion(
         showCancelButton:true,
 
         confirmButtonText:
-            `Importar ${resultado.validas.length} marcaciones`,
+            `Validar e importar`,
 
         cancelButtonText:
             "Cancelar",
@@ -765,6 +830,14 @@ function mostrarVistaPreviaImportacion(
 
         showConfirmButton:
             resultado.validas.length > 0,
+
+        preConfirm:()=>{
+            const selecciones={};
+            document.querySelectorAll("[data-equivalencia-dni]").forEach(selector=>{
+                selecciones[selector.dataset.equivalenciaDni]=selector.value||"";
+            });
+            return selecciones;
+        },
 
         html:
         `
@@ -809,11 +882,11 @@ function mostrarVistaPreviaImportacion(
                     <div class="importacion-indicador advertencia">
 
                         <span>
-                            DNI recuperados
+                            Por validar
                         </span>
 
                         <strong>
-                            ${resultado.coincidenciasDniSinCeros?.length || 0}
+                            ${resultado.coincidenciasDniPendientes?.length || 0}
                         </strong>
 
                     </div>
@@ -846,14 +919,29 @@ function mostrarVistaPreviaImportacion(
 
                 </div>
 
-                ${resultado.coincidenciasDniSinCeros?.length ? `
+                ${resultado.equivalenciasRecordadas?.length ? `
                     <div class="importacion-advertencia-dni">
-                        <i class="bi bi-exclamation-triangle"></i>
+                        <i class="bi bi-bookmark-check"></i>
                         <div>
-                            <strong>Se reconocieron DNI sin ceros iniciales</strong>
-                            <p>El sistema conservará el DNI registrado del colaborador y asociará estas marcaciones:</p>
-                            <ul>${resultado.coincidenciasDniSinCeros.map(item=>`<li><b>${escaparHTML(item.dniReloj)}</b> → <b>${escaparHTML(item.dniColaborador)}</b> · ${escaparHTML(item.colaboradorNombre)}</li>`).join("")}</ul>
+                            <strong>Equivalencias reconocidas anteriormente</strong>
+                            <p>Estas relaciones ya fueron confirmadas en una importación previa:</p>
+                            <ul>${resultado.equivalenciasRecordadas.map(item=>`<li>${escaparHTML(item.dniReloj)} → ${escaparHTML(item.dniColaborador)} · ${escaparHTML(item.colaboradorNombre)}</li>`).join("")}</ul>
                         </div>
+                    </div>` : ""}
+
+                ${resultado.coincidenciasDniPendientes?.length ? `
+                    <div class="conciliacion-dni-importacion">
+                        <header><i class="bi bi-person-check"></i><div><strong>Valida los DNI similares</strong><p>Selecciona una persona solo si confirmas que las marcaciones le pertenecen. La decisión se recordará para futuras importaciones.</p></div></header>
+                        ${resultado.coincidenciasDniPendientes.map((grupo,indice)=>`
+                            <section class="conciliacion-dni-fila">
+                                <div><span>DNI recibido</span><strong>${escaparHTML(grupo.dniRecibido)}</strong></div>
+                                <label>Posible colaborador
+                                    <select data-equivalencia-dni="${escaparHTML(grupo.dniRecibido)}">
+                                        <option value="">No importar estas marcaciones</option>
+                                        ${grupo.candidatos.map(candidato=>`<option value="${escaparHTML(candidato.id)}">${escaparHTML(candidato.dni)} · ${escaparHTML(candidato.nombre)}</option>`).join("")}
+                                    </select>
+                                </label>
+                            </section>`).join("")}
                     </div>` : ""}
 
                 ${resultado.invalidas.length ? `
@@ -926,7 +1014,7 @@ function mostrarVistaPreviaImportacion(
         `
 
     })
-    .then(resultadoSwal=>{
+    .then(async resultadoSwal=>{
 
         if(!resultadoSwal.isConfirmed){
 
@@ -935,10 +1023,54 @@ function mostrarVistaPreviaImportacion(
         }
 
 
+        await aplicarConciliacionDni(resultado,resultadoSwal.value||{});
         confirmarImportacionMarcaciones();
 
     });
 
+}
+
+async function aplicarConciliacionDni(resultado,selecciones){
+    const empresaId=sessionStorage.getItem("empresaId");
+    const usuario=auth.currentUser;
+    const pendientes=resultado.coincidenciasDniPendientes||[];
+    const aceptadas=new Map();
+
+    for(const grupo of pendientes){
+        const colaboradorId=selecciones[grupo.dniRecibido];
+        const candidato=grupo.candidatos.find(item=>item.id===colaboradorId);
+        if(!candidato) continue;
+        aceptadas.set(grupo.dniRecibido,candidato);
+        const id=`${empresaId}__${grupo.dniRecibido}`;
+        await setDoc(doc(db,"equivalenciasDniMarcaciones",id),{
+            empresaId,
+            dniRecibido:grupo.dniRecibido,
+            dniColaborador:candidato.dni,
+            colaboradorId:candidato.id,
+            colaboradorNombre:candidato.nombre,
+            confirmadoPor:usuario?.uid||null,
+            confirmadoPorCorreo:usuario?.email||null,
+            confirmadoEn:serverTimestamp(),
+            activo:true
+        },{merge:true});
+    }
+
+    marcacionesProcesadas=resultado.validas.filter(marcacion=>{
+        if(!marcacion.requiereConfirmacion) return true;
+        const candidato=aceptadas.get(marcacion.dniOriginal||marcacion.dni);
+        if(!candidato) return false;
+        marcacion.dni=candidato.dni;
+        marcacion.coincidenciaDni={
+            dniReloj:marcacion.dniOriginal,
+            dniColaborador:candidato.dni,
+            colaboradorId:candidato.id,
+            colaboradorNombre:candidato.nombre,
+            confirmadaAhora:true
+        };
+        delete marcacion.requiereConfirmacion;
+        delete marcacion.candidatosDni;
+        return true;
+    });
 }
 
 
