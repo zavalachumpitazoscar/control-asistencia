@@ -28,7 +28,8 @@ import {
     obtenerUltimoDiaMes,
     obtenerDatosEntrada,
     obtenerDatosSalida,
-    escaparHTML
+    escaparHTML,
+    asignarTexto
 }
 from "./horarios-utilidades.js";
 
