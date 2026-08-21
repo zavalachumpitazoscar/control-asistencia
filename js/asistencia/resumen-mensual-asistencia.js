@@ -704,6 +704,84 @@ function agregarHojaSimplificada(XLSX, libro, r) {
     minutosExcel(r.minutosExtraPendientes), minutosExcel(r.minutosExtraAprobados), "",
   ]);
 
+  const resumenPractico = calcularResumenPractico(r);
+  const filaTituloResumen = filas.length + 1;
+  filas.push([]);
+  filas.push(["RESUMEN PRÁCTICO DEL PERÍODO"]);
+
+  const gruposResumen = [
+    {
+      titulo: "TIEMPO LABORAL",
+      items: [
+        ["Asignado", minutosExcel(r.minutosAsignados)],
+        ["Jornada cumplida", minutosExcel(r.minutosJornadaCumplida)],
+        ["Trabajado", minutosExcel(r.minutosTrabajados)],
+        ["Ausencia", minutosExcel(r.minutosAusencia)],
+        ["Justificado", minutosExcel(r.minutosJustificados)],
+      ],
+    },
+    {
+      titulo: "INCIDENCIAS",
+      items: [
+        ["Asistencias", String(r.asistencias)],
+        ["Tardanzas", String(r.tardanzas)],
+        ["Ausencias", String(r.ausencias)],
+        ["Permisos", String(r.permisos)],
+        ["Salidas anticipadas", String(resumenPractico.salidasAnticipadas)],
+      ],
+    },
+    {
+      titulo: "HORAS EXTRA",
+      items: [
+        ["Generada", minutosExcel(r.minutosExtraGenerados)],
+        ["Pendiente", minutosExcel(r.minutosExtraPendientes)],
+        ["Aprobada", minutosExcel(r.minutosExtraAprobados)],
+        ["Días con extra", String(resumenPractico.diasConExtra)],
+        ["Días incompletos", String(resumenPractico.diasIncompletos)],
+      ],
+    },
+    {
+      titulo: "RESULTADO",
+      items: [
+        ["Tardanza acumulada", minutosExcel(resumenPractico.minutosTardanza)],
+        ["Salida anticipada", minutosExcel(resumenPractico.minutosSalidaAnticipada)],
+        ["Exceso refrigerio", minutosExcel(resumenPractico.minutosExcesoRefrigerio)],
+        ["Falta no justificada", minutosExcel(resumenPractico.minutosFaltaNoJustificada)],
+        ["Cobertura de jornada", `${resumenPractico.porcentajeCobertura}%`],
+      ],
+    },
+  ];
+
+  const filaCabecerasResumen = filas.length;
+  filas.push(gruposResumen.flatMap(grupo=>[grupo.titulo, "", "", ""]));
+  const filasDetalleResumen = [];
+  for(let indice = 0; indice < 5; indice++){
+    const fila = [];
+    gruposResumen.forEach(grupo=>{
+      const item = grupo.items[indice] || ["", ""];
+      fila.push(item[0], "", "", item[1]);
+    });
+    filasDetalleResumen.push(filas.length);
+    filas.push(fila);
+  }
+
+  const filaFirmas = filas.length + 2;
+  filas.push([]);
+  filas.push([]);
+  filas.push(["", "________________________________", "", "", "", "", "", "", "", "", "________________________________"]);
+  filas.push(["", "COLABORADOR", "", "", "", "", "", "", "", "", "RESPONSABLE / EMPLEADOR"]);
+  filas.push(["", `${r.nombre} · DNI ${r.documento || "—"}`, "", "", "", "", "", "", "", "", "Firma, nombre y documento"]);
+
+  const filaTituloGlosario = filas.length + 1;
+  filas.push([]);
+  filas.push(["GLOSARIO Y CRITERIOS DE LECTURA"]);
+  const glosario = obtenerGlosarioReporte();
+  const filasGlosario = [];
+  glosario.forEach(item=>{
+    filasGlosario.push(filas.length);
+    filas.push([`${item.termino}: ${item.descripcion}`]);
+  });
+
   const hoja = XLSX.utils.aoa_to_sheet(filas);
   hoja["!merges"] = [
     rangoCombinado(0, 0, 0, 15), rangoCombinado(1, 0, 1, 15),
@@ -716,9 +794,65 @@ function agregarHojaSimplificada(XLSX, libro, r) {
     ]),
     ...filasSemana.map((fila) => rangoCombinado(fila, 0, fila, 5)),
     rangoCombinado(filaTotal, 0, filaTotal, 5),
+    rangoCombinado(filaTituloResumen, 0, filaTituloResumen, 15),
+    ...[0,4,8,12].map(columna=>rangoCombinado(filaCabecerasResumen, columna, filaCabecerasResumen, columna + 3)),
+    ...filasDetalleResumen.flatMap(fila=>[0,4,8,12].map(columna=>rangoCombinado(fila, columna, fila, columna + 2))),
+    rangoCombinado(filaFirmas, 1, filaFirmas, 5),
+    rangoCombinado(filaFirmas, 10, filaFirmas, 14),
+    rangoCombinado(filaFirmas + 1, 1, filaFirmas + 1, 5),
+    rangoCombinado(filaFirmas + 1, 10, filaFirmas + 1, 14),
+    rangoCombinado(filaFirmas + 2, 1, filaFirmas + 2, 5),
+    rangoCombinado(filaFirmas + 2, 10, filaFirmas + 2, 14),
+    rangoCombinado(filaTituloGlosario, 0, filaTituloGlosario, 15),
+    ...filasGlosario.map(fila=>rangoCombinado(fila, 0, fila, 15)),
   ];
-  aplicarEstiloPlanillaExcel(XLSX, hoja, filas.length, filasSemana, filaTotal);
+  aplicarEstiloPlanillaExcel(XLSX, hoja, filas.length, filasSemana, filaTotal, {
+    filaTituloResumen,
+    filaCabecerasResumen,
+    filasDetalleResumen,
+    filaFirmas,
+    filaTituloGlosario,
+    filasGlosario,
+  });
   anexarHojaUnica(XLSX, libro, hoja, nombreHoja(r.nombre));
+}
+
+function calcularResumenPractico(r) {
+  const detalles = Array.isArray(r.detalles) ? r.detalles : [];
+  const sumar = (campo) => detalles.reduce((total, detalle) => total + numero(detalle[campo]), 0);
+  const minutosTardanza = sumar("tardanza");
+  const minutosSalidaAnticipada = sumar("salidaAnticipada");
+  const minutosExcesoRefrigerio = sumar("excesoRefrigerio");
+  const minutosFaltaNoJustificada = Math.max(0, numero(r.minutosAusencia) - numero(r.minutosJustificados));
+  const porcentajeCobertura = numero(r.minutosAsignados)
+    ? Math.min(999, Math.round((numero(r.minutosTrabajados) / numero(r.minutosAsignados)) * 100))
+    : 0;
+  return {
+    minutosTardanza,
+    minutosSalidaAnticipada,
+    minutosExcesoRefrigerio,
+    minutosFaltaNoJustificada,
+    porcentajeCobertura,
+    salidasAnticipadas: detalles.filter(detalle=>numero(detalle.salidaAnticipada) > 0).length,
+    diasConExtra: detalles.filter(detalle=>numero(detalle.extraGenerada) > 0).length,
+    diasIncompletos: detalles.filter(detalle=>String(detalle.estado || "").toUpperCase().includes("INCOMPLET")).length,
+  };
+}
+
+function obtenerGlosarioReporte() {
+  return [
+    { termino:"Asignado", descripcion:"tiempo programado según el horario del colaborador." },
+    { termino:"Jornada cumplida", descripcion:"tiempo reconocido dentro de la jornada programada." },
+    { termino:"Trabajado", descripcion:"tiempo efectivo calculado entre marcaciones válidas, descontando el refrigerio cuando corresponde." },
+    { termino:"Ausencia", descripcion:"tiempo programado que no fue trabajado; puede incluir minutos posteriormente justificados." },
+    { termino:"Tardanza", descripcion:"minutos transcurridos después de la hora límite de ingreso configurada." },
+    { termino:"Salida anticipada", descripcion:"minutos faltantes cuando la salida ocurre antes del límite permitido." },
+    { termino:"Justificado", descripcion:"tiempo de ausencia respaldado por un permiso o regularización aprobada." },
+    { termino:"Extra generada", descripcion:"tiempo trabajado fuera de la jornada que el sistema detectó para evaluación." },
+    { termino:"Extra pendiente", descripcion:"tiempo extra detectado que aún no ha sido aprobado ni rechazado." },
+    { termino:"Extra aprobada", descripcion:"tiempo extra validado expresamente por el administrador." },
+    { termino:"Cobertura de jornada", descripcion:"porcentaje de horas trabajadas respecto de las horas asignadas en el período." },
+  ];
 }
 
 function totalizarSemana(semana) {
@@ -761,7 +895,7 @@ function rangoCombinado(filaInicio, columnaInicio, filaFin, columnaFin) {
   };
 }
 
-function aplicarEstiloPlanillaExcel(XLSX, hoja, totalFilas, filasSemana, filaTotal) {
+function aplicarEstiloPlanillaExcel(XLSX, hoja, totalFilas, filasSemana, filaTotal, secciones = {}) {
   const azul = "1E3A8A";
   const azulClaro = "DBEAFE";
   const borde = "CBD5E1";
@@ -786,14 +920,57 @@ function aplicarEstiloPlanillaExcel(XLSX, hoja, totalFilas, filasSemana, filaTot
   });
   rango(7, 7, 0, 15, { fill: { fgColor: { rgb: azul } }, font: { bold: true, sz: 8, color: "FFFFFF" }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: bordesExcel("FFFFFF") });
   rango(8, totalFilas - 1, 0, 15, { font: { sz: 8, color: texto }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: bordesExcel("D9E2EF") });
+  for (let fila = 8; fila < filaTotal; fila++) {
+    if (filasSemana.includes(fila)) continue;
+    rango(fila, fila, 2, 14, { font: { bold: true, sz: 9, color: "0F172A" }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: bordesExcel("D9E2EF") });
+  }
   for (let fila = 8; fila < totalFilas; fila++) {
     if ((fila - 8) % 2 === 1 && !filasSemana.includes(fila) && fila !== filaTotal)
       rango(fila, fila, 0, 15, { fill: { fgColor: { rgb: "F8FAFC" } }, font: { sz: 8, color: texto }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: bordesExcel("D9E2EF") });
   }
+  for (let fila = 8; fila < filaTotal; fila++) {
+    if (filasSemana.includes(fila)) continue;
+    rango(fila, fila, 2, 14, { font: { bold: true, sz: 9, color: "0F172A" }, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: bordesExcel("D9E2EF") });
+  }
   filasSemana.forEach((fila) => rango(fila, fila, 0, 15, { fill: { fgColor: { rgb: azulClaro } }, font: { bold: true, sz: 8, color: azul }, alignment: { horizontal: "center", vertical: "center" }, border: bordesExcel("B9D3F5") }));
   rango(filaTotal, filaTotal, 0, 15, { fill: { fgColor: { rgb: azul } }, font: { bold: true, sz: 9, color: "FFFFFF" }, alignment: { horizontal: "center", vertical: "center" }, border: bordesExcel("FFFFFF") });
+
+  if(Number.isInteger(secciones.filaTituloResumen)){
+    rango(secciones.filaTituloResumen, secciones.filaTituloResumen, 0, 15, { fill: { fgColor: { rgb: "EAF2FF" } }, font: { bold: true, sz: 12, color: azul }, alignment: { horizontal: "left", vertical: "center" }, border: { bottom: { style: "medium", color: { rgb: azul } } } });
+    [0,4,8,12].forEach(columna=>rango(secciones.filaCabecerasResumen, secciones.filaCabecerasResumen, columna, columna + 3, { fill: { fgColor: { rgb: "D1D5DB" } }, font: { bold: true, sz: 9, color: "111827" }, alignment: { horizontal: "center", vertical: "center" }, border: bordesExcel("6B7280") }));
+    (secciones.filasDetalleResumen || []).forEach(fila=>{
+      [0,4,8,12].forEach(columna=>{
+        rango(fila, fila, columna, columna + 2, { fill: { fgColor: { rgb: "FFFFFF" } }, font: { sz: 8, color: "1F2937" }, alignment: { horizontal: "left", vertical: "center" }, border: bordesExcel("9CA3AF") });
+        rango(fila, fila, columna + 3, columna + 3, { fill: { fgColor: { rgb: "F8FAFC" } }, font: { bold: true, sz: 10, color: "0F172A" }, alignment: { horizontal: "right", vertical: "center" }, border: bordesExcel("9CA3AF") });
+      });
+    });
+  }
+
+  if(Number.isInteger(secciones.filaFirmas)){
+    rango(secciones.filaFirmas, secciones.filaFirmas, 1, 14, { font: { bold: true, sz: 9, color: "111827" }, alignment: { horizontal: "center", vertical: "bottom" } });
+    rango(secciones.filaFirmas + 1, secciones.filaFirmas + 1, 1, 14, { font: { bold: true, sz: 9, color: "111827" }, alignment: { horizontal: "center" } });
+    rango(secciones.filaFirmas + 2, secciones.filaFirmas + 2, 1, 14, { font: { sz: 8, color: "475569" }, alignment: { horizontal: "center", wrapText: true } });
+  }
+
+  if(Number.isInteger(secciones.filaTituloGlosario)){
+    rango(secciones.filaTituloGlosario, secciones.filaTituloGlosario, 0, 15, { fill: { fgColor: { rgb: "E5E7EB" } }, font: { bold: true, sz: 10, color: "111827" }, alignment: { horizontal: "left", vertical: "center" }, border: bordesExcel("9CA3AF") });
+    (secciones.filasGlosario || []).forEach(fila=>rango(fila, fila, 0, 15, { fill: { fgColor: { rgb: "FFFFFF" } }, font: { sz: 8, color: "334155" }, alignment: { horizontal: "left", vertical: "center", wrapText: true }, border: { bottom: { style: "thin", color: { rgb: "D1D5DB" } } } }));
+  }
   hoja["!cols"] = [13, 18, 11, 13, 13, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 24].map((wch) => ({ wch }));
-  hoja["!rows"] = Array.from({ length: totalFilas }, (_, fila) => ({ hpt: fila === 0 ? 30 : fila === 7 ? 32 : [4, 5].includes(fila) ? 28 : fila === 3 || fila === 6 ? 8 : 22 }));
+  hoja["!rows"] = Array.from({ length: totalFilas }, (_, fila) => ({
+    hpt: fila === 0 ? 30
+      : fila === 7 ? 32
+      : [4, 5].includes(fila) ? 28
+      : fila === 3 || fila === 6 ? 8
+      : fila === secciones.filaTituloResumen ? 26
+      : fila === secciones.filaCabecerasResumen ? 23
+      : (secciones.filasDetalleResumen || []).includes(fila) ? 22
+      : fila === secciones.filaFirmas - 1 ? 28
+      : [secciones.filaFirmas, secciones.filaFirmas + 1, secciones.filaFirmas + 2].includes(fila) ? 20
+      : fila === secciones.filaTituloGlosario ? 23
+      : (secciones.filasGlosario || []).includes(fila) ? 28
+      : 22
+  }));
   hoja["!freeze"] = { xSplit: 0, ySplit: 8, topLeftCell: "A9" };
   hoja["!autofilter"] = { ref: `A8:P${totalFilas}` };
   hoja["!pageSetup"] = { orientation: "landscape", fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
@@ -987,7 +1164,7 @@ function seccionPdfSimplificada(r) {
       const filas = semana
         .map(
           (d) =>
-          `<tr><td class="texto-izquierda"><strong>${nombreDia(d.fecha)}</strong><small>${formatearFecha(d.fecha)}</small></td><td><strong>${html(d.horario)}</strong></td><td>${html(horaMarcacion(d.entrada))}</td><td>${html(horaMarcacion(d.refrigerioInicio))}</td><td>${html(horaMarcacion(d.refrigerioFin))}</td><td>${html(horaMarcacion(d.salida))}</td><td>${minutos(d.asignados)}</td><td>${minutos(d.jornadaCumplida)}</td><td>${minutos(d.trabajados)}</td><td>${minutos(d.ausencia)}</td><td>${minutos(d.tardanza)}</td><td>${minutos(d.justificados)}</td><td>${minutos(d.extraGenerada)}</td><td>${minutos(d.extraPendiente)}</td><td>${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
+          `<tr><td class="texto-izquierda"><strong>${nombreDia(d.fecha)}</strong><small>${formatearFecha(d.fecha)}</small></td><td><strong>${html(d.horario)}</strong></td><td class="marcacion-destacada">${html(horaMarcacion(d.entrada))}</td><td class="marcacion-destacada">${html(horaMarcacion(d.refrigerioInicio))}</td><td class="marcacion-destacada">${html(horaMarcacion(d.refrigerioFin))}</td><td class="marcacion-destacada">${html(horaMarcacion(d.salida))}</td><td class="tiempo-destacado">${minutos(d.asignados)}</td><td class="tiempo-destacado">${minutos(d.jornadaCumplida)}</td><td class="tiempo-destacado trabajado">${minutos(d.trabajados)}</td><td class="tiempo-destacado incidencia">${minutos(d.ausencia)}</td><td class="tiempo-destacado incidencia">${minutos(d.tardanza)}</td><td class="tiempo-destacado">${minutos(d.justificados)}</td><td class="tiempo-destacado">${minutos(d.extraGenerada)}</td><td class="tiempo-destacado">${minutos(d.extraPendiente)}</td><td class="tiempo-destacado">${minutos(d.extra)}</td><td><span class="estado-reporte">${html(etiquetaPlano(d.estado))}</span></td></tr>`,
         )
         .join("");
       const total = semana.reduce(
@@ -1007,13 +1184,69 @@ function seccionPdfSimplificada(r) {
       return `${filas}<tr class="resumen-semana"><th colspan="6">Resumen · Semana ${indice + 1}</th><th>${minutos(total.asignado)}</th><th>${minutos(total.jornada)}</th><th>${minutos(total.trabajado)}</th><th>${minutos(total.ausencia)}</th><th>${minutos(total.tardanza)}</th><th>${minutos(total.justificado)}</th><th>${minutos(total.extraGenerada)}</th><th>${minutos(total.extraPendiente)}</th><th>${minutos(total.extra)}</th><th></th></tr>`;
     })
     .join("");
-  const resumen = `<div class="reporte-resumen-final"><div><span>Horas asignadas</span><strong>${minutos(r.minutosAsignados)}</strong></div><div><span>Jornada cumplida</span><strong>${minutos(r.minutosJornadaCumplida)}</strong></div><div><span>Horas trabajadas</span><strong>${minutos(r.minutosTrabajados)}</strong></div><div><span>Horas de ausencia</span><strong>${minutos(r.minutosAusencia)}</strong></div><div><span>Horas justificadas</span><strong>${minutos(r.minutosJustificados)}</strong></div><div><span>Extra generada</span><strong>${minutos(r.minutosExtraGenerados)}</strong></div><div><span>Extra pendiente</span><strong>${minutos(r.minutosExtraPendientes)}</strong></div><div><span>Extra aprobada</span><strong>${minutos(r.minutosExtraAprobados)}</strong></div><div><span>Asistencias</span><strong>${r.asistencias}</strong></div><div><span>Tardanzas</span><strong>${r.tardanzas}</strong></div><div><span>Ausencias</span><strong>${r.ausencias}</strong></div></div>`;
+  const resumen = construirResumenPracticoPdf(r);
   return hojaReporte({
     titulo: "Planilla individual de asistencia",
     subtitulo: "Detalle diario organizado por semanas",
     colaborador: r,
-    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Ausencia</th><th>Tardanza</th><th>Justificado</th><th>Extra<br>generada</th><th>Extra<br>pendiente</th><th>Extra<br>aprobada</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div><h2 class="titulo-resumen-reporte">Resumen general</h2>${resumen}`,
+    contenido: `<div class="reporte-tabla-marco reporte-tabla-amplia"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Entrada</th><th>Inicio<br>refrigerio</th><th>Fin<br>refrigerio</th><th>Salida</th><th>Asignado</th><th>Jornada</th><th>Trabajado</th><th>Ausencia</th><th>Tardanza</th><th>Justificado</th><th>Extra<br>generada</th><th>Extra<br>pendiente</th><th>Extra<br>aprobada</th><th>Estado</th></tr></thead><tbody>${cuerpo}</tbody></table></div>${resumen}`,
   });
+}
+
+function construirResumenPracticoPdf(r) {
+  const resumen = calcularResumenPractico(r);
+  const bloque = (titulo, items) => `
+    <section class="resumen-practico-bloque">
+      <h3>${html(titulo)}</h3>
+      <table><tbody>${items.map(([etiqueta, valor, destacado])=>`
+        <tr class="${destacado ? "resultado-destacado" : ""}">
+          <td>${html(etiqueta)}</td><td>${html(String(valor))}</td>
+        </tr>`).join("")}</tbody></table>
+    </section>`;
+  const tablas = `
+    <h2 class="titulo-resumen-reporte">Resumen práctico del período</h2>
+    <div class="resumen-practico-grid">
+      ${bloque("Tiempo laboral", [
+        ["Asignado", minutos(r.minutosAsignados)],
+        ["Jornada cumplida", minutos(r.minutosJornadaCumplida)],
+        ["Trabajado", minutos(r.minutosTrabajados), true],
+        ["Ausencia", minutos(r.minutosAusencia)],
+        ["Justificado", minutos(r.minutosJustificados)],
+      ])}
+      ${bloque("Incidencias", [
+        ["Asistencias", r.asistencias],
+        ["Tardanzas", r.tardanzas],
+        ["Ausencias", r.ausencias],
+        ["Permisos", r.permisos],
+        ["Salidas anticipadas", resumen.salidasAnticipadas],
+      ])}
+      ${bloque("Horas extra", [
+        ["Generada", minutos(r.minutosExtraGenerados)],
+        ["Pendiente", minutos(r.minutosExtraPendientes)],
+        ["Aprobada", minutos(r.minutosExtraAprobados), true],
+        ["Días con extra", resumen.diasConExtra],
+        ["Días incompletos", resumen.diasIncompletos],
+      ])}
+      ${bloque("Resultado", [
+        ["Tardanza acumulada", minutos(resumen.minutosTardanza)],
+        ["Salida anticipada", minutos(resumen.minutosSalidaAnticipada)],
+        ["Exceso refrigerio", minutos(resumen.minutosExcesoRefrigerio)],
+        ["Falta no justificada", minutos(resumen.minutosFaltaNoJustificada), true],
+        ["Cobertura de jornada", `${resumen.porcentajeCobertura}%`, true],
+      ])}
+    </div>`;
+  const firmas = `
+    <div class="reporte-firmas">
+      <div><span></span><strong>Colaborador</strong><small>${html(r.nombre)} · DNI ${html(r.documento || "—")}</small></div>
+      <div><span></span><strong>Responsable / Empleador</strong><small>Firma, nombre y documento</small></div>
+    </div>`;
+  const glosario = `
+    <section class="reporte-glosario">
+      <h3>Glosario y criterios de lectura</h3>
+      <div>${obtenerGlosarioReporte().map(item=>`<p><strong>${html(item.termino)}:</strong> ${html(item.descripcion)}</p>`).join("")}</div>
+      <p class="nota-reporte"><strong>Nota:</strong> Las marcaciones y cálculos reflejan la información registrada y las reglas vigentes al momento de generar el reporte. Toda regularización posterior puede modificar los resultados.</p>
+    </section>`;
+  return `${tablas}${firmas}${glosario}`;
 }
 
 function hojaReporte({ titulo, subtitulo, contenido, colaborador }) {
@@ -1065,7 +1298,7 @@ function abrirImpresion(contenido) {
 }
 
 function estilosDocumentoReporte() {
-  return `*{box-sizing:border-box}.reporte-documento{width:100%;max-width:1180px;margin:0 auto 24px;padding:28px;background:#fff;color:#1e293b;font-family:Inter,Segoe UI,Arial,sans-serif;border-radius:16px;box-shadow:0 12px 32px rgba(15,23,42,.12)}.reporte-cabecera{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:18px;border-bottom:3px solid #1d4ed8}.reporte-marca{display:flex;align-items:center;gap:14px}.reporte-logo{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#1d4ed8,#4f46e5);color:#fff;font-size:24px}.reporte-marca small{color:#64748b;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.reporte-marca h1{margin:3px 0;color:#0f172a;font-size:22px;line-height:1.1;text-transform:uppercase}.reporte-marca p{margin:0;color:#64748b;font-size:10px}.reporte-sello{min-width:100px;padding:9px 12px;border:1px solid #dbeafe;border-radius:10px;background:#eff6ff;text-align:right}.reporte-sello span,.reporte-datos span{display:block;color:#64748b;font-size:8px;font-weight:700;text-transform:uppercase}.reporte-sello strong,.reporte-datos strong{display:block;margin-top:3px;color:#1e3a8a;font-size:10px}.reporte-datos{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:1px;margin:15px 0;background:#cbd5e1;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden}.reporte-datos>div{min-height:48px;padding:9px 11px;background:#f8fafc}.reporte-tabla-marco{overflow:hidden;border:1px solid #cbd5e1;border-radius:10px}.reporte-tabla-marco table{width:100%;border-collapse:collapse;font-size:8px}.reporte-tabla-marco th,.reporte-tabla-marco td{padding:7px 5px;border-right:1px solid #dbe3ee;border-bottom:1px solid #dbe3ee;text-align:center;vertical-align:middle}.reporte-tabla-marco thead th{background:#1e3a8a;color:#fff;font-weight:800;text-transform:uppercase;letter-spacing:.025em}.reporte-tabla-marco tbody tr:nth-child(even){background:#f8fafc}.reporte-tabla-marco tbody tr:hover{background:#eff6ff}.reporte-tabla-marco tfoot th,.resumen-semana th{background:#dbeafe!important;color:#1e3a8a!important;font-weight:800}.texto-izquierda{text-align:left!important}.texto-izquierda small,.reporte-tabla-marco td small{display:block;margin-top:2px;color:#64748b;font-size:7px}.estado-reporte{display:inline-block;padding:3px 5px;border-radius:4px;background:#e0e7ff;color:#3730a3;font-size:7px;font-weight:800}.reporte-resumen-final{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.reporte-resumen-final>div{padding:11px;border:1px solid #dbeafe;border-radius:9px;background:linear-gradient(145deg,#f8fafc,#eff6ff)}.reporte-resumen-final span{display:block;color:#64748b;font-size:8px;font-weight:700;text-transform:uppercase}.reporte-resumen-final strong{display:block;margin-top:4px;color:#1e3a8a;font-size:15px}.titulo-resumen-reporte{margin:16px 0 9px;color:#0f172a;font-size:13px;text-transform:uppercase}.reporte-pie-documento{display:flex;justify-content:space-between;gap:12px;margin-top:14px;padding-top:8px;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:7px}.reporte-sin-datos{padding:50px;text-align:center;color:#64748b}@media(max-width:900px){.reporte-datos{grid-template-columns:repeat(2,1fr)}.reporte-resumen-final{grid-template-columns:repeat(2,1fr)}.reporte-documento{min-width:980px}}`;
+  return `*{box-sizing:border-box}.reporte-documento{width:100%;max-width:1180px;margin:0 auto 24px;padding:26px;background:#fff;color:#1e293b;font-family:Inter,Segoe UI,Arial,sans-serif;border-radius:16px;box-shadow:0 12px 32px rgba(15,23,42,.12)}.reporte-cabecera{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:16px;border-bottom:3px solid #1d4ed8}.reporte-marca{display:flex;align-items:center;gap:14px}.reporte-logo{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#1d4ed8,#4f46e5);color:#fff;font-size:24px}.reporte-marca small{color:#64748b;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.reporte-marca h1{margin:3px 0;color:#0f172a;font-size:22px;line-height:1.1;text-transform:uppercase}.reporte-marca p{margin:0;color:#64748b;font-size:10px}.reporte-sello{min-width:100px;padding:9px 12px;border:1px solid #dbeafe;border-radius:10px;background:#eff6ff;text-align:right}.reporte-sello span,.reporte-datos span{display:block;color:#64748b;font-size:8px;font-weight:700;text-transform:uppercase}.reporte-sello strong,.reporte-datos strong{display:block;margin-top:3px;color:#1e3a8a;font-size:10px}.reporte-datos{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:1px;margin:14px 0;background:#cbd5e1;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden}.reporte-datos>div{min-height:48px;padding:9px 11px;background:#f8fafc}.reporte-tabla-marco{overflow:hidden;border:1px solid #aebdd1;border-radius:10px}.reporte-tabla-marco table{width:100%;border-collapse:collapse;font-size:8px}.reporte-tabla-marco th,.reporte-tabla-marco td{padding:7px 5px;border-right:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;text-align:center;vertical-align:middle}.reporte-tabla-marco thead th{background:#1e3a8a;color:#fff;font-weight:800;text-transform:uppercase;letter-spacing:.025em}.reporte-tabla-marco tbody tr:nth-child(even){background:#f8fafc}.reporte-tabla-marco tbody tr:hover{background:#eff6ff}.reporte-tabla-marco tfoot th,.resumen-semana th{background:#dbeafe!important;color:#1e3a8a!important;font-weight:800}.texto-izquierda{text-align:left!important}.texto-izquierda small,.reporte-tabla-marco td small{display:block;margin-top:2px;color:#64748b;font-size:7px}.marcacion-destacada{color:#0f172a;font-size:9px;font-weight:800}.tiempo-destacado{color:#172033;font-size:8.5px;font-weight:750}.tiempo-destacado.trabajado{background:#edf8f3;color:#087856}.tiempo-destacado.incidencia{color:#9a3412}.estado-reporte{display:inline-block;padding:3px 5px;border-radius:4px;background:#e0e7ff;color:#3730a3;font-size:7px;font-weight:800}.titulo-resumen-reporte{margin:17px 0 8px;padding-bottom:6px;border-bottom:2px solid #1e3a8a;color:#0f172a;font-size:13px;text-transform:uppercase}.resumen-practico-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.resumen-practico-bloque{border:1px solid #94a3b8;background:#fff}.resumen-practico-bloque h3{margin:0;padding:6px;background:#d1d5db;color:#111827;font-size:9px;text-align:center;text-transform:uppercase}.resumen-practico-bloque table{width:100%;border-collapse:collapse;font-size:8px}.resumen-practico-bloque td{padding:4px 6px;border-top:1px solid #d1d5db}.resumen-practico-bloque td:last-child{width:34%;color:#0f172a;font-weight:800;text-align:right;white-space:nowrap}.resumen-practico-bloque .resultado-destacado td{background:#f1f5f9;font-weight:800}.reporte-firmas{display:grid;grid-template-columns:1fr 1fr;gap:28%;margin:42px 6% 20px}.reporte-firmas>div{text-align:center}.reporte-firmas span{display:block;border-top:1px solid #111827}.reporte-firmas strong{display:block;margin-top:5px;color:#111827;font-size:9px;text-transform:uppercase}.reporte-firmas small{display:block;margin-top:3px;color:#475569;font-size:7px}.reporte-glosario{padding:10px 12px;border:1px solid #9ca3af;background:#f8fafc}.reporte-glosario h3{margin:0 0 7px;color:#111827;font-size:10px;text-transform:uppercase}.reporte-glosario>div{columns:2;column-gap:24px}.reporte-glosario p{margin:0 0 4px;color:#334155;font-size:7px;line-height:1.35;break-inside:avoid}.reporte-glosario p strong{color:#0f172a}.reporte-glosario .nota-reporte{margin:7px 0 0;padding-top:6px;border-top:1px solid #cbd5e1}.reporte-pie-documento{display:flex;justify-content:space-between;gap:12px;margin-top:12px;padding-top:8px;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:7px}.reporte-sin-datos{padding:50px;text-align:center;color:#64748b}@media print{.reporte-firmas,.reporte-glosario{break-inside:avoid}.resumen-practico-grid{break-inside:avoid}}@media(max-width:900px){.reporte-datos{grid-template-columns:repeat(2,1fr)}.resumen-practico-grid{grid-template-columns:repeat(2,1fr)}.reporte-documento{min-width:980px}}`;
 }
 
 function periodoPdf() {
@@ -1278,4 +1511,3 @@ function html(v) {
   e.textContent = String(v ?? "");
   return e.innerHTML;
 }
-
