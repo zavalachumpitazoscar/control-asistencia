@@ -14,6 +14,11 @@
   <article class="admin-movil-panel">
     <header><div><span>COLABORADORES</span><h3>Accesos móviles</h3><p>Cada colaborador puede marcar libremente o tener una o varias geocercas permitidas.</p></div><input id="buscarAccesoMovil" type="search" placeholder="Buscar nombre, DNI o correo"></header>
     <div id="listaAccesosMoviles" class="lista-accesos-moviles"><p class="movil-vacio">Cargando colaboradores…</p></div>
+    <footer id="paginacionAccesosMoviles" class="paginacion-accesos-moviles" hidden>
+      <div class="paginacion-cantidad"><span>Mostrar</span><select id="cantidadAccesosMoviles"><option value="10">10</option><option value="20">20</option><option value="50">50</option></select><span>por página</span></div>
+      <span id="resumenPaginacionAccesos" class="paginacion-resumen"></span>
+      <nav id="botonesPaginacionAccesos" aria-label="Paginación de accesos móviles"></nav>
+    </footer>
   </article>
 
   <article class="admin-movil-panel">
