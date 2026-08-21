@@ -160,7 +160,7 @@ async function crearAcceso() {
 
 async function ingresar() {
   if (!accesoDesdeCelular || cargando) return;
-  const correo = valor("correoMovil");
+  const correo = valor("correoMovil").toLowerCase();
   const password = valor("passwordMovil");
   if (!correo || !password) return mensajeLogin("Ingresa correo y contraseña.");
   cargando = true;
@@ -168,13 +168,20 @@ async function ingresar() {
   mensajeLogin("");
   estadoBotonAcceso("ingresarMovil", true, "Ingresando…");
   estadoBotonAcceso("crearAccesoMovil", true);
+  let autenticacionCompletada = false;
   try {
     await setPersistence(auth, browserSessionPersistence);
     const credencial = await signInWithEmailAndPassword(auth, correo, password);
+    autenticacionCompletada = true;
     estadoBotonAcceso("ingresarMovil", true, "Cargando portal…");
     await cargarPortal(credencial.user);
   } catch (error) {
-    mensajeLogin("No se pudo ingresar. Revisa tus credenciales.");
+    console.error("Error de ingreso móvil:", error);
+    mensajeLogin(
+      autenticacionCompletada
+        ? limpiarError(error)
+        : mensajeErrorAutenticacion(error),
+    );
     if (auth.currentUser) await signOut(auth);
   } finally {
     iniciandoSesion = false;
@@ -186,8 +193,11 @@ async function ingresar() {
 
 async function buscarAcceso(correo) {
   const resultado = await getDocs(
-    query(collection(db, "accesosMoviles"), where("correo", "==", correo), limit(1)),
+    query(collection(db, "accesosMoviles"), where("correo", "==", correo), limit(2)),
   );
+  if (resultado.size > 1) {
+    throw new Error("Este correo está asignado a más de un acceso móvil. La empresa debe corregir el correo duplicado antes de continuar.");
+  }
   return resultado.empty
     ? null
     : { id: resultado.docs[0].id, ...resultado.docs[0].data() };
@@ -1116,6 +1126,20 @@ function limpiarError(error) {
   return mensaje
     .replace(/^FirebaseError:\s*/, "")
     .replace(/Firebase:\s*/, "");
+}
+function mensajeErrorAutenticacion(error) {
+  const codigo = String(error?.code || "").toLowerCase();
+  if (["auth/invalid-credential", "auth/wrong-password"].includes(codigo)) {
+    return "La contraseña es incorrecta. Usa Restablecer contraseña o solicita un nuevo enlace al administrador.";
+  }
+  if (codigo === "auth/user-not-found") {
+    return "Este correo todavía no tiene una contraseña creada. Pulsa Crear contraseña.";
+  }
+  if (codigo === "auth/invalid-email") return "El correo electrónico no es válido.";
+  if (codigo === "auth/user-disabled") return "Esta cuenta móvil está deshabilitada en Firebase Authentication.";
+  if (codigo === "auth/too-many-requests") return "Se realizaron demasiados intentos. Espera unos minutos o restablece la contraseña.";
+  if (codigo === "auth/network-request-failed") return "No se pudo conectar con Firebase. Revisa tu conexión a internet.";
+  return limpiarError(error);
 }
 function aviso(titulo, texto, icono) {
   return Swal.fire({
