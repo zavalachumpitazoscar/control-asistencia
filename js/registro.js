@@ -4,18 +4,29 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
+import {doc,runTransaction,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 import {
-    auth
+    auth,
+    db
 }
 from "./firebase-config.js";
 
-const funciones=getFunctions(undefined,"us-central1");
-const registrarEmpresaSegura=httpsCallable(funciones,"registrarEmpresaSegura");
 async function registrarEmpresaSpark(datos) {
-    const respuesta=await registrarEmpresaSegura(datos);
-    return respuesta.data;
+    const correo=String(datos.correo||"").trim().toLowerCase();
+    const ruc=String(datos.ruc||"").replace(/\D/g,"");
+    const uid=auth.currentUser?.uid;
+    if(!uid)throw Object.assign(new Error("No se pudo validar la nueva cuenta."),{code:"registro/sin-sesion"});
+    await runTransaction(db,async tx=>{
+        const refRuc=doc(db,"indicesRuc",ruc),refCorreo=doc(db,"indicesCorreo",correo);
+        const [rucSnap,correoSnap]=await Promise.all([tx.get(refRuc),tx.get(refCorreo)]);
+        if(rucSnap.exists())throw Object.assign(new Error("Este RUC ya se encuentra registrado."),{code:"registro/ruc-duplicado"});
+        if(correoSnap.exists())throw Object.assign(new Error("Este correo ya está siendo utilizado."),{code:"registro/correo-duplicado"});
+        tx.set(refRuc,{valor:ruc,empresaId:datos.empresaId,tipo:"EMPRESA",uid,creadoEn:serverTimestamp()});
+        tx.set(refCorreo,{valor:correo,empresaId:datos.empresaId,tipo:"ADMINISTRADOR_PRINCIPAL",uid,creadoEn:serverTimestamp()});
+        tx.set(doc(db,"companias",datos.empresaId),{empresaId:datos.empresaId,estado:"PENDIENTE",fechaRegistro:serverTimestamp(),fechaSolicitud:serverTimestamp(),empresa:{ruc,razonSocial:datos.razonSocial,giro:datos.giro},ubicacion:datos.ubicacion,representantes:datos.representantes,configuracion:{zonaHoraria:"America/Lima",idioma:"es",moneda:"PEN"},plan:{nombre:"BASICO",maxUsuarios:5,maxEmpleados:25,maxSucursales:1,maxAreas:10,maxSubareas:30}});
+        tx.set(doc(db,"usuarios",uid),{uid,empresaId:datos.empresaId,principal:true,nombre:datos.nombre,correo,rol:"ADMINISTRADOR",estado:"PENDIENTE",fechaRegistro:serverTimestamp()});
+    });
 }
 
 
@@ -136,7 +147,7 @@ Creando empresa...
 
                 document
                     .getElementById("correo")
-                    .value.trim();
+                    .value.trim().toLowerCase();
 
             const password=
 
@@ -194,7 +205,7 @@ Creando empresa...
 
                 setTimeout(()=>{
 
-                window.location="index.html";
+                window.location="index.html?registro=pendiente";
 
 },3000);
 
@@ -293,6 +304,14 @@ Creando empresa...
                 case "functions/not-found":
 
                     mostrarToast("error", "La función segura de registro todavía no está desplegada en Firebase.");
+
+                    break;
+
+                case "permission-denied":
+
+                case "firestore/permission-denied":
+
+                    mostrarToast("error", "Las reglas de registro gratuito todavía no están publicadas en Firestore.");
 
                     break;
 
