@@ -4,30 +4,18 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-import {collection,doc,getDocs,limit,query,runTransaction,serverTimestamp,where} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 
 import {
-    auth,
-    db
+    auth
 }
 from "./firebase-config.js";
 
+const funciones=getFunctions(undefined,"us-central1");
+const registrarEmpresaSegura=httpsCallable(funciones,"registrarEmpresaSegura");
 async function registrarEmpresaSpark(datos) {
-    const correo = String(datos.correo || "").trim().toLowerCase();
-    const ruc = String(datos.ruc || "").replace(/\D/g, "");
-    const duplicada = await getDocs(query(collection(db, "companias"), where("empresa.ruc", "==", ruc), limit(1)));
-    if (!duplicada.empty) throw Object.assign(new Error("Este RUC ya se encuentra registrado."), { code: "registro/ruc-duplicado" });
-    const uid = auth.currentUser.uid;
-    await runTransaction(db, async tx => {
-        const refRuc = doc(db, "indicesRuc", ruc), refCorreo = doc(db, "indicesCorreo", correo);
-        const [rucSnap, correoSnap] = await Promise.all([tx.get(refRuc), tx.get(refCorreo)]);
-        if (rucSnap.exists()) throw Object.assign(new Error("Este RUC ya se encuentra registrado."), { code: "registro/ruc-duplicado" });
-        if (correoSnap.exists()) throw Object.assign(new Error("Este correo ya está siendo utilizado."), { code: "registro/correo-duplicado" });
-        tx.set(refRuc, { valor:ruc, empresaId:datos.empresaId, tipo:"EMPRESA", uid, creadoEn:serverTimestamp() });
-        tx.set(refCorreo, { valor:correo, empresaId:datos.empresaId, tipo:"ADMINISTRADOR_PRINCIPAL", uid, creadoEn:serverTimestamp() });
-        tx.set(doc(db,"companias",datos.empresaId), { empresaId:datos.empresaId, estado:"PENDIENTE", fechaRegistro:serverTimestamp(), fechaSolicitud:serverTimestamp(), empresa:{ruc,razonSocial:datos.razonSocial,giro:datos.giro}, ubicacion:datos.ubicacion, representantes:datos.representantes, configuracion:{zonaHoraria:"America/Lima",idioma:"es",moneda:"PEN"}, plan:{nombre:"BASICO",maxUsuarios:5,maxEmpleados:25,maxSucursales:1,maxAreas:10,maxSubareas:30} });
-        tx.set(doc(db,"usuarios",uid), { uid, empresaId:datos.empresaId, principal:true, nombre:datos.nombre, correo, rol:"ADMINISTRADOR", estado:"PENDIENTE", fechaRegistro:serverTimestamp() });
-    });
+    const respuesta=await registrarEmpresaSegura(datos);
+    return respuesta.data;
 }
 
 
@@ -284,13 +272,37 @@ Creando empresa...
 
                     break;
 
+                case "functions/already-exists":
+
+                    mostrarToast("error", error.message || "El RUC o correo ya está registrado.");
+
+                    break;
+
+                case "functions/permission-denied":
+
+                    mostrarToast("error", "La cuenta creada no coincide con el correo del registro. Vuelve a intentarlo.");
+
+                    break;
+
+                case "functions/unauthenticated":
+
+                    mostrarToast("error", "No se pudo validar la nueva cuenta. Vuelve a iniciar el registro.");
+
+                    break;
+
+                case "functions/not-found":
+
+                    mostrarToast("error", "La función segura de registro todavía no está desplegada en Firebase.");
+
+                    break;
+
                 default:
 
                     mostrarToast(
 
                         "error",
 
-                        error.message
+                        error.message === "internal" ? "El servidor no pudo completar el registro. Verifica el despliegue de la función segura." : error.message
 
                     );
 
