@@ -1,5 +1,5 @@
-import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { signInWithEmailAndPassword, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
 
 const form = document.getElementById("loginForm");
@@ -8,9 +8,46 @@ const toast = document.getElementById("toast");
 const correoInput = document.getElementById("correo");
 const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
+const modalCambioPassword = document.getElementById("modalCambioObligatorioPassword");
+const formCambioPassword = document.getElementById("formCambioObligatorioPassword");
 const SUPERADMIN_UID = "q9H2AzN2eIODDioC7auy92MpcHf2";
 let ingresando = false;
 let toastTimer;
+
+modalCambioPassword.addEventListener("cancel", event => event.preventDefault());
+function solicitarCambioObligatorio(user) {
+  return new Promise((resolve, reject) => {
+    const nueva = document.getElementById("passwordObligatoriaNueva");
+    const confirmar = document.getElementById("passwordObligatoriaConfirmar");
+    const boton = document.getElementById("guardarPasswordObligatoria");
+    nueva.value = "";
+    confirmar.value = "";
+    modalCambioPassword.showModal();
+    formCambioPassword.onsubmit = async event => {
+      event.preventDefault();
+      const regla = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.!@#$%_-]).{10,128}$/;
+      if (!regla.test(nueva.value)) return mostrarToast("error", "La nueva contraseña no cumple los requisitos de seguridad.");
+      if (nueva.value !== confirmar.value) return mostrarToast("error", "Las contraseñas no coinciden.");
+      try {
+        boton.disabled = true;
+        boton.textContent = "Protegiendo cuenta…";
+        await updatePassword(user, nueva.value);
+        await updateDoc(doc(db, "usuarios", user.uid), {requiereCambioPassword:false,passwordCambiadoEn:serverTimestamp(),passwordTemporalAsignadoEn:null,passwordTemporalAsignadoPor:null});
+        modalCambioPassword.close();
+        mostrarToast("exito", "Tu nueva contraseña quedó guardada.");
+        resolve();
+      } catch (error) {
+        mostrarToast("error", "No se pudo guardar la contraseña. Vuelve a iniciar sesión.");
+        await signOut(auth);
+        modalCambioPassword.close();
+        reject(error);
+      } finally {
+        boton.disabled = false;
+        boton.textContent = "Guardar y continuar";
+      }
+    };
+  });
+}
 
 function mostrarToast(tipo, mensaje) {
   clearTimeout(toastTimer);
@@ -81,6 +118,8 @@ form.addEventListener("submit", async (event) => {
       return;
     }
 
+    if (usuario.requiereCambioPassword === true) await solicitarCambioObligatorio(credencial.user);
+
     sessionStorage.setItem("empresaId", usuario.empresaId);
     sessionStorage.setItem("uid", usuario.uid || uid);
     sessionStorage.setItem("rol", usuario.rol);
@@ -105,4 +144,5 @@ form.addEventListener("submit", async (event) => {
     ocultarCarga();
   }
 });
+
 
