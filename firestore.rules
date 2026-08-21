@@ -86,7 +86,10 @@ service cloud.firestore {
     }
 
     match /solicitudesDispositivoMovil/{id} {
-      allow read: if administraEmpresa(resource.data.empresaId)
+      allow get: if (autenticado() && id.matches('^' + request.auth.uid + '_.*$'))
+        || administraEmpresa(resource.data.empresaId)
+        || (autenticado() && resource.data.usuarioId == request.auth.uid);
+      allow list: if administraEmpresa(resource.data.empresaId)
         || (autenticado() && resource.data.usuarioId == request.auth.uid);
       allow create: if autenticado()
         && request.resource.data.usuarioId == request.auth.uid
@@ -206,7 +209,8 @@ service cloud.firestore {
 
     match /auditoriaSuperadmin/{id} {
       allow read, create: if esSuperadmin();
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if esSuperadmin();
     }
 
     // Comunicados: los administradores gestionan; cada móvil solo lee los de su empresa.
@@ -223,16 +227,21 @@ service cloud.firestore {
     match /auditoriaSistema/{id} {
       allow read: if administraEmpresa(resource.data.empresaId);
       allow create: if administraEmpresa(request.resource.data.empresaId);
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if esSuperadmin();
     }
 
     match /historialOperacionesAsistencia/{id} {
       allow read: if administraEmpresa(resource.data.empresaId);
       allow create: if administraEmpresa(request.resource.data.empresaId);
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if esSuperadmin();
     }
 
-    match /mail/{id} { allow read, write: if false; }
+    match /mail/{id} {
+      allow read, delete: if esSuperadmin();
+      allow create, update: if false;
+    }
     match /desafiosMoviles/{id} { allow read, write: if false; }
 
     match /{coleccion}/{id} {
@@ -244,4 +253,3 @@ service cloud.firestore {
     }
   }
 }
-
