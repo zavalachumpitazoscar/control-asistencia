@@ -711,12 +711,16 @@ function validarFilaColaborador(
     .toUpperCase();
 
 
-    const numeroDocumento =
-    String(
+    const numeroDocumentoOriginal = String(
         fila.NUMERO_DOCUMENTO || ""
-    )
-    .trim()
-    .toUpperCase();
+    ).trim().toUpperCase();
+
+    const normalizacionDocumento = normalizarDocumentoImportado(
+        tipoDocumento,
+        numeroDocumentoOriginal
+    );
+
+    const numeroDocumento = normalizacionDocumento.numero;
 
 
     const nombres =
@@ -986,6 +990,11 @@ function validarFilaColaborador(
 
             numeroDocumento,
 
+            numeroDocumentoOriginal,
+
+            documentoCompletadoConCeros:
+            normalizacionDocumento.completadoConCeros,
+
             nombres,
 
             apellidos,
@@ -1089,7 +1098,9 @@ function mostrarVistaPreviaExcel(
         const observacion =
         fila.valido
         ?
-        "Lista para importar"
+        fila.datos.documentoCompletadoConCeros
+            ? `DNI completado automáticamente: ${fila.datos.numeroDocumentoOriginal} → ${fila.datos.numeroDocumento}`
+            : "Lista para importar"
         :
         fila.errores.join("; ");
 
@@ -1958,6 +1969,25 @@ function normalizarTexto(
     .trim()
     .toUpperCase();
 
+}
+
+function normalizarDocumentoImportado(tipoDocumento, numeroDocumento) {
+    const numero = String(numeroDocumento || "").trim().toUpperCase();
+
+    if (
+        tipoDocumento === "DNI" &&
+        /^\d{7}$/.test(numero)
+    ) {
+        return {
+            numero: numero.padStart(8, "0"),
+            completadoConCeros: true
+        };
+    }
+
+    return {
+        numero,
+        completadoConCeros: false
+    };
 }
 
 
