@@ -13,6 +13,7 @@ import {
     setDoc,
     deleteDoc,
     doc,
+    writeBatch,
     serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
@@ -2307,9 +2308,9 @@ validarConflictosAsignacion(
 );
 
 
-if(
-    conflictos.length > 0
-){
+let reemplazarConflictos = false;
+
+if(conflictos.length > 0){
 
     const primerosConflictos =
     conflictos
@@ -2421,7 +2422,7 @@ if(
     .join("");
 
 
-    await Swal.fire({
+    const decisionReemplazo = await Swal.fire({
 
         icon:"warning",
 
@@ -2430,8 +2431,8 @@ if(
         html:`
 
             <p>
-                No se puede guardar porque existen horarios
-                que se cruzan para el mismo colaborador.
+                Ya existen horarios dentro del periodo seleccionado.
+                Puedes cancelar o reemplazarlos solamente en las fechas afectadas.
             </p>
 
             ${primerosConflictos}
@@ -2449,13 +2450,22 @@ if(
 
         `,
 
+        showCancelButton:true,
+
         confirmButtonText:
-        "Entendido"
+        "Sí, reemplazar horarios",
+
+        cancelButtonText:
+        "Cancelar",
+
+        confirmButtonColor:
+        "#2563eb"
 
     });
 
+    if(!decisionReemplazo.isConfirmed) return;
 
-    return;
+    reemplazarConflictos = true;
 
 }
 
@@ -2474,30 +2484,20 @@ if(
                     `;
 
 
-                    await addDoc(
-
-                        collection(
-                            db,
-                            "asignacionesHorarios"
-                        ),
-
-                        {
-
-                            ...resultado,
-
-                            empresaId,
-
-                            estado:"ACTIVO",
-
-                            fechaRegistro:
-                            serverTimestamp(),
-
-                            fechaModificacion:
-                            serverTimestamp()
-
-                        }
-
-                    );
+                    if(reemplazarConflictos){
+                        await guardarAsignacionReemplazandoConflictos(resultado,conflictos);
+                    }else{
+                        await addDoc(
+                            collection(db,"asignacionesHorarios"),
+                            {
+                                ...resultado,
+                                empresaId,
+                                estado:"ACTIVO",
+                                fechaRegistro:serverTimestamp(),
+                                fechaModificacion:serverTimestamp()
+                            }
+                        );
+                    }
 
 
                     cerrar();
@@ -2509,8 +2509,9 @@ if(
 
                         title:"Asignación registrada",
 
-                        text:
-                        "El horario fue asignado correctamente."
+                        text: reemplazarConflictos
+                            ? "El nuevo horario reemplazó las fechas superpuestas sin modificar el historial anterior."
+                            : "El horario fue asignado correctamente."
 
                     });
 
@@ -2553,6 +2554,67 @@ if(
 
             }
         );
+
+    }
+
+
+
+    async function guardarAsignacionReemplazandoConflictos(resultado,conflictos){
+
+        const referenciaAsignacion = doc(collection(db,"asignacionesHorarios"));
+        const fechaOperacion = serverTimestamp();
+        const operaciones = [{
+            referencia:referenciaAsignacion,
+            datos:{
+                ...resultado,
+                empresaId,
+                estado:"ACTIVO",
+                reemplazoConfirmado:true,
+                cantidadFechasReemplazadas:new Set(conflictos.map(item=>`${item.colaboradorId}_${item.fecha}`)).size,
+                fechaRegistro:fechaOperacion,
+                fechaModificacion:fechaOperacion
+            },
+            merge:false
+        }];
+
+        const programacionNueva = obtenerProgramacionResultado(resultado);
+        const clavesConflicto = new Set(conflictos.map(item=>`${item.colaboradorId}_${item.fecha}`));
+
+        clavesConflicto.forEach(clave=>{
+            const separador = clave.lastIndexOf("_");
+            const colaboradorId = clave.slice(0,separador);
+            const fecha = clave.slice(separador+1);
+            const horarioIds = [...new Set(
+                programacionNueva
+                    .filter(item=>item.fecha===fecha)
+                    .map(item=>item.horarioId)
+                    .filter(Boolean)
+            )];
+            if(!horarioIds.length) return;
+            operaciones.push({
+                referencia:doc(db,"excepcionesHorarios",obtenerIdExcepcion(colaboradorId,fecha)),
+                datos:{
+                    empresaId,
+                    colaboradorId,
+                    fecha,
+                    tipo:"REEMPLAZAR",
+                    horarioIds,
+                    asignacionReemplazoId:referenciaAsignacion.id,
+                    estado:"ACTIVO",
+                    fechaRegistro:serverTimestamp(),
+                    fechaModificacion:serverTimestamp()
+                },
+                merge:true
+            });
+        });
+
+        for(let inicio=0;inicio<operaciones.length;inicio+=450){
+            const lote=writeBatch(db);
+            operaciones.slice(inicio,inicio+450).forEach(operacion=>{
+                lote.set(operacion.referencia,operacion.datos,{merge:operacion.merge});
+            });
+            await lote.commit();
+        }
 
     }
 
@@ -8038,5 +8100,4 @@ function mostrarCamposIncompletos(
     });
 
 }
-
 
