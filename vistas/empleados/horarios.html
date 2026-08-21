@@ -141,22 +141,57 @@
 
             <div
             id="detalleHorarioVacio"
-            class="detalle-horario-vacio">
+            class="detalle-horario-vacio panel-cobertura-horarios">
 
-                <div class="detalle-vacio-icono">
-
-                    <i class="bi bi-calendar-week"></i>
-
+                <div class="cobertura-horarios-cabecera">
+                    <div>
+                        <span class="cobertura-horarios-eyebrow">COBERTURA DEL EQUIPO</span>
+                        <h3>Horarios de colaboradores</h3>
+                        <p>Revisa rápidamente quién tiene horario y asigna uno sin salir de esta vista.</p>
+                    </div>
+                    <button id="btnActualizarCoberturaHorarios" type="button" class="btn-actualizar-cobertura" title="Actualizar listado">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
                 </div>
 
-                <h3>
-                    Selecciona un horario
-                </h3>
+                <div class="cobertura-horarios-resumen">
+                    <button type="button" class="cobertura-resumen-card activo" data-filtro-cobertura="TODOS">
+                        <span>Todos</span>
+                        <strong id="coberturaTotalColaboradores">0</strong>
+                    </button>
+                    <button type="button" class="cobertura-resumen-card con-horario" data-filtro-cobertura="CON_HORARIO">
+                        <span>Con horario</span>
+                        <strong id="coberturaConHorario">0</strong>
+                    </button>
+                    <button type="button" class="cobertura-resumen-card sin-horario" data-filtro-cobertura="SIN_HORARIO">
+                        <span>Sin horario</span>
+                        <strong id="coberturaSinHorario">0</strong>
+                    </button>
+                </div>
 
-                <p>
-                    Aquí podrás visualizar la jornada,
-                    sus reglas y asignaciones.
-                </p>
+                <div class="cobertura-horarios-herramientas">
+                    <label class="buscar-cobertura-horarios">
+                        <i class="bi bi-search"></i>
+                        <input id="buscarCoberturaHorarios" type="search" placeholder="Buscar por nombre o DNI" autocomplete="off">
+                    </label>
+                    <span id="textoFiltroCoberturaHorarios">Mostrando todos</span>
+                </div>
+
+                <div id="listaCoberturaHorarios" class="lista-cobertura-horarios">
+                    <div class="cobertura-cargando">
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        Cargando colaboradores...
+                    </div>
+                </div>
+
+                <div id="paginacionCoberturaHorarios" class="paginacion-cobertura-horarios" hidden>
+                    <span id="infoPaginacionCoberturaHorarios"></span>
+                    <div>
+                        <button id="anteriorCoberturaHorarios" type="button" aria-label="Página anterior"><i class="bi bi-chevron-left"></i></button>
+                        <span id="paginaCoberturaHorarios">1 / 1</span>
+                        <button id="siguienteCoberturaHorarios" type="button" aria-label="Página siguiente"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                </div>
 
             </div>
 
