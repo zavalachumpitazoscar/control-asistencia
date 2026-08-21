@@ -94,7 +94,7 @@ function renderizar() {
                   : "No habilitado";
           const dispositivo = solicitud?.dispositivo || acceso?.dispositivo;
           const modelo = dispositivo
-            ? dispositivo.modelo || modeloDesdeNavegador(dispositivo.navegador) || dispositivo.descripcion
+            ? modeloVisibleDispositivo(dispositivo) || dispositivo.descripcion
             : null;
           const actividad = acceso ? estadoActividad(acceso.actualizadoEn) : null;
           return `
@@ -297,7 +297,7 @@ async function verDispositivo(referencia) {
     (item) => item.colaboradorId === (solicitud?.colaboradorId || referencia),
   );
   const dispositivo = solicitud?.dispositivo || acceso?.dispositivo || {};
-  const modelo = dispositivo.modelo || modeloDesdeNavegador(dispositivo.navegador);
+  const modelo = modeloVisibleDispositivo(dispositivo);
   const estado = solicitud?.estado === "PENDIENTE"
     ? "Pendiente de autorización"
     : acceso?.estado === "AUTORIZADO"
@@ -313,12 +313,12 @@ async function verDispositivo(referencia) {
       <div class="dispositivo-modal-cabecera"><i class="bi bi-phone"></i><span><strong>${html(modelo || dispositivo.descripcion || "Modelo no informado")}</strong><small>${html(estado)}</small></span></div>
       <dl>
         <div><dt>Descripción</dt><dd>${html(dispositivo.descripcion || "No informada")}</dd></div>
-        <div><dt>Modelo</dt><dd>${html(modelo || "El navegador no lo informa")}</dd></div>
+        <div><dt>Modelo detectado</dt><dd>${html(modelo || "El navegador no lo informa")}${dispositivo.modeloTecnico && !String(modelo).includes(dispositivo.modeloTecnico) ? `<small>Código: ${html(dispositivo.modeloTecnico)}</small>` : ""}</dd></div>
         <div><dt>Plataforma</dt><dd>${html(dispositivo.plataforma || "No informada")}</dd></div>
         <div><dt>Pantalla</dt><dd>${html(dispositivo.pantalla || "No informada")}</dd></div>
         <div><dt>Zona horaria</dt><dd>${html(dispositivo.zonaHoraria || "No informada")}</dd></div>
         <div><dt>Idioma</dt><dd>${html(dispositivo.idioma || "No informado")}</dd></div>
-        <div><dt>Memoria / núcleos</dt><dd>${html(dispositivo.memoriaGB ? `${dispositivo.memoriaGB} GB` : "—")} / ${html(dispositivo.nucleos || "—")}</dd></div>
+        <div><dt>RAM aproximada / procesadores lógicos</dt><dd>${html(dispositivo.memoriaGB ? `Hasta ${dispositivo.memoriaGB} GB informados` : "No informada")} / ${html(dispositivo.nucleos || "No informados")}<small>Valores aproximados proporcionados por el navegador; no representan necesariamente la ficha técnica real.</small></dd></div>
         <div><dt>Última actividad</dt><dd>${html(actividad?.texto || "Sin actividad registrada")}</dd></div>
         <div><dt>Solicitado</dt><dd>${html(formatearFechaHora(solicitud?.creadoEn))}</dd></div>
         <div><dt>Autorizado</dt><dd>${html(formatearFechaHora(acceso?.autorizadoEn))}</dd></div>
@@ -338,10 +338,17 @@ function estadoActividad(timestamp) {
 
 function modeloDesdeNavegador(navegador = "") {
   const android = String(navegador).match(/Android[^;]*;\s*([^;)]+?)(?:\s+Build\/[^;)]+)?[;)]/i);
-  if (android?.[1]) return android[1].trim();
+  if (android?.[1] && !/^(K|Android)$/i.test(android[1].trim())) return android[1].trim();
   if (/iPhone/i.test(navegador)) return "Apple iPhone";
   if (/iPad/i.test(navegador)) return "Apple iPad";
   return "";
+}
+
+function modeloVisibleDispositivo(dispositivo = {}) {
+  const informado = String(dispositivo.modelo || "").trim();
+  if (informado && !/^(K|Android|Modelo no informado)$/i.test(informado)) return informado;
+  const detectado = modeloDesdeNavegador(dispositivo.navegador);
+  return detectado || "Modelo no informado por el navegador";
 }
 
 function formatearFechaHora(timestamp) {
@@ -558,3 +565,4 @@ function mensaje(error) {
 function alerta(titulo, texto, icono) {
   return Swal.fire({ title: titulo, text: texto, icon: icono, confirmButtonColor: "#2563eb" });
 }
+
