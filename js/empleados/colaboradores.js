@@ -48,7 +48,7 @@ from "./filtros-colaboradores.js";
 import {
     iniciarAsignacionesHorarios
 }
-from "./horarios-asignaciones.js?v=20260822-1";
+from "./horarios-asignaciones.js?v=20260822-2";
 
 import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260819-1";
 
@@ -3455,4 +3455,3 @@ iniciarEliminacionMasiva({
     
     
 }
-
