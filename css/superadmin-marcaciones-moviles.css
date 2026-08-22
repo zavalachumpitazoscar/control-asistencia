@@ -22,3 +22,17 @@
   #modalHistorialMarcacionesMovilSuper .mobile-history-map{min-height:400px}
   #modalHistorialMarcacionesMovilSuper .mobile-history-footer{bottom:-14px;margin:10px -14px -14px!important;padding:10px 14px}
 }
+/* En celular el listado siempre aparece antes del mapa y conserva altura propia. */
+@media(max-width:800px){
+  #modalHistorialMarcacionesMovilSuper .mobile-history-layout{display:flex!important;flex:0 0 auto;flex-direction:column;overflow:visible}
+  #modalHistorialMarcacionesMovilSuper .mobile-history-list{display:block;min-height:190px;max-height:330px;flex:0 0 auto;overflow-y:auto;overscroll-behavior:contain}
+  #modalHistorialMarcacionesMovilSuper .mobile-history-map{display:flex;min-height:430px;flex:0 0 430px}
+  #modalHistorialMarcacionesMovilSuper .mobile-history-form{overflow-y:auto;overscroll-behavior:contain}
+  #modalHistorialMarcacionesMovilSuper .mobile-history-footer{position:static;margin:10px -17px -17px!important}
+}
+
+@media(max-width:480px){
+  #modalHistorialMarcacionesMovilSuper .mobile-history-list{min-height:210px;max-height:350px}
+  #modalHistorialMarcacionesMovilSuper .mobile-history-footer{margin:10px -14px -14px!important}
+}
+
