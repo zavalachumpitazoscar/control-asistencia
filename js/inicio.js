@@ -34,7 +34,7 @@ import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuard
 import { iniciarManual, abrirManual } from "./manual.js?v=20260814-3";
 import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260820-3";
 import { iniciarAnunciosGlobales } from "./anuncios-globales.js?v=20260820-3";
-import { iniciarSeguimientoUsoSistema, cerrarSeguimientoUsoSistema } from "./seguimiento-uso-sistema.js?v=20260822-1";
+import { iniciarSeguimientoUsoSistema, cerrarSeguimientoUsoSistema } from "./seguimiento-uso-sistema.js?v=20260822-2";
 
 aplicarAparienciaGuardada();
 iniciarManual();
