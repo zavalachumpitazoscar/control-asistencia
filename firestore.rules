@@ -185,6 +185,19 @@ service cloud.firestore {
       allow read, update, delete: if administraEmpresa(resource.data.empresaId);
     }
 
+    match /sesionesSistema/{id} {
+      allow read: if esSuperadmin() || administraEmpresa(resource.data.empresaId);
+      allow create: if autenticado()
+        && request.resource.data.usuarioId == request.auth.uid
+        && administraEmpresa(request.resource.data.empresaId);
+      allow update: if autenticado()
+        && resource.data.usuarioId == request.auth.uid
+        && request.resource.data.usuarioId == resource.data.usuarioId
+        && request.resource.data.empresaId == resource.data.empresaId
+        && administraEmpresa(resource.data.empresaId);
+      allow delete: if esSuperadmin();
+    }
+
     match /configuracionSuperadmin/{id} {
       allow read, write: if esSuperadmin();
     }
