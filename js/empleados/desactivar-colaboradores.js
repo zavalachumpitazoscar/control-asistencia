@@ -239,6 +239,9 @@ async function desactivarColaboradores({
                         "INACTIVO",
 
                         fechaModificacion:
+                        serverTimestamp(),
+
+                        fechaDesactivacion:
                         serverTimestamp()
 
                     }
