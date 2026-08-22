@@ -2320,7 +2320,13 @@ validarConflictosAsignacion(
 
 let reemplazarConflictos = false;
 
-if(conflictos.length > 0){
+const fechasVaciasOcupadas =
+obtenerFechasVaciasOcupadasParaReemplazo(
+    resultado,
+    resultado.colaboradorIds
+);
+
+if(conflictos.length > 0 || fechasVaciasOcupadas.length > 0){
 
     const primerosConflictos =
     conflictos
@@ -2448,6 +2454,19 @@ if(conflictos.length > 0){
             ${primerosConflictos}
 
             ${
+                fechasVaciasOcupadas.length
+                ?
+                `<div style="text-align:left;margin:12px 0;padding:12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#1e3a8a;">
+                    <strong>Días que quedarán sin horario</strong>
+                    <div style="margin-top:5px;">
+                        Se limpiarán ${fechasVaciasOcupadas.length} fecha(s) que conservaban un horario anterior porque ahora fueron dejadas vacías.
+                    </div>
+                </div>`
+                :
+                ""
+            }
+
+            ${
                 conflictos.length > 5
                 ?
                 `<p>
@@ -2495,7 +2514,7 @@ if(conflictos.length > 0){
 
 
                     if(reemplazarConflictos){
-                        await guardarAsignacionReemplazandoConflictos(resultado,conflictos);
+                        await guardarAsignacionReemplazandoConflictos(resultado,conflictos,fechasVaciasOcupadas);
                     }else{
                         await addDoc(
                             collection(db,"asignacionesHorarios"),
@@ -2520,7 +2539,7 @@ if(conflictos.length > 0){
                         title:"Asignación registrada",
 
                         text: reemplazarConflictos
-                            ? "El nuevo horario reemplazó las fechas superpuestas sin modificar el historial anterior."
+                            ? "El nuevo horario reemplazó el período seleccionado y los días vacíos quedaron sin horario, sin modificar el historial anterior."
                             : "El horario fue asignado correctamente."
 
                     });
@@ -2569,7 +2588,7 @@ if(conflictos.length > 0){
 
 
 
-    async function guardarAsignacionReemplazandoConflictos(resultado,conflictos){
+    async function guardarAsignacionReemplazandoConflictos(resultado,conflictos,fechasVaciasOcupadas=[]){
 
         const referenciaAsignacion = doc(collection(db,"asignacionesHorarios"));
         const fechaOperacion = serverTimestamp();
@@ -2580,7 +2599,11 @@ if(conflictos.length > 0){
                 empresaId,
                 estado:"ACTIVO",
                 reemplazoConfirmado:true,
-                cantidadFechasReemplazadas:new Set(conflictos.map(item=>`${item.colaboradorId}_${item.fecha}`)).size,
+                cantidadFechasReemplazadas:new Set([
+                    ...conflictos.map(item=>`${item.colaboradorId}_${item.fecha}`),
+                    ...fechasVaciasOcupadas.map(item=>`${item.colaboradorId}_${item.fecha}`)
+                ]).size,
+                cantidadFechasSinHorario:fechasVaciasOcupadas.length,
                 fechaRegistro:fechaOperacion,
                 fechaModificacion:fechaOperacion
             },
@@ -2610,6 +2633,25 @@ if(conflictos.length > 0){
                     tipo:"REEMPLAZAR",
                     horarioIds,
                     asignacionReemplazoId:referenciaAsignacion.id,
+                    estado:"ACTIVO",
+                    fechaRegistro:serverTimestamp(),
+                    fechaModificacion:serverTimestamp()
+                },
+                merge:true
+            });
+        });
+
+        fechasVaciasOcupadas.forEach(item=>{
+            operaciones.push({
+                referencia:doc(db,"excepcionesHorarios",obtenerIdExcepcion(item.colaboradorId,item.fecha)),
+                datos:{
+                    empresaId,
+                    colaboradorId:item.colaboradorId,
+                    fecha:item.fecha,
+                    tipo:"SIN_HORARIO",
+                    horarioIds:[],
+                    asignacionReemplazoId:referenciaAsignacion.id,
+                    motivo:"Día vacío incluido en una asignación de reemplazo",
                     estado:"ACTIVO",
                     fechaRegistro:serverTimestamp(),
                     fechaModificacion:serverTimestamp()
@@ -5049,6 +5091,90 @@ function obtenerProgramacionResultado(
 
 
     return resultado;
+
+}
+
+
+function obtenerFechasVaciasOcupadasParaReemplazo(
+    resultado,
+    colaboradorIds
+){
+
+    if(
+        !resultado
+        ||
+        !Array.isArray(colaboradorIds)
+        ||
+        !["SEMANAL","MENSUAL"].includes(resultado.tipoAsignacion)
+        ||
+        !resultado.fechaInicio
+        ||
+        !resultado.fechaFin
+    ){
+
+        return [];
+
+    }
+
+
+    const fechasConHorarioNuevo = new Set(
+        obtenerProgramacionResultado(resultado)
+        .map(item=>item.fecha)
+        .filter(Boolean)
+    );
+
+
+    const fechasVacias = new Set();
+    const cursor = new Date(`${resultado.fechaInicio}T00:00:00`);
+    const limite = new Date(`${resultado.fechaFin}T00:00:00`);
+
+
+    while(cursor <= limite){
+
+        const fecha = [
+            cursor.getFullYear(),
+            String(cursor.getMonth()+1).padStart(2,"0"),
+            String(cursor.getDate()).padStart(2,"0")
+        ].join("-");
+
+
+        if(!fechasConHorarioNuevo.has(fecha)){
+
+            fechasVacias.add(fecha);
+
+        }
+
+
+        cursor.setDate(cursor.getDate()+1);
+
+    }
+
+
+    const resultadoLimpieza = [];
+
+
+    colaboradorIds.forEach(colaboradorId=>{
+
+        const fechasOcupadas = new Set(
+            obtenerProgramacionExistenteColaborador(colaboradorId)
+            .map(item=>item.fecha)
+            .filter(fecha=>fechasVacias.has(fecha))
+        );
+
+
+        fechasOcupadas.forEach(fecha=>{
+
+            resultadoLimpieza.push({
+                colaboradorId,
+                fecha
+            });
+
+        });
+
+    });
+
+
+    return resultadoLimpieza;
 
 }
 
