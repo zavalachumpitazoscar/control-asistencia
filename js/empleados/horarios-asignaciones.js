@@ -1213,7 +1213,7 @@ actualizarContadorColaboradores();
 
         asignarValor(
             "fechaFinAsignacionSemanal",
-            fechaCincoAniosDespues(fechaActual)
+            fechaFinDelAnio(fechaActual)
         );
 
         horarioSemanalSeleccionadoId =
@@ -1283,9 +1283,9 @@ actualizarHorarioSemanalSeleccionado();
 
     function eliminarSemanaSemanal(indice){if(indice<=0||!programacionesSemanales[indice])return;programacionesSemanales.splice(indice,1);cambiarSemanaSemanal(Math.min(indiceSemanaSemanal,programacionesSemanales.length-1));}
 
-    function fechaCincoAniosDespues(fechaISO){
+    function fechaFinDelAnio(fechaISO){
         const fecha=new Date(`${fechaISO}T00:00:00`);
-        fecha.setFullYear(fecha.getFullYear()+5);
+        fecha.setMonth(11,31);
         return formatearFechaISO(fecha);
     }
 
