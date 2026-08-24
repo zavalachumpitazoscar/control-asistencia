@@ -14,7 +14,8 @@ import {
     query,
     where,
     deleteDoc,
-    onSnapshot
+    onSnapshot,
+    serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -500,17 +501,21 @@ await setDoc(
 doc(db,"usuarios",nuevoUsuario.user.uid),
 {
 
+uid:nuevoUsuario.user.uid,
+
 nombre,
 
 correo,
 
 rol,
 
+principal:false,
+
 estado:"ACTIVO",
 
 empresaId,
 
-fechaRegistro:new Date()
+fechaRegistro:serverTimestamp()
 
 });
 
