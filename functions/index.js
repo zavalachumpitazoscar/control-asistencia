@@ -30,17 +30,16 @@ exports.invitarColaboradorMovil=callableAdmin(async({data,admin})=>{
 });
 
 exports.crearUsuarioAdministradorEmpresa=callableAdmin(async({data,admin})=>{
-  const empresaId=texto(data.empresaId),email=texto(data.correo).toLowerCase(),nombreUsuario=texto(data.nombre),rol=texto(data.rol).toUpperCase(),password=texto(data.passwordTemporal);
+  const empresaId=texto(data.empresaId),email=texto(data.correo).toLowerCase(),nombreUsuario=texto(data.nombre),rol=texto(data.rol).toUpperCase(),password=`Ce!${crypto.randomBytes(8).toString("base64url")}9a`;
   if(empresaId!==admin.empresaId)throw new HttpsError("permission-denied","Solo puedes crear usuarios para tu propia empresa.");
   if(!nombreUsuario||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new HttpsError("invalid-argument","Completa un nombre y un correo válidos.");
-  if(!["ADMINISTRADOR","REVISOR"].includes(rol))throw new HttpsError("invalid-argument","Rol de usuario inválido.");
-  if(password.length<6)throw new HttpsError("invalid-argument","La contraseña temporal debe tener al menos 6 caracteres.");
+  if(!["ADMINISTRADOR","REVISOR","SUPERVISOR"].includes(rol))throw new HttpsError("invalid-argument","Rol de usuario inválido.");
   const empresa=await db.doc(`companias/${empresaId}`).get();
   if(!empresa.exists)throw new HttpsError("not-found","La empresa no existe.");
   let usuario;
   try{
     usuario=await getAuth().createUser({email,password,displayName:nombreUsuario,disabled:false});
-    await db.doc(`usuarios/${usuario.uid}`).create({uid:usuario.uid,empresaId,principal:false,nombre:nombreUsuario,correo:email,rol,estado:"ACTIVO",fechaRegistro:FieldValue.serverTimestamp(),creadoPor:admin.uid});
+    await db.doc(`usuarios/${usuario.uid}`).create({uid:usuario.uid,empresaId,principal:false,nombre:nombreUsuario,correo:email,rol,estado:"ACTIVO",requiereCambioPassword:true,fechaRegistro:FieldValue.serverTimestamp(),creadoPor:admin.uid});
     await getAuth().setCustomUserClaims(usuario.uid,{tipo:"CLIENTE_EMPRESA",empresaId,rol});
   }catch(e){
     if(usuario?.uid)try{await getAuth().deleteUser(usuario.uid);}catch(errorRollback){console.error("No se pudo revertir la cuenta",errorRollback);}
@@ -48,7 +47,30 @@ exports.crearUsuarioAdministradorEmpresa=callableAdmin(async({data,admin})=>{
     console.error("No se pudo crear el usuario administrativo",e);
     throw e instanceof HttpsError?e:new HttpsError("internal","No se pudo crear el usuario administrativo.");
   }
-  return {ok:true,uid:usuario.uid,correo:email};
+  return {ok:true,uid:usuario.uid,correo:email,passwordTemporal:password};
+});
+
+exports.gestionarUsuarioEmpresa=callableAdmin(async({data,admin})=>{
+  const uid=texto(data.uid),accion=texto(data.accion).toUpperCase(),estado=texto(data.estado).toUpperCase();
+  if(!uid||uid===admin.uid)throw new HttpsError("permission-denied","No puedes realizar esta acción sobre tu propia cuenta.");
+  const ref=db.doc(`usuarios/${uid}`),snap=await ref.get();
+  if(!snap.exists)throw new HttpsError("not-found","El usuario no existe.");
+  const perfil=snap.data();
+  if(perfil.empresaId!==admin.empresaId)throw new HttpsError("permission-denied","El usuario pertenece a otra empresa.");
+  if(perfil.principal===true)throw new HttpsError("permission-denied","El administrador principal de la empresa no puede modificarse ni eliminarse.");
+  if(accion==="ESTADO"){
+    if(!["ACTIVO","INACTIVO"].includes(estado))throw new HttpsError("invalid-argument","Estado inválido.");
+    await getAuth().updateUser(uid,{disabled:estado!=="ACTIVO"});
+    if(estado!=="ACTIVO")await getAuth().revokeRefreshTokens(uid);
+    await ref.update({estado,actualizadoEn:FieldValue.serverTimestamp(),actualizadoPor:admin.uid});
+    return {ok:true,estado};
+  }
+  if(accion==="ELIMINAR"){
+    await getAuth().deleteUser(uid);
+    await ref.delete();
+    return {ok:true,eliminado:true};
+  }
+  throw new HttpsError("invalid-argument","Acción de usuario inválida.");
 });
 
 exports.solicitarDispositivoMovil=callableMovil(async({data,movil})=>{
