@@ -45,7 +45,7 @@ export function iniciarDashboard() {
   }, opcionesEvento);
   document.getElementById("irDetalleResumenDashboard")?.addEventListener("click", () => { cerrarResumenDashboard(); navegarDashboard(destinoModalDashboard); }, opcionesEvento);
   document.addEventListener("keydown", cerrarModalConEscape, opcionesEvento);
-  cargarDashboard();
+  return cargarDashboard();
 }
 
 async function cargarDashboard() {
