@@ -10,30 +10,45 @@ import {
     updateDoc,
     collection,
     getDocs,
+    setDoc,
+    serverTimestamp,
     query,
     where,
     deleteDoc,
-    onSnapshot
+    onSnapshot,
+    writeBatch
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-import {
-    getFunctions,
-    httpsCallable
+import {createUserWithEmailAndPassword,deleteUser,getAuth,inMemoryPersistence,setPersistence} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {deleteApp,initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
+function generarPasswordTemporal(){
+    const may="ABCDEFGHJKLMNPQRSTUVWXYZ",min="abcdefghijkmnopqrstuvwxyz",num="23456789",sim="!@#$%_-",todos=may+min+num+sim;
+    const elegir=grupo=>grupo[crypto.getRandomValues(new Uint32Array(1))[0]%grupo.length];
+    const partes=[elegir(may),elegir(min),elegir(num),elegir(sim)];
+    while(partes.length<14)partes.push(elegir(todos));
+    for(let i=partes.length-1;i>0;i--){const j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);[partes[i],partes[j]]=[partes[j],partes[i]];}
+    return partes.join("");
 }
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 
-const crearUsuarioAdministradorEmpresa =
-httpsCallable(
-    getFunctions(undefined,"us-central1"),
-    "crearUsuarioAdministradorEmpresa"
-);
-
-const gestionarUsuarioEmpresa =
-httpsCallable(
-    getFunctions(undefined,"us-central1"),
-    "gestionarUsuarioEmpresa"
-);
+async function crearUsuarioSinCambiarSesion({empresaId,nombre,correo,rol}){
+    const passwordTemporal=generarPasswordTemporal();
+    const appSecundaria=initializeApp(auth.app.options,`creador-usuario-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    const authSecundaria=getAuth(appSecundaria);
+    let credencial=null;
+    try{
+        await setPersistence(authSecundaria,inMemoryPersistence);
+        credencial=await createUserWithEmailAndPassword(authSecundaria,correo,passwordTemporal);
+        await setDoc(doc(db,"usuarios",credencial.user.uid),{uid:credencial.user.uid,empresaId,principal:false,nombre,correo,rol,estado:"ACTIVO",requiereCambioPassword:true,fechaRegistro:serverTimestamp(),creadoPor:auth.currentUser.uid});
+        return {correo,passwordTemporal};
+    }catch(error){
+        if(credencial?.user)try{await deleteUser(credencial.user);}catch(errorReversion){console.error("No se pudo revertir la cuenta incompleta:",errorReversion);}
+        throw error;
+    }finally{
+        await deleteApp(appSecundaria);
+    }
+}
 
 
 export async function iniciarInformacion(){
@@ -449,8 +464,7 @@ if(!nombre||!correo){
 try{
     botonGuardar.disabled=true;
     botonGuardar.textContent="Creando usuario…";
-    const respuesta=await crearUsuarioAdministradorEmpresa({empresaId,nombre,correo,rol});
-    const credenciales=respuesta.data;
+    const credenciales=await crearUsuarioSinCambiarSesion({empresaId,nombre,correo,rol});
     modalAcceso.style.display="none";
     await Swal.fire({
         icon:"success",
@@ -472,8 +486,8 @@ try{
     });
 }catch(error){
     console.error("No se pudo crear el usuario administrativo:",error);
-    const sinConexion=/internal|cors|failed to fetch|network/i.test(String(error?.code||"")+" "+String(error?.message||error));
-    await Swal.fire({icon:"error",title:"No se pudo crear el usuario",text:sinConexion?"La función segura todavía no está disponible. Despliega las funciones de Firebase y vuelve a intentarlo.":error?.message||"Ocurrió un error inesperado.",confirmButtonColor:"#dc2626"});
+    const mensajes={"auth/email-already-in-use":"Este correo ya pertenece a una cuenta existente.","permission-denied":"Las reglas de Firestore todavía no permiten crear usuarios secundarios. Copia y publica el bloque de reglas entregado junto con esta actualización."};
+    await Swal.fire({icon:"error",title:"No se pudo crear el usuario",text:mensajes[error?.code]||error?.message||"Ocurrió un error inesperado.",confirmButtonColor:"#dc2626"});
 }finally{
     botonGuardar.disabled=false;
     botonGuardar.textContent="Guardar";
@@ -654,7 +668,7 @@ document
         try{
 
 
-            await gestionarUsuarioEmpresa({uid,accion:"ESTADO",estado:nuevoEstado});
+            await updateDoc(doc(db,"usuarios",uid),{estado:nuevoEstado,actualizadoEn:serverTimestamp(),actualizadoPor:auth.currentUser.uid});
 
 
             await Swal.fire({
@@ -727,8 +741,15 @@ document.querySelectorAll(".btnEliminarUsuario").forEach(boton=>{
         if(!resultado.isConfirmed)return;
         try{
             boton.disabled=true;
-            await gestionarUsuarioEmpresa({uid,accion:"ELIMINAR"});
-            await Swal.fire({icon:"success",title:"Usuario eliminado",text:"La cuenta y su acceso fueron eliminados correctamente.",confirmButtonColor:"#2563eb"});
+            const solicitudRef=doc(db,"solicitudesEliminacionAuth",uid);
+            const usuarioSnap=await getDoc(doc(db,"usuarios",uid));
+            if(!usuarioSnap.exists())throw new Error("El perfil ya no existe.");
+            const perfilEliminado=usuarioSnap.data();
+            const lote=writeBatch(db);
+            lote.set(solicitudRef,{empresaId,usuarioUid:uid,correo:perfilEliminado.correo||"",nombre:perfilEliminado.nombre||nombreUsuario,rol:perfilEliminado.rol||"",estado:"PENDIENTE",solicitadoPor:auth.currentUser.uid,fechaSolicitud:serverTimestamp()});
+            lote.delete(doc(db,"usuarios",uid));
+            await lote.commit();
+            await Swal.fire({icon:"success",title:"Acceso eliminado",text:"El perfil fue eliminado y esta cuenta ya no podrá ingresar al sistema.",confirmButtonColor:"#2563eb"});
         }catch(error){
             console.error("No se pudo eliminar el usuario:",error);
             await Swal.fire({icon:"error",title:"No se pudo eliminar",text:error?.message||"Ocurrió un error inesperado.",confirmButtonColor:"#dc2626"});
