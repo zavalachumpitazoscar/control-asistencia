@@ -4037,6 +4037,12 @@
     isolation:isolate;
 }
 
+/* El desplazamiento debe pertenecer únicamente al contenedor exterior.
+   Evita la doble barra que impedía sincronizar la columna Acciones. */
+.tabla-wrapper > .tabla-colaboradores{
+    overflow:visible !important;
+}
+
 .tabla-header .columna-horario,
 .tabla-fila .columna-horario{
     position:relative;
