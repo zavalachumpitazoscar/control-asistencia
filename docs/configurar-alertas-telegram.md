@@ -1,6 +1,8 @@
 # Configurar avisos de eliminaciones por Telegram
 
-Esta automatización revisa cada 10 minutos las solicitudes pendientes de eliminación en Firebase Authentication. Cuando encuentra una solicitud nueva, envía un mensaje privado por Telegram y la marca como notificada para no repetir el aviso.
+Esta automatización revisa cada 10 minutos las solicitudes pendientes de eliminación en Firebase Authentication. Cuando encuentra solicitudes nuevas, envía un mensaje privado con la cantidad total y las marca como notificadas para no repetir el aviso.
+
+Por seguridad, Telegram **no recibe nombres, correos, UID, empresas ni roles**. Los detalles solo se consultan dentro del panel de superadministrador.
 
 La automatización **no elimina usuarios de Authentication**. La eliminación seguirá siendo manual desde Firebase Console.
 
