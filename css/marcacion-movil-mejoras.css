@@ -23,3 +23,31 @@
 .evidencia-marcacion-movil small{color:#64748b;font-size:11px}
 .evidencia-marcacion-movil img{width:100%;max-height:260px;object-fit:contain;border-radius:12px;background:#f8fafc}
 .evidencia-marcacion-movil img[hidden]{display:none}
+
+.ubicacion-movil{border:1px solid #fecaca!important;background:#fff1f2!important;transition:background .2s ease,border-color .2s ease,box-shadow .2s ease}
+.ubicacion-movil>i,.ubicacion-movil strong{color:#dc2626!important}
+.ubicacion-movil small{color:#991b1b!important}
+.ubicacion-movil.gps-listo{border-color:#86efac!important;background:#f0fdf4!important;box-shadow:0 8px 24px rgba(22,163,74,.08)}
+.ubicacion-movil.gps-listo>i,.ubicacion-movil.gps-listo strong{color:#16a34a!important}
+.ubicacion-movil.gps-listo small{color:#166534!important}
+.ubicacion-movil.gps-pendiente{border-color:#fecaca!important;background:#fff1f2!important}
+.marca-historial--interactiva{box-sizing:border-box;width:100%;border:0;border-bottom:1px solid #f1f5f9;background:transparent;text-align:left;font:inherit;cursor:pointer}
+.marca-historial--interactiva:active{background:#f8fafc}
+.marca-historial--interactiva em{display:flex;gap:8px;margin-top:4px;color:#2563eb;font-size:8px;font-style:normal;font-weight:800}
+.marca-historial--interactiva em i{margin-right:2px}
+.marca-historial--interactiva time{display:grid;gap:4px;text-align:right}
+.marca-historial--interactiva time small{color:#2563eb;font-size:7px;font-weight:800}
+.detalle-comprobante-movil{display:grid;gap:12px;text-align:left}
+.comprobante-resumen{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:#eff6ff}
+.comprobante-resumen>i{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:#fff;color:#2563eb;font-size:20px}
+.comprobante-resumen span{display:grid}.comprobante-resumen small{margin-top:3px;color:#64748b}
+.mapa-comprobante-movil{width:100%;height:240px;border:0;border-radius:12px;background:#e2e8f0}
+.enlace-mapa-comprobante{color:#2563eb;font-size:12px;font-weight:800;text-align:center;text-decoration:none}
+.mapa-comprobante-vacio,.dato-comprobante-vacio{margin:0;padding:16px;border-radius:12px;background:#f8fafc;color:#64748b;text-align:center}
+.detalle-comprobante-movil dl{display:grid;gap:0;margin:0;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+.detalle-comprobante-movil dl div{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:9px 11px;border-bottom:1px solid #e2e8f0}
+.detalle-comprobante-movil dl div:last-child{border-bottom:0}
+.detalle-comprobante-movil dt{color:#475569;font-size:11px;font-weight:800}.detalle-comprobante-movil dd{margin:0;color:#0f172a;font-size:11px;overflow-wrap:anywhere}
+.foto-comprobante-movil{width:100%;max-height:360px;object-fit:contain;border-radius:12px;background:#f8fafc}
+.texto-compartir-marcacion{color:#64748b;font-size:13px}
+@media(max-width:480px){.mapa-comprobante-movil{height:210px}.detalle-comprobante-movil dl div{grid-template-columns:90px 1fr}}

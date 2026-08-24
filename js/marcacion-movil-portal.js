@@ -53,6 +53,10 @@ document.querySelector(".botones-marcacion").onclick = (evento) => {
   const boton = evento.target.closest("[data-tipo-marca]");
   if (boton) marcar(boton.dataset.tipoMarca, boton);
 };
+document.getElementById("historialMarcacionesMovil")?.addEventListener("click", (evento) => {
+  const tarjeta = evento.target.closest("[data-marcacion-id]");
+  if (tarjeta) abrirDetalleMarcacion(tarjeta.dataset.marcacionId);
+});
 document.querySelector(".filtros-historial-movil")?.addEventListener("click", (evento) => {
   const boton = evento.target.closest("[data-vista-historial]");
   if (!boton) return;
@@ -346,7 +350,9 @@ async function marcar(tipo, boton) {
       radioPermitidoMetros: validacionZona.radioMetros || null,
       distanciaSucursalMetros: validacionZona.distanciaMetros ?? null,
     };
-    await setDoc(doc(db, "marcaciones", `MOVIL_${acceso.colaboradorId}_${Date.now()}`), {
+    const marcacionId = `MOVIL_${acceso.colaboradorId}_${Date.now()}`;
+    const referenciaMarcacion = doc(db, "marcaciones", marcacionId);
+    const datosMarcacion = {
       empresaId: acceso.empresaId,
       colaboradorId: acceso.colaboradorId,
       dni: acceso.dni || null,
@@ -374,9 +380,17 @@ async function marcar(tipo, boton) {
       fechaHora: serverTimestamp(),
       creadoEn: serverTimestamp(),
       usuarioId: auth.currentUser.uid,
-    });
-    await aviso("Marcación registrada", etiqueta(tipo), "success");
+    };
+    await setDoc(referenciaMarcacion, datosMarcacion);
+    const registradaSnap = await getDoc(referenciaMarcacion);
+    const marcacionRegistrada = {
+      id: marcacionId,
+      ...datosMarcacion,
+      ...(registradaSnap.exists() ? registradaSnap.data() : {}),
+      fechaHoraLocal: new Date(),
+    };
     await pintarPortal();
+    await mostrarConfirmacionMarcacion(marcacionRegistrada);
   } catch (error) {
     aviso("No se pudo marcar", limpiarError(error), "error");
   } finally {
@@ -732,9 +746,173 @@ function pintarHistorial() {
         const gps = marca.ubicacion
           ? ` · GPS ±${Math.round(marca.ubicacion.precisionMetros || 0)} m${direccion ? ` · ${direccion} · © OpenStreetMap` : ""}`
           : "";
-        return `<div class="marca-historial"><i class="bi ${iconoTipo(marca.tipo)}"></i><span><strong>${html(etiqueta(marca.tipo))}</strong><small>${html(fecha)} · ${html(origen)}${html(gps)}</small></span><time>${html(hora)}</time></div>`;
+        return `<button type="button" class="marca-historial marca-historial--interactiva" data-marcacion-id="${html(marca.id)}"><i class="bi ${iconoTipo(marca.tipo)}"></i><span><strong>${html(etiqueta(marca.tipo))}</strong><small>${html(fecha)} · ${html(origen)}${html(gps)}</small><em>${marca.comentario ? '<i class="bi bi-chat-left-text"></i> Comentario' : ""}${marca.foto?.dataUrl ? '<i class="bi bi-camera"></i> Foto' : ""}</em></span><time>${html(hora)}<small>Ver comprobante</small></time></button>`;
       }).join("")
     : `<p>No existen marcaciones ${vistaHistorial === "hoy" ? "para hoy" : vistaHistorial === "fecha" ? `para el ${html(fechaBuscada.split("-").reverse().join("/"))}` : "registradas"}.</p>`;
+}
+
+function establecerEstadoGps(listo) {
+  const tarjeta = document.querySelector(".ubicacion-movil");
+  if (!tarjeta) return;
+  tarjeta.classList.toggle("gps-listo", Boolean(listo));
+  tarjeta.classList.toggle("gps-pendiente", !listo);
+}
+
+async function abrirDetalleMarcacion(id) {
+  const marca = marcacionesPortal.find((item) => item.id === id);
+  if (!marca) return;
+  const ubicacionMarca = marca.ubicacion || {};
+  const latitud = Number(ubicacionMarca.latitud);
+  const longitud = Number(ubicacionMarca.longitud);
+  const tieneGps = Number.isFinite(latitud) && Number.isFinite(longitud);
+  const mapa = tieneGps
+    ? `<iframe class="mapa-comprobante-movil" title="Mapa de la marcación" loading="lazy" src="https://maps.google.com/maps?q=${encodeURIComponent(`${latitud},${longitud}`)}&z=17&output=embed"></iframe>
+       <a class="enlace-mapa-comprobante" href="https://www.google.com/maps?q=${encodeURIComponent(`${latitud},${longitud}`)}" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> Abrir mapa grande</a>`
+    : '<div class="mapa-comprobante-vacio"><i class="bi bi-geo-alt"></i> Esta marcación no tiene coordenadas.</div>';
+  const foto = marca.foto?.dataUrl
+    ? `<img class="foto-comprobante-movil" src="${marca.foto.dataUrl}" alt="Foto adjunta a la marcación">`
+    : '<p class="dato-comprobante-vacio">Sin fotografía adjunta</p>';
+  const resultado = await Swal.fire({
+    title: "Comprobante de marcación",
+    html: `<div class="detalle-comprobante-movil">
+      <div class="comprobante-resumen"><i class="bi ${iconoTipo(marca.tipo)}"></i><span><strong>${html(etiqueta(marca.tipo))}</strong><small>${html(formatearFechaHoraMarca(marca))}</small></span></div>
+      ${mapa}
+      <dl>
+        <div><dt>Dirección</dt><dd>${html(direccionDeMarca(marca) || "No disponible")}</dd></div>
+        <div><dt>Precisión GPS</dt><dd>${tieneGps ? `±${Math.round(ubicacionMarca.precisionMetros || 0)} m` : "No disponible"}</dd></div>
+        <div><dt>Validación</dt><dd>${html(textoValidacionMarca(marca))}</dd></div>
+        <div><dt>Comentario</dt><dd>${html(marca.comentario || "Sin comentario")}</dd></div>
+      </dl>
+      ${foto}
+    </div>`,
+    showCancelButton: true,
+    confirmButtonText: '<i class="bi bi-share"></i> Compartir / PDF',
+    cancelButtonText: "Cerrar",
+    confirmButtonColor: "#2563eb",
+    width: 680,
+  });
+  if (resultado.isConfirmed) await compartirComprobanteMarcacion(marca);
+}
+
+async function mostrarConfirmacionMarcacion(marca) {
+  const resultado = await Swal.fire({
+    icon: "success",
+    title: "Marcación registrada",
+    html: `<p>Tu <strong>${html(etiqueta(marca.tipo))}</strong> fue registrada correctamente.</p><p class="texto-compartir-marcacion">¿Deseas descargar o compartir tu comprobante?</p>`,
+    showCancelButton: true,
+    confirmButtonText: '<i class="bi bi-share"></i> Compartir comprobante',
+    cancelButtonText: "Cerrar",
+    confirmButtonColor: "#16a34a",
+  });
+  if (resultado.isConfirmed) await compartirComprobanteMarcacion(marca);
+}
+
+async function compartirComprobanteMarcacion(marca) {
+  try {
+    const pdf = generarComprobantePdf(marca);
+    const nombre = `comprobante-${String(marca.tipo || "marcacion").toLowerCase()}-${marca.fecha || fechaLocal()}.pdf`;
+    const archivo = new File([pdf.output("blob")], nombre, { type: "application/pdf" });
+    if (navigator.share && navigator.canShare?.({ files: [archivo] })) {
+      await navigator.share({
+        title: "Comprobante de marcación",
+        text: `${etiqueta(marca.tipo)} registrada en Control Empresarial.`,
+        files: [archivo],
+      });
+      return;
+    }
+    pdf.save(nombre);
+    await aviso("Comprobante descargado", "Tu celular no permite compartir archivos directamente desde este navegador. Se descargó el PDF para que puedas enviarlo.", "info");
+  } catch (error) {
+    if (error?.name === "AbortError") return;
+    await aviso("No se pudo generar el comprobante", limpiarError(error), "error");
+  }
+}
+
+function generarComprobantePdf(marca) {
+  const constructorPdf = window.jspdf?.jsPDF;
+  if (!constructorPdf) throw new Error("El generador de PDF todavía no terminó de cargar. Intenta nuevamente.");
+  const pdf = new constructorPdf({ unit: "mm", format: "a4" });
+  const direccion = direccionDeMarca(marca) || "No disponible";
+  const ubicacionMarca = marca.ubicacion || {};
+  const latitud = Number(ubicacionMarca.latitud);
+  const longitud = Number(ubicacionMarca.longitud);
+  let y = 20;
+  pdf.setFillColor(37, 99, 235);
+  pdf.rect(0, 0, 210, 38, "F");
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(18);
+  pdf.text("COMPROBANTE DE MARCACIÓN", 16, 17);
+  pdf.setFontSize(10);
+  pdf.text("Control Empresarial · Registro verificable", 16, 27);
+  pdf.setTextColor(15, 23, 42);
+  y = 51;
+  pdf.setFontSize(15);
+  pdf.text(etiqueta(marca.tipo), 16, y);
+  y += 10;
+  const filas = [
+    ["Colaborador", perfil?.nombre || "Colaborador"],
+    ["Documento", acceso?.dni || marca.dni || "—"],
+    ["Fecha y hora", formatearFechaHoraMarca(marca)],
+    ["Dirección aproximada", direccion],
+    ["Coordenadas", Number.isFinite(latitud) && Number.isFinite(longitud) ? `${latitud.toFixed(6)}, ${longitud.toFixed(6)}` : "No disponible"],
+    ["Precisión GPS", Number.isFinite(Number(ubicacionMarca.precisionMetros)) ? `±${Math.round(ubicacionMarca.precisionMetros)} m` : "No disponible"],
+    ["Validación", textoValidacionMarca(marca)],
+    ["Comentario", marca.comentario || "Sin comentario"],
+    ["Código de registro", marca.id || "—"],
+  ];
+  pdf.setFontSize(10);
+  filas.forEach(([titulo, valor]) => {
+    pdf.setFont(undefined, "bold");
+    pdf.text(`${titulo}:`, 16, y);
+    pdf.setFont(undefined, "normal");
+    const lineas = pdf.splitTextToSize(String(valor), 132);
+    pdf.text(lineas, 58, y);
+    y += Math.max(8, lineas.length * 5);
+  });
+  if (marca.foto?.dataUrl) {
+    if (y > 210) { pdf.addPage(); y = 20; }
+    pdf.setFont(undefined, "bold");
+    pdf.text("Fotografía adjunta:", 16, y);
+    y += 5;
+    const propiedades = pdf.getImageProperties(marca.foto.dataUrl);
+    const anchoMaximo = 150;
+    const altoMaximo = 75;
+    const escala = Math.min(anchoMaximo / propiedades.width, altoMaximo / propiedades.height);
+    pdf.addImage(marca.foto.dataUrl, "JPEG", 16, y, propiedades.width * escala, propiedades.height * escala);
+    y += propiedades.height * escala + 8;
+  }
+  if (y > 270) { pdf.addPage(); y = 20; }
+  pdf.setDrawColor(203, 213, 225);
+  pdf.line(16, y, 194, y);
+  pdf.setFontSize(8);
+  pdf.setTextColor(100, 116, 139);
+  pdf.text("Documento generado desde el historial personal de marcaciones.", 16, y + 7);
+  pdf.text(`Generado: ${new Date().toLocaleString("es-PE")}`, 16, y + 12);
+  return pdf;
+}
+
+function direccionDeMarca(marca) {
+  return marca?.direccion?.direccionCompleta || marca?.ubicacion?.direccion || "";
+}
+
+function textoValidacionMarca(marca) {
+  return marca?.validacionBiometrica
+    ? "Huella, rostro o seguridad del dispositivo"
+    : marca?.metodoValidacion === "MANUAL"
+      ? "Marcación manual autorizada"
+      : "Validación del sistema";
+}
+
+function formatearFechaHoraMarca(marca) {
+  const momento = marca?.fechaHora?.toDate?.() || marca?.fechaHoraLocal || null;
+  if (momento instanceof Date && !Number.isNaN(momento.getTime())) {
+    return momento.toLocaleString("es-PE", {
+      dateStyle: "long",
+      timeStyle: "medium",
+      timeZone: "America/Lima",
+    });
+  }
+  return `${marca?.fecha || "Fecha pendiente"} · hora registrada por el servidor`;
 }
 
 function pintarResumenHorario() {
@@ -947,6 +1125,7 @@ async function obtenerUbicacion() {
   const precision = document.getElementById("precisionUbicacionMovil");
   ubicacion = null;
   detenerUbicacion();
+  establecerEstadoGps(false);
   if (!navigator.geolocation) {
     estado.textContent = "Ubicación no compatible";
     precision.textContent = "Este navegador no permite obtener el GPS.";
@@ -982,9 +1161,11 @@ async function obtenerUbicacion() {
         metros <= 200
           ? `Precisión aproximada: ${metros} m`
           : `Precisión actual: ${metros} m. Espera unos segundos.`;
+      establecerEstadoGps(true);
     },
     (error) => {
       ubicacion = null;
+      establecerEstadoGps(false);
       if (error.code === 1) {
         estado.textContent = "Permiso de ubicación rechazado";
         precision.textContent = "Autoriza la ubicación en la configuración del navegador.";
