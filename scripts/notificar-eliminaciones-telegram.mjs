@@ -28,14 +28,11 @@ async function firebaseLogin(){
 }
 
 async function listPendingRequests(idToken){
-  const requests=[];let pageToken="";
-  do{
-    const url=new URL(`${firestoreBase}/solicitudesEliminacionAuth`);url.searchParams.set("pageSize","100");if(pageToken)url.searchParams.set("pageToken",pageToken);
-    const page=await requestJson(url,{headers:{Authorization:`Bearer ${idToken}`}});
-    for(const document of page.documents||[]){const data=decodeFields(document.fields);if(data.estado==="PENDIENTE"&&!data.telegramNotificadoEn)requests.push(document.name.split("/").pop())}
-    pageToken=page.nextPageToken||"";
-  }while(pageToken);
-  return requests;
+  const result=await requestJson(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`,{
+    method:"POST",headers:{Authorization:`Bearer ${idToken}`,"Content-Type":"application/json"},
+    body:JSON.stringify({structuredQuery:{from:[{collectionId:"solicitudesEliminacionAuth"}],where:{fieldFilter:{field:{fieldPath:"telegramPendiente"},op:"EQUAL",value:{booleanValue:true}}},limit:25}})
+  });
+  return result.filter(row=>row.document).map(row=>row.document.name.split("/").pop());
 }
 
 async function sendTelegram(total){
@@ -45,9 +42,9 @@ async function sendTelegram(total){
 
 async function markAsNotified(idToken,requestId,messageId){
   const url=new URL(`${firestoreBase}/solicitudesEliminacionAuth/${encodeURIComponent(requestId)}`);
-  for(const field of ["telegramNotificadoEn","telegramEstado","telegramMensajeId"])url.searchParams.append("updateMask.fieldPaths",field);
+  for(const field of ["telegramNotificadoEn","telegramEstado","telegramMensajeId","telegramPendiente"])url.searchParams.append("updateMask.fieldPaths",field);
   url.searchParams.set("currentDocument.exists","true");
-  await requestJson(url,{method:"PATCH",headers:{Authorization:`Bearer ${idToken}`,"Content-Type":"application/json"},body:JSON.stringify({fields:{telegramNotificadoEn:{timestampValue:new Date().toISOString()},telegramEstado:{stringValue:"ENVIADO"},telegramMensajeId:{integerValue:String(messageId)}}})});
+  await requestJson(url,{method:"PATCH",headers:{Authorization:`Bearer ${idToken}`,"Content-Type":"application/json"},body:JSON.stringify({fields:{telegramNotificadoEn:{timestampValue:new Date().toISOString()},telegramEstado:{stringValue:"ENVIADO"},telegramMensajeId:{integerValue:String(messageId)},telegramPendiente:{booleanValue:false}}})});
 }
 
 const idToken=await firebaseLogin(),pending=await listPendingRequests(idToken);
