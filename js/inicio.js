@@ -25,7 +25,7 @@ signOut
 from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-import { iniciarCompañia } from "./compañia.js?v=20260824-4";
+import { iniciarCompañia } from "./compañia.js?v=20260824-5";
 import { iniciarEmpleados } from "./empleados.js?v=20260824-3";
 import { iniciarAsistencia } from "./asistencia.js?v=20260824-1";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260818-9";
