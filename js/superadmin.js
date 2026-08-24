@@ -8,8 +8,9 @@ const funciones=getFunctions(undefined,"us-central1");
 const enviarRestablecimiento=httpsCallable(funciones,"enviarRestablecimientoSuperadmin");
 const generarPasswordTemporal=httpsCallable(funciones,"generarPasswordTemporalSuperadmin");
 const PLANES={BASICO:{desde:1,hasta:20,maxEmpleados:20},ESTANDAR:{desde:21,hasta:50,maxEmpleados:50},PREMIUM:{desde:51,hasta:100,maxEmpleados:100},EMPRESARIAL:{desde:101,hasta:null,maxEmpleados:null}};
-const COLECCIONES_EMPRESA=["usuarios","usuariosMoviles","colaboradores","accesosMoviles","solicitudesDispositivoMovil","marcaciones","sesionesSistema","sucursales","areas","subareas","horarios","asignacionesHorarios","excepcionesHorarios","permisos","feriados","descansosSustitutoriosFeriados","regularizacionesAsistencia","cierresAsistencia","aprobacionesHorasExtra","incidenciasAsistencia","cierresDiariosAutomaticos","historialOperacionesAsistencia","auditoriaSistema","anunciosEmpresa","plantillasReportes","pagosSuscripciones","indicesRuc","indicesCorreo","auditoriaSuperadmin","mail"];
+const COLECCIONES_EMPRESA=["usuarios","usuariosMoviles","colaboradores","accesosMoviles","solicitudesDispositivoMovil","solicitudesEliminacionAuth","marcaciones","sesionesSistema","sucursales","areas","subareas","horarios","asignacionesHorarios","excepcionesHorarios","permisos","feriados","descansosSustitutoriosFeriados","regularizacionesAsistencia","cierresAsistencia","aprobacionesHorasExtra","incidenciasAsistencia","cierresDiariosAutomaticos","historialOperacionesAsistencia","auditoriaSistema","anunciosEmpresa","plantillasReportes","pagosSuscripciones","indicesRuc","indicesCorreo","auditoriaSuperadmin","mail"];
 let ultimoComprobanteEliminacion="";
+const estilosPendientesAuth=document.createElement("link");estilosPendientesAuth.rel="stylesheet";estilosPendientesAuth.href="css/superadmin-auth-pendientes.css?v=20260824-1";document.head.appendChild(estilosPendientesAuth);
 function esAdministradorSistema(usuario){const rol=String(usuario?.rol||"").toUpperCase();return usuario?.principal===true||/ADMIN|PROPIET|GERENT/.test(rol)}
 function toast(m,e=false){clearTimeout(timer);const x=$("toastSuper");x.textContent=m;x.className=`toast show${e?" error":""}`;timer=setTimeout(()=>x.classList.remove("show"),4200)}
 onAuthStateChanged(auth,async u=>{const ok=u?.uid===UID&&u.email?.toLowerCase()===EMAIL;$("loginSuper").hidden=ok;$("appSuper").hidden=!ok;if(ok){$("superEmailLabel").textContent=u.email;await cargar()}else if(u)await signOut(auth)});
@@ -51,6 +52,24 @@ $("confirmarEliminarEmpresa").onclick=async e=>{e.preventDefault();const empresa
 function mostrarErrorEliminacion(texto){const progreso=$("progresoEliminarEmpresa");progreso.hidden=false;progreso.className="delete-progress error";progreso.textContent=texto}
 $("descargarComprobanteEliminacion").onclick=()=>{if(!ultimoComprobanteEliminacion)return;const url=URL.createObjectURL(new Blob([ultimoComprobanteEliminacion],{type:"text/plain;charset=utf-8"})),a=document.createElement("a");a.href=url;a.download=`comprobante-eliminacion-${new Date().toISOString().slice(0,10)}.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 function renderMejorado(){render();const e=datos.empresa,c=e.empresa||{};$("datosEmpresa").innerHTML=[["Razón social",c.razonSocial],["RUC",c.ruc],["Giro",c.giro],["Dirección",e.ubicacion?.direccion],["Departamento",e.ubicacion?.departamento],["Provincia",e.ubicacion?.provincia],["Distrito",e.ubicacion?.distrito],["Plan",e.plan?.nombre],["Precio mensual",`S/ ${precioAplicableEmpresa().toFixed(2)}`]].map(([a,b])=>`<div class="data-item"><small>${h(a)}</small><b>${h(b||"—")}</b></div>`).join("")+`<div class="state-help full"><b>Estados:</b> PENDIENTE espera aprobación · ACTIVO permite trabajar normalmente · SUSPENDIDO pausa temporalmente el acceso · BLOQUEADO restringe el acceso por seguridad o incumplimiento.</div>`;renderCapacidad();renderPrecioEmpresa();renderSuscripcion()}
+async function cargarPendientesAuth(){
+  if(!datos)return;
+  const empresaId=datos.empresa.empresaId||datos.empresa.id,contenedor=$("listaPendientesAuth");
+  contenedor.innerHTML='<div class="usage-empty">Consultando pendientes de Authentication…</div>';
+  try{
+    const snap=await getDocs(query(collection(db,"solicitudesEliminacionAuth"),where("empresaId","==",empresaId)));
+    const lista=snap.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>{if(a.estado!==b.estado)return a.estado==="PENDIENTE"?-1:1;return String(b.fechaSolicitud?.seconds||0).localeCompare(String(a.fechaSolicitud?.seconds||0))});
+    contenedor.innerHTML=lista.length?`<div class="auth-pending-list">${lista.map(x=>`<article class="auth-pending-item ${x.estado==="RESUELTO"?"resuelto":""}"><div><b>${h(x.nombre||"Usuario sin nombre")}</b><small>${h(x.correo||"Sin correo")} · ${h(x.rol||"Sin rol")}</small><em>${h(x.estado||"PENDIENTE")}</em></div><div><span>UID de Authentication</span><code>${h(x.usuarioUid||x.id)}</code><small>${x.fechaSolicitud?.toDate?x.fechaSolicitud.toDate().toLocaleString("es-PE"):"Fecha pendiente de sincronizar"}</small></div><div class="auth-pending-actions"><button data-copiar-auth="${h(x.usuarioUid||x.id)}">Copiar UID</button><button data-copiar-auth="${h(x.correo||"")}">Copiar correo</button>${x.estado!=="RESUELTO"?`<button class="resolve" data-resolver-auth="${h(x.id)}">Marcar resuelto</button>`:""}</div></article>`).join("")}</div>`:'<div class="usage-empty">Esta empresa no tiene eliminaciones pendientes en Authentication.</div>';
+  }catch(error){contenedor.innerHTML=`<div class="usage-signal error"><b>No se pudo cargar</b><span>${h(error?.message||"Error inesperado")}</span></div>`;}
+}
+document.addEventListener("click",async evento=>{
+  if(evento.target.closest('[data-tab="auth"]'))setTimeout(cargarPendientesAuth,0);
+  if(evento.target.closest("#recargarPendientesAuth"))cargarPendientesAuth();
+  const copiar=evento.target.closest("[data-copiar-auth]");
+  if(copiar){try{await navigator.clipboard.writeText(copiar.dataset.copiarAuth);toast("Dato copiado.")}catch(_){toast("No se pudo copiar automáticamente.",true)}}
+  const resolver=evento.target.closest("[data-resolver-auth]");
+  if(resolver){try{resolver.disabled=true;await updateDoc(doc(db,"solicitudesEliminacionAuth",resolver.dataset.resolverAuth),{estado:"RESUELTO",resueltoEn:serverTimestamp(),resueltoPor:UID});toast("Pendiente marcado como resuelto.");await cargarPendientesAuth()}catch(error){resolver.disabled=false;toast(error?.message||"No se pudo actualizar.",true)}}
+});
 function mesActualUso(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`}
 function limitesMesUso(mes){const [anio,numero]=String(mes).split("-").map(Number),inicio=`${anio}-${String(numero).padStart(2,"0")}-01`,finDate=new Date(anio,numero,1),fin=`${finDate.getFullYear()}-${String(finDate.getMonth()+1).padStart(2,"0")}-01`;return{inicio,fin}}
 function mesesUso(base,cantidad=6){const [anio,numero]=base.split("-").map(Number);return Array.from({length:cantidad},(_,i)=>{const d=new Date(anio,numero-1-i,1);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`})}
