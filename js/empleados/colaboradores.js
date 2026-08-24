@@ -91,6 +91,49 @@ export function iniciarColaboradores(){
 
 }
 
+    const tablaWrapper = lista.closest(".tabla-wrapper");
+    let frameAccionesFijas = null;
+
+    function actualizarColumnaAccionesFija(){
+        if(!tablaWrapper) return;
+        const desplazamientoMaximo = Math.max(
+            0,
+            tablaWrapper.scrollWidth - tablaWrapper.clientWidth
+        );
+        const compensacion =
+            tablaWrapper.scrollLeft - desplazamientoMaximo;
+
+        tablaWrapper.style.setProperty(
+            "--compensacion-acciones",
+            `${compensacion}px`
+        );
+    }
+
+    function programarColumnaAccionesFija(){
+        if(frameAccionesFijas !== null) return;
+        frameAccionesFijas = requestAnimationFrame(()=>{
+            frameAccionesFijas = null;
+            actualizarColumnaAccionesFija();
+        });
+    }
+
+    tablaWrapper?.addEventListener(
+        "scroll",
+        programarColumnaAccionesFija,
+        { passive:true }
+    );
+
+    if(tablaWrapper && window.ResizeObserver){
+        new ResizeObserver(
+            programarColumnaAccionesFija
+        ).observe(tablaWrapper);
+    }
+
+    requestAnimationFrame(
+        actualizarColumnaAccionesFija
+    );
+
+
     const consultaHorariosColaboradores =
 query(
 
@@ -1725,6 +1768,10 @@ if(seleccionarTodos){
 
 renderizarPaginacion(
     filtrados.length
+);
+
+requestAnimationFrame(
+    actualizarColumnaAccionesFija
 );
 }
 
