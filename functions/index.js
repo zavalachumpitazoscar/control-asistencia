@@ -29,6 +29,28 @@ exports.invitarColaboradorMovil=callableAdmin(async({data,admin})=>{
   return {ok:true,correo};
 });
 
+exports.crearUsuarioAdministradorEmpresa=callableAdmin(async({data,admin})=>{
+  const empresaId=texto(data.empresaId),email=texto(data.correo).toLowerCase(),nombreUsuario=texto(data.nombre),rol=texto(data.rol).toUpperCase(),password=texto(data.passwordTemporal);
+  if(empresaId!==admin.empresaId)throw new HttpsError("permission-denied","Solo puedes crear usuarios para tu propia empresa.");
+  if(!nombreUsuario||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new HttpsError("invalid-argument","Completa un nombre y un correo válidos.");
+  if(!["ADMINISTRADOR","REVISOR"].includes(rol))throw new HttpsError("invalid-argument","Rol de usuario inválido.");
+  if(password.length<6)throw new HttpsError("invalid-argument","La contraseña temporal debe tener al menos 6 caracteres.");
+  const empresa=await db.doc(`companias/${empresaId}`).get();
+  if(!empresa.exists)throw new HttpsError("not-found","La empresa no existe.");
+  let usuario;
+  try{
+    usuario=await getAuth().createUser({email,password,displayName:nombreUsuario,disabled:false});
+    await db.doc(`usuarios/${usuario.uid}`).create({uid:usuario.uid,empresaId,principal:false,nombre:nombreUsuario,correo:email,rol,estado:"ACTIVO",fechaRegistro:FieldValue.serverTimestamp(),creadoPor:admin.uid});
+    await getAuth().setCustomUserClaims(usuario.uid,{tipo:"CLIENTE_EMPRESA",empresaId,rol});
+  }catch(e){
+    if(usuario?.uid)try{await getAuth().deleteUser(usuario.uid);}catch(errorRollback){console.error("No se pudo revertir la cuenta",errorRollback);}
+    if(e?.code==="auth/email-already-exists")throw new HttpsError("already-exists","Este correo ya pertenece a otra cuenta.");
+    console.error("No se pudo crear el usuario administrativo",e);
+    throw e instanceof HttpsError?e:new HttpsError("internal","No se pudo crear el usuario administrativo.");
+  }
+  return {ok:true,uid:usuario.uid,correo:email};
+});
+
 exports.solicitarDispositivoMovil=callableMovil(async({data,movil})=>{
   const dispositivoId=validarDispositivo(data.dispositivoId),id=`${movil.uid}_${dispositivoId}`;
   await db.doc(`solicitudesDispositivoMovil/${id}`).set({empresaId:movil.empresaId,colaboradorId:movil.colaboradorId,usuarioId:movil.uid,dispositivoId,dispositivo:sanitizarDispositivo(data.dispositivo),estado:"PENDIENTE",solicitadoEn:FieldValue.serverTimestamp()},{merge:true});
