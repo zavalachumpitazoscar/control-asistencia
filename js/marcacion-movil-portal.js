@@ -455,16 +455,25 @@ async function comprimirFotoMarcacion(archivo) {
     };
     lector.readAsDataURL(archivo);
   });
-  const limite = 1200;
-  const escala = Math.min(1, limite / Math.max(imagen.naturalWidth, imagen.naturalHeight));
-  const ancho = Math.max(1, Math.round(imagen.naturalWidth * escala));
-  const alto = Math.max(1, Math.round(imagen.naturalHeight * escala));
-  const lienzo = document.createElement("canvas");
-  lienzo.width = ancho;
-  lienzo.height = alto;
-  lienzo.getContext("2d").drawImage(imagen, 0, 0, ancho, alto);
-  const dataUrl = lienzo.toDataURL("image/jpeg", 0.7);
-  if (dataUrl.length > 700000) {
+  let limite = 960;
+  let calidad = 0.68;
+  let dataUrl = "";
+  let ancho = 0;
+  let alto = 0;
+  for (let intento = 0; intento < 3; intento += 1) {
+    const escala = Math.min(1, limite / Math.max(imagen.naturalWidth, imagen.naturalHeight));
+    ancho = Math.max(1, Math.round(imagen.naturalWidth * escala));
+    alto = Math.max(1, Math.round(imagen.naturalHeight * escala));
+    const lienzo = document.createElement("canvas");
+    lienzo.width = ancho;
+    lienzo.height = alto;
+    lienzo.getContext("2d").drawImage(imagen, 0, 0, ancho, alto);
+    dataUrl = lienzo.toDataURL("image/jpeg", calidad);
+    if (dataUrl.length <= 240000) break;
+    limite = Math.round(limite * 0.78);
+    calidad = Math.max(0.48, calidad - 0.09);
+  }
+  if (dataUrl.length > 320000) {
     throw new Error("La foto sigue siendo demasiado pesada. Selecciona una imagen más pequeña.");
   }
   return {
