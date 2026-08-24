@@ -1,4 +1,4 @@
-import { iniciarInformacion } from "./compañia/informacion.js?v=20260824-2";
+import { iniciarInformacion } from "./compañia/informacion.js?v=20260824-3";
 import { iniciarSucursales } from "./compañia/sucursales.js?v=20260817-1";
 import { iniciarAreas } from "./compañia/areas.js?v=20260817-1";
 import { iniciarSubareas } from "./compañia/subareas.js?v=20260817-1";
