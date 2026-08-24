@@ -1,0 +1,32 @@
+name: Avisar eliminaciones pendientes por Telegram
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: telegram-eliminaciones-auth
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Consultar pendientes y avisar por Telegram
+        env:
+          FIREBASE_PROJECT_ID: control-asistencia-958aa
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_SUPERADMIN_EMAIL: ${{ secrets.FIREBASE_SUPERADMIN_EMAIL }}
+          FIREBASE_SUPERADMIN_PASSWORD: ${{ secrets.FIREBASE_SUPERADMIN_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SUPERADMIN_URL: https://zavalachumpitazoscar.github.io/control-asistencia/superadmin.html
+        run: node scripts/notificar-eliminaciones-telegram.mjs
