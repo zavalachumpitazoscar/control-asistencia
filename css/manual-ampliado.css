@@ -1,5 +1,7 @@
 .manual-acciones-cabecera{display:flex;align-items:center;gap:8px}
-.manual-acciones-cabecera #descargarManualPdf{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid rgba(255,255,255,.28);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-weight:800;cursor:pointer}
+.manual-acciones-cabecera #descargarManualPdf{display:flex;align-items:center;gap:7px;width:auto;height:auto;min-height:36px;padding:9px 12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#1d4ed8;font-weight:800;cursor:pointer;white-space:nowrap}
+.manual-acciones-cabecera #descargarManualPdf span{color:#1d4ed8;font-size:9px;letter-spacing:0}
+.manual-acciones-cabecera #cerrarManualSistema{flex:0 0 36px;width:36px;height:36px}
 .manual-acciones-cabecera #descargarManualPdf:disabled{cursor:wait;opacity:.7}
 .manual-herramientas>span{padding:5px 9px;border-radius:999px;background:#eff6ff;color:#2563eb;font-size:9px;font-weight:900;white-space:nowrap}
 .manual-layout nav button span{display:grid;gap:2px;text-align:left}

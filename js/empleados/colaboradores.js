@@ -92,6 +92,8 @@ export function iniciarColaboradores(){
 }
 
     const tablaWrapper = lista.closest(".tabla-wrapper");
+    const accionesFijas = document.getElementById("accionesFijasColaboradores");
+    let paginaVisibleAcciones = [];
     let frameAccionesFijas = null;
 
     function actualizarColumnaAccionesFija(){
@@ -124,14 +126,34 @@ export function iniciarColaboradores(){
     );
 
     if(tablaWrapper && window.ResizeObserver){
-        new ResizeObserver(
-            programarColumnaAccionesFija
-        ).observe(tablaWrapper);
+        new ResizeObserver(()=>{
+            programarColumnaAccionesFija();
+            requestAnimationFrame(()=>renderizarAccionesPermanentes(paginaVisibleAcciones));
+        }).observe(tablaWrapper);
     }
 
     requestAnimationFrame(
         actualizarColumnaAccionesFija
     );
+
+    accionesFijas?.addEventListener("click", async(evento)=>{
+        const boton = evento.target.closest(".btn-editar-colaborador");
+        if(!boton) return;
+        await abrirModalEditarColaborador(boton.dataset.id);
+    });
+
+    function renderizarAccionesPermanentes(registros){
+        if(!accionesFijas) return;
+        paginaVisibleAcciones = registros;
+        const cabecera = tablaWrapper?.querySelector(".tabla-header");
+        const filas = [...lista.querySelectorAll(".tabla-fila")];
+        const altoCabecera = Math.max(48, Math.ceil(cabecera?.getBoundingClientRect().height || 0));
+        accionesFijas.innerHTML = `<div class="acciones-fijas-cabecera" style="height:${altoCabecera}px">Acciones</div><div class="acciones-fijas-cuerpo">${registros.map((colaborador,indice)=>{
+            const alto = Math.max(58, Math.ceil(filas[indice]?.getBoundingClientRect().height || 0));
+            return `<div class="acciones-fijas-fila" style="height:${alto}px"><button class="btn-editar-colaborador" data-id="${colaborador.id}" aria-label="Editar colaborador"><i class="bi bi-pencil"></i></button></div>`;
+        }).join("")}</div>`;
+        accionesFijas.hidden = registros.length === 0;
+    }
 
 
     const consultaHorariosColaboradores =
@@ -1552,6 +1574,7 @@ fin
 
             `;
 
+            renderizarAccionesPermanentes([]);
             renderizarPaginacion(0);
             return;
 
@@ -1719,6 +1742,8 @@ col.subarea ||
             </div>
             `;
         });
+
+renderizarAccionesPermanentes(pagina);
 
 activarChecks();
 
