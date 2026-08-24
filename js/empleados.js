@@ -54,7 +54,7 @@ botones.forEach(boton=>{
     Cargar la pestaña solicitada.
 */
 
-cargarTab(
+return cargarTab(
     tabInicial
 );
 }
