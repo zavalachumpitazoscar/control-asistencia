@@ -472,7 +472,8 @@ try{
     });
 }catch(error){
     console.error("No se pudo crear el usuario administrativo:",error);
-    await Swal.fire({icon:"error",title:"No se pudo crear el usuario",text:error?.message||"Ocurrió un error inesperado.",confirmButtonColor:"#dc2626"});
+    const sinConexion=/internal|cors|failed to fetch|network/i.test(String(error?.code||"")+" "+String(error?.message||error));
+    await Swal.fire({icon:"error",title:"No se pudo crear el usuario",text:sinConexion?"La función segura todavía no está disponible. Despliega las funciones de Firebase y vuelve a intentarlo.":error?.message||"Ocurrió un error inesperado.",confirmButtonColor:"#dc2626"});
 }finally{
     botonGuardar.disabled=false;
     botonGuardar.textContent="Guardar";
@@ -560,7 +561,7 @@ onSnapshot(
                         data-estado="${datosUsuario.estado}">
                         ${datosUsuario.estado === "ACTIVO" ? "Desactivar" : "Activar"}
                     </button>
-                    <button class="btnEliminarUsuario" data-id="${usuario.id}" data-nombre="${datosUsuario.nombre||datosUsuario.correo||"Usuario"}">Eliminar</button>
+                    <button class="btnEliminarUsuario" data-id="${usuario.id}" data-nombre="${datosUsuario.nombre||datosUsuario.correo||"Usuario"}" aria-label="Eliminar usuario" title="Eliminar usuario"><i class="bi bi-trash3"></i></button>
                 </div>
                 `
                 :
