@@ -25,11 +25,11 @@ signOut
 from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-import { iniciarCompañia } from "./compañia.js?v=20260824-2";
-import { iniciarEmpleados } from "./empleados.js?v=20260824-2";
+import { iniciarCompañia } from "./compañia.js?v=20260824-3";
+import { iniciarEmpleados } from "./empleados.js?v=20260824-3";
 import { iniciarAsistencia } from "./asistencia.js?v=20260824-1";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260818-9";
-import { iniciarDashboard } from "./dashboard.js?v=20260819-2";
+import { iniciarDashboard } from "./dashboard.js?v=20260824-1";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260824-3";
 import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260820-3";
@@ -55,6 +55,20 @@ const overlay = document.querySelector(".overlay");
 const contenidoPrincipal = document.querySelector(".contenido");
 
 const topbar = document.querySelector(".topbar");
+
+const sincronizacionInicial = document.getElementById("sincronizacionInicial");
+
+function actualizarSincronizacion(mensaje){
+    const texto=sincronizacionInicial?.querySelector("p");
+    if(texto)texto.textContent=mensaje;
+}
+
+function finalizarSincronizacion(){
+    if(!sincronizacionInicial)return;
+    sincronizacionInicial.setAttribute("aria-busy","false");
+    sincronizacionInicial.classList.add("oculta");
+    setTimeout(()=>sincronizacionInicial.remove(),350);
+}
 
 const ANCHO_MENU_MOVIL = 1024;
 
@@ -291,19 +305,25 @@ onAuthStateChanged(auth, async(usuario)=>{
 
     }
 
-    await cargarPerfilUsuario(usuario);
-
-    await iniciarSeguimientoUsoSistema(usuario,sessionStorage.getItem("empresaId"));
-
-    programarCierreAutomatico();
-
-    iniciarMonitorAuditoriaGlobal(usuario);
-
-    const vistaInicial = obtenerAparienciaGuardada().vistaInicial || "dashboard";
-    botones.forEach((boton)=>boton.classList.toggle("activo",boton.dataset.vista===vistaInicial));
-    const botonInicial = document.querySelector(`.item[data-vista="${vistaInicial}"]`);
-    if(botonInicial) titulo.textContent = botonInicial.innerText;
-    cargarVista(vistaInicial);
+    try{
+        actualizarSincronizacion("Validando tu cuenta y los permisos de la empresa…");
+        await cargarPerfilUsuario(usuario);
+        actualizarSincronizacion("Sincronizando la información necesaria para comenzar…");
+        await iniciarSeguimientoUsoSistema(usuario,sessionStorage.getItem("empresaId"));
+        programarCierreAutomatico();
+        iniciarMonitorAuditoriaGlobal(usuario);
+        const vistaInicial = obtenerAparienciaGuardada().vistaInicial || "dashboard";
+        botones.forEach((boton)=>boton.classList.toggle("activo",boton.dataset.vista===vistaInicial));
+        const botonInicial = document.querySelector(`.item[data-vista="${vistaInicial}"]`);
+        if(botonInicial) titulo.textContent = botonInicial.innerText;
+        actualizarSincronizacion("Preparando el panel y sus registros…");
+        await cargarVista(vistaInicial);
+    }catch(error){
+        console.error("No se pudo completar la sincronización inicial:",error);
+        await Swal.fire({icon:"error",title:"No se pudo sincronizar la información",text:"Vuelve a iniciar sesión o recarga la página para intentarlo nuevamente.",confirmButtonColor:"#2563eb"});
+    }finally{
+        finalizarSincronizacion();
+    }
 
 });
 
@@ -513,20 +533,20 @@ async function cargarVista(
 
             case "dashboard":
 
-                iniciarDashboard();
+                await iniciarDashboard();
 
             break;
 
             case "compañia":
 
-                iniciarCompañia();
+                await iniciarCompañia();
 
             break;
 
 
             case "empleados":
 
-                iniciarEmpleados(
+                await iniciarEmpleados(
                     tabInicial
                 );
 
@@ -535,7 +555,7 @@ async function cargarVista(
 
             case "asistencia":
 
-                iniciarAsistencia();
+                await iniciarAsistencia();
 
             break;
 
