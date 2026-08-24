@@ -55,12 +55,24 @@
 <link rel="stylesheet" href="css/operaciones-periodo-ajuste.css?v=20260814-1">
 <link rel="stylesheet" href="css/asistente-interno.css?v=20260820-3">
 <link rel="stylesheet" href="css/centro-control.css?v=20260820-3">
+<link rel="stylesheet" href="css/sincronizacion-inicial.css?v=20260824-1">
+<link rel="stylesheet" href="css/usuarios-acceso.css?v=20260824-1">
 
 
 </head>
 
 
 <body>
+
+<div id="sincronizacionInicial" class="sincronizacion-inicial" role="status" aria-live="polite" aria-busy="true">
+    <div class="sincronizacion-inicial__card">
+        <img class="sincronizacion-inicial__logo" src="img/isotipo-color.png?v=20260820" alt="Control Empresarial">
+        <div class="sincronizacion-inicial__spinner" aria-hidden="true"></div>
+        <h2>Sincronizando información</h2>
+        <p>Estamos preparando la empresa, tus permisos y la información del sistema.</p>
+        <small>Espera un momento antes de comenzar.</small>
+    </div>
+</div>
 
 <div class="overlay"></div>
    
@@ -329,7 +341,7 @@ class="menu-usuario">
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
-<script type="module" src="js/inicio.js?v=20260824-5"></script>
+<script type="module" src="js/inicio.js?v=20260824-6"></script>
 <script type="module" src="js/asistente-interno.js?v=20260820-5"></script>
 
 </body>
