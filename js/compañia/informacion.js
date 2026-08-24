@@ -29,6 +29,12 @@ httpsCallable(
     "crearUsuarioAdministradorEmpresa"
 );
 
+const gestionarUsuarioEmpresa =
+httpsCallable(
+    getFunctions(undefined,"us-central1"),
+    "gestionarUsuarioEmpresa"
+);
+
 
 export async function iniciarInformacion(){
     
@@ -424,54 +430,53 @@ if(cerrarAcceso && modalAcceso){
 
 document.getElementById("guardarAcceso")
 .onclick = async ()=>{
-
-
-const nombre =
-document.getElementById("nombreAcceso").value;
-
-
-const correo =
-document.getElementById("correoAcceso").value;
-
-
-const rol =
-document.getElementById("rolAcceso").value;
-
-
-
-const empresaId =
-    sessionStorage.getItem("empresaId");
-
+const botonGuardar=document.getElementById("guardarAcceso");
+const nombre=document.getElementById("nombreAcceso").value.trim();
+const correo=document.getElementById("correoAcceso").value.trim();
+const rol=document.getElementById("rolAcceso").value;
+const empresaId=sessionStorage.getItem("empresaId");
 
 if(!empresaId){
-
-    alert("No se encontró la empresa");
-
+    await Swal.fire({icon:"error",title:"No se encontró la empresa",text:"Vuelve a cargar la página e inténtalo nuevamente.",confirmButtonColor:"#2563eb"});
     return;
-
 }
 
+if(!nombre||!correo){
+    await Swal.fire({icon:"warning",title:"Completa los datos",text:"El nombre y el correo del nuevo usuario son obligatorios.",confirmButtonColor:"#2563eb"});
+    return;
+}
 
-
-const passwordTemporal =
-"123456";
-
-
-await crearUsuarioAdministradorEmpresa({
-    empresaId,
-    nombre,
-    correo,
-    rol,
-    passwordTemporal
-});
-
-
-alert("Usuario creado");
-
-
-modalAcceso.style.display="none";
-
-
+try{
+    botonGuardar.disabled=true;
+    botonGuardar.textContent="Creando usuario…";
+    const respuesta=await crearUsuarioAdministradorEmpresa({empresaId,nombre,correo,rol});
+    const credenciales=respuesta.data;
+    modalAcceso.style.display="none";
+    await Swal.fire({
+        icon:"success",
+        title:"Usuario administrador creado",
+        html:`<div style="text-align:left;margin-top:8px"><p style="margin:0 0 14px;color:#64748b;line-height:1.5">Comparte estas credenciales de forma segura. Al ingresar, el usuario deberá cambiar su contraseña temporal.</p><label style="display:block;margin-bottom:5px;color:#475569;font-size:12px;font-weight:700">Correo de acceso</label><div id="credencialCorreoAdmin" style="padding:11px 12px;border:1px solid #dbe4f0;border-radius:10px;background:#f8fafc;color:#1e293b;overflow-wrap:anywhere"></div><label style="display:block;margin:14px 0 5px;color:#475569;font-size:12px;font-weight:700">Contraseña temporal</label><div style="display:flex;gap:8px"><input id="credencialPasswordAdmin" readonly style="min-width:0;flex:1;padding:11px 12px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff;color:#1e3a8a;font-family:monospace;font-size:15px;font-weight:700"><button id="copiarPasswordAdmin" type="button" style="padding:0 14px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer">Copiar</button></div><small id="estadoCopiaPasswordAdmin" style="display:block;min-height:18px;margin-top:7px;color:#059669"></small></div>`,
+        confirmButtonText:"Listo",
+        confirmButtonColor:"#2563eb",
+        allowOutsideClick:false,
+        didOpen:()=>{
+            document.getElementById("credencialCorreoAdmin").textContent=credenciales.correo;
+            document.getElementById("credencialPasswordAdmin").value=credenciales.passwordTemporal;
+            document.getElementById("copiarPasswordAdmin").onclick=async()=>{
+                const estado=document.getElementById("estadoCopiaPasswordAdmin");
+                try{await navigator.clipboard.writeText(credenciales.passwordTemporal);}
+                catch(_){const campo=document.getElementById("credencialPasswordAdmin");campo.select();document.execCommand("copy");}
+                estado.textContent="✓ Contraseña copiada al portapapeles";
+            };
+        }
+    });
+}catch(error){
+    console.error("No se pudo crear el usuario administrativo:",error);
+    await Swal.fire({icon:"error",title:"No se pudo crear el usuario",text:error?.message||"Ocurrió un error inesperado.",confirmButtonColor:"#dc2626"});
+}finally{
+    botonGuardar.disabled=false;
+    botonGuardar.textContent="Guardar";
+}
 };
 
 //=========================
@@ -513,7 +518,8 @@ onSnapshot(
 
     const puedeAdministrar =
         esAdministrador &&
-        usuario.id !== auth.currentUser.uid;
+        usuario.id !== auth.currentUser.uid &&
+        datosUsuario.principal !== true;
 
     listaAccesos.innerHTML +=
     `
@@ -547,16 +553,15 @@ onSnapshot(
                 puedeAdministrar
                 ?
                 `
-                <button
-                    class="btnEstadoUsuario"
-                    data-id="${usuario.id}"
-                    data-estado="${datosUsuario.estado}">
-                    ${
-                        datosUsuario.estado === "ACTIVO"
-                        ? "Desactivar"
-                        : "Activar"
-                    }
-                </button>
+                <div class="acciones-usuario-secundario">
+                    <button
+                        class="btnEstadoUsuario"
+                        data-id="${usuario.id}"
+                        data-estado="${datosUsuario.estado}">
+                        ${datosUsuario.estado === "ACTIVO" ? "Desactivar" : "Activar"}
+                    </button>
+                    <button class="btnEliminarUsuario" data-id="${usuario.id}" data-nombre="${datosUsuario.nombre||datosUsuario.correo||"Usuario"}">Eliminar</button>
+                </div>
                 `
                 :
                 ""
@@ -648,19 +653,7 @@ document
         try{
 
 
-            await updateDoc(
-
-                doc(
-                    db,
-                    "usuarios",
-                    uid
-                ),
-
-                {
-                    estado:nuevoEstado
-                }
-
-            );
+            await gestionarUsuarioEmpresa({uid,accion:"ESTADO",estado:nuevoEstado});
 
 
             await Swal.fire({
@@ -716,7 +709,34 @@ document
 
     });
 
-    }); 
+document.querySelectorAll(".btnEliminarUsuario").forEach(boton=>{
+    boton.onclick=async()=>{
+        const uid=boton.dataset.id,nombreUsuario=boton.dataset.nombre;
+        const resultado=await Swal.fire({
+            icon:"warning",
+            title:"¿Eliminar usuario?",
+            text:`Se eliminará definitivamente el acceso de ${nombreUsuario}. Esta acción no se puede deshacer.`,
+            showCancelButton:true,
+            confirmButtonText:"Sí, eliminar",
+            cancelButtonText:"Cancelar",
+            confirmButtonColor:"#dc2626",
+            cancelButtonColor:"#64748b",
+            reverseButtons:true
+        });
+        if(!resultado.isConfirmed)return;
+        try{
+            boton.disabled=true;
+            await gestionarUsuarioEmpresa({uid,accion:"ELIMINAR"});
+            await Swal.fire({icon:"success",title:"Usuario eliminado",text:"La cuenta y su acceso fueron eliminados correctamente.",confirmButtonColor:"#2563eb"});
+        }catch(error){
+            console.error("No se pudo eliminar el usuario:",error);
+            await Swal.fire({icon:"error",title:"No se pudo eliminar",text:error?.message||"Ocurrió un error inesperado.",confirmButtonColor:"#dc2626"});
+            boton.disabled=false;
+        }
+    };
+});
+
+    });
 
 
 } 
