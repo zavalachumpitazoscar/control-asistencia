@@ -1,0 +1,32 @@
+.manual-acciones-cabecera{display:flex;align-items:center;gap:8px}
+.manual-acciones-cabecera #descargarManualPdf{display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid rgba(255,255,255,.28);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-weight:800;cursor:pointer}
+.manual-acciones-cabecera #descargarManualPdf:disabled{cursor:wait;opacity:.7}
+.manual-herramientas>span{padding:5px 9px;border-radius:999px;background:#eff6ff;color:#2563eb;font-size:9px;font-weight:900;white-space:nowrap}
+.manual-layout nav button span{display:grid;gap:2px;text-align:left}
+.manual-layout nav button small{color:#94a3b8;font-size:7px;font-weight:900;text-transform:uppercase}
+.manual-layout nav button.activo small{color:#93c5fd}
+.manual-portada-seccion{display:flex;align-items:flex-start;gap:15px;margin-bottom:14px}
+.manual-portada-seccion .manual-icono{flex:0 0 54px;margin:0}
+.manual-portada-seccion>div:last-child>span{color:#4f46e5;font-size:9px;font-weight:900;letter-spacing:.1em}
+.manual-portada-seccion h3{margin:3px 0 7px;color:#0f172a;font-size:28px}
+.manual-portada-seccion p{margin:0;color:#64748b;line-height:1.6}
+.manual-funciones{margin:16px 0;padding:15px;border:1px solid #dbeafe;border-radius:14px;background:#f8fbff}
+.manual-funciones h4{display:flex;align-items:center;gap:8px;margin:0 0 11px;color:#1e3a8a}
+.manual-funciones>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.manual-funciones span{display:flex;align-items:center;gap:7px;padding:9px;border-radius:9px;background:#fff;color:#334155;font-size:11px}
+.manual-funciones span i{color:#16a34a}
+.manual-ejemplo{margin-top:20px;padding:17px;border:1px solid #bfdbfe;border-radius:15px;background:linear-gradient(145deg,#eff6ff,#fff)}
+.manual-ejemplo>header{display:flex;align-items:center;gap:11px}
+.manual-ejemplo>header>i{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:#2563eb;color:#fff}
+.manual-ejemplo header span{color:#2563eb;font-size:8px;font-weight:900;letter-spacing:.1em}
+.manual-ejemplo h4{margin:2px 0;color:#1e3a8a}
+.manual-ejemplo>p{color:#334155;line-height:1.55}
+.manual-ejemplo>ol{display:grid;gap:6px;margin:10px 0;padding-left:22px;color:#475569;font-size:11px}
+.manual-ejemplo>div:last-child{display:flex;align-items:flex-start;gap:9px;padding:11px;border-radius:10px;background:#fff;color:#166534}
+.manual-ejemplo>div:last-child p{margin:0;font-size:11px;line-height:1.5}
+.manual-advertencia{display:flex;align-items:flex-start;gap:12px;margin-top:16px;padding:14px;border:1px solid #fecaca;border-radius:12px;background:#fef2f2}
+.manual-advertencia>i{color:#dc2626;font-size:21px}
+.manual-advertencia strong{color:#991b1b}
+.manual-advertencia p{margin:4px 0 0;color:#7f1d1d;font-size:11px;line-height:1.5}
+.manual-resultados button small{color:#2563eb;font-size:7px;font-weight:900;text-transform:uppercase}
+@media(max-width:640px){.manual-acciones-cabecera #descargarManualPdf span{display:none}.manual-herramientas>span{display:none}.manual-portada-seccion h3{font-size:22px}.manual-funciones>div{grid-template-columns:1fr}}
