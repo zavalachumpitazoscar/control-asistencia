@@ -4028,3 +4028,42 @@
     transform:translateY(-1px);
 
 }
+
+/*=====================================================
+  ACCIONES SIEMPRE VISIBLES DURANTE EL SCROLL HORIZONTAL
+=====================================================*/
+.tabla-wrapper{
+    --compensacion-acciones:0px;
+    isolation:isolate;
+}
+
+.tabla-header .columna-horario,
+.tabla-fila .columna-horario{
+    position:relative;
+    right:auto;
+    z-index:auto;
+    width:auto;
+    min-width:0;
+    max-width:none;
+    box-shadow:none;
+}
+
+.tabla-header .columna-acciones,
+.tabla-fila .columna-acciones{
+    position:relative;
+    right:auto;
+    z-index:20;
+    transform:translateX(var(--compensacion-acciones));
+    will-change:transform;
+    background:#ffffff;
+    box-shadow:-10px 0 16px -14px rgba(15,23,42,.85);
+}
+
+.tabla-header .columna-acciones{
+    z-index:25;
+    background:#f8fafc;
+}
+
+.tabla-fila:hover .columna-acciones{
+    background:#f8fafc;
+}
