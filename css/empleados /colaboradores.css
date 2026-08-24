@@ -4073,3 +4073,47 @@
 .tabla-fila:hover .columna-acciones{
     background:#f8fafc;
 }
+
+/* Columna de acciones independiente del contenido desplazable. */
+.tabla-shell-colaboradores{
+    position:relative;
+    width:100%;
+    max-width:100%;
+}
+
+.tabla-shell-colaboradores>.tabla-wrapper{
+    padding-right:82px;
+    box-sizing:border-box;
+}
+
+.tabla-shell-colaboradores .tabla-header>.columna-acciones,
+.tabla-shell-colaboradores .tabla-fila>.columna-acciones{
+    visibility:hidden !important;
+    pointer-events:none !important;
+}
+
+.acciones-fijas-colaboradores{
+    position:absolute;
+    z-index:80;
+    top:0;
+    right:0;
+    width:82px;
+    overflow:hidden;
+    border-left:1px solid #e2e8f0;
+    border-radius:0 16px 16px 0;
+    background:#fff;
+    box-shadow:-14px 0 22px -20px rgba(15,23,42,.9);
+}
+
+.acciones-fijas-colaboradores[hidden]{display:none}
+.acciones-fijas-cabecera,.acciones-fijas-fila{display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.acciones-fijas-cabecera{border-bottom:1px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:13px;font-weight:700}
+.acciones-fijas-fila{border-bottom:1px solid #e2e8f0;background:#fff}
+.acciones-fijas-fila:hover{background:#f8fafc}
+.acciones-fijas-fila .btn-editar-colaborador{display:grid;place-items:center;width:39px;height:39px;margin:0;border:0;border-radius:11px;background:#eff6ff;color:#2563eb;cursor:pointer}
+.acciones-fijas-fila .btn-editar-colaborador:hover{background:#dbeafe;transform:translateY(-1px)}
+
+@media(max-width:600px){
+    .tabla-shell-colaboradores>.tabla-wrapper{padding-right:70px}
+    .acciones-fijas-colaboradores{width:70px}
+}
