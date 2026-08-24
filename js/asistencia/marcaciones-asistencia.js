@@ -25,6 +25,7 @@ export function iniciarMarcacionesAsistencia() {
   }
 
   buscarMarcaciones?.addEventListener("input", renderizarMarcaciones);
+  cuerpoMarcaciones.addEventListener("click", abrirFotoMarcacion);
 
   document
     .getElementById("btnDiaAnteriorMarcaciones")
@@ -104,7 +105,7 @@ function renderizarMarcaciones() {
 
   const filtradas = marcacionesDia.filter((marcacion) => {
     return normalizarTexto(
-      `${marcacion.colaboradorNombre} ${marcacion.colaboradorDocumento} ${obtenerDireccionMarcacion(marcacion)}`,
+      `${marcacion.colaboradorNombre} ${marcacion.colaboradorDocumento} ${obtenerDireccionMarcacion(marcacion)} ${marcacion.comentario || ""}`,
     ).includes(texto);
   });
 
@@ -139,6 +140,8 @@ function renderizarMarcaciones() {
                 <td><span class="marcacion-estado ${claseEstado}">${escaparHTML(formatearEtiqueta(estado))}</span></td>
                 <td>${renderizarUbicacion(marcacion)}</td>
                 <td>${renderizarDireccion(marcacion)}</td>
+                <td>${renderizarComentario(marcacion)}</td>
+                <td>${renderizarFoto(marcacion)}</td>
                 <td><span class="asistencia-estado-desarrollo">Solo lectura</span></td>
             </tr>
         `;
@@ -151,7 +154,7 @@ function renderizarMarcaciones() {
 function mostrarMensaje(mensaje) {
   cuerpoMarcaciones.innerHTML = `
         <tr>
-            <td colspan="10" class="asistencia-tabla-vacia">
+            <td colspan="12" class="asistencia-tabla-vacia">
                 ${escaparHTML(mensaje)}
             </td>
         </tr>
@@ -232,6 +235,34 @@ function renderizarDireccion(marcacion) {
     return `<span class="marcacion-direccion no-disponible"><strong>No disponible</strong><small>Registro sin dirección guardada</small></span>`;
   }
   return `<span class="marcacion-direccion" title="${escaparHTML(direccion)}"><strong>${escaparHTML(direccion)}</strong><small><i class="bi bi-info-circle"></i> Dirección aproximada según GPS</small></span>`;
+}
+
+function renderizarComentario(marcacion) {
+  const comentario = String(marcacion?.comentario || "").trim();
+  if (!comentario) return '<span class="marcacion-direccion no-disponible">Sin comentario</span>';
+  return `<span class="marcacion-comentario" title="${escaparHTML(comentario)}">${escaparHTML(comentario)}</span>`;
+}
+
+function renderizarFoto(marcacion) {
+  if (!marcacion?.foto?.dataUrl) {
+    return '<span class="marcacion-direccion no-disponible">Sin foto</span>';
+  }
+  return `<button type="button" class="btn-tabla-asistencia ver-foto-marcacion" data-marcacion-id="${escaparHTML(marcacion.id)}"><i class="bi bi-image"></i> Ver foto</button>`;
+}
+
+function abrirFotoMarcacion(evento) {
+  const boton = evento.target.closest(".ver-foto-marcacion");
+  if (!boton) return;
+  const marcacion = marcacionesDia.find((item) => item.id === boton.dataset.marcacionId);
+  const dataUrl = marcacion?.foto?.dataUrl;
+  if (!dataUrl) return;
+  Swal.fire({
+    title: `Evidencia de ${marcacion.colaboradorNombre}`,
+    html: `<div style="display:grid;gap:12px"><img src="${dataUrl}" alt="Foto de la marcación" style="width:100%;max-height:65vh;object-fit:contain;border-radius:12px;background:#f8fafc"><p style="margin:0;text-align:left"><strong>Comentario:</strong> ${escaparHTML(marcacion.comentario || "Sin comentario")}</p></div>`,
+    width: 720,
+    confirmButtonText: "Cerrar",
+    confirmButtonColor: "#2563eb",
+  });
 }
 
 function formatearEtiqueta(valor) {

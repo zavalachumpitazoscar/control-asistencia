@@ -325,6 +325,8 @@ async function marcar(tipo, boton) {
   cargando = true;
   boton.disabled = true;
   try {
+    const evidencia = await solicitarEvidenciaMarcacion(tipo);
+    if (!evidencia) return;
     const validacionZona = await validarLimitesMarcacion();
     const validacion = await resolverValidacionMarcacion(tipo);
     if (!validacion) return;
@@ -367,6 +369,8 @@ async function marcar(tipo, boton) {
       metodoValidacion: validacion.metodoValidacion,
       intentosBiometricos: validacion.intentosBiometricos,
       motivoMarcacionManual: validacion.motivoMarcacionManual,
+      comentario: evidencia.comentario || null,
+      foto: evidencia.foto || null,
       fechaHora: serverTimestamp(),
       creadoEn: serverTimestamp(),
       usuarioId: auth.currentUser.uid,
@@ -379,6 +383,107 @@ async function marcar(tipo, boton) {
     cargando = false;
     boton.disabled = false;
   }
+}
+
+async function solicitarEvidenciaMarcacion(tipo) {
+  let urlPrevia = null;
+  const resultado = await Swal.fire({
+    title: `Marcar ${etiqueta(tipo)}`,
+    html: `
+      <div class="evidencia-marcacion-movil">
+        <p>Agrega un comentario o una foto si lo deseas. Ambos son opcionales.</p>
+        <label for="comentarioMarcacionMovil">Comentario opcional</label>
+        <textarea id="comentarioMarcacionMovil" maxlength="500" rows="3" placeholder="Escribe una observación..."></textarea>
+        <label for="fotoMarcacionMovil">Foto opcional</label>
+        <input id="fotoMarcacionMovil" type="file" accept="image/*" capture="environment">
+        <small>La foto se comprimirá antes de guardarse.</small>
+        <img id="vistaPreviaMarcacionMovil" alt="Vista previa de la foto" hidden>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Continuar y validar identidad",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#2563eb",
+    focusConfirm: false,
+    didOpen: () => {
+      const archivo = document.getElementById("fotoMarcacionMovil");
+      const previa = document.getElementById("vistaPreviaMarcacionMovil");
+      archivo?.addEventListener("change", () => {
+        if (urlPrevia) URL.revokeObjectURL(urlPrevia);
+        const foto = archivo.files?.[0];
+        if (!foto) {
+          previa.hidden = true;
+          previa.removeAttribute("src");
+          return;
+        }
+        urlPrevia = URL.createObjectURL(foto);
+        previa.src = urlPrevia;
+        previa.hidden = false;
+      });
+    },
+    preConfirm: async () => {
+      const comentario = document.getElementById("comentarioMarcacionMovil")?.value.trim() || "";
+      const archivo = document.getElementById("fotoMarcacionMovil")?.files?.[0] || null;
+      if (archivo && !archivo.type.startsWith("image/")) {
+        Swal.showValidationMessage("Selecciona un archivo de imagen válido.");
+        return false;
+      }
+      try {
+        return {
+          comentario,
+          foto: archivo ? await comprimirFotoMarcacion(archivo) : null,
+        };
+      } catch (error) {
+        Swal.showValidationMessage(error.message || "No se pudo preparar la foto.");
+        return false;
+      }
+    },
+  });
+  if (urlPrevia) URL.revokeObjectURL(urlPrevia);
+  return resultado.isConfirmed ? resultado.value : null;
+}
+
+async function comprimirFotoMarcacion(archivo) {
+  const imagen = await new Promise((resolve, reject) => {
+    const lector = new FileReader();
+    lector.onerror = () => reject(new Error("No se pudo leer la foto seleccionada."));
+    lector.onload = () => {
+      const elemento = new Image();
+      elemento.onerror = () => reject(new Error("La imagen seleccionada no se pudo abrir."));
+      elemento.onload = () => resolve(elemento);
+      elemento.src = lector.result;
+    };
+    lector.readAsDataURL(archivo);
+  });
+  let limite = 960;
+  let calidad = 0.68;
+  let dataUrl = "";
+  let ancho = 0;
+  let alto = 0;
+  for (let intento = 0; intento < 3; intento += 1) {
+    const escala = Math.min(1, limite / Math.max(imagen.naturalWidth, imagen.naturalHeight));
+    ancho = Math.max(1, Math.round(imagen.naturalWidth * escala));
+    alto = Math.max(1, Math.round(imagen.naturalHeight * escala));
+    const lienzo = document.createElement("canvas");
+    lienzo.width = ancho;
+    lienzo.height = alto;
+    lienzo.getContext("2d").drawImage(imagen, 0, 0, ancho, alto);
+    dataUrl = lienzo.toDataURL("image/jpeg", calidad);
+    if (dataUrl.length <= 240000) break;
+    limite = Math.round(limite * 0.78);
+    calidad = Math.max(0.48, calidad - 0.09);
+  }
+  if (dataUrl.length > 320000) {
+    throw new Error("La foto sigue siendo demasiado pesada. Selecciona una imagen más pequeña.");
+  }
+  return {
+    dataUrl,
+    nombreOriginal: archivo.name || "foto-marcacion.jpg",
+    tipo: "image/jpeg",
+    tamanoOriginal: archivo.size || null,
+    ancho,
+    alto,
+  };
 }
 
 async function validarLimitesMarcacion() {
