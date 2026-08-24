@@ -1574,6 +1574,7 @@ fin
 
             `;
 
+            renderizarAccionesPermanentes([]);
             renderizarPaginacion(0);
             return;
 
