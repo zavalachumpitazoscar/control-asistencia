@@ -19,9 +19,18 @@ import {
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 import {
-    createUserWithEmailAndPassword
+    createUserWithEmailAndPassword,
+    getAuth,
+    inMemoryPersistence,
+    setPersistence
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+import {
+    deleteApp,
+    initializeApp
+}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 
 
 export async function iniciarInformacion(){
@@ -451,12 +460,39 @@ const passwordTemporal =
 "123456";
 
 
-const nuevoUsuario =
-await createUserWithEmailAndPassword(
-auth,
-correo,
-passwordTemporal
-);
+// Firebase inicia sesión automáticamente con cada cuenta creada. Usamos una
+// instancia secundaria para no reemplazar la sesión del administrador actual.
+const nombreAppSecundaria =
+`creador-administrador-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+const appSecundaria =
+initializeApp(auth.app.options,nombreAppSecundaria);
+
+const authSecundaria =
+getAuth(appSecundaria);
+
+let nuevoUsuario;
+
+try{
+
+    await setPersistence(
+        authSecundaria,
+        inMemoryPersistence
+    );
+
+    nuevoUsuario =
+    await createUserWithEmailAndPassword(
+        authSecundaria,
+        correo,
+        passwordTemporal
+    );
+
+}
+finally{
+
+    await deleteApp(appSecundaria);
+
+}
 
 
 
@@ -838,4 +874,3 @@ document
 
 };
 }
-
