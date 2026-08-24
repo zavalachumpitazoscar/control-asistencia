@@ -8,7 +8,6 @@ import {
     doc,
     getDoc,
     updateDoc,
-    setDoc,
     collection,
     getDocs,
     query,
@@ -19,18 +18,16 @@ import {
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 import {
-    createUserWithEmailAndPassword,
-    getAuth,
-    inMemoryPersistence,
-    setPersistence
+    getFunctions,
+    httpsCallable
 }
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 
-import {
-    deleteApp,
-    initializeApp
-}
-from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+const crearUsuarioAdministradorEmpresa =
+httpsCallable(
+    getFunctions(undefined,"us-central1"),
+    "crearUsuarioAdministradorEmpresa"
+);
 
 
 export async function iniciarInformacion(){
@@ -460,58 +457,12 @@ const passwordTemporal =
 "123456";
 
 
-// Firebase inicia sesión automáticamente con cada cuenta creada. Usamos una
-// instancia secundaria para no reemplazar la sesión del administrador actual.
-const nombreAppSecundaria =
-`creador-administrador-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-const appSecundaria =
-initializeApp(auth.app.options,nombreAppSecundaria);
-
-const authSecundaria =
-getAuth(appSecundaria);
-
-let nuevoUsuario;
-
-try{
-
-    await setPersistence(
-        authSecundaria,
-        inMemoryPersistence
-    );
-
-    nuevoUsuario =
-    await createUserWithEmailAndPassword(
-        authSecundaria,
-        correo,
-        passwordTemporal
-    );
-
-}
-finally{
-
-    await deleteApp(appSecundaria);
-
-}
-
-
-
-await setDoc(
-doc(db,"usuarios",nuevoUsuario.user.uid),
-{
-
-nombre,
-
-correo,
-
-rol,
-
-estado:"ACTIVO",
-
-empresaId,
-
-fechaRegistro:new Date()
-
+await crearUsuarioAdministradorEmpresa({
+    empresaId,
+    nombre,
+    correo,
+    rol,
+    passwordTemporal
 });
 
 
