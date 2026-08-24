@@ -746,7 +746,7 @@ document.querySelectorAll(".btnEliminarUsuario").forEach(boton=>{
             if(!usuarioSnap.exists())throw new Error("El perfil ya no existe.");
             const perfilEliminado=usuarioSnap.data();
             const lote=writeBatch(db);
-            lote.set(solicitudRef,{empresaId,usuarioUid:uid,correo:perfilEliminado.correo||"",nombre:perfilEliminado.nombre||nombreUsuario,rol:perfilEliminado.rol||"",estado:"PENDIENTE",solicitadoPor:auth.currentUser.uid,fechaSolicitud:serverTimestamp()});
+            lote.set(solicitudRef,{empresaId,usuarioUid:uid,correo:perfilEliminado.correo||"",nombre:perfilEliminado.nombre||nombreUsuario,rol:perfilEliminado.rol||"",estado:"PENDIENTE",telegramPendiente:true,solicitadoPor:auth.currentUser.uid,fechaSolicitud:serverTimestamp()});
             lote.delete(doc(db,"usuarios",uid));
             await lote.commit();
             await Swal.fire({icon:"success",title:"Acceso eliminado",text:"El perfil fue eliminado y esta cuenta ya no podrá ingresar al sistema.",confirmButtonColor:"#2563eb"});
