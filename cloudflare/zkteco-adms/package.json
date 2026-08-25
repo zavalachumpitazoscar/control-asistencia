@@ -1,0 +1,12 @@
+{
+  "name": "control-asistencia-zkteco-adms",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test/attlog.test.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.33.1"
+  }
+}
