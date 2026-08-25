@@ -3,6 +3,7 @@ import {
   collection,
   getDoc,
   getDocs,
+  limit,
   onSnapshot,
   query,
   serverTimestamp,
@@ -12,10 +13,8 @@ import {
 import { db } from "./firebase-config.js";
 
 const COLECCIONES_AUDITADAS = [
-  "empresas", "usuarios", "sucursales", "areas", "subareas", "colaboradores", "horarios",
-  "asignacionesHorarios", "excepcionesHorarios", "permisos", "feriados",
-  "descansosSustitutorios", "marcaciones", "ajustesAsistenciaDiaria",
-  "aprobacionesHorasExtra", "regularizacionesAsistencia", "cierresAsistencia",
+  "usuarios", "colaboradores", "asignacionesHorarios", "permisos", "feriados",
+  "regularizacionesAsistencia", "cierresAsistencia",
 ];
 const nombresModulo = {
   empresas: "Compañía", usuarios: "Usuarios y perfiles", sucursales: "Sucursales", areas: "Áreas", subareas: "Subáreas",
@@ -201,8 +200,8 @@ async function cargarAuditoria() {
   cuerpo.innerHTML = '<tr><td colspan="8" class="auditoria-vacio">Cargando historial global...</td></tr>';
   try {
     const [global, asistencia] = await Promise.all([
-      getDocs(query(collection(db, "auditoriaSistema"), where("empresaId", "==", empresaId))),
-      getDocs(query(collection(db, "historialOperacionesAsistencia"), where("empresaId", "==", empresaId))),
+      getDocs(query(collection(db, "auditoriaSistema"), where("empresaId", "==", empresaId), limit(500))),
+      getDocs(query(collection(db, "historialOperacionesAsistencia"), where("empresaId", "==", empresaId), limit(500))),
     ]);
     registros = [
       ...global.docs.map((d) => normalizarGlobal(d.id, d.data())),
