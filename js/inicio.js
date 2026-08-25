@@ -33,8 +33,9 @@ import { iniciarDashboard } from "./dashboard.js?v=20260825-2";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260824-3";
 import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260825-2";
-import { iniciarAnunciosGlobales } from "./anuncios-globales.js?v=20260820-3";
+import { iniciarAnunciosGlobales } from "./anuncios-globales.js?v=20260825-1";
 import { iniciarSeguimientoUsoSistema, cerrarSeguimientoUsoSistema } from "./seguimiento-uso-sistema.js?v=20260822-2";
+import { mostrarBloqueoSuscripcion, obtenerBloqueoSuscripcion } from "./suscripcion-acceso.js?v=20260825-1";
 
 aplicarAparienciaGuardada();
 iniciarManual();
@@ -330,7 +331,15 @@ onAuthStateChanged(auth, async(usuario)=>{
 
     try{
         actualizarSincronizacion("Validando tu cuenta y los permisos de la empresa…");
-        await cargarPerfilUsuario(usuario);
+        const perfilActual = await cargarPerfilUsuario(usuario);
+        const empresaIdActual = sessionStorage.getItem("empresaId") || perfilActual?.empresaId;
+        const bloqueoSuscripcion = await obtenerBloqueoSuscripcion(empresaIdActual);
+        if(bloqueoSuscripcion){
+            finalizarSincronizacion();
+            await mostrarBloqueoSuscripcion(bloqueoSuscripcion);
+            await signOut(auth);
+            return;
+        }
         actualizarSincronizacion("Sincronizando la información necesaria para comenzar…");
         await iniciarSeguimientoUsoSistema(usuario,sessionStorage.getItem("empresaId"));
         programarCierreAutomatico();
@@ -642,7 +651,7 @@ async function cargarPerfilUsuario(usuario){
     const documento =
     await getDoc(referencia);
 
-    if(!documento.exists()) return;
+    if(!documento.exists()) return null;
 
     const datos =
     documento.data();
@@ -672,6 +681,7 @@ async function cargarPerfilUsuario(usuario){
         if (texto) sessionStorage.setItem(clave, texto); else sessionStorage.removeItem(clave);
     });
     document.dispatchEvent(new CustomEvent("perfilUsuarioActualizado"));
+    return datos;
 }
 
 

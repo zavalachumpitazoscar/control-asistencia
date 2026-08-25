@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
+import { mostrarBloqueoSuscripcion, obtenerBloqueoSuscripcion } from "./suscripcion-acceso.js?v=20260825-1";
 
 const form = document.getElementById("loginForm");
 const btnLogin = document.getElementById("btnLogin");
@@ -129,6 +130,14 @@ form.addEventListener("submit", async (event) => {
       return;
     }
 
+    const bloqueoSuscripcion = await obtenerBloqueoSuscripcion(usuario.empresaId);
+    if (bloqueoSuscripcion) {
+      await signOut(auth);
+      await mostrarBloqueoSuscripcion(bloqueoSuscripcion);
+      mostrarToast("info", "La suscripción mensual está vencida. Contacta al 902 564 457.");
+      return;
+    }
+
     if (usuario.requiereCambioPassword === true) await solicitarCambioObligatorio(credencial.user);
 
     sessionStorage.setItem("empresaId", usuario.empresaId);
@@ -155,5 +164,4 @@ form.addEventListener("submit", async (event) => {
     ocultarCarga();
   }
 });
-
 
