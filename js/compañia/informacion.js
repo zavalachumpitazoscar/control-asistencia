@@ -15,10 +15,16 @@ import {
     query,
     where,
     deleteDoc,
-    onSnapshot,
+    onSnapshot as firestoreOnSnapshot,
     writeBatch
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+function onSnapshot(...argumentos){
+    const detener = firestoreOnSnapshot(...argumentos);
+    window.registrarEscuchaVista?.(detener);
+    return detener;
+}
 
 import {createUserWithEmailAndPassword,deleteUser,getAuth,inMemoryPersistence,setPersistence} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {deleteApp,initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
