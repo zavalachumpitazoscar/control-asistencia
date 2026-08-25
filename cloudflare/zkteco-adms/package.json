@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "node test/attlog.test.mjs",
-    "deploy": "wrangler deploy"
+    "deploy": "node scripts/desplegar-con-secretos.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.33.1"
