@@ -8,7 +8,7 @@ import {
     collection,
     query,
     where,
-    onSnapshot,
+    onSnapshot as firestoreOnSnapshot,
     addDoc,
     setDoc,
     deleteDoc,
@@ -17,6 +17,12 @@ import {
     serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+function onSnapshot(...argumentos){
+    const detener = firestoreOnSnapshot(...argumentos);
+    window.registrarEscuchaVista?.(detener);
+    return detener;
+}
 
 
 import {
