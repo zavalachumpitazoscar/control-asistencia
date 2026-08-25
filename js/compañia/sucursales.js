@@ -10,10 +10,16 @@ import {
     doc,
     query,
     where,
-    onSnapshot,
+    onSnapshot as firestoreOnSnapshot,
     getDoc
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+function onSnapshot(...argumentos){
+    const detener = firestoreOnSnapshot(...argumentos);
+    window.registrarEscuchaVista?.(detener);
+    return detener;
+}
 
 import { activarListadoColaboradores } from "./colaboradores-organizacion.js";
 
