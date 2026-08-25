@@ -12,6 +12,8 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260825-2";
+
 export function iniciarActivacionMasiva({
 
     botonActivar,
@@ -56,6 +58,29 @@ export function iniciarActivacionMasiva({
                 confirmButtonText:
                 "Aceptar"
 
+            });
+
+            return;
+
+        }
+
+        try{
+
+            await validarCupoColaboradores(
+                sessionStorage.getItem("empresaId"),
+                seleccionados.length
+            );
+
+        }
+        catch(error){
+
+            const limitePlan = error?.code === "limite-plan-colaboradores";
+
+            await Swal.fire({
+                icon:"error",
+                title:limitePlan ? "Límite de colaboradores activos" : "No se pudo validar el plan",
+                text:limitePlan ? error.message : "No fue posible comprobar los cupos disponibles. Inténtalo nuevamente.",
+                confirmButtonText:"Aceptar"
             });
 
             return;

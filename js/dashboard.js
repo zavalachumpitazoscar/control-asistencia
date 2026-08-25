@@ -1,5 +1,5 @@
 import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260825-2";
-import { obtenerEstadoPlan } from "./suscripcion-limites.js?v=20260819-1";
+import { contarColaboradoresActivos, obtenerEstadoPlan } from "./suscripcion-limites.js?v=20260825-2";
 
 let cargaActual = 0;
 let detallesDashboard = {};
@@ -67,7 +67,7 @@ async function cargarDashboard() {
     ));
     if (turno !== cargaActual || !document.querySelector(".dashboard-pagina")) return;
     datosDashboard = Object.fromEntries(coleccionesDashboard.map((nombre, i) => [nombre, resultados[i]]));
-    datosDashboard.estadoPlan = await obtenerEstadoPlan(empresaId, datosDashboard.colaboradores.length);
+    datosDashboard.estadoPlan = await obtenerEstadoPlan(empresaId, contarColaboradoresActivos(datosDashboard.colaboradores));
     fechaUltimaCargaDashboard = new Date();
     prepararFiltrosDashboard(datosDashboard.colaboradores);
     renderizarDashboardFiltrado();

@@ -32,7 +32,7 @@ exports.registrarEmpresaSegura=onCall({region:REGION,enforceAppCheck:false},asyn
     const base={empresaId,estado:"PENDIENTE",fechaRegistro:FieldValue.serverTimestamp(),fechaSolicitud:FieldValue.serverTimestamp()};
     tx.create(refRuc,{valor:numeroRuc,empresaId,tipo:"EMPRESA",uid:req.auth.uid,creadoEn:FieldValue.serverTimestamp()});
     tx.create(refCorreo,{valor:email,empresaId,tipo:"ADMINISTRADOR_PRINCIPAL",uid:req.auth.uid,creadoEn:FieldValue.serverTimestamp()});
-    tx.create(refEmpresa,{...base,empresa:{ruc:numeroRuc,razonSocial:texto(d.razonSocial),giro:texto(d.giro)},ubicacion:d.ubicacion||{},representantes:Array.isArray(d.representantes)?d.representantes:[],configuracion:{zonaHoraria:"America/Lima",idioma:"es",moneda:"PEN"},plan:{nombre:"BASICO",maxUsuarios:5,maxEmpleados:25,maxSucursales:1,maxAreas:10,maxSubareas:30}});
+    tx.create(refEmpresa,{...base,empresa:{ruc:numeroRuc,razonSocial:texto(d.razonSocial),giro:texto(d.giro)},ubicacion:d.ubicacion||{},representantes:Array.isArray(d.representantes)?d.representantes:[],configuracion:{zonaHoraria:"America/Lima",idioma:"es",moneda:"PEN"},plan:{nombre:"BASICO",maxUsuarios:5,maxEmpleados:20,maxSucursales:1,maxAreas:10,maxSubareas:30}});
     tx.create(refUsuario,{uid:req.auth.uid,empresaId,principal:true,nombre:texto(d.nombre),correo:email,rol:"ADMINISTRADOR",estado:"PENDIENTE",fechaRegistro:FieldValue.serverTimestamp()});
   });
   await getAuth().setCustomUserClaims(req.auth.uid,{tipo:"CLIENTE_EMPRESA",empresaId,rol:"ADMINISTRADOR"});

@@ -29,7 +29,7 @@ function onSnapshot(...argumentos){
 import {
     iniciarCargaMasivaColaboradores
 }
-from "./carga-masiva-colaboradores.js?v=20260821-2";
+from "./carga-masiva-colaboradores.js?v=20260825-3";
 
 import {
     iniciarDesactivacionMasiva
@@ -39,7 +39,7 @@ from "./desactivar-colaboradores.js";
 import {
     iniciarActivacionMasiva
 }
-from "./activar-colaboradores.js";
+from "./activar-colaboradores.js?v=20260825-2";
 
 import {
     iniciarEliminacionMasiva
@@ -56,7 +56,7 @@ import {
 }
 from "./horarios-asignaciones.js?v=20260822-2";
 
-import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260819-1";
+import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260825-2";
 
 export function iniciarColaboradores(){
 

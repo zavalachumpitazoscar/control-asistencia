@@ -8,12 +8,20 @@ export const PLANES_COLABORADORES = {
   EMPRESARIAL: { nombre: "Empresarial", desde: 101, hasta: null, maximo: null },
 };
 
+export function esColaboradorActivo(colaborador) {
+  return String(colaborador?.estado || "ACTIVO").toUpperCase() === "ACTIVO";
+}
+
+export function contarColaboradoresActivos(colaboradores = []) {
+  return colaboradores.filter(esColaboradorActivo).length;
+}
+
 export async function obtenerEstadoPlan(empresaId, cantidadConocida = null) {
   if (!empresaId) throw new Error("No se identificó la empresa.");
   const [empresaSnap, cantidad] = await Promise.all([
     getDoc(doc(db, "companias", empresaId)),
     cantidadConocida === null
-      ? getDocs(query(collection(db, "colaboradores"), where("empresaId", "==", empresaId))).then((s) => s.size)
+      ? getDocs(query(collection(db, "colaboradores"), where("empresaId", "==", empresaId))).then((s) => contarColaboradoresActivos(s.docs.map((d) => d.data())))
       : Promise.resolve(cantidadConocida),
   ]);
   const empresa = empresaSnap.exists() ? empresaSnap.data() : {};
@@ -31,7 +39,7 @@ export async function obtenerEstadoPlan(empresaId, cantidadConocida = null) {
 export async function validarCupoColaboradores(empresaId, cantidadNueva = 1, cantidadConocida = null) {
   const estado = await obtenerEstadoPlan(empresaId, cantidadConocida);
   if (estado.maximo !== null && estado.usados + cantidadNueva > estado.maximo) {
-    const error = new Error(`El plan ${estado.plan.nombre} permite un máximo de ${estado.maximo} colaboradores. Actualmente existen ${estado.usados} y se intentan registrar ${cantidadNueva}.`);
+    const error = new Error(`El plan ${estado.plan.nombre} permite un máximo de ${estado.maximo} colaboradores activos. Actualmente existen ${estado.usados} activos y se intentan activar o registrar ${cantidadNueva}.`);
     error.code = "limite-plan-colaboradores";
     error.estadoPlan = estado;
     throw error;
