@@ -26,10 +26,10 @@ from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import { iniciarCompañia } from "./compañia.js?v=20260825-1";
-import { iniciarEmpleados } from "./empleados.js?v=20260825-1";
+import { iniciarEmpleados } from "./empleados.js?v=20260825-2";
 import { iniciarAsistencia } from "./asistencia.js?v=20260825-2";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260825-2";
-import { iniciarDashboard } from "./dashboard.js?v=20260825-2";
+import { iniciarDashboard } from "./dashboard.js?v=20260825-3";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260824-3";
 import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260825-2";

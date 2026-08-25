@@ -19,7 +19,7 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260819-1";
+import { contarColaboradoresActivos, validarCupoColaboradores } from "../suscripcion-limites.js?v=20260825-2";
 
 let empresaIdActual = null;
 
@@ -1826,7 +1826,7 @@ async function importarColaboradores(
         await validarCupoColaboradores(
             empresaIdActual,
             colaboradoresImportar.length,
-            resultadoColaboradores.size
+            contarColaboradoresActivos(resultadoColaboradores.docs.map((documento) => documento.data()))
         );
 
 

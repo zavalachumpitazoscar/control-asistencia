@@ -24,7 +24,7 @@ async function registrarEmpresaSpark(datos) {
         if(correoSnap.exists())throw Object.assign(new Error("Este correo ya está siendo utilizado."),{code:"registro/correo-duplicado"});
         tx.set(refRuc,{valor:ruc,empresaId:datos.empresaId,tipo:"EMPRESA",uid,creadoEn:serverTimestamp()});
         tx.set(refCorreo,{valor:correo,empresaId:datos.empresaId,tipo:"ADMINISTRADOR_PRINCIPAL",uid,creadoEn:serverTimestamp()});
-        tx.set(doc(db,"companias",datos.empresaId),{empresaId:datos.empresaId,estado:"PENDIENTE",fechaRegistro:serverTimestamp(),fechaSolicitud:serverTimestamp(),empresa:{ruc,razonSocial:datos.razonSocial,giro:datos.giro},ubicacion:datos.ubicacion,representantes:datos.representantes,configuracion:{zonaHoraria:"America/Lima",idioma:"es",moneda:"PEN"},plan:{nombre:"BASICO",maxUsuarios:5,maxEmpleados:25,maxSucursales:1,maxAreas:10,maxSubareas:30}});
+        tx.set(doc(db,"companias",datos.empresaId),{empresaId:datos.empresaId,estado:"PENDIENTE",fechaRegistro:serverTimestamp(),fechaSolicitud:serverTimestamp(),empresa:{ruc,razonSocial:datos.razonSocial,giro:datos.giro},ubicacion:datos.ubicacion,representantes:datos.representantes,configuracion:{zonaHoraria:"America/Lima",idioma:"es",moneda:"PEN"},plan:{nombre:"BASICO",maxUsuarios:5,maxEmpleados:20,maxSucursales:1,maxAreas:10,maxSubareas:30}});
         tx.set(doc(db,"usuarios",uid),{uid,empresaId:datos.empresaId,principal:true,nombre:datos.nombre,correo,rol:"ADMINISTRADOR",estado:"PENDIENTE",fechaRegistro:serverTimestamp()});
     });
 }
