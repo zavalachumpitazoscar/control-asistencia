@@ -1,4 +1,4 @@
-import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260818-7";
+import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260825-2";
 import { obtenerEstadoPlan } from "./suscripcion-limites.js?v=20260819-1";
 
 let cargaActual = 0;
@@ -55,7 +55,16 @@ async function cargarDashboard() {
   const turno = ++cargaActual;
   mostrarCarga(true);
   try {
-    const resultados = await Promise.all(coleccionesDashboard.map((nombre) => consultarColeccionEmpresa(nombre, empresaId)));
+    const fechaBase = new Date(`${fecha}T00:00:00`);
+    const inicioMes = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), 1);
+    const ayer = new Date(fechaBase); ayer.setDate(ayer.getDate() - 1);
+    const desde = fechaLocal(ayer < inicioMes ? ayer : inicioMes);
+    const hasta = fechaLocal(new Date(fechaBase.getFullYear(), fechaBase.getMonth() + 1, 0));
+    const resultados = await Promise.all(coleccionesDashboard.map((nombre) =>
+      nombre === "marcaciones"
+        ? consultarColeccionEmpresa(nombre, empresaId, { fechaDesde: desde, fechaHasta: hasta })
+        : consultarColeccionEmpresa(nombre, empresaId)
+    ));
     if (turno !== cargaActual || !document.querySelector(".dashboard-pagina")) return;
     datosDashboard = Object.fromEntries(coleccionesDashboard.map((nombre, i) => [nombre, resultados[i]]));
     datosDashboard.estadoPlan = await obtenerEstadoPlan(empresaId, datosDashboard.colaboradores.length);

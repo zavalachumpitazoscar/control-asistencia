@@ -3,6 +3,7 @@ import {
   query,
   where,
   getDocs,
+  limit as limitarConsulta,
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 import { db } from "../firebase-config.js";
@@ -98,6 +99,7 @@ export function iniciarResumenAsistencia() {
 
   document.addEventListener("asistencia:horario-dia-actualizado", () => {
     if (fechaResumenSeleccionada) {
+      invalidarCacheColeccionesEmpresa("excepcionesHorarios");
       cargarResumenAsistencia(fechaResumenSeleccionada);
     }
   });
@@ -108,6 +110,7 @@ export function iniciarResumenAsistencia() {
       detalle.fecha === fechaResumenSeleccionada ||
       (detalle.masivo && detalle.desde <= fechaResumenSeleccionada && detalle.hasta >= fechaResumenSeleccionada);
     if (afectaFechaSeleccionada) {
+      invalidarCacheColeccionesEmpresa("aprobacionesHorasExtra");
       cargarResumenAsistencia(fechaResumenSeleccionada);
     }
   });
@@ -174,6 +177,7 @@ export function iniciarResumenAsistencia() {
         fechaResumenSeleccionada &&
         fechaActualizada === fechaResumenSeleccionada
       ) {
+        invalidarCacheColeccionesEmpresa("ajustesAsistenciaDiaria");
         cargarResumenAsistencia(fechaResumenSeleccionada);
       }
     },
@@ -333,12 +337,14 @@ export function iniciarResumenAsistencia() {
 
   document.addEventListener("asistencia:marcacion-manual-registrada", () => {
     if (fechaResumenSeleccionada) {
+      invalidarCacheColeccionesEmpresa("marcaciones");
       cargarResumenAsistencia(fechaResumenSeleccionada);
     }
   });
 
   document.addEventListener("asistencia:marcaciones-importadas", () => {
     if (fechaResumenSeleccionada) {
+      invalidarCacheColeccionesEmpresa("marcaciones");
       cargarResumenAsistencia(fechaResumenSeleccionada);
     }
   });
@@ -375,6 +381,7 @@ async function recalcularResumenSeleccionado() {
     return;
   }
 
+  invalidarCacheColeccionesEmpresa("marcaciones");
   await cargarResumenAsistencia(fechaResumenSeleccionada);
 
   Swal.fire({
@@ -515,7 +522,10 @@ async function cargarResumenAsistencia(fecha) {
     ] = await Promise.all([
       consultarColeccionEmpresa("colaboradores", empresaId),
 
-      consultarColeccionEmpresa("marcaciones", empresaId),
+      consultarColeccionEmpresa("marcaciones", empresaId, {
+        fechaDesde: fecha,
+        fechaHasta: fecha,
+      }),
 
       consultarColeccionEmpresa("asignacionesHorarios", empresaId),
 
@@ -592,19 +602,59 @@ async function cargarResumenAsistencia(fecha) {
 CONSULTAR COLECCIÓN
 =====================================================*/
 
-export async function consultarColeccionEmpresa(nombreColeccion, empresaId) {
-  const consulta = query(
-    collection(db, nombreColeccion),
-    where("empresaId", "==", empresaId),
-  );
+const CACHE_CATALOGO_MS = 5 * 60 * 1000;
+const cacheColeccionesEmpresa = new Map();
 
-  const resultado = await getDocs(consulta);
+export function invalidarCacheColeccionesEmpresa(nombreColeccion = "") {
+  for (const clave of cacheColeccionesEmpresa.keys()) {
+    if (!nombreColeccion || clave.startsWith(`${nombreColeccion}:`)) {
+      cacheColeccionesEmpresa.delete(clave);
+    }
+  }
+}
 
-  return resultado.docs.map((documento) => ({
-    id: documento.id,
+export async function consultarColeccionEmpresa(
+  nombreColeccion,
+  empresaId,
+  opciones = {},
+) {
+  const {
+    fechaDesde = "",
+    fechaHasta = "",
+    forzar = false,
+    limite = 0,
+  } = opciones;
+  const clave = `${nombreColeccion}:${empresaId}:${fechaDesde}:${fechaHasta}:${limite}`;
+  const ahora = Date.now();
+  const guardado = cacheColeccionesEmpresa.get(clave);
 
-    ...documento.data(),
-  }));
+  if (!forzar && guardado && ahora - guardado.creadoEn < CACHE_CATALOGO_MS) {
+    return guardado.promesa;
+  }
+
+  const restricciones = [where("empresaId", "==", empresaId)];
+  if (fechaDesde && fechaHasta && fechaDesde === fechaHasta) {
+    restricciones.push(where("fecha", "==", fechaDesde));
+  } else {
+    if (fechaDesde) restricciones.push(where("fecha", ">=", fechaDesde));
+    if (fechaHasta) restricciones.push(where("fecha", "<=", fechaHasta));
+  }
+  if (limite > 0) restricciones.push(limitarConsulta(limite));
+
+  const promesa = getDocs(
+    query(collection(db, nombreColeccion), ...restricciones),
+  ).then((resultado) =>
+    resultado.docs.map((documento) => ({
+      id: documento.id,
+      ...documento.data(),
+    })),
+  ).catch((error) => {
+    cacheColeccionesEmpresa.delete(clave);
+    throw error;
+  });
+
+  cacheColeccionesEmpresa.set(clave, { creadoEn: ahora, promesa });
+  return promesa;
 }
 
 /*=====================================================

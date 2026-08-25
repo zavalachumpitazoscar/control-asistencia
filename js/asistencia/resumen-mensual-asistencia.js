@@ -1,7 +1,8 @@
 import {
   consultarColeccionEmpresa,
   construirRegistrosResumen,
-} from "./resumen-asistencia.js?v=20260818-7";
+  invalidarCacheColeccionesEmpresa,
+} from "./resumen-asistencia.js?v=20260825-2";
 
 let fechaDesde, fechaHasta, buscarResumen, cuerpoResumen, btnActualizar;
 let paginaResumenMensual = 1;
@@ -78,10 +79,16 @@ export function iniciarResumenMensualAsistencia() {
     "asistencia:marcacion-manual-registrada",
     "asistencia:marcaciones-importadas",
   ].forEach((nombre) =>
-    document.addEventListener(nombre, () => (periodoCargado = "")),
+    document.addEventListener(nombre, () => {
+      periodoCargado = "";
+      if (nombre.includes("marcacion")) invalidarCacheColeccionesEmpresa("marcaciones");
+      if (nombre.includes("horario")) invalidarCacheColeccionesEmpresa("excepcionesHorarios");
+      if (nombre.includes("ajuste")) invalidarCacheColeccionesEmpresa("ajustesAsistenciaDiaria");
+    }),
   );
   document.addEventListener("asistencia:horas-extra-actualizadas", () => {
     periodoCargado = "";
+    invalidarCacheColeccionesEmpresa("aprobacionesHorasExtra");
     const panelMensual = document.querySelector('[data-contenido-tab="mensual"]');
     if (panelMensual?.classList.contains("activo")) cargarResumenPeriodo(true);
   });
@@ -104,7 +111,15 @@ async function cargarResumenPeriodo(forzar = false) {
   mostrarMensaje("Calculando el reporte del período...");
   try {
     const resultados = await Promise.all(
-      colecciones.map((n) => consultarColeccionEmpresa(n, empresaId)),
+      colecciones.map((n) =>
+        n === "marcaciones"
+          ? consultarColeccionEmpresa(n, empresaId, {
+              fechaDesde: fechaDesde.value,
+              fechaHasta: fechaHasta.value,
+              forzar,
+            })
+          : consultarColeccionEmpresa(n, empresaId),
+      ),
     );
     const [
       colaboradores,
