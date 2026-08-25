@@ -1,5 +1,5 @@
 import { auth, db } from "./firebase-config.js";
-import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260819-4";
+import { construirRegistrosResumen, consultarColeccionEmpresa } from "./asistencia/resumen-asistencia.js?v=20260825-2";
 import {
   Timestamp, addDoc, collection, deleteDoc, doc, getDocs, query, serverTimestamp,
   setDoc, updateDoc, where, writeBatch,
@@ -64,7 +64,12 @@ async function cargar(){
   const empresaId=sessionStorage.getItem('empresaId'); if(!empresaId)return;
   mostrarCarga(true);
   try{
-    const resultados=await Promise.all(COLECCIONES_BASE.map(n=>consultarSeguro(n,empresaId)));
+    const hoy=new Date(), desde=new Date(hoy.getFullYear(),hoy.getMonth()-1,1), hasta=new Date(hoy.getFullYear(),hoy.getMonth()+1,0);
+    const resultados=await Promise.all(COLECCIONES_BASE.map(n=>{
+      if(n==='marcaciones')return consultarSeguro(n,empresaId,{fechaDesde:fechaISO(desde),fechaHasta:fechaISO(hasta)});
+      if(n==='auditoriaSistema'||n==='historialOperacionesAsistencia')return consultarSeguro(n,empresaId,{limite:200});
+      return consultarSeguro(n,empresaId);
+    }));
     datos=Object.fromEntries(COLECCIONES_BASE.map((n,i)=>[n,resultados[i]]));
     datos.hoy=construirDia(fechaISO(new Date()));
     prepararAlertas(); prepararPendientes(); renderAlertas(); renderPendientes(); renderCalendario(); renderAnuncios(); renderPlantillas(); renderSucursales(); renderBitacora(); renderEstadoCierre();
@@ -74,7 +79,7 @@ async function cargar(){
   finally{mostrarCarga(false);}
 }
 
-async function consultarSeguro(nombre,empresaId){try{return await consultarColeccionEmpresa(nombre,empresaId);}catch(e){console.warn(nombre,e);return[];}}
+async function consultarSeguro(nombre,empresaId,opciones={}){try{return await consultarColeccionEmpresa(nombre,empresaId,opciones);}catch(e){console.warn(nombre,e);return[];}}
 function construirDia(fecha){return construirRegistrosResumen({fecha,colaboradores:datos.colaboradores||[],marcaciones:datos.marcaciones||[],asignaciones:datos.asignacionesHorarios||[],horarios:datos.horarios||[],excepciones:datos.excepcionesHorarios||[],ajustesAsistencia:datos.ajustesAsistenciaDiaria||[],aprobacionesHorasExtra:datos.aprobacionesHorasExtra||[],permisos:datos.permisos||[],feriados:datos.feriados||[],descansosSustitutorios:datos.descansosSustitutoriosFeriados||[]});}
 
 function prepararAlertas(){

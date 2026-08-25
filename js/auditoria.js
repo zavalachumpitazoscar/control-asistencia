@@ -13,7 +13,7 @@ import {
 import { db } from "./firebase-config.js";
 
 const COLECCIONES_AUDITADAS = [
-  "usuarios", "colaboradores", "asignacionesHorarios", "permisos", "feriados",
+  "usuarios", "colaboradores", "permisos", "feriados",
   "regularizacionesAsistencia", "cierresAsistencia",
 ];
 const nombresModulo = {
