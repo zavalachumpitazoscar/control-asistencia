@@ -1,6 +1,10 @@
 name = "control-asistencia-zkteco-adms"
 main = "src/index.js"
 compatibility_date = "2026-08-25"
+keep_vars = true
+
+[secrets]
+required = ["FIREBASE_CLIENT_EMAIL", "FIREBASE_PRIVATE_KEY"]
 
 [vars]
 FIREBASE_PROJECT_ID = "control-asistencia-958aa"
