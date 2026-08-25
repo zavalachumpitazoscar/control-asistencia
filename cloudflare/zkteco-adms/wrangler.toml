@@ -1,0 +1,6 @@
+name = "control-asistencia-zkteco-adms"
+main = "src/index.js"
+compatibility_date = "2026-08-25"
+
+[vars]
+FIREBASE_PROJECT_ID = "control-asistencia-958aa"
