@@ -29,3 +29,5 @@
   .company-option>.mini-status{grid-column:2;grid-row:2;justify-self:end}
   .company-option>i{grid-column:2;grid-row:1;align-self:center;justify-self:end;font-size:20px}
 }
+/* Acciones para corregir renovaciones registradas por error. */
+.payment-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}.payment-actions .edit-payment{border-color:#f2cc78;background:#fff8e8;color:#8a5b00}.payment-actions .delete-payment{border-color:#f5b5bb;background:#fff0f1;color:var(--red)}
