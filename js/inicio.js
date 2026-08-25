@@ -63,6 +63,14 @@ function detenerEscuchasVistaActiva(){
 }
 window.detenerEscuchasVistaActiva = detenerEscuchasVistaActiva;
 
+let secuenciaCargaVista = 0;
+function programarAuditoriaEnSegundoPlano(usuario){
+    const iniciar = ()=>Promise.resolve(iniciarMonitorAuditoriaGlobal(usuario))
+        .catch(error=>console.warn("La auditoría en segundo plano no pudo iniciar:",error));
+    if("requestIdleCallback" in window) window.requestIdleCallback(iniciar,{ timeout:3000 });
+    else setTimeout(iniciar,1200);
+}
+
 const titulo = document.querySelector(".topbar h1");
 
 const overlay = document.querySelector(".overlay");
@@ -326,13 +334,13 @@ onAuthStateChanged(auth, async(usuario)=>{
         actualizarSincronizacion("Sincronizando la información necesaria para comenzar…");
         await iniciarSeguimientoUsoSistema(usuario,sessionStorage.getItem("empresaId"));
         programarCierreAutomatico();
-        iniciarMonitorAuditoriaGlobal(usuario);
         const vistaInicial = obtenerAparienciaGuardada().vistaInicial || "dashboard";
         botones.forEach((boton)=>boton.classList.toggle("activo",boton.dataset.vista===vistaInicial));
         const botonInicial = document.querySelector(`.item[data-vista="${vistaInicial}"]`);
         if(botonInicial) titulo.textContent = botonInicial.innerText;
         actualizarSincronizacion("Preparando el panel y sus registros…");
         await cargarVista(vistaInicial);
+        programarAuditoriaEnSegundoPlano(usuario);
     }catch(error){
         console.error("No se pudo completar la sincronización inicial:",error);
         await Swal.fire({icon:"error",title:"No se pudo sincronizar la información",text:"Vuelve a iniciar sesión o recarga la página para intentarlo nuevamente.",confirmButtonColor:"#2563eb"});
@@ -471,6 +479,7 @@ async function cargarVista(
     vista
 ){
 
+    const secuenciaActual = ++secuenciaCargaVista;
     detenerEscuchasVistaActiva();
     document.querySelector("body > #modalDetalleAuditoria")?.remove();
 
@@ -540,6 +549,7 @@ async function cargarVista(
         const html =
             await respuesta.text();
 
+        if(secuenciaActual !== secuenciaCargaVista) return;
 
         contenedor.innerHTML =
             html;
