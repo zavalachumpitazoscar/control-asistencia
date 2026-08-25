@@ -1,7 +1,7 @@
-import { iniciarInformacion } from "./compañia/informacion.js?v=20260824-4";
-import { iniciarSucursales } from "./compañia/sucursales.js?v=20260817-1";
-import { iniciarAreas } from "./compañia/areas.js?v=20260817-1";
-import { iniciarSubareas } from "./compañia/subareas.js?v=20260817-1";
+import { iniciarInformacion } from "./compañia/informacion.js?v=20260825-1";
+import { iniciarSucursales } from "./compañia/sucursales.js?v=20260825-1";
+import { iniciarAreas } from "./compañia/areas.js?v=20260825-1";
+import { iniciarSubareas } from "./compañia/subareas.js?v=20260825-1";
 
 
 export function iniciarCompañia() {
@@ -37,6 +37,8 @@ export function iniciarCompañia() {
 
 
 async function cargarTab(tab) {
+
+    window.detenerEscuchasVistaActiva?.();
 
     const contenedor =
         document.getElementById("contenidoCompania");

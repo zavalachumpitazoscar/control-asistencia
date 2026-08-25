@@ -25,10 +25,10 @@ signOut
 from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-import { iniciarCompañia } from "./compañia.js?v=20260824-5";
-import { iniciarEmpleados } from "./empleados.js?v=20260824-3";
+import { iniciarCompañia } from "./compañia.js?v=20260825-1";
+import { iniciarEmpleados } from "./empleados.js?v=20260825-1";
 import { iniciarAsistencia } from "./asistencia.js?v=20260824-1";
-import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260818-9";
+import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260825-1";
 import { iniciarDashboard } from "./dashboard.js?v=20260824-1";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
 import { iniciarManual, abrirManual } from "./manual.js?v=20260824-3";
@@ -47,6 +47,21 @@ const botonMenu = document.querySelector(".btn-menu");
 const botones = document.querySelectorAll(".item");
 
 const contenedor = document.getElementById("contenedorVista");
+
+let escuchasVistaActiva = [];
+window.registrarEscuchaVista = function(detener){
+    if(typeof detener === "function") escuchasVistaActiva.push(detener);
+    return detener;
+};
+function detenerEscuchasVistaActiva(){
+    const escuchas = escuchasVistaActiva;
+    escuchasVistaActiva = [];
+    escuchas.forEach(detener=>{
+        try{ detener(); }
+        catch(error){ console.warn("No se pudo cerrar una escucha de la vista:",error); }
+    });
+}
+window.detenerEscuchasVistaActiva = detenerEscuchasVistaActiva;
 
 const titulo = document.querySelector(".topbar h1");
 
@@ -456,6 +471,7 @@ async function cargarVista(
     vista
 ){
 
+    detenerEscuchasVistaActiva();
     document.querySelector("body > #modalDetalleAuditoria")?.remove();
 
     try{

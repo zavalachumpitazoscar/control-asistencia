@@ -7,12 +7,18 @@ import {
     collection,
     query,
     where,
-    onSnapshot,
+    onSnapshot as firestoreOnSnapshot,
     doc,
     updateDoc,
     serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+function onSnapshot(...argumentos){
+    const detener = firestoreOnSnapshot(...argumentos);
+    window.registrarEscuchaVista?.(detener);
+    return detener;
+}
 
 
 import {
@@ -24,7 +30,7 @@ from "./horarios-formulario.js?v=20260819-1";
 import {
     iniciarAsignacionesHorarios
 }
-from "./horarios-asignaciones.js?v=20260822-2";
+from "./horarios-asignaciones.js?v=20260825-1";
 
 
 import {
