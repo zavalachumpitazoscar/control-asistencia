@@ -215,6 +215,16 @@
 
 }
 
+.acciones-masivas .btn-reloj-colaborador{
+    background:#e8f0ff;
+    color:#1d4fa8;
+    border:1px solid #b8cdf5;
+}
+
+.zk-import-summary{display:grid;gap:10px;max-height:55vh;overflow:auto;text-align:left;padding:2px}.zk-import-summary>p{margin:0 0 4px;color:#52627a}.zk-import-row{padding:12px;border:1px solid #dbe5f2;border-radius:10px;background:#f8fafc}.zk-import-row.existing{background:#eefbf3;border-color:#bce8cc}.zk-import-row label{display:flex;align-items:center;gap:7px;font-weight:800;color:#24344f}.zk-import-row>div{display:grid;grid-template-columns:150px 1fr 1fr;gap:8px;margin-top:9px}.zk-import-row input{min-width:0;padding:9px;border:1px solid #cbd8e8;border-radius:8px;background:#fff}.zk-import-row small{display:block;margin-top:7px;color:#b45309}
+
+@media(max-width:700px){.zk-import-row>div{grid-template-columns:1fr}}
+
 
 
 #btnActivarSeleccion{
