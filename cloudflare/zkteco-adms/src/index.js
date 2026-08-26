@@ -256,6 +256,10 @@ async function procesarBiometriaReloj(env, url, cuerpo) {
   return respuesta(`OK: ${registros.length}`);
 }
 
+function resumirComando(comando) {
+  return texto(comando).replace(/Passwd=[^\\t\\s]*/gi, "Passwd=***").slice(0, 160);
+}
+
 async function entregarComandoPendiente(env, url) {
   const serial = texto(url.searchParams.get("SN"));
   if (!serial || serial.length > 80) return respuesta("ERROR: SN", 400);
@@ -269,7 +273,7 @@ async function entregarComandoPendiente(env, url) {
   if (!comandos.length && !registrarPresencia) return respuesta("OK");
   const [comando, ...restantes] = comandos;
   const datos = comando
-    ? { comandosPendientes: restantes, ultimoComandoEnviado: comando.slice(0, 160), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora }
+    ? { comandosPendientes: restantes, ultimoComandoEnviado: resumirComando(comando), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora }
     : { ultimaConexionEn: ahora };
   await confirmarEscrituras(env, [{
     update: { name: nombreDocumento(env, ruta), fields: codificarCampos(datos) },
