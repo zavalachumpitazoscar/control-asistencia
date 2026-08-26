@@ -103,6 +103,7 @@ $("recargarRelojes")?.addEventListener("click", cargar);
 
 $("formRelojBiometrico")?.addEventListener("submit", async (evento) => {
   evento.preventDefault();
+  const formulario = evento.currentTarget;
   const idEmpresa = empresaId();
   const serial = serialValido($("relojSerial").value);
   const nombre = $("relojNombre").value.trim();
@@ -115,7 +116,7 @@ $("formRelojBiometrico")?.addEventListener("submit", async (evento) => {
     if (existente.exists() && existente.data().empresaId !== idEmpresa) return avisar("Este número de serie ya pertenece a otra empresa.", true);
     await setDoc(referencia, { empresaId: idEmpresa, nombre, modelo, sucursalId: $("relojSucursal").value || null, estado: "ACTIVO", protocolo: "ZKTECO_ADMS", zonaHoraria: "America/Lima", creadoEn: existente.exists() ? existente.data().creadoEn || serverTimestamp() : serverTimestamp(), actualizadoEn: serverTimestamp(), actualizadoPor: auth.currentUser?.uid || "" }, { merge: true });
     await auditar("AUTORIZAR_RELOJ_ZKTECO", { empresaId: idEmpresa, relojSerial: serial, relojNombre: nombre, modelo });
-    evento.currentTarget.reset();
+    formulario.reset();
     $("relojModelo").value = "FACE-T5";
     avisar("Reloj autorizado correctamente.");
     await cargar();
