@@ -257,7 +257,7 @@ async function procesarBiometriaReloj(env, url, cuerpo) {
 }
 
 function resumirComando(comando) {
-  return texto(comando).replace(/Passwd=[^\\t\\s]*/gi, "Passwd=***").slice(0, 160);
+  return texto(comando).replace(/Passwd=[^\t\s]*/gi, "Passwd=***").slice(0, 160);
 }
 
 async function entregarComandoPendiente(env, url) {
