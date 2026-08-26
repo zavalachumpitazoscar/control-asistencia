@@ -286,7 +286,11 @@ export default {
       if (!url.pathname.startsWith("/iclock/")) return respuesta("ZKTeco ADMS receptor");
       if (url.pathname === "/iclock/cdata" && request.method === "POST") {
         const cuerpo = await request.text();
-        const respuestaUsuarios = await procesarUsuariosReloj(new Request(request.url, { method:"POST", body:cuerpo }), env, url, cuerpo);\n        if (respuestaUsuarios) return respuestaUsuarios;\n        const respuestaBiometria = await procesarBiometriaReloj(env, url, cuerpo);\n        if (respuestaBiometria) return respuestaBiometria;\n        return procesarMarcaciones(new Request(request.url, { method:"POST", body:cuerpo }), env, url);
+        const respuestaUsuarios = await procesarUsuariosReloj(new Request(request.url, { method:"POST", body:cuerpo }), env, url, cuerpo);
+        if (respuestaUsuarios) return respuestaUsuarios;
+        const respuestaBiometria = await procesarBiometriaReloj(env, url, cuerpo);
+        if (respuestaBiometria) return respuestaBiometria;
+        return procesarMarcaciones(new Request(request.url, { method:"POST", body:cuerpo }), env, url);
       }
       // El reloj seguirá enviando marcaciones inmediatamente mediante
       // Realtime=1. Solo reducimos la frecuencia con la que pregunta si hay
