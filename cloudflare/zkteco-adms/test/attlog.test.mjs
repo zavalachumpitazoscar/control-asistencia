@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { analizarAttlog, analizarUsuariosReloj } from "../src/index.js";
+import { analizarAttlog, analizarUsuariosReloj, opcionesDispositivo } from "../src/index.js";
 
 const eventos = analizarAttlog([
   "15\t2026-08-25 08:01:30\t0\t1\t0\t0\t0",
@@ -24,3 +24,10 @@ assert.equal(usuarios.length, 2);
 assert.equal(usuarios[0].pin, "1536150");
 assert.equal(usuarios[0].nombre, "Usuario Prueba");
 console.log("USERINFO parser: OK");
+
+const opciones = opcionesDispositivo("SPK7242200451");
+assert.match(opciones, /Delay=120/);
+assert.match(opciones, /ErrorDelay=120/);
+assert.match(opciones, /Realtime=1/);
+assert.match(opciones, /TransInterval=1/);
+console.log("ADMS polling optimizado: OK");
