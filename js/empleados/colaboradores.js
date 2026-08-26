@@ -58,6 +58,7 @@ from "./horarios-asignaciones.js?v=20260822-2";
 
 import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260825-2";
 import { sincronizarColaboradorConRelojes } from "./sincronizacion-relojes.js?v=20260826-1";
+import { iniciarGestionRelojColaboradores } from "./gestion-reloj-colaboradores.js?v=20260826-1";
 
 export function iniciarColaboradores(){
 
@@ -330,6 +331,9 @@ const btnCargaMasiva =
 document.getElementById(
     "btnCargaMasiva"
 );
+
+const btnReenviarReloj = document.getElementById("btnReenviarReloj");
+const btnObtenerReloj = document.getElementById("btnObtenerReloj");
 
 
 const btnNuevo =
@@ -2532,6 +2536,10 @@ function actualizarAcciones(){
 
     }
 
+    if(btnReenviarReloj){
+        btnReenviarReloj.disabled = !haySeleccionados;
+    }
+
 }
 
 
@@ -3381,6 +3389,14 @@ iniciarCargaMasivaColaboradores({
     botonCargaMasiva:
     btnCargaMasiva
 
+});
+
+iniciarGestionRelojColaboradores({
+    empresaId,
+    botonReenviar:btnReenviarReloj,
+    botonObtener:btnObtenerReloj,
+    obtenerSeleccionados:()=>[...seleccionados],
+    obtenerColaboradores:()=>[...colaboradores]
 });
 
 iniciarDesactivacionMasiva({
