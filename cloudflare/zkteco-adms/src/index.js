@@ -1,6 +1,6 @@
 const FIRESTORE_SCOPE = "https://www.googleapis.com/auth/datastore";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
-const INTERVALO_COMANDOS_SEGUNDOS = 120;
+const INTERVALO_COMANDOS_SEGUNDOS = 30;
 const INTERVALO_PRESENCIA_MS = 5 * 60 * 1000;
 let tokenCache = null;
 
@@ -134,12 +134,29 @@ export function analizarUsuariosReloj(cuerpo) {
     const pin = linea.match(/\bPIN=([^\t\s]+)/i)?.[1] || "";
     const nombre = linea.match(/\bName=(.*?)(?=\t[A-Za-z][A-Za-z0-9_]*=|\s+(?:Pri|Passwd|Card|Grp|TZ|Verify|ViceCard)=|$)/i)?.[1] || "";
     if (!texto(pin)) return null;
-    return { pin:texto(pin), nombre:texto(nombre), crudo:linea.slice(0, 500) };
+    const password = linea.match(/\bPasswd=([^\t\s]*)/i)?.[1] || "";
+    const tarjeta = linea.match(/\bCard=([^\t\s]*)/i)?.[1] || "";
+    const privilegio = linea.match(/\bPri=([^\t\s]*)/i)?.[1] || "0";
+    const verificacion = linea.match(/\bVerify=([^\t\s]*)/i)?.[1] || "";
+    return { pin:texto(pin), nombre:texto(nombre), tienePassword:Boolean(texto(password)), tieneTarjeta:Boolean(texto(tarjeta)), privilegio:texto(privilegio), verificacion:texto(verificacion), crudo:linea.slice(0, 500) };
   }).filter(Boolean);
 }
 
 export function opcionesDispositivo(serial) {
   return `GET OPTION FROM: ${texto(serial)}\nATTLOGStamp=0\nOPERLOGStamp=0\nATTPHOTOStamp=0\nErrorDelay=${INTERVALO_COMANDOS_SEGUNDOS}\nDelay=${INTERVALO_COMANDOS_SEGUNDOS}\nTransTimes=00:00;14:05\nTransInterval=1\nTransFlag=TransData AttLog\nRealtime=1\nEncrypt=0`;
+}
+
+export function analizarBiometriaReloj(cuerpo) {
+  const registros = new Map();
+  for (const linea of cuerpo.split(/\r?\n/).map((item) => item.trim()).filter(Boolean)) {
+    const tipo = /\b(?:FP|FINGERTMP)\b/i.test(linea) ? "huellas" : (/\b(?:FACE|BIODATA)\b/i.test(linea) ? "rostros" : "");
+    const pin = linea.match(/\bPIN=([^\t\s]+)/i)?.[1] || "";
+    if (!tipo || !texto(pin)) continue;
+    const actual = registros.get(texto(pin)) || { pin:texto(pin), huellas:0, rostros:0 };
+    actual[tipo] += 1;
+    registros.set(texto(pin), actual);
+  }
+  return [...registros.values()];
 }
 
 function tipoDesdeEstado(estado) {
@@ -215,11 +232,32 @@ async function procesarUsuariosReloj(request, env, url, cuerpo) {
   const escrituras = [];
   for (const usuario of usuarios) {
     const clave = await hashCorto(`${serial}|${usuario.pin}`);
-    escrituras.push({ update:{ name:nombreDocumento(env, `usuariosRelojDetectados/${clave}`), fields:codificarCampos({ empresaId:reloj.empresaId, relojSerial:serial, relojNombre:reloj.nombre || "Reloj ZKTeco", pin:usuario.pin, nombre:usuario.nombre, estadoImportacion:"PENDIENTE", detectadoEn:ahora }) } });
+    escrituras.push({ update:{ name:nombreDocumento(env, `usuariosRelojDetectados/${clave}`), fields:codificarCampos({ empresaId:reloj.empresaId, relojSerial:serial, relojNombre:reloj.nombre || "Reloj ZKTeco", pin:usuario.pin, nombre:usuario.nombre, tienePassword:usuario.tienePassword, tieneTarjeta:usuario.tieneTarjeta, privilegio:usuario.privilegio, verificacion:usuario.verificacion, estadoImportacion:"PENDIENTE", detectadoEn:ahora }) } });
   }
   escrituras.push({ update:{ name:nombreDocumento(env, `relojesBiometricos/${encodeURIComponent(serial)}`), fields:codificarCampos({ ultimaLecturaUsuariosEn:ahora, ultimaConexionEn:ahora, usuariosDetectados:usuarios.length }) }, updateMask:{ fieldPaths:["ultimaLecturaUsuariosEn", "ultimaConexionEn", "usuariosDetectados"] } });
   await confirmarEscrituras(env, escrituras, token);
   return respuesta(`OK: ${usuarios.length}`);
+}
+
+async function procesarBiometriaReloj(env, url, cuerpo) {
+  const serial = texto(url.searchParams.get("SN"));
+  const registros = analizarBiometriaReloj(cuerpo);
+  if (!serial || !registros.length) return null;
+  const token = await tokenServicio(env);
+  const reloj = await obtenerDocumento(env, `relojesBiometricos/${encodeURIComponent(serial)}`, token);
+  if (!reloj || reloj.estado !== "ACTIVO" || !reloj.empresaId) return respuesta("ERROR: DEVICE", 403);
+  const escrituras = [];
+  for (const registro of registros) {
+    const clave = await hashCorto(`${serial}|${registro.pin}`);
+    const campos = { huellasRegistradas:registro.huellas, rostrosRegistrados:registro.rostros, biometriaConsultadaEn:new Date() };
+    escrituras.push({ update:{ name:nombreDocumento(env, `usuariosRelojDetectados/${clave}`), fields:codificarCampos(campos) }, updateMask:{ fieldPaths:Object.keys(campos) } });
+  }
+  await confirmarEscrituras(env, escrituras, token);
+  return respuesta(`OK: ${registros.length}`);
+}
+
+function resumirComando(comando) {
+  return texto(comando).replace(/Passwd=[^\t\s]*/gi, "Passwd=***").slice(0, 160);
 }
 
 async function entregarComandoPendiente(env, url) {
@@ -235,7 +273,7 @@ async function entregarComandoPendiente(env, url) {
   if (!comandos.length && !registrarPresencia) return respuesta("OK");
   const [comando, ...restantes] = comandos;
   const datos = comando
-    ? { comandosPendientes: restantes, ultimoComandoEnviado: comando.slice(0, 160), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora }
+    ? { comandosPendientes: restantes, ultimoComandoEnviado: resumirComando(comando), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora }
     : { ultimaConexionEn: ahora };
   await confirmarEscrituras(env, [{
     update: { name: nombreDocumento(env, ruta), fields: codificarCampos(datos) },
@@ -254,11 +292,12 @@ export default {
         const cuerpo = await request.text();
         const respuestaUsuarios = await procesarUsuariosReloj(new Request(request.url, { method:"POST", body:cuerpo }), env, url, cuerpo);
         if (respuestaUsuarios) return respuestaUsuarios;
+        const respuestaBiometria = await procesarBiometriaReloj(env, url, cuerpo);
+        if (respuestaBiometria) return respuestaBiometria;
         return procesarMarcaciones(new Request(request.url, { method:"POST", body:cuerpo }), env, url);
       }
-      // El reloj seguirá enviando marcaciones inmediatamente mediante
-      // Realtime=1. Solo reducimos la frecuencia con la que pregunta si hay
-      // órdenes administrativas pendientes (alta u obtención de usuarios).
+      // Realtime=1 mantiene las marcaciones inmediatas. Delay=30 controla
+      // únicamente la espera máxima de las órdenes administrativas.
       if (url.pathname === "/iclock/cdata" && request.method === "GET") return respuesta(opcionesDispositivo(url.searchParams.get("SN")));
       if (url.pathname === "/iclock/getrequest" && request.method === "GET") return entregarComandoPendiente(env, url);
       if (["/iclock/getrequest", "/iclock/devicecmd", "/iclock/ping", "/iclock/test"].includes(url.pathname)) return respuesta("OK");
