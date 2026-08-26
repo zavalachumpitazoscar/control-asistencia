@@ -1,0 +1,23 @@
+<section class="relojes-cliente">
+  <header class="relojes-encabezado">
+    <div>
+      <span class="relojes-kicker">Dispositivos biométricos</span>
+      <h2>Relojes ZKTeco</h2>
+      <p>Consulta la conexión y administra la sincronización de colaboradores y marcaciones.</p>
+    </div>
+    <button id="relojesActualizar" type="button"><i class="bi bi-arrow-clockwise"></i> Actualizar</button>
+  </header>
+  <div id="relojesResumen" class="relojes-resumen"></div>
+  <div class="relojes-panel">
+    <label>Reloj
+      <select id="relojesSelector"></select>
+    </label>
+    <div class="relojes-acciones">
+      <button id="relojSolicitarMarcaciones" type="button"><i class="bi bi-clock-history"></i><span>Traer marcaciones pendientes</span></button>
+      <button id="relojSincronizarEmpleados" type="button"><i class="bi bi-people"></i><span>Sincronizar empleados</span></button>
+      <button id="relojObtenerUsuarios" type="button"><i class="bi bi-person-down"></i><span>Obtener empleados del reloj</span></button>
+    </div>
+    <p class="relojes-ayuda">La sincronización envía los colaboradores activos y retira del reloj a los inactivos. Las órdenes pueden tardar hasta dos minutos.</p>
+  </div>
+  <div id="relojesLista" class="relojes-lista"></div>
+</section>
