@@ -5,10 +5,13 @@ from "../firebase-config.js";
 
 import {
     doc,
+    getDoc,
     writeBatch,
     serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+import { sincronizarColaboradoresConRelojes } from "./sincronizacion-relojes.js?v=20260826-1";
 
 
 export function iniciarDesactivacionMasiva({
@@ -60,7 +63,6 @@ export function iniciarDesactivacionMasiva({
             return;
 
         }
-
 
         const respuesta =
         await Swal.fire({
@@ -254,6 +256,18 @@ async function desactivarColaboradores({
 
         }
 
+        const colaboradoresDesactivados = (await Promise.all(ids.map(async id => {
+            const resultado = await getDoc(doc(db, "colaboradores", id));
+            return resultado.exists() ? { id: resultado.id, ...resultado.data(), estado:"INACTIVO" } : null;
+        }))).filter(Boolean);
+
+        try{
+            await sincronizarColaboradoresConRelojes(colaboradoresDesactivados, { estado:"INACTIVO" });
+        }
+        catch(errorSincronizacion){
+            console.warn("La desactivación se completó; la actualización del reloj queda pendiente:", errorSincronizacion);
+        }
+
 
         if(
             typeof limpiarSeleccion ===
@@ -311,4 +325,3 @@ async function desactivarColaboradores({
     }
 
 }
-

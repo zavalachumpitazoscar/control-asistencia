@@ -20,6 +20,7 @@ import {
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 import { contarColaboradoresActivos, validarCupoColaboradores } from "../suscripcion-limites.js?v=20260825-2";
+import { sincronizarColaboradoresConRelojes } from "./sincronizacion-relojes.js?v=20260826-1";
 
 let empresaIdActual = null;
 
@@ -1838,6 +1839,8 @@ async function importarColaboradores(
         const tamañoLote = 450;
 
 
+        const colaboradoresCreados = [];
+
         for(
             let inicio = 0;
 
@@ -1874,6 +1877,8 @@ async function importarColaboradores(
                         )
                     );
 
+                    colaboradoresCreados.push({ id: referencia.id, ...colaborador });
+
 
                     lote.set(
 
@@ -1889,6 +1894,13 @@ async function importarColaboradores(
 
             await lote.commit();
 
+        }
+
+        try{
+            await sincronizarColaboradoresConRelojes(colaboradoresCreados, { estado:"ACTIVO" });
+        }
+        catch(errorSincronizacion){
+            console.warn("La importación terminó; algunos relojes se sincronizarán posteriormente:", errorSincronizacion);
         }
 
 

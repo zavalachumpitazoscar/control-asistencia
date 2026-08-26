@@ -182,6 +182,26 @@ async function procesarMarcaciones(request, env, url) {
   return respuesta(`OK: ${eventosLimitados.length}`);
 }
 
+async function entregarComandoPendiente(env, url) {
+  const serial = texto(url.searchParams.get("SN"));
+  if (!serial || serial.length > 80) return respuesta("ERROR: SN", 400);
+  const token = await tokenServicio(env);
+  const ruta = `relojesBiometricos/${encodeURIComponent(serial)}`;
+  const reloj = await obtenerDocumento(env, ruta, token);
+  if (!reloj || reloj.estado !== "ACTIVO") return respuesta("OK");
+  const comandos = Array.isArray(reloj.comandosPendientes) ? reloj.comandosPendientes.filter((item) => typeof item === "string" && item.startsWith("C:")) : [];
+  if (!comandos.length) return respuesta("OK");
+  const [comando, ...restantes] = comandos;
+  await confirmarEscrituras(env, [{
+    update: {
+      name: nombreDocumento(env, ruta),
+      fields: codificarCampos({ comandosPendientes: restantes, ultimoComandoEnviado: comando.slice(0, 160), ultimoComandoEnviadoEn: new Date() }),
+    },
+    updateMask: { fieldPaths: ["comandosPendientes", "ultimoComandoEnviado", "ultimoComandoEnviadoEn"] },
+  }], token);
+  return respuesta(comando);
+}
+
 export default {
   async fetch(request, env) {
     try {
@@ -189,7 +209,8 @@ export default {
       if (url.pathname === "/salud") return Response.json({ ok: true, servicio: "ZKTeco ADMS", fecha: new Date().toISOString() });
       if (!url.pathname.startsWith("/iclock/")) return respuesta("ZKTeco ADMS receptor");
       if (url.pathname === "/iclock/cdata" && request.method === "POST") return procesarMarcaciones(request, env, url);
-      if (url.pathname === "/iclock/cdata" && request.method === "GET") return respuesta(`GET OPTION FROM: ${texto(url.searchParams.get("SN"))}\nATTLOGStamp=0\nOPERLOGStamp=0\nATTPHOTOStamp=0\nErrorDelay=30\nDelay=10\nTransTimes=00:00;14:05\nTransInterval=1\nTransFlag=TransData AttLog\nRealtime=1\nEncrypt=0`);
+      if (url.pathname === "/iclock/cdata" && request.method === "GET") return respuesta(`GET OPTION FROM: ${texto(url.searchParams.get("SN"))}\nATTLOGStamp=0\nOPERLOGStamp=0\nATTPHOTOStamp=0\nErrorDelay=30\nDelay=30\nTransTimes=00:00;14:05\nTransInterval=1\nTransFlag=TransData AttLog\nRealtime=1\nEncrypt=0`);
+      if (url.pathname === "/iclock/getrequest" && request.method === "GET") return entregarComandoPendiente(env, url);
       if (["/iclock/getrequest", "/iclock/devicecmd", "/iclock/ping", "/iclock/test"].includes(url.pathname)) return respuesta("OK");
       return respuesta("OK");
     } catch (error) {

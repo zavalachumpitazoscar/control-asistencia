@@ -13,6 +13,8 @@ import {
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260825-2";
+import { sincronizarColaboradoresConRelojes } from "./sincronizacion-relojes.js?v=20260826-1";
+import { getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 export function iniciarActivacionMasiva({
 
@@ -269,6 +271,18 @@ async function activarColaboradores({
 
             await lote.commit();
 
+        }
+
+        const colaboradoresActivados = (await Promise.all(ids.map(async id => {
+            const resultado = await getDoc(doc(db, "colaboradores", id));
+            return resultado.exists() ? { id: resultado.id, ...resultado.data(), estado:"ACTIVO" } : null;
+        }))).filter(Boolean);
+
+        try{
+            await sincronizarColaboradoresConRelojes(colaboradoresActivados, { estado:"ACTIVO" });
+        }
+        catch(errorSincronizacion){
+            console.warn("La activación se completó; la sincronización del reloj queda pendiente:", errorSincronizacion);
         }
 
 
