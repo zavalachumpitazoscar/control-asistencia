@@ -1,4 +1,4 @@
-import { iniciarColaboradores } from "./empleados/colaboradores.js?v=20260826-2";
+import { iniciarColaboradores } from "./empleados/colaboradores.js?v=20260826-3";
 import { iniciarHorarios } from "./empleados/horarios.js?v=20260825-1";
 import { iniciarPermisos } from "./empleados/permisos.js?v=20260825-1";
 import { iniciarFeriados } from "./empleados/feriados.js?v=20260825-1";

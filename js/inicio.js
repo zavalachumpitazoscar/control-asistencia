@@ -26,7 +26,7 @@ from
 "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import { iniciarCompañia } from "./compañia.js?v=20260825-1";
-import { iniciarEmpleados } from "./empleados.js?v=20260826-2";
+import { iniciarEmpleados } from "./empleados.js?v=20260826-3";
 import { iniciarAsistencia } from "./asistencia.js?v=20260825-2";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260825-2";
 import { iniciarDashboard } from "./dashboard.js?v=20260825-3";
