@@ -38,12 +38,12 @@ async function elegirReloj(empresaId) {
 }
 
 async function esperarUsuarios(empresaId, serial, solicitadoEn) {
-  for (let intento = 0; intento < 20; intento += 1) {
+  for (let intento = 0; intento < 50; intento += 1) {
     await new Promise((resolver) => setTimeout(resolver, 3000));
     const resultado = await getDocs(query(collection(db, "usuariosRelojDetectados"), where("empresaId", "==", empresaId)));
     const usuarios = resultado.docs.map((item) => ({ id:item.id, ...item.data() })).filter((item) => item.relojSerial === serial && Number(item.detectadoEn?.seconds || 0) * 1000 >= solicitadoEn - 5000);
     if (usuarios.length) return usuarios;
-    Swal.update({ html:`Esperando respuesta del reloj…<br><small>Intento ${intento + 1} de 20</small>` });
+    Swal.update({ html:`Esperando respuesta del reloj…<br><small>Intento ${intento + 1} de 50</small>` });
   }
   return [];
 }
@@ -85,6 +85,21 @@ async function revisarEImportar(usuarios, colaboradores, empresaId, reloj) {
   await Swal.fire({ icon:"success", title:"Importación completada", text:`Se registraron ${creados.length} colaboradores correctamente.` });
 }
 
+export async function obtenerEImportarUsuariosReloj({ empresaId, reloj, colaboradores }) {
+  if (!empresaId || !reloj) return;
+  try {
+    const solicitadoEn = Date.now();
+    await updateDoc(doc(db, "relojesBiometricos", reloj.id), { comandosPendientes:arrayUnion(comandoConsultaUsuarios()), solicitudUsuariosEn:serverTimestamp() });
+    Swal.fire({ title:"Obteniendo empleados del reloj", html:"La solicitud quedó programada. El reloj puede tardar hasta dos minutos…", allowOutsideClick:false, allowEscapeKey:false, showConfirmButton:false, didOpen:() => Swal.showLoading() });
+    const usuarios = await esperarUsuarios(empresaId, reloj.id, solicitadoEn);
+    if (!usuarios.length) return Swal.fire({ icon:"warning", title:"El reloj aún no respondió", text:"La orden seguirá pendiente. Si está desconectado, se procesará cuando vuelva a conectarse." });
+    await revisarEImportar(usuarios, colaboradores, empresaId, reloj);
+  } catch (error) {
+    console.error(error);
+    await Swal.fire({ icon:"error", title:"No se pudo obtener la lista", text:"El reloj no devolvió usuarios o Firestore no está disponible." });
+  }
+}
+
 export function iniciarGestionRelojColaboradores({ empresaId, botonReenviar, botonObtener, obtenerSeleccionados, obtenerColaboradores }) {
   botonReenviar?.addEventListener("click", async () => {
     const ids = obtenerSeleccionados();
@@ -103,16 +118,6 @@ export function iniciarGestionRelojColaboradores({ empresaId, botonReenviar, bot
   botonObtener?.addEventListener("click", async () => {
     const reloj = await elegirReloj(empresaId);
     if (!reloj) return;
-    try {
-      const solicitadoEn = Date.now();
-      await updateDoc(doc(db, "relojesBiometricos", reloj.id), { comandosPendientes:arrayUnion(comandoConsultaUsuarios()), solicitudUsuariosEn:serverTimestamp() });
-      Swal.fire({ title:"Obteniendo usuarios", html:"Esperando respuesta del reloj…", allowOutsideClick:false, allowEscapeKey:false, showConfirmButton:false, didOpen:() => Swal.showLoading() });
-      const usuarios = await esperarUsuarios(empresaId, reloj.id, solicitadoEn);
-      if (!usuarios.length) return Swal.fire({ icon:"warning", title:"El reloj no respondió", text:"Verifica que esté conectado y vuelve a intentarlo." });
-      await revisarEImportar(usuarios, obtenerColaboradores(), empresaId, reloj);
-    } catch (error) {
-      console.error(error);
-      await Swal.fire({ icon:"error", title:"No se pudo obtener la lista", text:"El reloj no devolvió usuarios o el formato no fue reconocido." });
-    }
+    await obtenerEImportarUsuariosReloj({ empresaId, reloj, colaboradores:obtenerColaboradores() });
   });
 }

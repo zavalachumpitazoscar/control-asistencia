@@ -1,6 +1,7 @@
 const FIRESTORE_SCOPE = "https://www.googleapis.com/auth/datastore";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const INTERVALO_COMANDOS_SEGUNDOS = 120;
+const INTERVALO_PRESENCIA_MS = 5 * 60 * 1000;
 let tokenCache = null;
 
 const texto = (valor) => String(valor ?? "").trim();
@@ -150,6 +151,11 @@ async function hashCorto(valor) {
   return Array.from(new Uint8Array(hash)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+function fechaMilisegundos(valor) {
+  const fecha = Date.parse(valor || "");
+  return Number.isFinite(fecha) ? fecha : 0;
+}
+
 function idVinculo(serial, pin) {
   return encodeURIComponent(`${serial}__${pin}`);
 }
@@ -192,7 +198,7 @@ async function procesarMarcaciones(request, env, url) {
     const datos = { empresaId: reloj.empresaId, colaboradorId: vinculo.colaboradorId, colaboradorNombre: vinculo.colaboradorNombre || "", colaboradorDocumento: vinculo.colaboradorDocumento || null, sucursalId: reloj.sucursalId || vinculo.sucursalId || null, fecha: evento.fecha, hora: evento.hora, fechaHora, fechaHoraISO: fechaHora.toISOString(), tipo: tipoDesdeEstado(evento.estado), tipoOriginal: "RELOJ_ZKTECO", tipoInterpretado: tipoDesdeEstado(evento.estado), origen: "RELOJ_ZKTECO", estado: "VALIDA", relojSerial: serial, relojNombre: reloj.nombre || "Reloj ZKTeco", pinReloj: evento.pin, estadoReloj: evento.estado, metodoValidacionReloj: evento.verificacion, codigoTrabajoReloj: evento.codigoTrabajo, creadoEn: new Date() };
     escrituras.push({ update: { name: nombreDocumento(env, `marcaciones/ZK_${clave}`), fields: codificarCampos(datos) } });
   }
-  escrituras.push({ update: { name: nombreDocumento(env, `relojesBiometricos/${encodeURIComponent(serial)}`), fields: codificarCampos({ ultimaMarcacionEn: new Date(), ultimoLoteRecibido: eventos.length, actualizadoPorReceptor: true }) }, updateMask: { fieldPaths: ["ultimaMarcacionEn", "ultimoLoteRecibido", "actualizadoPorReceptor"] } });
+  escrituras.push({ update: { name: nombreDocumento(env, `relojesBiometricos/${encodeURIComponent(serial)}`), fields: codificarCampos({ ultimaMarcacionEn: new Date(), ultimaConexionEn: new Date(), ultimoLoteRecibido: eventos.length, actualizadoPorReceptor: true }) }, updateMask: { fieldPaths: ["ultimaMarcacionEn", "ultimaConexionEn", "ultimoLoteRecibido", "actualizadoPorReceptor"] } });
   if (escrituras.length) await confirmarEscrituras(env, escrituras, token);
   return respuesta(`OK: ${eventosLimitados.length}`);
 }
@@ -211,7 +217,7 @@ async function procesarUsuariosReloj(request, env, url, cuerpo) {
     const clave = await hashCorto(`${serial}|${usuario.pin}`);
     escrituras.push({ update:{ name:nombreDocumento(env, `usuariosRelojDetectados/${clave}`), fields:codificarCampos({ empresaId:reloj.empresaId, relojSerial:serial, relojNombre:reloj.nombre || "Reloj ZKTeco", pin:usuario.pin, nombre:usuario.nombre, estadoImportacion:"PENDIENTE", detectadoEn:ahora }) } });
   }
-  escrituras.push({ update:{ name:nombreDocumento(env, `relojesBiometricos/${encodeURIComponent(serial)}`), fields:codificarCampos({ ultimaLecturaUsuariosEn:ahora, usuariosDetectados:usuarios.length }) }, updateMask:{ fieldPaths:["ultimaLecturaUsuariosEn", "usuariosDetectados"] } });
+  escrituras.push({ update:{ name:nombreDocumento(env, `relojesBiometricos/${encodeURIComponent(serial)}`), fields:codificarCampos({ ultimaLecturaUsuariosEn:ahora, ultimaConexionEn:ahora, usuariosDetectados:usuarios.length }) }, updateMask:{ fieldPaths:["ultimaLecturaUsuariosEn", "ultimaConexionEn", "usuariosDetectados"] } });
   await confirmarEscrituras(env, escrituras, token);
   return respuesta(`OK: ${usuarios.length}`);
 }
@@ -224,16 +230,18 @@ async function entregarComandoPendiente(env, url) {
   const reloj = await obtenerDocumento(env, ruta, token);
   if (!reloj || reloj.estado !== "ACTIVO") return respuesta("OK");
   const comandos = Array.isArray(reloj.comandosPendientes) ? reloj.comandosPendientes.filter((item) => typeof item === "string" && item.startsWith("C:")) : [];
-  if (!comandos.length) return respuesta("OK");
+  const ahora = new Date();
+  const registrarPresencia = ahora.getTime() - fechaMilisegundos(reloj.ultimaConexionEn) >= INTERVALO_PRESENCIA_MS;
+  if (!comandos.length && !registrarPresencia) return respuesta("OK");
   const [comando, ...restantes] = comandos;
+  const datos = comando
+    ? { comandosPendientes: restantes, ultimoComandoEnviado: comando.slice(0, 160), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora }
+    : { ultimaConexionEn: ahora };
   await confirmarEscrituras(env, [{
-    update: {
-      name: nombreDocumento(env, ruta),
-      fields: codificarCampos({ comandosPendientes: restantes, ultimoComandoEnviado: comando.slice(0, 160), ultimoComandoEnviadoEn: new Date() }),
-    },
-    updateMask: { fieldPaths: ["comandosPendientes", "ultimoComandoEnviado", "ultimoComandoEnviadoEn"] },
+    update: { name: nombreDocumento(env, ruta), fields: codificarCampos(datos) },
+    updateMask: { fieldPaths: Object.keys(datos) },
   }], token);
-  return respuesta(comando);
+  return respuesta(comando || "OK");
 }
 
 export default {

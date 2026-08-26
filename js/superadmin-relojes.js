@@ -67,6 +67,11 @@ function prepararSelectores() {
   actualizarSelectorRelojes();
 }
 
+function relojConectado(reloj) {
+  const fecha = reloj?.ultimaConexionEn?.toMillis?.() || Date.parse(reloj?.ultimaConexionEn || "") || 0;
+  return Date.now() - fecha < 7 * 60 * 1000;
+}
+
 function actualizarSelectorRelojes() {
   const actual = $("vinculoReloj")?.value || "";
   $("vinculoReloj").innerHTML = '<option value="">Selecciona un reloj</option>' + relojes.filter((reloj) => reloj.estado === "ACTIVO").map((reloj) => `<option value="${escapar(reloj.id)}">${escapar(reloj.nombre || reloj.id)} · ${escapar(reloj.id)}</option>`).join("");
@@ -74,7 +79,7 @@ function actualizarSelectorRelojes() {
 }
 
 function renderizar() {
-  $("listaRelojesBiometricos").innerHTML = relojes.length ? relojes.map((reloj) => `<article class="biometric-row"><div><b>${escapar(reloj.nombre || "Reloj ZKTeco")}</b><small>${escapar(reloj.modelo || "Modelo no indicado")} · Serie ${escapar(reloj.id)}</small><span>${escapar(nombreSucursal(reloj.sucursalId))} · Último evento: ${escapar(fechaVisible(reloj.ultimaMarcacionEn))}</span><em class="biometric-state ${reloj.estado === "ACTIVO" ? "" : "inactive"}">${escapar(reloj.estado || "INACTIVO")}</em></div><div><button data-cambiar-reloj="${escapar(reloj.id)}">${reloj.estado === "ACTIVO" ? "Desactivar" : "Activar"}</button></div></article>`).join("") : '<div class="usage-empty">Todavía no hay relojes autorizados.</div>';
+  $("listaRelojesBiometricos").innerHTML = relojes.length ? relojes.map((reloj) => `<article class="biometric-row"><div><b>${escapar(reloj.nombre || "Reloj ZKTeco")}</b><small>${escapar(reloj.modelo || "Modelo no indicado")} · Serie ${escapar(reloj.id)}</small><span>${escapar(nombreSucursal(reloj.sucursalId))} · Última conexión: ${escapar(fechaVisible(reloj.ultimaConexionEn))} · Última marcación: ${escapar(fechaVisible(reloj.ultimaMarcacionEn))}</span><em class="biometric-state ${relojConectado(reloj) ? "" : "inactive"}">${relojConectado(reloj) ? "CONECTADO" : "DESCONECTADO"}</em><em class="biometric-state ${reloj.estado === "ACTIVO" ? "" : "inactive"}">${escapar(reloj.estado || "INACTIVO")}</em></div><div><button data-cambiar-reloj="${escapar(reloj.id)}">${reloj.estado === "ACTIVO" ? "Desactivar" : "Activar"}</button></div></article>`).join("") : '<div class="usage-empty">Todavía no hay relojes autorizados.</div>';
   $("listaVinculosReloj").innerHTML = vinculos.length ? vinculos.map((vinculo) => `<article class="biometric-row"><div><b>${escapar(vinculo.colaboradorNombre || vinculo.colaboradorId)}</b><small>PIN ${escapar(vinculo.pin)} · ${escapar(vinculo.relojNombre || vinculo.relojSerial)}</small><span>${escapar(vinculo.colaboradorDocumento || "Sin documento")}</span></div><div><button class="danger" data-eliminar-vinculo="${escapar(vinculo.id)}">Quitar</button></div></article>`).join("") : '<div class="usage-empty">Todavía no hay colaboradores vinculados.</div>';
   const unicos = [...new Map(pendientes.map((item) => [`${item.relojSerial}__${item.pin}`, item])).values()];
   $("listaPinesPendientes").innerHTML = unicos.length ? unicos.map((item) => {

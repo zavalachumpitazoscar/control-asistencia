@@ -33,9 +33,10 @@ function comandoUsuario(tipo, colaborador, pin) {
   return `C:${id}:DATA UPDATE USERINFO PIN=${pin}\tName=${nombre}\tPri=0\tPasswd=\tCard=\tGrp=1\tTZ=0000000000000000\tVerify=0`;
 }
 
-async function relojesActivos(empresaId) {
+async function relojesActivos(empresaId, seriales = null) {
   const resultado = await getDocs(query(collection(db, "relojesBiometricos"), where("empresaId", "==", empresaId)));
-  return resultado.docs.map((item) => ({ id: item.id, ...item.data() })).filter((item) => item.estado === "ACTIVO");
+  const permitidos = Array.isArray(seriales) && seriales.length ? new Set(seriales) : null;
+  return resultado.docs.map((item) => ({ id: item.id, ...item.data() })).filter((item) => item.estado === "ACTIVO" && (!permitidos || permitidos.has(item.id)));
 }
 
 async function aplicarSincronizacion(colaborador, relojes, estado) {
@@ -80,7 +81,7 @@ export async function sincronizarColaboradorConRelojes(colaborador, { estado = "
 export async function sincronizarColaboradoresConRelojes(colaboradores, opciones = {}) {
   const empresaId = texto(colaboradores.find((item) => item?.empresaId)?.empresaId || sessionStorage.getItem("empresaId"));
   if (!empresaId || !colaboradores.length) return [];
-  const relojes = await relojesActivos(empresaId);
+  const relojes = await relojesActivos(empresaId, opciones.relojSeriales);
   const resultados = [];
   for (const colaborador of colaboradores) resultados.push(await aplicarSincronizacion(colaborador, relojes, opciones.estado || "ACTIVO"));
   return resultados;
