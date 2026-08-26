@@ -296,9 +296,8 @@ export default {
         if (respuestaBiometria) return respuestaBiometria;
         return procesarMarcaciones(new Request(request.url, { method:"POST", body:cuerpo }), env, url);
       }
-      // El reloj seguirá enviando marcaciones inmediatamente mediante
-      // Realtime=1. Solo reducimos la frecuencia con la que pregunta si hay
-      // órdenes administrativas pendientes (alta u obtención de usuarios).
+      // Realtime=1 mantiene las marcaciones inmediatas. Delay=30 controla
+      // únicamente la espera máxima de las órdenes administrativas.
       if (url.pathname === "/iclock/cdata" && request.method === "GET") return respuesta(opcionesDispositivo(url.searchParams.get("SN")));
       if (url.pathname === "/iclock/getrequest" && request.method === "GET") return entregarComandoPendiente(env, url);
       if (["/iclock/getrequest", "/iclock/devicecmd", "/iclock/ping", "/iclock/test"].includes(url.pathname)) return respuesta("OK");
