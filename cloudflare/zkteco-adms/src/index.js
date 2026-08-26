@@ -126,6 +126,16 @@ export function analizarAttlog(cuerpo) {
   }).filter(Boolean);
 }
 
+export function analizarUsuariosReloj(cuerpo) {
+  return cuerpo.split(/\r?\n/).map((linea) => linea.trim()).filter(Boolean).map((linea) => {
+    if (!/\b(?:USER|USERINFO)\b/i.test(linea) || !/\bPIN=/i.test(linea)) return null;
+    const pin = linea.match(/\bPIN=([^\t\s]+)/i)?.[1] || "";
+    const nombre = linea.match(/\bName=(.*?)(?=\t[A-Za-z][A-Za-z0-9_]*=|\s+(?:Pri|Passwd|Card|Grp|TZ|Verify|ViceCard)=|$)/i)?.[1] || "";
+    if (!texto(pin)) return null;
+    return { pin:texto(pin), nombre:texto(nombre), crudo:linea.slice(0, 500) };
+  }).filter(Boolean);
+}
+
 function tipoDesdeEstado(estado) {
   return ({ "0": "ENTRADA", "1": "SALIDA", "2": "INICIO_REFRIGERIO", "3": "FIN_REFRIGERIO", "4": "ENTRADA", "5": "SALIDA" })[estado] || "SIN_CLASIFICAR";
 }
@@ -182,6 +192,25 @@ async function procesarMarcaciones(request, env, url) {
   return respuesta(`OK: ${eventosLimitados.length}`);
 }
 
+async function procesarUsuariosReloj(request, env, url, cuerpo) {
+  const serial = texto(url.searchParams.get("SN"));
+  if (!serial || serial.length > 80) return respuesta("ERROR: SN", 400);
+  const usuarios = analizarUsuariosReloj(cuerpo).slice(0, 400);
+  if (!usuarios.length) return null;
+  const token = await tokenServicio(env);
+  const reloj = await obtenerDocumento(env, `relojesBiometricos/${encodeURIComponent(serial)}`, token);
+  if (!reloj || reloj.estado !== "ACTIVO" || !reloj.empresaId) return respuesta("ERROR: DEVICE", 403);
+  const ahora = new Date();
+  const escrituras = [];
+  for (const usuario of usuarios) {
+    const clave = await hashCorto(`${serial}|${usuario.pin}`);
+    escrituras.push({ update:{ name:nombreDocumento(env, `usuariosRelojDetectados/${clave}`), fields:codificarCampos({ empresaId:reloj.empresaId, relojSerial:serial, relojNombre:reloj.nombre || "Reloj ZKTeco", pin:usuario.pin, nombre:usuario.nombre, estadoImportacion:"PENDIENTE", detectadoEn:ahora }) } });
+  }
+  escrituras.push({ update:{ name:nombreDocumento(env, `relojesBiometricos/${encodeURIComponent(serial)}`), fields:codificarCampos({ ultimaLecturaUsuariosEn:ahora, usuariosDetectados:usuarios.length }) }, updateMask:{ fieldPaths:["ultimaLecturaUsuariosEn", "usuariosDetectados"] } });
+  await confirmarEscrituras(env, escrituras, token);
+  return respuesta(`OK: ${usuarios.length}`);
+}
+
 async function entregarComandoPendiente(env, url) {
   const serial = texto(url.searchParams.get("SN"));
   if (!serial || serial.length > 80) return respuesta("ERROR: SN", 400);
@@ -208,7 +237,12 @@ export default {
       const url = new URL(request.url);
       if (url.pathname === "/salud") return Response.json({ ok: true, servicio: "ZKTeco ADMS", fecha: new Date().toISOString() });
       if (!url.pathname.startsWith("/iclock/")) return respuesta("ZKTeco ADMS receptor");
-      if (url.pathname === "/iclock/cdata" && request.method === "POST") return procesarMarcaciones(request, env, url);
+      if (url.pathname === "/iclock/cdata" && request.method === "POST") {
+        const cuerpo = await request.text();
+        const respuestaUsuarios = await procesarUsuariosReloj(new Request(request.url, { method:"POST", body:cuerpo }), env, url, cuerpo);
+        if (respuestaUsuarios) return respuestaUsuarios;
+        return procesarMarcaciones(new Request(request.url, { method:"POST", body:cuerpo }), env, url);
+      }
       if (url.pathname === "/iclock/cdata" && request.method === "GET") return respuesta(`GET OPTION FROM: ${texto(url.searchParams.get("SN"))}\nATTLOGStamp=0\nOPERLOGStamp=0\nATTPHOTOStamp=0\nErrorDelay=30\nDelay=30\nTransTimes=00:00;14:05\nTransInterval=1\nTransFlag=TransData AttLog\nRealtime=1\nEncrypt=0`);
       if (url.pathname === "/iclock/getrequest" && request.method === "GET") return entregarComandoPendiente(env, url);
       if (["/iclock/getrequest", "/iclock/devicecmd", "/iclock/ping", "/iclock/test"].includes(url.pathname)) return respuesta("OK");
