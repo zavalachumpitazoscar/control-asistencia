@@ -3,9 +3,13 @@ import { auth } from "./firebase-config.js";
 import { db } from "./firebase-config.js";
 
 import {
+    collection,
     doc,
     getDoc,
-    updateDoc
+    getDocs,
+    query,
+    updateDoc,
+    where
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -27,6 +31,7 @@ from
 
 import { iniciarCompañia } from "./compañia.js?v=20260825-1";
 import { iniciarEmpleados } from "./empleados.js?v=20260826-3";
+import { iniciarRelojes } from "./relojes.js?v=20260826-1";
 import { iniciarAsistencia } from "./asistencia.js?v=20260825-2";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260825-2";
 import { iniciarDashboard } from "./dashboard.js?v=20260825-3";
@@ -333,6 +338,7 @@ onAuthStateChanged(auth, async(usuario)=>{
         actualizarSincronizacion("Validando tu cuenta y los permisos de la empresa…");
         const perfilActual = await cargarPerfilUsuario(usuario);
         const empresaIdActual = sessionStorage.getItem("empresaId") || perfilActual?.empresaId;
+        await configurarAccesoRelojes(empresaIdActual);
         const bloqueoSuscripcion = await obtenerBloqueoSuscripcion(empresaIdActual);
         if(bloqueoSuscripcion){
             finalizarSincronizacion();
@@ -594,6 +600,12 @@ async function cargarVista(
 
             break;
 
+            case "relojes":
+
+                await iniciarRelojes();
+
+            break;
+
             case "auditoria":
 
                 iniciarAuditoria();
@@ -638,6 +650,18 @@ async function cargarVista(
 
 document.getElementById("btnManualGlobal")?.addEventListener("click", abrirManual);
 
+
+async function configurarAccesoRelojes(empresaId){
+    const boton = document.getElementById("menuRelojesCliente");
+    if(!boton || !empresaId){ if(boton) boton.hidden = true; return; }
+    try{
+        const resultado = await getDocs(query(collection(db,"relojesBiometricos"),where("empresaId","==",empresaId)));
+        boton.hidden = resultado.empty;
+    }catch(error){
+        console.warn("No se pudo validar el acceso a Relojes:",error);
+        boton.hidden = true;
+    }
+}
 
 async function cargarPerfilUsuario(usuario){
 
