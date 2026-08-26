@@ -30,7 +30,9 @@ function comandoUsuario(tipo, colaborador, pin) {
   const id = `${Date.now()}${Math.floor(Math.random() * 900 + 100)}`;
   if (tipo === "ELIMINAR") return `C:${id}:DATA DELETE USERINFO PIN=${pin}`;
   const nombre = limpiarComando(nombreColaborador(colaborador) || pin, 40);
-  // En usuarios existentes solo actualizamos identidad. Omitir contraseña,\n  // tarjeta, verificación y privilegio evita borrar credenciales biométricas.\n  return `C:${id}:DATA UPDATE USERINFO PIN=${pin}\\tName=${nombre}`;
+  // En usuarios existentes solo actualizamos identidad. Omitir contraseña,
+  // tarjeta, verificación y privilegio evita borrar credenciales biométricas.
+  return `C:${id}:DATA UPDATE USERINFO PIN=${pin}\tName=${nombre}`;
 }
 
 async function relojesActivos(empresaId, seriales = null) {
