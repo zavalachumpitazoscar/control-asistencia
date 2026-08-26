@@ -58,7 +58,7 @@ from "./horarios-asignaciones.js?v=20260822-2";
 
 import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260825-2";
 import { sincronizarColaboradorConRelojes } from "./sincronizacion-relojes.js?v=20260826-1";
-import { iniciarGestionRelojColaboradores } from "./gestion-reloj-colaboradores.js?v=20260826-1";
+import { iniciarGestionRelojColaboradores } from "./gestion-reloj-colaboradores.js?v=20260826-2";
 
 export function iniciarColaboradores(){
 
