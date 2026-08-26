@@ -139,6 +139,12 @@ function idVinculo(serial, pin) {
   return encodeURIComponent(`${serial}__${pin}`);
 }
 
+function normalizarPin(pin) {
+  const valor = texto(pin);
+  if (!/^\d+$/.test(valor)) return valor;
+  return valor.replace(/^0+(?=\d)/, "");
+}
+
 async function procesarMarcaciones(request, env, url) {
   const serial = texto(url.searchParams.get("SN"));
   if (!serial || serial.length > 80) return respuesta("ERROR: SN", 400);
@@ -151,11 +157,16 @@ async function procesarMarcaciones(request, env, url) {
   // Firestore admite hasta 500 escrituras por commit. Reservamos una para
   // actualizar el estado del reloj y mantenemos margen para futuros campos.
   const eventosLimitados = eventos.slice(0, 400);
-  const rutasVinculos = [...new Set(eventosLimitados.map((evento) => `vinculosReloj/${idVinculo(serial, evento.pin)}`))];
+  const rutasVinculos = [...new Set(eventosLimitados.flatMap((evento) => {
+    const normalizado = normalizarPin(evento.pin);
+    return normalizado === evento.pin
+      ? [`vinculosReloj/${idVinculo(serial, evento.pin)}`]
+      : [`vinculosReloj/${idVinculo(serial, normalizado)}`, `vinculosReloj/${idVinculo(serial, evento.pin)}`];
+  }))];
   const vinculos = await obtenerDocumentos(env, rutasVinculos, token);
   const escrituras = [];
   for (const evento of eventosLimitados) {
-    const vinculo = vinculos.get(idVinculo(serial, evento.pin));
+    const vinculo = vinculos.get(idVinculo(serial, normalizarPin(evento.pin))) || vinculos.get(idVinculo(serial, evento.pin));
     const clave = await hashCorto(`${serial}|${evento.pin}|${evento.fecha}|${evento.hora}|${evento.estado}`);
     if (!vinculo || vinculo.estado !== "ACTIVO" || vinculo.empresaId !== reloj.empresaId || !vinculo.colaboradorId) {
       escrituras.push({ update: { name: nombreDocumento(env, `marcacionesRelojPendientes/${clave}`), fields: codificarCampos({ empresaId: reloj.empresaId, relojSerial: serial, relojNombre: reloj.nombre || "Reloj ZKTeco", pin: evento.pin, fecha: evento.fecha, hora: evento.hora, estadoReloj: evento.estado, motivo: "PIN_NO_VINCULADO", recibidoEn: new Date() }) } });
