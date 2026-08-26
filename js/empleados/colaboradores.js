@@ -29,17 +29,17 @@ function onSnapshot(...argumentos){
 import {
     iniciarCargaMasivaColaboradores
 }
-from "./carga-masiva-colaboradores.js?v=20260825-3";
+from "./carga-masiva-colaboradores.js?v=20260826-1";
 
 import {
     iniciarDesactivacionMasiva
 }
-from "./desactivar-colaboradores.js";
+from "./desactivar-colaboradores.js?v=20260826-1";
 
 import {
     iniciarActivacionMasiva
 }
-from "./activar-colaboradores.js?v=20260825-2";
+from "./activar-colaboradores.js?v=20260826-1";
 
 import {
     iniciarEliminacionMasiva
@@ -57,6 +57,7 @@ import {
 from "./horarios-asignaciones.js?v=20260822-2";
 
 import { validarCupoColaboradores } from "../suscripcion-limites.js?v=20260825-2";
+import { sincronizarColaboradorConRelojes } from "./sincronizacion-relojes.js?v=20260826-1";
 
 export function iniciarColaboradores(){
 
@@ -3191,6 +3192,11 @@ const datosColaborador = {
 };
 
 
+let colaboradorGuardadoId = colaboradorEditandoId;
+const estadoGuardado = colaboradorEditandoId
+? String(colaboradores.find((item) => item.id === colaboradorEditandoId)?.estado || "ACTIVO").toUpperCase()
+: "ACTIVO";
+
 if(colaboradorEditandoId){
 
     const referenciaColaborador =
@@ -3234,7 +3240,7 @@ if(colaboradorEditandoId){
 }
 else{
 
-    await addDoc(
+    const referenciaCreada = await addDoc(
 
         collection(
             db,
@@ -3254,6 +3260,8 @@ else{
 
     );
 
+    colaboradorGuardadoId = referenciaCreada.id;
+
 
     cerrarModalColaborador();
 
@@ -3272,6 +3280,13 @@ else{
 
     });
 
+}
+
+try{
+    await sincronizarColaboradorConRelojes({ id: colaboradorGuardadoId, ...datosColaborador, estado:estadoGuardado }, { estado:estadoGuardado });
+}
+catch(errorSincronizacion){
+    console.warn("El colaborador se guardó, pero el reloj se sincronizará posteriormente:", errorSincronizacion);
 }
 
 /* Esta llave cierra el try */
