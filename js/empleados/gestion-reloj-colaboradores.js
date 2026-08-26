@@ -38,12 +38,12 @@ async function elegirReloj(empresaId) {
 }
 
 async function esperarUsuarios(empresaId, serial, solicitadoEn) {
-  for (let intento = 0; intento < 20; intento += 1) {
+  for (let intento = 0; intento < 50; intento += 1) {
     await new Promise((resolver) => setTimeout(resolver, 3000));
     const resultado = await getDocs(query(collection(db, "usuariosRelojDetectados"), where("empresaId", "==", empresaId)));
     const usuarios = resultado.docs.map((item) => ({ id:item.id, ...item.data() })).filter((item) => item.relojSerial === serial && Number(item.detectadoEn?.seconds || 0) * 1000 >= solicitadoEn - 5000);
     if (usuarios.length) return usuarios;
-    Swal.update({ html:`Esperando respuesta del reloj…<br><small>Intento ${intento + 1} de 20</small>` });
+    Swal.update({ html:`Esperando respuesta del reloj…<br><small>Intento ${intento + 1} de 50</small>` });
   }
   return [];
 }
