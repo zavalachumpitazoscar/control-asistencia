@@ -1,5 +1,6 @@
 const FIRESTORE_SCOPE = "https://www.googleapis.com/auth/datastore";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
+const INTERVALO_COMANDOS_SEGUNDOS = 120;
 let tokenCache = null;
 
 const texto = (valor) => String(valor ?? "").trim();
@@ -136,6 +137,10 @@ export function analizarUsuariosReloj(cuerpo) {
   }).filter(Boolean);
 }
 
+export function opcionesDispositivo(serial) {
+  return `GET OPTION FROM: ${texto(serial)}\nATTLOGStamp=0\nOPERLOGStamp=0\nATTPHOTOStamp=0\nErrorDelay=${INTERVALO_COMANDOS_SEGUNDOS}\nDelay=${INTERVALO_COMANDOS_SEGUNDOS}\nTransTimes=00:00;14:05\nTransInterval=1\nTransFlag=TransData AttLog\nRealtime=1\nEncrypt=0`;
+}
+
 function tipoDesdeEstado(estado) {
   return ({ "0": "ENTRADA", "1": "SALIDA", "2": "INICIO_REFRIGERIO", "3": "FIN_REFRIGERIO", "4": "ENTRADA", "5": "SALIDA" })[estado] || "SIN_CLASIFICAR";
 }
@@ -243,7 +248,10 @@ export default {
         if (respuestaUsuarios) return respuestaUsuarios;
         return procesarMarcaciones(new Request(request.url, { method:"POST", body:cuerpo }), env, url);
       }
-      if (url.pathname === "/iclock/cdata" && request.method === "GET") return respuesta(`GET OPTION FROM: ${texto(url.searchParams.get("SN"))}\nATTLOGStamp=0\nOPERLOGStamp=0\nATTPHOTOStamp=0\nErrorDelay=30\nDelay=30\nTransTimes=00:00;14:05\nTransInterval=1\nTransFlag=TransData AttLog\nRealtime=1\nEncrypt=0`);
+      // El reloj seguirá enviando marcaciones inmediatamente mediante
+      // Realtime=1. Solo reducimos la frecuencia con la que pregunta si hay
+      // órdenes administrativas pendientes (alta u obtención de usuarios).
+      if (url.pathname === "/iclock/cdata" && request.method === "GET") return respuesta(opcionesDispositivo(url.searchParams.get("SN")));
       if (url.pathname === "/iclock/getrequest" && request.method === "GET") return entregarComandoPendiente(env, url);
       if (["/iclock/getrequest", "/iclock/devicecmd", "/iclock/ping", "/iclock/test"].includes(url.pathname)) return respuesta("OK");
       return respuesta("OK");
