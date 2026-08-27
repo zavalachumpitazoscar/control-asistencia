@@ -8,7 +8,7 @@ import {
 
 import { db } from "../firebase-config.js";
 
-import { clasificarMarcaciones } from "./clasificar-marcaciones.js?v=20260818-7";
+import { clasificarMarcaciones } from "./clasificar-marcaciones.js?v=20260827-1";
 
 import { calcularJornadaAsistencia } from "./calcular-jornada-asistencia.js";
 
@@ -586,6 +586,7 @@ async function cargarResumenAsistencia(fecha) {
           fecha,
           colaboradores,
           marcaciones,
+          registros: registrosResumen,
         },
       }),
     );
