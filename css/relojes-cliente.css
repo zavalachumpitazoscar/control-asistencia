@@ -1,2 +1,48 @@
-.relojes-cliente{display:grid;gap:18px}.relojes-encabezado,.relojes-panel,.reloj-cliente-card{background:#fff;border:1px solid #dce5f2;border-radius:18px;box-shadow:0 8px 24px rgba(27,55,95,.06)}.relojes-encabezado{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px}.relojes-encabezado h2{margin:3px 0 5px;color:#17233a}.relojes-encabezado p{margin:0;color:#627089}.relojes-kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#2f6fed}.relojes-encabezado button,.relojes-acciones button{border:0;border-radius:11px;padding:12px 15px;background:#2f6fed;color:#fff;font-weight:800;cursor:pointer}.relojes-resumen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.reloj-metrica{padding:16px;border:1px solid #dce5f2;border-radius:14px;background:#f8faff}.reloj-metrica b{display:block;font-size:1.35rem;color:#16243d}.reloj-metrica span{color:#68758c}.relojes-panel{padding:20px}.relojes-panel label{display:grid;gap:7px;font-weight:800;color:#34435d}.relojes-panel select{width:100%;padding:12px;border:1px solid #cbd7e7;border-radius:10px;background:#fff}.relojes-acciones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:15px}.relojes-acciones button{display:flex;justify-content:center;align-items:center;gap:8px}.relojes-acciones button:nth-child(2){background:#18356d}.relojes-acciones button:nth-child(3){background:#6954d9}.relojes-ayuda{margin:13px 0 0;color:#6b778b;font-size:.88rem}.relojes-lista{display:grid;gap:12px}.reloj-cliente-card{padding:18px;display:grid;grid-template-columns:1fr auto;gap:14px}.reloj-cliente-card h3{margin:0 0 5px}.reloj-cliente-card p,.reloj-cliente-card small{display:block;margin:3px 0;color:#66758c}.reloj-conexion{align-self:start;padding:7px 11px;border-radius:999px;font-weight:900;font-size:.78rem;background:#e8f8ee;color:#187a3d}.reloj-conexion.desconectado{background:#fff0f0;color:#b52939}.reloj-comandos{margin-top:9px;padding-top:9px;border-top:1px solid #edf1f7;font-size:.83rem;color:#4d5d75}@media(max-width:780px){.relojes-encabezado{align-items:flex-start;flex-direction:column}.relojes-resumen,.relojes-acciones{grid-template-columns:1fr}.reloj-cliente-card{grid-template-columns:1fr}.reloj-conexion{justify-self:start}}
-.relojes-tabs{margin:0}.reloj-colaborador-toolbar{display:grid;grid-template-columns:1fr auto;align-items:end;gap:12px}.reloj-colaborador-toolbar button{border:0;border-radius:11px;padding:12px 15px;background:#6954d9;color:#fff;font-weight:800;cursor:pointer}.reloj-colaboradores-lista{display:grid;gap:10px}.reloj-persona{display:grid;grid-template-columns:minmax(180px,1.3fr) repeat(4,minmax(95px,.65fr)) auto;align-items:center;gap:12px;padding:15px;border:1px solid #dce5f2;border-radius:14px;background:#fff}.reloj-persona h3{margin:0 0 4px;font-size:.96rem}.reloj-persona small{color:#6b778b}.reloj-dato b{display:block;color:#20304c}.reloj-dato span{font-size:.78rem;color:#6b778b}.reloj-persona-acciones{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.reloj-persona-acciones button{border:1px solid #cbd7e7;border-radius:8px;padding:7px 9px;background:#f5f8fd;color:#23406e;font-weight:800;cursor:pointer}.reloj-persona-acciones button.admin{background:#fff4df;border-color:#f0cf8c;color:#8a5700}.reloj-vacio{padding:28px;border:1px dashed #cbd7e7;border-radius:14px;text-align:center;color:#68758c;background:#fff}@media(max-width:1050px){.reloj-persona{grid-template-columns:1fr 1fr}.reloj-persona-acciones{justify-content:flex-start}}@media(max-width:650px){.reloj-colaborador-toolbar,.reloj-persona{grid-template-columns:1fr}}
+.relojes-cliente{display:flex;flex-direction:column;gap:14px;color:#172033}
+.relojes-encabezado{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:4px 4px 2px}
+.relojes-encabezado h2{margin:4px 0;color:#111827;font-size:22px}
+.relojes-encabezado p{margin:0;color:#64748b;font-size:12px}
+.relojes-kicker{color:#2563eb;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.relojes-encabezado button,.relojes-acciones button,.reloj-colaborador-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:9px 14px;border:1px solid #d6e0ef;border-radius:10px;color:#38506f;background:#fff;font:inherit;font-size:12px;font-weight:750;cursor:pointer;transition:border-color .2s ease,background .2s ease,color .2s ease,transform .2s ease}
+.relojes-encabezado button:hover,.reloj-colaborador-toolbar button:hover{border-color:#93b4f5;color:#1d4ed8;background:#f8fbff}
+.relojes-tabs{display:flex;gap:4px;padding:6px;border:1px solid #dce5f1;border-radius:14px;background:#fff}
+.relojes-tabs .tab{padding:9px 14px;border-radius:9px;color:#64748b;background:transparent;font-size:11px}
+.relojes-tabs .tab:hover{background:#f4f7fb;color:#334155}
+.relojes-tabs .tab.activo{color:#2563eb;background:#edf4ff}
+[data-reloj-panel]{display:flex;flex-direction:column;gap:12px}
+[data-reloj-panel][hidden]{display:none}
+.relojes-resumen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.reloj-metrica{position:relative;padding:16px 18px 15px;overflow:hidden;border:1px solid #e0e7f0;border-radius:14px;background:#fff}
+.reloj-metrica::before{position:absolute;inset:0 auto 0 0;width:3px;background:#3b82f6;content:""}
+.reloj-metrica b{display:block;color:#0f172a;font-size:20px;line-height:1.15}
+.reloj-metrica span{display:block;margin-top:5px;color:#64748b;font-size:11px}
+.relojes-panel,.reloj-cliente-card,.reloj-persona,.reloj-vacio{border:1px solid #e0e7f0;border-radius:15px;background:#fff}
+.relojes-panel{padding:17px 18px}
+.relojes-panel label{display:grid;gap:6px;color:#475569;font-size:11px;font-weight:750}
+.relojes-panel select{width:100%;min-height:41px;padding:9px 12px;border:1px solid #cbd7e7;border-radius:10px;color:#1e293b;background:#fff;font:inherit}
+.relojes-acciones{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:13px}
+.relojes-acciones button{min-width:0}
+.relojes-acciones button:first-child{border-color:#2563eb;color:#fff;background:#2563eb}
+.relojes-acciones button:first-child:hover{background:#1d4ed8}
+.relojes-acciones button:nth-child(2):hover{border-color:#93b4f5;color:#1d4ed8;background:#eff6ff}
+.relojes-acciones button:nth-child(3):hover{border-color:#c4b5fd;color:#6d28d9;background:#f5f3ff}
+.relojes-ayuda{margin:12px 0 0;color:#7b879a;font-size:10.5px;line-height:1.5}
+.relojes-lista,.reloj-colaboradores-lista{display:grid;gap:9px}
+.reloj-cliente-card{display:grid;grid-template-columns:1fr auto;align-items:start;gap:16px;padding:16px 18px}
+.reloj-cliente-card h3{margin:0 0 4px;color:#162033;font-size:15px}
+.reloj-cliente-card p,.reloj-cliente-card small{display:block;margin:3px 0;color:#64748b;font-size:10.5px}
+.reloj-conexion{padding:6px 10px;border-radius:999px;color:#168447;background:#e7f8ee;font-size:9px;font-weight:850;letter-spacing:.04em}
+.reloj-conexion.desconectado{color:#b42335;background:#fff0f1}
+.reloj-comandos{margin-top:10px;padding-top:9px;border-top:1px solid #edf1f6;color:#52627a;font-size:10px}
+.reloj-colaborador-toolbar{display:grid;grid-template-columns:minmax(260px,1fr) auto;align-items:end;gap:10px}
+.reloj-persona{display:grid;grid-template-columns:minmax(190px,1.35fr) repeat(4,minmax(90px,.62fr)) auto;align-items:center;gap:12px;padding:13px 15px}
+.reloj-persona h3{margin:0 0 4px;color:#172033;font-size:13px}
+.reloj-persona small{color:#718096;font-size:10px}
+.reloj-dato b{display:block;color:#26354d;font-size:12px}
+.reloj-dato span{display:block;margin-top:2px;color:#7a879a;font-size:9px}
+.reloj-persona-acciones{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.reloj-persona-acciones button{padding:7px 9px;border:1px solid #d6e0ef;border-radius:8px;color:#31517e;background:#f8fbff;font-size:9px;font-weight:750;cursor:pointer}
+.reloj-persona-acciones button.admin{border-color:#efd59d;color:#8a5b0a;background:#fff9eb}
+.reloj-vacio{padding:28px;text-align:center;color:#718096;font-size:11px}
+@media(max-width:1050px){.reloj-persona{grid-template-columns:1fr 1fr}.reloj-persona-acciones{justify-content:flex-start}}
+@media(max-width:780px){.relojes-encabezado{align-items:flex-start;flex-direction:column}.relojes-resumen{grid-template-columns:1fr}.relojes-tabs{overflow-x:auto;flex-wrap:nowrap}.relojes-tabs .tab{flex:0 0 auto}.relojes-acciones{align-items:stretch;flex-direction:column}.relojes-acciones button{width:100%}.reloj-cliente-card,.reloj-colaborador-toolbar,.reloj-persona{grid-template-columns:1fr}.reloj-conexion{justify-self:start}}
