@@ -11,6 +11,7 @@ const fechaVisible=(v)=>{const ms=fechaMs(v);return ms?new Date(ms).toLocaleStri
 const estaConectado=(r)=>Date.now()-fechaMs(r.ultimaConexionEn)<7*60*1000;
 const comando=(contenido)=>`C:${Date.now()}${Math.floor(Math.random()*900+100)}:${contenido}`;
 let relojes=[],colaboradores=[],usuariosReloj=[];
+let busquedaColaborador="",filtroProcedencia="";
 
 async function cargar(){
   const id=empresaId();if(!id)return;
@@ -43,10 +44,29 @@ function usuariosDelReloj(){
   const reloj=relojActual("relojColaboradoresSelector");
   return reloj?usuariosReloj.filter(u=>u.relojSerial===reloj.id).sort((a,b)=>texto(a.nombre).localeCompare(texto(b.nombre),"es")):[];
 }
+function normalizarDocumento(valor){return texto(valor).replace(/\D/g,"").replace(/^0+(?=\d)/,"");}
+function documentoColaborador(colaborador){return texto(colaborador?.documento?.numero||colaborador?.numeroDocumento||colaborador?.documentoNumero);}
+function colaboradorEnSistema(usuario){
+  const pin=normalizarDocumento(usuario.pin);
+  return colaboradores.find(colaborador=>normalizarDocumento(documentoColaborador(colaborador))===pin)||null;
+}
 function renderizarColaboradores(){
-  const lista=usuariosDelReloj(),administradores=lista.filter(u=>texto(u.privilegio)!=="0").length;
-  document.getElementById("relojColaboradoresResumen").innerHTML=`<div class="reloj-metrica"><b>${lista.length}</b><span>Colaboradores en el reloj</span></div><div class="reloj-metrica"><b>${lista.filter(u=>(u.huellasRegistradas||0)>0).length}</b><span>Con huellas detectadas</span></div><div class="reloj-metrica"><b>${administradores}</b><span>Administradores del equipo</span></div>`;
-  document.getElementById("relojColaboradoresLista").innerHTML=lista.length?lista.map(u=>`<article class="reloj-persona"><div><h3>${escapar(u.nombre||"Sin nombre")}</h3><small>Código o DNI en reloj: ${escapar(u.pin)}</small></div><div class="reloj-dato"><b>${u.huellasRegistradas??"—"}</b><span>Huellas</span></div><div class="reloj-dato"><b>${u.rostrosRegistrados??"—"}</b><span>Rostros</span></div><div class="reloj-dato"><b>${u.tienePassword?"Sí":"No"}</b><span>Contraseña</span></div><div class="reloj-dato"><b>${texto(u.privilegio)!=="0"?"Administrador":"Usuario"}</b><span>Privilegio</span></div><div class="reloj-persona-acciones"><button data-password-pin="${escapar(u.pin)}">Cambiar contraseña</button><button class="admin" data-privilegio-pin="${escapar(u.pin)}" data-privilegio="${texto(u.privilegio)!=="0"?"0":"14"}">${texto(u.privilegio)!=="0"?"Quitar administrador":"Hacer administrador"}</button></div></article>`).join(""):'<div class="reloj-vacio">Obtén los colaboradores del reloj para consultar sus datos.</div>';
+  const todos=usuariosDelReloj().map(usuario=>({...usuario,colaboradorSistema:colaboradorEnSistema(usuario)}));
+  const sistemaYReloj=todos.filter(usuario=>usuario.colaboradorSistema).length,soloReloj=todos.length-sistemaYReloj;
+  const termino=busquedaColaborador.toLocaleLowerCase("es");
+  const lista=todos.filter(usuario=>{
+    const procedencia=usuario.colaboradorSistema?"SISTEMA_RELOJ":"SOLO_RELOJ";
+    const coincideProcedencia=!filtroProcedencia||filtroProcedencia===procedencia;
+    const coincideBusqueda=!termino||`${texto(usuario.nombre)} ${texto(usuario.pin)}`.toLocaleLowerCase("es").includes(termino);
+    return coincideProcedencia&&coincideBusqueda;
+  });
+  document.getElementById("relojColaboradoresResumen").innerHTML=`<div class="reloj-metrica"><b>${todos.length}</b><span>Colaboradores en el reloj</span></div><div class="reloj-metrica"><b>${sistemaYReloj}</b><span>Sistema y reloj</span></div><div class="reloj-metrica"><b>${soloReloj}</b><span>Solo en el reloj</span></div>`;
+  document.getElementById("relojColaboradoresLista").innerHTML=lista.length?lista.map(u=>{
+    const esAdmin=texto(u.privilegio)!=="0";
+    const procedencia=u.colaboradorSistema?'<span class="reloj-origen sistema"><i class="bi bi-check2-circle"></i> Sistema y reloj</span>':'<span class="reloj-origen solo"><i class="bi bi-exclamation-circle"></i> Solo en reloj</span>';
+    const accionAdmin=esAdmin?`<span class="reloj-admin-etiqueta"><i class="bi bi-shield-lock"></i> Administrador</span><button class="admin" data-privilegio-pin="${escapar(u.pin)}" data-privilegio="0">Quitar administrador</button>`:`<button class="admin" data-privilegio-pin="${escapar(u.pin)}" data-privilegio="14">Hacer administrador</button>`;
+    return `<article class="reloj-persona"><div><div class="reloj-persona-titulo"><h3>${escapar(u.nombre||"Sin nombre")}</h3>${procedencia}</div><small>Código o DNI en reloj: ${escapar(u.pin)}</small></div><div class="reloj-dato"><b>${u.huellasRegistradas??"—"}</b><span>Huellas</span></div><div class="reloj-dato"><b>${u.rostrosRegistrados??"—"}</b><span>Rostros</span></div><div class="reloj-dato"><b>${u.tienePassword?"Sí":"No"}</b><span>Contraseña</span></div><div class="reloj-dato"><b>${esAdmin?"Administrador":"Usuario"}</b><span>Privilegio</span></div><div class="reloj-persona-acciones"><button data-password-pin="${escapar(u.pin)}">Cambiar contraseña</button>${accionAdmin}</div></article>`;
+  }).join(""):`<div class="reloj-vacio">${todos.length?"No hay colaboradores que coincidan con la búsqueda o el filtro.":"Obtén los colaboradores del reloj para consultar sus datos."}</div>`;
 }
 async function encolar(reloj,comandos){
   await updateDoc(doc(db,"relojesBiometricos",reloj.id),{comandosPendientes:arrayUnion(...comandos),comandosActualizadosEn:serverTimestamp()});
@@ -71,7 +91,7 @@ async function cambiarPassword(pin){
 async function cambiarPrivilegio(pin,privilegio){
   const reloj=relojActual("relojColaboradoresSelector");if(!reloj)return;
   const hacerAdmin=privilegio==="14";
-  const r=await Swal.fire({icon:"warning",title:hacerAdmin?"Convertir en administrador":"Quitar privilegio de administrador",text:hacerAdmin?"Este colaborador podrá abrir el menú protegido del equipo usando sus credenciales registradas.":"El colaborador conservará sus marcaciones y credenciales, pero perderá acceso al menú.",showCancelButton:true,confirmButtonText:"Confirmar",cancelButtonText:"Cancelar"});
+  const r=await Swal.fire({icon:"warning",title:hacerAdmin?"Convertir en administrador":"Quitar privilegio de administrador",text:hacerAdmin?"Este colaborador podrá abrir el menú protegido del equipo usando sus credenciales registradas.":"El colaborador conservará sus marcaciones y credenciales, pero perderá acceso al menú protegido. Si no queda otro administrador, el equipo dejará de solicitar credenciales para abrir ese menú.",showCancelButton:true,confirmButtonText:hacerAdmin?"Hacer administrador":"Quitar administrador",cancelButtonText:"Cancelar"});
   if(!r.isConfirmed)return;
   await encolar(reloj,[comando(`DATA UPDATE USERINFO PIN=${pin}\tPri=${privilegio}`)]);
   await Swal.fire({icon:"success",title:"Cambio programado",text:"El reloj aplicará el privilegio en su próxima consulta."});
@@ -80,6 +100,8 @@ export async function iniciarRelojes(){
   document.querySelectorAll("[data-reloj-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-reloj-tab]").forEach(x=>x.classList.toggle("activo",x===b));document.querySelectorAll("[data-reloj-panel]").forEach(p=>p.hidden=p.dataset.relojPanel!==b.dataset.relojTab);}));
   document.getElementById("relojesActualizar")?.addEventListener("click",cargar);
   document.getElementById("relojColaboradoresSelector")?.addEventListener("change",renderizarColaboradores);
+  document.getElementById("relojBuscarColaborador")?.addEventListener("input",evento=>{busquedaColaborador=texto(evento.target.value);renderizarColaboradores();});
+  document.getElementById("relojFiltroProcedencia")?.addEventListener("change",evento=>{filtroProcedencia=texto(evento.target.value);renderizarColaboradores();});
   document.getElementById("relojActualizarDetalles")?.addEventListener("click",actualizarDetalles);
   document.getElementById("relojSolicitarMarcaciones")?.addEventListener("click",()=>programar("DATA QUERY ATTLOG","El reloj enviará inmediatamente las marcaciones almacenadas."));
   document.getElementById("relojSincronizarEmpleados")?.addEventListener("click",async()=>{const reloj=relojActual();if(!reloj)return;const activos=colaboradores.filter(c=>c.estado!=="INACTIVO"),inactivos=colaboradores.filter(c=>c.estado==="INACTIVO");const r=await Swal.fire({icon:"question",title:"Sincronizar empleados",html:`Se enviarán <b>${activos.length}</b> activos y se retirarán <b>${inactivos.length}</b> inactivos de <b>${escapar(reloj.nombre||reloj.id)}</b>.<br><small>Los usuarios existentes conservarán contraseña, huellas, rostro, tarjeta y privilegios.</small>`,showCancelButton:true,confirmButtonText:"Sincronizar",cancelButtonText:"Cancelar"});if(!r.isConfirmed)return;await sincronizarColaboradoresConRelojes(activos,{estado:"ACTIVO",relojSeriales:[reloj.id]});await sincronizarColaboradoresConRelojes(inactivos,{estado:"INACTIVO",relojSeriales:[reloj.id]});await Swal.fire({icon:"success",title:"Sincronización programada",text:"El reloj procesará las órdenes en aproximadamente 30 segundos."});await cargar();});

@@ -26,6 +26,10 @@
         <label>Mostrar colaboradores del reloj<select id="relojColaboradoresSelector"></select></label>
         <button id="relojActualizarDetalles" type="button"><i class="bi bi-arrow-repeat"></i> Actualizar desde el reloj</button>
       </div>
+      <div class="reloj-colaborador-filtros">
+        <label class="reloj-buscador"><i class="bi bi-search"></i><input id="relojBuscarColaborador" type="search" placeholder="Buscar por nombre o código/DNI" autocomplete="off"></label>
+        <label>Procedencia<select id="relojFiltroProcedencia"><option value="">Todos</option><option value="SISTEMA_RELOJ">Sistema y reloj</option><option value="SOLO_RELOJ">Solo en reloj</option></select></label>
+      </div>
       <p class="relojes-ayuda">Se muestran estados y cantidades. Las plantillas de huella y rostro nunca se guardan en Firestore.</p>
     </div>
     <div id="relojColaboradoresResumen" class="relojes-resumen"></div>
