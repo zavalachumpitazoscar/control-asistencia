@@ -72,8 +72,11 @@ export function clasificarMarcaciones({
 
 
     /*
-        Primero respetamos las marcaciones manuales
-        que ya tienen un tipo explícito.
+        Con horario, las ventanas configuradas tienen prioridad sobre el
+        botón o tipo enviado por el reloj/móvil. Solo una corrección hecha
+        por un administrador conserva su tipo explícito.
+
+        Sin horario, el tipo declarado sí es la única referencia disponible.
     */
 
     marcas.forEach(marcacion=>{
@@ -92,14 +95,23 @@ export function clasificarMarcaciones({
         if(tipo === "FIN_ALMUERZO") tipo = "FIN_REFRIGERIO";
 
 
-        const esMarcacionMovil =
-            String(marcacion.origen || "").trim().toUpperCase() === "MOVIL";
+        const origen = String(marcacion.origen || "").trim().toUpperCase();
+        const esCorreccionAdministrativa =
+            origen === "MANUAL" ||
+            origen === "REGULARIZACION" ||
+            Boolean(marcacion.registradaManualmentePor) ||
+            Boolean(marcacion.regularizacionId);
 
-        // Con horario asignado, una marcación móvil se interpreta por la
-        // hora oficial guardada y las ventanas del horario. El botón pulsado
-        // se conserva como referencia, pero no decide la clasificación.
-        if(esMarcacionMovil && existenHorarios){
+        if(existenHorarios && !esCorreccionAdministrativa){
             marcacion.tipoSolicitado = tipo;
+            return;
+        }
+
+        // Sin horario solo existen entrada y salida. Los tipos de refrigerio
+        // necesitan ventanas configuradas para poder interpretarse.
+        if(!existenHorarios && ["INICIO_REFRIGERIO","FIN_REFRIGERIO"].includes(tipo)){
+            marcacion.tipoSolicitado = tipo;
+            marcacion.motivoSinClasificar = "TIPO_SIN_HORARIO";
             return;
         }
 
@@ -119,6 +131,11 @@ export function clasificarMarcaciones({
         }
 
     });
+
+    if(!existenHorarios){
+        invalidarTiposRepetidosSinHorario(marcas, "ENTRADA", "PRIMERA");
+        invalidarTiposRepetidosSinHorario(marcas, "SALIDA", "ULTIMA");
+    }
 
 
     const horariosOrdenados =
@@ -246,6 +263,17 @@ clasificarHorario(
 
     return resultado;
 
+}
+
+function invalidarTiposRepetidosSinHorario(marcaciones, tipo, conservar){
+    const candidatas = marcaciones.filter(marcacion=>marcacion.tipoInterpretado===tipo);
+    if(candidatas.length<=1) return;
+    const valida = conservar==="ULTIMA" ? candidatas[candidatas.length-1] : candidatas[0];
+    candidatas.forEach(marcacion=>{
+        if(marcacion===valida) return;
+        marcacion.tipoInterpretado=null;
+        marcacion.motivoSinClasificar="TIPO_REPETIDO_SIN_HORARIO";
+    });
 }
 
 

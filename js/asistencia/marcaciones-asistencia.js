@@ -26,6 +26,7 @@ export function iniciarMarcacionesAsistencia() {
 
   buscarMarcaciones?.addEventListener("input", renderizarMarcaciones);
   cuerpoMarcaciones.addEventListener("click", abrirFotoMarcacion);
+  cuerpoMarcaciones.addEventListener("click", corregirMarcacionInvalida);
 
   document
     .getElementById("btnDiaAnteriorMarcaciones")
@@ -54,20 +55,28 @@ export function iniciarMarcacionesAsistencia() {
     const fecha = evento.detail?.fecha;
     const colaboradores = evento.detail?.colaboradores || [];
     const marcaciones = evento.detail?.marcaciones || [];
+    const registros = evento.detail?.registros || [];
 
-    prepararMarcaciones(fecha, colaboradores, marcaciones);
+    prepararMarcaciones(fecha, colaboradores, marcaciones, registros);
   });
 }
 
-function prepararMarcaciones(fecha, colaboradores, marcaciones) {
+function prepararMarcaciones(fecha, colaboradores, marcaciones, registros = []) {
   const colaboradoresPorId = new Map(
     colaboradores.map((colaborador) => [colaborador.id, colaborador]),
+  );
+  const registrosPorColaborador = new Map(
+    registros.map((registro) => [registro.colaboradorId, registro]),
   );
 
   marcacionesDia = marcaciones
     .filter((marcacion) => marcacion.fecha === fecha)
     .map((marcacion) => {
       const colaborador = colaboradoresPorId.get(marcacion.colaboradorId) || {};
+      const registro = registrosPorColaborador.get(marcacion.colaboradorId) || null;
+      const clasificada = registro?.clasificacion?.todas?.find(
+        (item) => item.id === marcacion.id,
+      ) || null;
 
       const nombres =
         colaborador.datosPersonales?.nombres || colaborador.nombres || "";
@@ -91,6 +100,13 @@ function prepararMarcaciones(fecha, colaboradores, marcaciones) {
           colaborador.documento ||
           colaborador.dni ||
           "—",
+        tipoInterpretadoCalculado: clasificada?.tipoInterpretado || null,
+        motivoSinClasificar: clasificada?.motivoSinClasificar || null,
+        estadoCalculado: clasificada && !clasificada.tipoInterpretado
+          ? "INVALIDA"
+          : String(marcacion.estado || "VALIDA").toUpperCase(),
+        registroAsistencia: registro,
+        marcacionClasificada: clasificada,
       };
     })
     .sort((primera, segunda) => {
@@ -121,10 +137,16 @@ function renderizarMarcaciones() {
 
   cuerpoMarcaciones.innerHTML = filtradas
     .map((marcacion) => {
-      const estado = String(marcacion.estado || "VALIDA").toUpperCase();
-      const tipo = formatearEtiqueta(marcacion.tipo || "SIN_CLASIFICAR");
+      const estado = String(marcacion.estadoCalculado || marcacion.estado || "VALIDA").toUpperCase();
+      const tipo = formatearEtiqueta(marcacion.tipoInterpretadoCalculado || marcacion.tipo || "SIN_CLASIFICAR");
       const origen = formatearEtiqueta(marcacion.origen || "NO_INDICADO");
       const claseEstado = estado === "VALIDA" ? "valida" : "inactiva";
+      const detalleTipo = marcacion.tipoInterpretadoCalculado && marcacion.tipoInterpretadoCalculado !== marcacion.tipo
+        ? `<small>Declarada: ${escaparHTML(formatearEtiqueta(marcacion.tipo || "SIN_CLASIFICAR"))}</small>`
+        : (estado === "INVALIDA" ? `<small>${escaparHTML(motivoInvalidez(marcacion))}</small>` : "");
+      const accion = estado === "INVALIDA"
+        ? `<button type="button" class="btn-tabla-asistencia" data-corregir-marcacion="${escaparHTML(marcacion.id || "")}"><i class="bi bi-pencil-square"></i> Corregir</button>`
+        : '<span class="asistencia-estado-desarrollo">Solo lectura</span>';
 
       return `
             <tr>
@@ -135,20 +157,26 @@ function renderizarMarcaciones() {
                 <td>${escaparHTML(marcacion.colaboradorDocumento)}</td>
                 <td>${escaparHTML(formatearFecha(marcacion.fecha))}</td>
                 <td><span class="marcacion-hora">${escaparHTML(formatearHoraMarcacion(marcacion))}</span></td>
-                <td><span class="marcacion-tipo">${escaparHTML(tipo)}</span></td>
+                <td><span class="marcacion-tipo">${escaparHTML(tipo)}${detalleTipo}</span></td>
                 <td><span class="marcacion-origen">${escaparHTML(origen)}</span></td>
                 <td><span class="marcacion-estado ${claseEstado}">${escaparHTML(formatearEtiqueta(estado))}</span></td>
                 <td>${renderizarUbicacion(marcacion)}</td>
                 <td>${renderizarDireccion(marcacion)}</td>
                 <td>${renderizarComentario(marcacion)}</td>
                 <td>${renderizarFoto(marcacion)}</td>
-                <td><span class="asistencia-estado-desarrollo">Solo lectura</span></td>
+                <td>${accion}</td>
             </tr>
         `;
     })
     .join("");
 
   actualizarInformacion(filtradas.length);
+}
+
+function motivoInvalidez(marcacion) {
+  if (marcacion.motivoSinClasificar === "TIPO_REPETIDO_SIN_HORARIO") return "Tipo repetido sin horario";
+  if (marcacion.motivoSinClasificar === "TIPO_SIN_HORARIO") return "Tipo no disponible sin horario";
+  return "Fuera de la ventana del horario";
 }
 
 function mostrarMensaje(mensaje) {
@@ -263,6 +291,31 @@ function abrirFotoMarcacion(evento) {
     confirmButtonText: "Cerrar",
     confirmButtonColor: "#2563eb",
   });
+}
+
+function corregirMarcacionInvalida(evento) {
+  const boton = evento.target.closest("[data-corregir-marcacion]");
+  if (!boton) return;
+  const marcacion = marcacionesDia.find((item) => item.id === boton.dataset.corregirMarcacion);
+  const registro = marcacion?.registroAsistencia;
+  const clasificada = marcacion?.marcacionClasificada || marcacion;
+  if (!marcacion || !registro) return;
+  document.dispatchEvent(new CustomEvent("asistencia:editar-marcacion-existente", {
+    detail: {
+      colaboradorId: marcacion.colaboradorId,
+      colaboradorNombre: marcacion.colaboradorNombre,
+      fecha: marcacion.fecha,
+      tipo: marcacion.tipo || "ENTRADA",
+      marcacion: clasificada,
+      horarioId: registro.horarioPrincipal?.id || null,
+      horario: registro.horarioPrincipal || null,
+      entradaActual: registro.entrada || null,
+      salidaActual: registro.salida || null,
+      inicioRefrigerioActual: registro.clasificacion?.inicioRefrigerio || null,
+      finRefrigerioActual: registro.clasificacion?.finRefrigerio || null,
+      refrigerio: registro.horarioPrincipal?.refrigerio || null,
+    },
+  }));
 }
 
 function formatearEtiqueta(valor) {
