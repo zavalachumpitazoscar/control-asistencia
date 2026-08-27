@@ -1,4 +1,4 @@
-import { arrayUnion, collection, doc, getDocs, query, serverTimestamp, updateDoc, where } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { arrayUnion, collection, deleteDoc, doc, getDocs, query, serverTimestamp, updateDoc, where } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 import { sincronizarColaboradoresConRelojes } from "./empleados/sincronizacion-relojes.js?v=20260826-3";
 import { obtenerEImportarUsuariosReloj } from "./empleados/gestion-reloj-colaboradores.js?v=20260826-3";
@@ -26,6 +26,19 @@ async function cargar(){
   usuariosReloj=u.docs.map(d=>({id:d.id,...d.data()}));
   renderizar();
 }
+async function actualizarVista(){
+  const boton=document.getElementById("relojesActualizar"),contenidoOriginal=boton?.innerHTML;
+  if(boton){boton.disabled=true;boton.innerHTML='<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Actualizando...';}
+  try{
+    await cargar();
+    await Swal.fire({toast:true,position:"top-end",icon:"success",title:"Información actualizada",showConfirmButton:false,timer:1800,timerProgressBar:true});
+  }catch(error){
+    console.error("No se pudo actualizar la sección de relojes:",error);
+    await Swal.fire({icon:"error",title:"No se pudo actualizar",text:"Revisa tu conexión e inténtalo nuevamente."});
+  }finally{
+    if(boton){boton.disabled=false;boton.innerHTML=contenidoOriginal||'<i class="bi bi-arrow-clockwise"></i> Actualizar';}
+  }
+}
 function actualizarSelectores(){
   ["relojesSelector","relojColaboradoresSelector"].forEach(id=>{
     const s=document.getElementById(id),actual=s?.value;if(!s)return;
@@ -44,9 +57,17 @@ function renderizar(){
 function descripcionComando(valor){const c=texto(valor);if(c.includes("ATTLOG"))return"Solicitar marcaciones";if(c.includes("USERINFO"))return"Consultar o actualizar usuarios";if(c.includes("FINGERTMP"))return"Consultar huellas";if(c.includes("FACE"))return"Consultar rostros";if(c.includes("DateTime"))return"Sincronizar hora";if(c.includes("REBOOT"))return"Reiniciar equipo";if(c.includes("DELETE USERINFO"))return"Retirar colaborador";return"Comando administrativo";}
 function renderizarActividad(){const reloj=relojActual(),alerta=document.getElementById("relojAlertaDesconexion");if(!reloj||!alerta)return;const minutos=Math.floor((Date.now()-fechaMs(reloj.ultimaConexionEn))/60000),desconectado=!estaConectado(reloj);alerta.innerHTML=desconectado?`<div class="reloj-alerta"><i class="bi bi-wifi-off"></i><div><b>Reloj desconectado</b><span>Sin comunicación hace ${Number.isFinite(minutos)?minutos:"—"} minutos.</span></div></div>`:"";document.getElementById("relojInformacionEquipo").innerHTML=`<div><span>Nombre</span><b>${escapar(reloj.nombre||"Reloj ZKTeco")}</b></div><div><span>Modelo</span><b>${escapar(reloj.modelo||"No informado")}</b></div><div><span>Número de serie</span><b>${escapar(reloj.id)}</b></div><div><span>Firmware</span><b>${escapar(reloj.firmware||"Pendiente de consultar")}</b></div><div><span>Usuarios detectados</span><b>${reloj.usuariosDetectados??"—"}</b></div><div><span>Capacidad / memoria</span><b>${escapar(reloj.capacidadDisponible||"Pendiente de consultar")}</b></div>`;const conexiones=(reloj.historialConexion||[]).slice().sort((a,b)=>fechaMs(b.fecha)-fechaMs(a.fecha)).slice(0,30);document.getElementById("relojHistorialConexion").innerHTML=conexiones.length?conexiones.map(x=>`<div><i class="bi ${x.tipo==="DESCONECTADO"?"bi-wifi-off":"bi-wifi"}"></i><span><b>${escapar(x.tipo||"CONEXIÓN")}</b><small>${escapar(fechaVisible(x.fecha))}</small></span></div>`).join(""):'<div class="reloj-vacio">El historial comenzará desde esta actualización.</div>';const historial=(reloj.historialComandos||[]).slice().sort((a,b)=>fechaMs(b.fecha||b.enviadoEn)-fechaMs(a.fecha||a.enviadoEn)).slice(0,50);document.getElementById("relojHistorialComandos").innerHTML=historial.length?historial.map(x=>`<div><i class="bi bi-terminal"></i><span><b>${escapar(x.descripcion||descripcionComando(x.comando))}</b><small>${escapar(x.estado||"PROGRAMADO")} · ${escapar(fechaVisible(x.enviadoEn||x.fecha))}</small></span></div>`).join(""):'<div class="reloj-vacio">Todavía no hay comandos registrados.</div>';}
 function relojActual(id="relojesSelector"){return relojes.find(r=>r.id===document.getElementById(id)?.value);}
+function retiradoDespuesDeDetectarlo(usuario,reloj){
+  const detectadoEn=fechaMs(usuario.detectadoEn);
+  return (reloj?.historialComandos||[]).some(item=>{
+    const valor=texto(item.comando),enviadoEn=fechaMs(item.enviadoEn||item.fecha);
+    const pin=valor.match(/DELETE USERINFO PIN=([^\\t\\s]+)/i)?.[1];
+    return pin===texto(usuario.pin)&&enviadoEn>=detectadoEn&&texto(item.estado)!=="PROGRAMADO";
+  });
+}
 function usuariosDelReloj(){
   const reloj=relojActual("relojColaboradoresSelector");
-  return reloj?usuariosReloj.filter(u=>u.relojSerial===reloj.id).sort((a,b)=>texto(a.nombre).localeCompare(texto(b.nombre),"es")):[];
+  return reloj?usuariosReloj.filter(u=>u.relojSerial===reloj.id&&!retiradoDespuesDeDetectarlo(u,reloj)).sort((a,b)=>texto(a.nombre).localeCompare(texto(b.nombre),"es")):[];
 }
 function normalizarDocumento(valor){return texto(valor).replace(/\D/g,"").replace(/^0+(?=\d)/,"");}
 function documentoColaborador(colaborador){return texto(colaborador?.documento?.numero||colaborador?.numeroDocumento||colaborador?.documentoNumero);}
@@ -83,10 +104,10 @@ function renderizarColaboradores(){
   document.getElementById("relojColaboradoresPaginacion").innerHTML=`<span>Mostrando ${desde}–${hasta} de ${filtrados.length}</span><div><label>Mostrar <select id="relojPorPagina"><option value="10" ${porPaginaColaboradores===10?"selected":""}>10</option><option value="20" ${porPaginaColaboradores===20?"selected":""}>20</option><option value="50" ${porPaginaColaboradores===50?"selected":""}>50</option></select></label><button type="button" data-pagina-reloj="${paginaColaboradores-1}" ${paginaColaboradores<=1?"disabled":""}><i class="bi bi-chevron-left"></i></button><b>${paginaColaboradores} / ${totalPaginas}</b><button type="button" data-pagina-reloj="${paginaColaboradores+1}" ${paginaColaboradores>=totalPaginas?"disabled":""}><i class="bi bi-chevron-right"></i></button></div>`;
 }
 async function encolar(reloj,comandos){
-  const fecha=new Date(),historial=comandos.map(valor=>({comando:valor,descripcion:descripcionComando(valor),estado:"PROGRAMADO",fecha:fecha.toISOString()}));
+  const fecha=new Date(),historial=comandos.map(valor=>({comando:valor.replace(/Passwd=[^\\t\\s]*/gi,"Passwd=***"),descripcion:descripcionComando(valor),estado:"PROGRAMADO",fecha:fecha.toISOString()}));
   await updateDoc(doc(db,"relojesBiometricos",reloj.id),{comandosPendientes:arrayUnion(...comandos),historialComandos:arrayUnion(...historial),comandosActualizadosEn:serverTimestamp()});
 }
-async function retirarUsuario(pin,nombre){const reloj=relojActual("relojColaboradoresSelector");if(!reloj)return;const r=await Swal.fire({icon:"warning",title:"Retirar del reloj",html:`Se eliminará <b>${escapar(nombre)}</b> únicamente de <b>${escapar(reloj.nombre||reloj.id)}</b>.<br><small>El colaborador y sus marcaciones permanecerán en la plataforma.</small>`,showCancelButton:true,confirmButtonText:"Retirar",cancelButtonText:"Cancelar"});if(!r.isConfirmed)return;await encolar(reloj,[comando(`DATA DELETE USERINFO PIN=${pin}`),comando("DATA QUERY USERINFO")]);await Swal.fire({icon:"success",title:"Retiro programado",text:"El reloj procesará la orden y luego actualizará su lista."});}
+async function retirarUsuario(pin,nombre){const reloj=relojActual("relojColaboradoresSelector");if(!reloj)return;const r=await Swal.fire({icon:"warning",title:"Retirar del reloj",html:`Se eliminará <b>${escapar(nombre)}</b> únicamente de <b>${escapar(reloj.nombre||reloj.id)}</b>.<br><small>El colaborador y sus marcaciones permanecerán en la plataforma.</small>`,showCancelButton:true,confirmButtonText:"Retirar",cancelButtonText:"Cancelar"});if(!r.isConfirmed)return;await encolar(reloj,[comando(`DATA DELETE USERINFO PIN=${pin}`),comando("DATA QUERY USERINFO")]);const detectado=usuariosReloj.find(u=>u.relojSerial===reloj.id&&texto(u.pin)===texto(pin));if(detectado){await deleteDoc(doc(db,"usuariosRelojDetectados",detectado.id));usuariosReloj=usuariosReloj.filter(u=>u.id!==detectado.id);renderizarColaboradores();}await Swal.fire({icon:"success",title:"Retiro programado",text:"Se retiró de esta lista y el reloj procesará la orden. El colaborador permanece en la plataforma."});}
 async function programar(contenido,mensaje){
   const reloj=relojActual();if(!reloj)return;
   await encolar(reloj,[comando(contenido)]);
@@ -117,7 +138,7 @@ async function cambiarPrivilegio(pin,privilegio){
 }
 export async function iniciarRelojes(){
   document.querySelectorAll("[data-reloj-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-reloj-tab]").forEach(x=>x.classList.toggle("activo",x===b));document.querySelectorAll("[data-reloj-panel]").forEach(p=>p.hidden=p.dataset.relojPanel!==b.dataset.relojTab);}));
-  document.getElementById("relojesActualizar")?.addEventListener("click",cargar);
+  document.getElementById("relojesActualizar")?.addEventListener("click",actualizarVista);
   document.getElementById("relojColaboradoresSelector")?.addEventListener("change",renderizarColaboradores);
   document.getElementById("relojBuscarColaborador")?.addEventListener("input",evento=>{busquedaColaborador=texto(evento.target.value);paginaColaboradores=1;renderizarColaboradores();});
   document.getElementById("relojFiltroProcedencia")?.addEventListener("change",evento=>{filtroProcedencia=texto(evento.target.value);paginaColaboradores=1;renderizarColaboradores();});
