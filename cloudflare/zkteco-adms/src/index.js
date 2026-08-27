@@ -2,6 +2,7 @@ const FIRESTORE_SCOPE = "https://www.googleapis.com/auth/datastore";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const INTERVALO_COMANDOS_SEGUNDOS = 30;
 const INTERVALO_PRESENCIA_MS = 5 * 60 * 1000;
+const INTERVALO_HORA_MS = 15 * 60 * 1000;
 let tokenCache = null;
 
 const texto = (valor) => String(valor ?? "").trim();
@@ -173,6 +174,20 @@ function fechaMilisegundos(valor) {
   return Number.isFinite(fecha) ? fecha : 0;
 }
 
+export function fechaHoraServidor(fecha = new Date()) {
+  const partes = new Intl.DateTimeFormat("en-CA", { timeZone:"America/Lima", year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hourCycle:"h23" }).formatToParts(fecha);
+  const valor = (tipo) => partes.find((parte) => parte.type === tipo)?.value || "00";
+  return `${valor("year")}-${valor("month")}-${valor("day")} ${valor("hour")}:${valor("minute")}:${valor("second")}`;
+}
+
+function comandoHoraServidor(fecha = new Date()) {
+  return `C:${fecha.getTime()}:SET OPTIONS DateTime=${fechaHoraServidor(fecha)}`;
+}
+
+function materializarComando(comando, fecha = new Date()) {
+  return texto(comando).replace("__SERVER_TIME__", fechaHoraServidor(fecha));
+}
+
 function idVinculo(serial, pin) {
   return encodeURIComponent(`${serial}__${pin}`);
 }
@@ -270,10 +285,13 @@ async function entregarComandoPendiente(env, url) {
   const comandos = Array.isArray(reloj.comandosPendientes) ? reloj.comandosPendientes.filter((item) => typeof item === "string" && item.startsWith("C:")) : [];
   const ahora = new Date();
   const registrarPresencia = ahora.getTime() - fechaMilisegundos(reloj.ultimaConexionEn) >= INTERVALO_PRESENCIA_MS;
-  if (!comandos.length && !registrarPresencia) return respuesta("OK");
-  const [comando, ...restantes] = comandos;
+  const sincronizarHora = ahora.getTime() - fechaMilisegundos(reloj.ultimaSincronizacionHoraEn) >= INTERVALO_HORA_MS;
+  if (!comandos.length && !registrarPresencia && !sincronizarHora) return respuesta("OK");
+  const [comandoPendiente, ...restantes] = comandos;
+  const comando = materializarComando(comandoPendiente || (sincronizarHora ? comandoHoraServidor(ahora) : ""), ahora);
+  const esComandoHora = comando.includes("SET OPTIONS DateTime=");
   const datos = comando
-    ? { comandosPendientes: restantes, ultimoComandoEnviado: resumirComando(comando), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora }
+    ? { comandosPendientes: restantes, ultimoComandoEnviado: resumirComando(comando), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora, ...(esComandoHora ? { ultimaSincronizacionHoraEn:ahora } : {}) }
     : { ultimaConexionEn: ahora };
   await confirmarEscrituras(env, [{
     update: { name: nombreDocumento(env, ruta), fields: codificarCampos(datos) },
