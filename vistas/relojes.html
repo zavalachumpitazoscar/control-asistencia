@@ -6,6 +6,7 @@
   <div class="tabs-empleados relojes-tabs">
     <button class="tab activo" type="button" data-reloj-tab="relojes">Relojes</button>
     <button class="tab" type="button" data-reloj-tab="colaboradores">Colaboradores en reloj</button>
+    <button class="tab" type="button" data-reloj-tab="actividad">Actividad e información</button>
   </div>
   <div data-reloj-panel="relojes">
     <div id="relojesResumen" class="relojes-resumen"></div>
@@ -14,6 +15,7 @@
       <div class="relojes-acciones">
         <button id="relojSolicitarMarcaciones" type="button"><i class="bi bi-clock-history"></i><span>Traer marcaciones ahora</span></button>
         <button id="relojSincronizarEmpleados" type="button"><i class="bi bi-people"></i><span>Sincronizar empleados</span></button>
+        <button id="relojRetirarInactivos" type="button"><i class="bi bi-person-dash"></i><span>Retirar inactivos</span></button>
         <button id="relojObtenerUsuarios" type="button"><i class="bi bi-person-down"></i><span>Importar desde el reloj</span></button>
         <button id="relojSincronizarHora" type="button"><i class="bi bi-clock"></i><span>Sincronizar hora</span></button>
         <button id="relojReiniciar" class="peligro" type="button"><i class="bi bi-power"></i><span>Reiniciar equipo</span></button>
@@ -38,5 +40,13 @@
     <div id="relojColaboradoresResumen" class="relojes-resumen"></div>
     <div id="relojColaboradoresLista" class="reloj-colaboradores-lista"></div>
     <div id="relojColaboradoresPaginacion" class="reloj-paginacion"></div>
+  </div>
+  <div data-reloj-panel="actividad" hidden>
+    <div id="relojAlertaDesconexion"></div>
+    <div class="reloj-actividad-grid">
+      <article class="relojes-panel"><div class="reloj-seccion-titulo"><div><span>INFORMACIÓN DEL EQUIPO</span><h3>Identificación y capacidad</h3></div><button id="relojEditarNombre" type="button"><i class="bi bi-pencil"></i> Editar nombre</button></div><div id="relojInformacionEquipo" class="reloj-info-grid"></div></article>
+      <article class="relojes-panel"><div class="reloj-seccion-titulo"><div><span>CONEXIONES</span><h3>Actividad reciente</h3></div></div><div id="relojHistorialConexion" class="reloj-historial"></div></article>
+    </div>
+    <article class="relojes-panel"><div class="reloj-seccion-titulo"><div><span>ÓRDENES ADMINISTRATIVAS</span><h3>Historial de comandos</h3></div></div><div id="relojHistorialComandos" class="reloj-historial"></div></article>
   </div>
 </section>
