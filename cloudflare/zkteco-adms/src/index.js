@@ -290,9 +290,21 @@ async function entregarComandoPendiente(env, url) {
   const [comandoPendiente, ...restantes] = comandos;
   const comando = materializarComando(comandoPendiente || (sincronizarHora ? comandoHoraServidor(ahora) : ""), ahora);
   const esComandoHora = comando.includes("SET OPTIONS DateTime=");
+  const historialPrevio = Array.isArray(reloj.historialComandos) ? reloj.historialComandos : [];
+  let historialComandos = historialPrevio.map((item) => item?.comando === comandoPendiente ? { ...item, estado:"ENVIADO", enviadoEn:ahora, comando:resumirComando(comando) } : item);
+  if (comando && !comandoPendiente) historialComandos.push({ comando:resumirComando(comando), descripcion:"Sincronización automática de hora", estado:"ENVIADO", enviadoEn:ahora });
+  historialComandos = historialComandos.slice(-60);
+  const ultimaConexionMs = fechaMilisegundos(reloj.ultimaConexionEn);
+  let historialConexion = Array.isArray(reloj.historialConexion) ? reloj.historialConexion : [];
+  if (!ultimaConexionMs || ahora.getTime() - ultimaConexionMs >= 7 * 60 * 1000) {
+    if (ultimaConexionMs) historialConexion.push({ tipo:"DESCONECTADO", fecha:new Date(ultimaConexionMs + 7 * 60 * 1000) });
+    historialConexion.push({ tipo:"CONECTADO", fecha:ahora });
+  }
+  if (comando.includes("REBOOT")) historialConexion.push({ tipo:"REINICIO_SOLICITADO", fecha:ahora });
+  historialConexion = historialConexion.slice(-60);
   const datos = comando
-    ? { comandosPendientes: restantes, ultimoComandoEnviado: resumirComando(comando), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora, ...(esComandoHora ? { ultimaSincronizacionHoraEn:ahora } : {}) }
-    : { ultimaConexionEn: ahora };
+    ? { comandosPendientes: restantes, historialComandos, historialConexion, ultimoComandoEnviado: resumirComando(comando), ultimoComandoEnviadoEn: ahora, ultimaConexionEn: ahora, ...(esComandoHora ? { ultimaSincronizacionHoraEn:ahora } : {}) }
+    : { historialConexion, ultimaConexionEn: ahora };
   await confirmarEscrituras(env, [{
     update: { name: nombreDocumento(env, ruta), fields: codificarCampos(datos) },
     updateMask: { fieldPaths: Object.keys(datos) },
