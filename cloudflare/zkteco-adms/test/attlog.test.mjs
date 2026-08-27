@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { analizarAttlog, analizarUsuariosReloj, analizarBiometriaReloj, opcionesDispositivo } from "../src/index.js";
+import { analizarAttlog, analizarUsuariosReloj, analizarBiometriaReloj, fechaHoraServidor, opcionesDispositivo } from "../src/index.js";
 
 const eventos = analizarAttlog([
   "15\t2026-08-25 08:01:30\t0\t1\t0\t0\t0",
@@ -40,3 +40,6 @@ assert.equal(credenciales[0].privilegio, "14");
 const biometria = analizarBiometriaReloj("FP PIN=1536150\tFID=0\nFP PIN=1536150\tFID=1\nFACE PIN=1536150\tFID=0");
 assert.deepEqual(biometria[0], { pin:"1536150", huellas:2, rostros:1 });
 console.log("Metadatos biométricos: OK");
+
+assert.equal(fechaHoraServidor(new Date("2026-08-27T15:30:45.000Z")), "2026-08-27 10:30:45");
+console.log("Hora del servidor en America/Lima: OK");
