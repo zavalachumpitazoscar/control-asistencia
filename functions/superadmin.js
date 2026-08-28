@@ -21,8 +21,8 @@ function auditar(tipo,req,datos={}){return db.collection("auditoriaSuperadmin").
 function dniColaborador(d){return texto(d?.documento?.numero||d?.dni||d?.numeroDocumento).replace(/\D/g,"");}
 function nombreColaborador(d){return texto(d?.nombreCompleto||[d?.datosPersonales?.nombres||d?.nombres||d?.nombre,d?.datosPersonales?.apellidos||d?.apellidos||d?.apellido].filter(Boolean).join(" "))||"Colaborador sin nombre";}
 async function empresaPorRuc(numeroRuc){
-  const indice=await db.doc(\`indicesRuc/\${numeroRuc}\`).get();
-  if(indice.exists){const id=texto(indice.data().empresaId),snap=await db.doc(\`companias/\${id}\`).get();if(snap.exists)return{id,snap};}
+  const indice=await db.doc(`indicesRuc/${numeroRuc}`).get();
+  if(indice.exists){const id=texto(indice.data().empresaId),snap=await db.doc(`companias/${id}`).get();if(snap.exists)return{id,snap};}
   const antigua=await db.collection("companias").where("empresa.ruc","==",numeroRuc).limit(1).get();
   if(antigua.empty)throw new HttpsError("not-found","No se encontró una empresa con ese RUC.");
   return{id:antigua.docs[0].id,snap:antigua.docs[0]};
@@ -164,7 +164,7 @@ exports.unificarColaboradoresSuperadmin=onCall({region:REGION,enforceAppCheck:fa
   exigirSuper(req);
   const accion=texto(req.data?.accion||"PREVISUALIZAR").toUpperCase(),ctx=await contextoUnificacion(req.data),origen=ctx.origen.data(),destino=ctx.destino.data();
   const [grupos,accesoOrigen,accesoDestino]=await Promise.all([
-    referenciasUnificacion(ctx.empresa.id,ctx.origen.id),db.doc(\`accesosMoviles/\${ctx.origen.id}\`).get(),db.doc(\`accesosMoviles/\${ctx.destino.id}\`).get()
+    referenciasUnificacion(ctx.empresa.id,ctx.origen.id),db.doc(`accesosMoviles/${ctx.origen.id}`).get(),db.doc(`accesosMoviles/${ctx.destino.id}`).get()
   ]);
   const conflictoAccesoMovil=accesoOrigen.exists&&accesoDestino.exists;
   const base={empresa:{id:ctx.empresa.id,ruc:ctx.numeroRuc,razonSocial:ctx.empresa.snap.data().empresa?.razonSocial||ctx.empresa.snap.data().razonSocial||"Empresa"},origen:{id:ctx.origen.id,dni:ctx.dniOrigen,nombre:nombreColaborador(origen)},destino:{id:ctx.destino.id,dni:ctx.dniDestino,nombre:nombreColaborador(destino)},referencias:resumenReferencias(grupos),totalReferencias:grupos.reduce((n,x)=>n+x.docs.length,0)+(accesoOrigen.exists?1:0),accesoMovilOrigen:accesoOrigen.exists,accesoMovilDestino:accesoDestino.exists,conflictoAccesoMovil};
@@ -185,7 +185,7 @@ exports.unificarColaboradoresSuperadmin=onCall({region:REGION,enforceAppCheck:fa
       if(item.tipo==="lista"||item.tipo==="ambos")cambios.colaboradorIds=[...new Set((actual.colaboradorIds||[]).map(id=>id===ctx.origen.id?ctx.destino.id:id))];
       writer.set(item.doc.ref,cambios,{merge:true});
     }
-    if(accesoOrigen.exists){const datosAcceso={...accesoOrigen.data(),colaboradorId:ctx.destino.id,nombre:nombreDestino,documento:ctx.dniDestino,actualizadoEn:FieldValue.serverTimestamp(),actualizadoPor:req.auth.uid};writer.set(db.doc(\`accesosMoviles/\${ctx.destino.id}\`),datosAcceso,{merge:true});writer.delete(accesoOrigen.ref);}
+    if(accesoOrigen.exists){const datosAcceso={...accesoOrigen.data(),colaboradorId:ctx.destino.id,nombre:nombreDestino,documento:ctx.dniDestino,actualizadoEn:FieldValue.serverTimestamp(),actualizadoPor:req.auth.uid};writer.set(db.doc(`accesosMoviles/${ctx.destino.id}`),datosAcceso,{merge:true});writer.delete(accesoOrigen.ref);}
     await writer.close();
     if(accesoOrigen.exists&&accesoOrigen.data().usuarioId){const uid=accesoOrigen.data().usuarioId,usuario=await getAuth().getUser(uid),claims={...(usuario.customClaims||{}),empresaId:ctx.empresa.id,colaboradorId:ctx.destino.id};await getAuth().setCustomUserClaims(uid,claims);}
     await ctx.destino.ref.set({actualizadoEn:FieldValue.serverTimestamp(),unificadoDesde:FieldValue.arrayUnion(ctx.origen.id),unificadoDesdeDni:FieldValue.arrayUnion(ctx.dniOrigen)},{merge:true});
