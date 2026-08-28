@@ -18,6 +18,44 @@ function esAdministradorSistema(perfil){const rol=texto(perfil?.rol).toUpperCase
 async function usuarioAuthPorCorreo(email){try{return await getAuth().getUserByEmail(email);}catch(e){console.error("No se pudo obtener la cuenta Auth",e);if(e?.code==="auth/user-not-found")throw new HttpsError("not-found","No se encontró esta cuenta en Firebase Authentication.");throw new HttpsError("internal","No se pudo consultar la cuenta de acceso.");}}
 function auditar(tipo,req,datos={}){return db.collection("auditoriaSuperadmin").add({tipo,superadminUid:req.auth.uid,superadminCorreo:req.auth.token.email||SUPERADMIN_EMAIL,...datos,fecha:FieldValue.serverTimestamp()});}
 
+function dniColaborador(d){return texto(d?.documento?.numero||d?.dni||d?.numeroDocumento).replace(/\D/g,"");}
+function nombreColaborador(d){return texto(d?.nombreCompleto||[d?.datosPersonales?.nombres||d?.nombres||d?.nombre,d?.datosPersonales?.apellidos||d?.apellidos||d?.apellido].filter(Boolean).join(" "))||"Colaborador sin nombre";}
+async function empresaPorRuc(numeroRuc){
+  const indice=await db.doc(\`indicesRuc/\${numeroRuc}\`).get();
+  if(indice.exists){const id=texto(indice.data().empresaId),snap=await db.doc(\`companias/\${id}\`).get();if(snap.exists)return{id,snap};}
+  const antigua=await db.collection("companias").where("empresa.ruc","==",numeroRuc).limit(1).get();
+  if(antigua.empty)throw new HttpsError("not-found","No se encontró una empresa con ese RUC.");
+  return{id:antigua.docs[0].id,snap:antigua.docs[0]};
+}
+async function contextoUnificacion(data){
+  const numeroRuc=ruc(data?.ruc),dniOrigen=ruc(data?.dniOrigen),dniDestino=ruc(data?.dniDestino);
+  if(!/^\d{11}$/.test(numeroRuc))throw new HttpsError("invalid-argument","El RUC debe tener 11 dígitos.");
+  if(!/^\d{8}$/.test(dniOrigen)||!/^\d{8}$/.test(dniDestino))throw new HttpsError("invalid-argument","Ambos DNI deben tener 8 dígitos.");
+  if(dniOrigen===dniDestino)throw new HttpsError("invalid-argument","El DNI incorrecto y el correcto no pueden ser iguales.");
+  const empresa=await empresaPorRuc(numeroRuc),snap=await db.collection("colaboradores").where("empresaId","==",empresa.id).get();
+  const coincidencias=snap.docs.filter(x=>[dniColaborador(x.data()),ruc(x.id)].includes(dniOrigen)||[dniColaborador(x.data()),ruc(x.id)].includes(dniDestino));
+  const origen=coincidencias.find(x=>dniColaborador(x.data())===dniOrigen||ruc(x.id)===dniOrigen);
+  const destino=coincidencias.find(x=>dniColaborador(x.data())===dniDestino||ruc(x.id)===dniDestino);
+  if(!origen)throw new HttpsError("not-found","No se encontró el colaborador con el DNI incorrecto en esta empresa.");
+  if(!destino)throw new HttpsError("not-found","Primero crea al colaborador con el DNI correcto en esta empresa.");
+  if(origen.id===destino.id)throw new HttpsError("failed-precondition","Los dos DNI corresponden al mismo colaborador.");
+  return{numeroRuc,dniOrigen,dniDestino,empresa,origen,destino};
+}
+const COLECCIONES_NO_UNIFICABLES=new Set(["colaboradores","auditoriaSistema","auditoriaSuperadmin","historialOperacionesAsistencia","fusionesColaboradores","accesosMoviles"]);
+async function referenciasUnificacion(empresaId,origenId){
+  const colecciones=await db.listCollections(),halladas=[];
+  for(const col of colecciones){
+    if(COLECCIONES_NO_UNIFICABLES.has(col.id))continue;
+    const [simples,listas]=await Promise.all([col.where("colaboradorId","==",origenId).get(),col.where("colaboradorIds","array-contains",origenId).get()]);
+    const docs=new Map();
+    simples.docs.forEach(x=>{if(x.data().empresaId===empresaId)docs.set(x.ref.path,{doc:x,tipo:"simple"});});
+    listas.docs.forEach(x=>{if(x.data().empresaId===empresaId)docs.set(x.ref.path,{doc:x,tipo:docs.get(x.ref.path)?.tipo==="simple"?"ambos":"lista"});});
+    if(docs.size)halladas.push({coleccion:col.id,docs:[...docs.values()]});
+  }
+  return halladas;
+}
+function resumenReferencias(grupos){return grupos.map(x=>({coleccion:x.coleccion,cantidad:x.docs.length})).sort((a,b)=>b.cantidad-a.cantidad||a.coleccion.localeCompare(b.coleccion));}
+
 exports.registrarEmpresaSegura=onCall({region:REGION,enforceAppCheck:false},async req=>{
   exigirAuth(req);const d=req.data||{},email=correo(d.correo),numeroRuc=ruc(d.ruc);
   if(email!==correo(req.auth.token.email))throw new HttpsError("permission-denied","El correo no corresponde a la sesión creada.");
@@ -120,4 +158,40 @@ exports.generarPasswordTemporalSuperadmin=onCall({region:REGION,enforceAppCheck:
   await perfilRef.set({requiereCambioPassword:true,passwordTemporalAsignadoEn:FieldValue.serverTimestamp(),passwordTemporalAsignadoPor:req.auth.uid},{merge:true});
   await auditar("GENERAR_PASSWORD_TEMPORAL",req,{empresaId,uidObjetivo:user.uid,correo:email,motivo});
   return {ok:true,correo:email,passwordTemporal:temporal};
+});
+
+exports.unificarColaboradoresSuperadmin=onCall({region:REGION,enforceAppCheck:false,timeoutSeconds:540,memory:"512MiB"},async req=>{
+  exigirSuper(req);
+  const accion=texto(req.data?.accion||"PREVISUALIZAR").toUpperCase(),ctx=await contextoUnificacion(req.data),origen=ctx.origen.data(),destino=ctx.destino.data();
+  const [grupos,accesoOrigen,accesoDestino]=await Promise.all([
+    referenciasUnificacion(ctx.empresa.id,ctx.origen.id),db.doc(\`accesosMoviles/\${ctx.origen.id}\`).get(),db.doc(\`accesosMoviles/\${ctx.destino.id}\`).get()
+  ]);
+  const conflictoAccesoMovil=accesoOrigen.exists&&accesoDestino.exists;
+  const base={empresa:{id:ctx.empresa.id,ruc:ctx.numeroRuc,razonSocial:ctx.empresa.snap.data().empresa?.razonSocial||ctx.empresa.snap.data().razonSocial||"Empresa"},origen:{id:ctx.origen.id,dni:ctx.dniOrigen,nombre:nombreColaborador(origen)},destino:{id:ctx.destino.id,dni:ctx.dniDestino,nombre:nombreColaborador(destino)},referencias:resumenReferencias(grupos),totalReferencias:grupos.reduce((n,x)=>n+x.docs.length,0)+(accesoOrigen.exists?1:0),accesoMovilOrigen:accesoOrigen.exists,accesoMovilDestino:accesoDestino.exists,conflictoAccesoMovil};
+  if(accion==="PREVISUALIZAR")return{ok:true,...base};
+  if(accion!=="EJECUTAR")throw new HttpsError("invalid-argument","Acción de unificación inválida.");
+  const motivo=texto(req.data?.motivo),confirmacion=ruc(req.data?.confirmacion);
+  if(motivo.length<5)throw new HttpsError("invalid-argument","Indica el motivo de la unificación.");
+  if(confirmacion!==ctx.dniDestino)throw new HttpsError("failed-precondition","La confirmación no coincide con el DNI correcto.");
+  if(conflictoAccesoMovil)throw new HttpsError("failed-precondition","Ambos colaboradores tienen acceso móvil. Revoca uno de los accesos antes de unificarlos.");
+  const fusionRef=db.collection("fusionesColaboradores").doc(),ahora=FieldValue.serverTimestamp();
+  await fusionRef.set({estado:"EN_PROCESO",empresaId:ctx.empresa.id,ruc:ctx.numeroRuc,origenId:ctx.origen.id,dniOrigen:ctx.dniOrigen,datosOrigen:origen,destinoId:ctx.destino.id,dniDestino:ctx.dniDestino,datosDestinoAntes:destino,motivo,referencias:base.referencias,iniciadoEn:ahora,iniciadoPor:req.auth.uid});
+  await ctx.origen.ref.set({unificacionEnProceso:true,unificacionDestinoId:ctx.destino.id,unificacionIniciadaEn:ahora},{merge:true});
+  try{
+    const writer=db.bulkWriter(),nombreDestino=nombreColaborador(destino);
+    for(const grupo of grupos)for(const item of grupo.docs){
+      const actual=item.doc.data(),cambios={actualizadoEn:FieldValue.serverTimestamp()};
+      if(item.tipo==="simple"||item.tipo==="ambos"){cambios.colaboradorId=ctx.destino.id;if(Object.prototype.hasOwnProperty.call(actual,"colaboradorDocumento"))cambios.colaboradorDocumento=ctx.dniDestino;if(Object.prototype.hasOwnProperty.call(actual,"colaboradorNombre"))cambios.colaboradorNombre=nombreDestino;}
+      if(item.tipo==="lista"||item.tipo==="ambos")cambios.colaboradorIds=[...new Set((actual.colaboradorIds||[]).map(id=>id===ctx.origen.id?ctx.destino.id:id))];
+      writer.set(item.doc.ref,cambios,{merge:true});
+    }
+    if(accesoOrigen.exists){const datosAcceso={...accesoOrigen.data(),colaboradorId:ctx.destino.id,nombre:nombreDestino,documento:ctx.dniDestino,actualizadoEn:FieldValue.serverTimestamp(),actualizadoPor:req.auth.uid};writer.set(db.doc(\`accesosMoviles/\${ctx.destino.id}\`),datosAcceso,{merge:true});writer.delete(accesoOrigen.ref);}
+    await writer.close();
+    if(accesoOrigen.exists&&accesoOrigen.data().usuarioId){const uid=accesoOrigen.data().usuarioId,usuario=await getAuth().getUser(uid),claims={...(usuario.customClaims||{}),empresaId:ctx.empresa.id,colaboradorId:ctx.destino.id};await getAuth().setCustomUserClaims(uid,claims);}
+    await ctx.destino.ref.set({actualizadoEn:FieldValue.serverTimestamp(),unificadoDesde:FieldValue.arrayUnion(ctx.origen.id),unificadoDesdeDni:FieldValue.arrayUnion(ctx.dniOrigen)},{merge:true});
+    await ctx.origen.ref.delete();
+    await fusionRef.set({estado:"COMPLETADO",completadoEn:FieldValue.serverTimestamp(),totalReferencias:base.totalReferencias},{merge:true});
+    await auditar("UNIFICAR_COLABORADORES",req,{empresaId:ctx.empresa.id,ruc:ctx.numeroRuc,origenId:ctx.origen.id,dniOrigen:ctx.dniOrigen,destinoId:ctx.destino.id,dniDestino:ctx.dniDestino,totalReferencias:base.totalReferencias,motivo,fusionId:fusionRef.id});
+    return{ok:true,fusionId:fusionRef.id,...base};
+  }catch(e){console.error("Error al unificar colaboradores",e);await fusionRef.set({estado:"ERROR",error:texto(e?.message).slice(0,500),falloEn:FieldValue.serverTimestamp()},{merge:true});throw e instanceof HttpsError?e:new HttpsError("internal","La unificación no terminó. El colaborador incorrecto se conservó para poder reintentar de forma segura.");}
 });
