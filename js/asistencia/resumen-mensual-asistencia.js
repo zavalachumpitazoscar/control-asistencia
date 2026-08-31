@@ -40,6 +40,9 @@ export function iniciarResumenMensualAsistencia() {
   instalarPaginacionResumenMensual();
 
   asignarMes(new Date());
+  [fechaDesde, fechaHasta].forEach((campo) =>
+    campo.addEventListener("change", () => prepararConsultaPeriodo()),
+  );
   document
     .getElementById("btnAplicarRangoResumenMensual")
     ?.addEventListener("click", () => cargarResumenPeriodo(true));
@@ -48,7 +51,7 @@ export function iniciarResumenMensualAsistencia() {
     .getElementById("btnMesActualResumenMensual")
     ?.addEventListener("click", () => {
       asignarMes(new Date());
-      cargarResumenPeriodo(true);
+      prepararConsultaPeriodo();
     });
   document
     .getElementById("btnMesAnteriorResumenMensual")
@@ -56,7 +59,7 @@ export function iniciarResumenMensualAsistencia() {
       const d = new Date();
       d.setMonth(d.getMonth() - 1);
       asignarMes(d);
-      cargarResumenPeriodo(true);
+      prepararConsultaPeriodo();
     });
   document
     .getElementById("btnAbrirDescargaResumenMensual")
@@ -69,10 +72,6 @@ export function iniciarResumenMensualAsistencia() {
   configurarModal();
   configurarModalDescarga();
 
-  document.addEventListener("asistencia:cambio-tab", (e) => {
-    if (e.detail?.tab === "mensual" && periodoCargado !== clavePeriodo())
-      cargarResumenPeriodo();
-  });
   [
     "asistencia:horario-dia-actualizado",
     "asistencia:ajuste-diario-actualizado",
@@ -84,14 +83,27 @@ export function iniciarResumenMensualAsistencia() {
       if (nombre.includes("marcacion")) invalidarCacheColeccionesEmpresa("marcaciones");
       if (nombre.includes("horario")) invalidarCacheColeccionesEmpresa("excepcionesHorarios");
       if (nombre.includes("ajuste")) invalidarCacheColeccionesEmpresa("ajustesAsistenciaDiaria");
+      prepararConsultaPeriodo(
+        "Los datos cambiaron. Presiona “Consultar” para actualizar el período.",
+      );
     }),
   );
   document.addEventListener("asistencia:horas-extra-actualizadas", () => {
     periodoCargado = "";
     invalidarCacheColeccionesEmpresa("aprobacionesHorasExtra");
-    const panelMensual = document.querySelector('[data-contenido-tab="mensual"]');
-    if (panelMensual?.classList.contains("activo")) cargarResumenPeriodo(true);
+    prepararConsultaPeriodo("Las horas extra cambiaron. Presiona “Consultar” para actualizar el período.");
   });
+}
+
+function prepararConsultaPeriodo(
+  mensaje = "Período listo. Presiona “Consultar” para cargar el resumen.",
+) {
+  periodoCargado = "";
+  registrosPeriodo = [];
+  paginaResumenMensual = 1;
+  mostrarMensaje(mensaje);
+  const descripcion = document.getElementById("descripcionResumenMensual");
+  if (descripcion) descripcion.textContent = mensaje;
 }
 
 async function cargarResumenPeriodo(forzar = false) {
