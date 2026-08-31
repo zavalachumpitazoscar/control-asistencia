@@ -37,6 +37,8 @@ let filtroEstado;
 let btnLimpiarFiltros;
 let paginaResumenDiario = 1;
 let limiteResumenDiario = 10;
+let fechaResumenCargada = "";
+let cargandoResumenDiario = false;
 
 /*=====================================================
 INICIAR RESUMEN
@@ -56,6 +58,10 @@ export function iniciarResumenAsistencia() {
   filtroEstado = document.getElementById("filtroEstadoAsistencia");
 
   btnLimpiarFiltros = document.getElementById("btnLimpiarFiltrosAsistencia");
+
+  ["btnConsultarResumenDiario", "btnConsultarMarcacionesDia"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", consultarDiaSeleccionado);
+  });
 
   document
     .getElementById("btnRecalcularAsistencia")
@@ -93,14 +99,13 @@ export function iniciarResumenAsistencia() {
 
   document.addEventListener("asistencia:cambio-fecha", (evento) => {
     fechaResumenSeleccionada = evento.detail.fecha;
-
-    cargarResumenAsistencia(fechaResumenSeleccionada);
+    marcarResumenPendiente();
   });
 
   document.addEventListener("asistencia:horario-dia-actualizado", () => {
     if (fechaResumenSeleccionada) {
       invalidarCacheColeccionesEmpresa("excepcionesHorarios");
-      cargarResumenAsistencia(fechaResumenSeleccionada);
+      marcarResumenPendiente("El horario cambió. Presiona “Consultar día” para actualizar.");
     }
   });
 
@@ -111,7 +116,7 @@ export function iniciarResumenAsistencia() {
       (detalle.masivo && detalle.desde <= fechaResumenSeleccionada && detalle.hasta >= fechaResumenSeleccionada);
     if (afectaFechaSeleccionada) {
       invalidarCacheColeccionesEmpresa("aprobacionesHorasExtra");
-      cargarResumenAsistencia(fechaResumenSeleccionada);
+      marcarResumenPendiente("Las horas extra cambiaron. Presiona “Consultar día” para actualizar.");
     }
   });
 
@@ -178,7 +183,7 @@ export function iniciarResumenAsistencia() {
         fechaActualizada === fechaResumenSeleccionada
       ) {
         invalidarCacheColeccionesEmpresa("ajustesAsistenciaDiaria");
-        cargarResumenAsistencia(fechaResumenSeleccionada);
+        marcarResumenPendiente("El ajuste cambió. Presiona “Consultar día” para actualizar.");
       }
     },
   );
@@ -338,14 +343,14 @@ export function iniciarResumenAsistencia() {
   document.addEventListener("asistencia:marcacion-manual-registrada", () => {
     if (fechaResumenSeleccionada) {
       invalidarCacheColeccionesEmpresa("marcaciones");
-      cargarResumenAsistencia(fechaResumenSeleccionada);
+      marcarResumenPendiente("Se registró una marcación. Presiona “Consultar día” para actualizar.");
     }
   });
 
   document.addEventListener("asistencia:marcaciones-importadas", () => {
     if (fechaResumenSeleccionada) {
       invalidarCacheColeccionesEmpresa("marcaciones");
-      cargarResumenAsistencia(fechaResumenSeleccionada);
+      marcarResumenPendiente("Se importaron marcaciones. Presiona “Consultar día” para actualizar.");
     }
   });
 
@@ -368,6 +373,26 @@ export function iniciarResumenAsistencia() {
       }),
     );
   });
+}
+
+async function consultarDiaSeleccionado() {
+  if (!fechaResumenSeleccionada || cargandoResumenDiario) return;
+  await cargarResumenAsistencia(fechaResumenSeleccionada);
+}
+
+function marcarResumenPendiente(
+  mensaje = "Selecciona la fecha y presiona “Consultar día” para cargar la asistencia.",
+) {
+  fechaResumenCargada = "";
+  registrosResumen = [];
+  paginaResumenDiario = 1;
+  mostrarMensajeTabla(mensaje);
+  actualizarContadores([]);
+  document.dispatchEvent(
+    new CustomEvent("asistencia:consulta-diaria-pendiente", {
+      detail: { fecha: fechaResumenSeleccionada },
+    }),
+  );
 }
 
 async function recalcularResumenSeleccionado() {
@@ -398,7 +423,7 @@ async function solicitarMarcacionDesdeEncabezado() {
     Swal.fire({
       icon: "info",
       title: "No hay colaboradores disponibles",
-      text: "Espera a que termine de cargar el resumen o selecciona otra fecha.",
+      text: "Selecciona la fecha y presiona “Consultar día” antes de registrar la marcación.",
       confirmButtonColor: "#2563eb",
     });
     return;
@@ -502,7 +527,9 @@ async function cargarResumenAsistencia(fecha) {
     return;
   }
 
-  mostrarMensajeTabla("Cargando resumen de asistencia...");
+  cargandoResumenDiario = true;
+  actualizarBotonesConsultaDiaria(true);
+  mostrarMensajeTabla("Consultando el resumen de asistencia...");
 
   try {
     const [
@@ -580,6 +607,8 @@ async function cargarResumenAsistencia(fecha) {
       descansosSustitutorios,
     });
 
+    fechaResumenCargada = fecha;
+
     document.dispatchEvent(
       new CustomEvent("asistencia:datos-diarios-cargados", {
         detail: {
@@ -596,7 +625,19 @@ async function cargarResumenAsistencia(fecha) {
     console.error("Error cargando resumen:", error);
 
     mostrarMensajeTabla("No se pudo cargar el resumen de asistencia.");
+  } finally {
+    cargandoResumenDiario = false;
+    actualizarBotonesConsultaDiaria(false);
   }
+}
+
+function actualizarBotonesConsultaDiaria(cargando) {
+  ["btnConsultarResumenDiario", "btnConsultarMarcacionesDia"].forEach((id) => {
+    const boton = document.getElementById(id);
+    if (!boton) return;
+    boton.disabled = cargando;
+    boton.classList.toggle("cargando", cargando);
+  });
 }
 
 /*=====================================================
@@ -1484,6 +1525,13 @@ RENDERIZAR
 
 function renderizarResumenAsistencia() {
   if (!cuerpoResumen) {
+    return;
+  }
+
+  if (!fechaResumenCargada || fechaResumenCargada !== fechaResumenSeleccionada) {
+    mostrarMensajeTabla(
+      "Selecciona la fecha y presiona “Consultar día” para cargar la asistencia.",
+    );
     return;
   }
 

@@ -48,7 +48,13 @@ export function iniciarMarcacionesAsistencia() {
 
   document.addEventListener("asistencia:cambio-fecha", (evento) => {
     actualizarFechaVisible(evento.detail?.fechaObjeto);
-    mostrarMensaje("Cargando marcaciones...");
+    mostrarMensaje("Presiona “Consultar marcaciones” para cargar el día seleccionado.");
+  });
+
+  document.addEventListener("asistencia:consulta-diaria-pendiente", () => {
+    marcacionesDia = [];
+    mostrarMensaje("Presiona “Consultar marcaciones” para cargar el día seleccionado.");
+    if (informacionMarcaciones) informacionMarcaciones.textContent = "Mostrando 0 marcaciones";
   });
 
   document.addEventListener("asistencia:datos-diarios-cargados", (evento) => {

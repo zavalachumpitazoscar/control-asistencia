@@ -1,9 +1,9 @@
 import { iniciarNavegacionAsistencia } from "./asistencia/navegacion-asistencia.js";
 import { iniciarFechaAsistencia } from "./asistencia/fecha-asistencia.js";
 import { iniciarImportacionMarcaciones } from "./asistencia/importacion-marcaciones.js?v=20260821-3";
-import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260825-2";
-import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js?v=20260827-1";
-import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260825-2";
+import { iniciarResumenAsistencia } from "./asistencia/resumen-asistencia.js?v=20260831-1";
+import { iniciarMarcacionesAsistencia } from "./asistencia/marcaciones-asistencia.js?v=20260831-1";
+import { iniciarResumenMensualAsistencia } from "./asistencia/resumen-mensual-asistencia.js?v=20260831-1";
 import { iniciarEditarDiaAsistencia } from "./asistencia/editar-dia-asistencia.js?v=20260814-1";
 import { iniciarMarcacionManualAsistencia } from "./asistencia/marcacion-manual-asistencia.js?v=20260817-1";
 import { iniciarAjusteRefrigerioAsistencia } from "./asistencia/ajuste-refrigerio-asistencia.js";
@@ -14,7 +14,7 @@ import { iniciarRegularizacionesCierresAsistencia } from "./asistencia/regulariz
 export async function iniciarAsistencia() {
   // Retira cualquier panel obsoleto que hubiera quedado en caché de versiones anteriores.
   document.getElementById("panelAdministracionAsistencia")?.remove();
-  console.log("✅ INICIANDO MÓDULO DE ASISTENCIA · VERSIÓN 2026-08-12.5");
+  console.log("✅ INICIANDO MÓDULO DE ASISTENCIA · VERSIÓN 2026-08-31.1");
   iniciarNavegacionAsistencia();
   iniciarResumenAsistencia();
   iniciarMarcacionesAsistencia();

@@ -32,7 +32,7 @@ from
 import { iniciarCompañia } from "./compañia.js?v=20260825-1";
 import { iniciarEmpleados } from "./empleados.js?v=20260826-3";
 import { iniciarRelojes } from "./relojes.js?v=20260827-6";
-import { iniciarAsistencia } from "./asistencia.js?v=20260827-1";
+import { iniciarAsistencia } from "./asistencia.js?v=20260831-1";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260825-2";
 import { iniciarDashboard } from "./dashboard.js?v=20260825-3";
 import { iniciarConfiguracion, aplicarAparienciaGuardada, obtenerAparienciaGuardada } from "./configuracion.js?v=20260814-1";
@@ -543,7 +543,7 @@ async function cargarVista(
 
 
         const ruta =
-            `vistas/${vistaPrincipal}.html?v=20260820-5`;
+            `vistas/${vistaPrincipal}.html?v=20260831-1`;
 
 
         const respuesta =
