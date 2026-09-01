@@ -1,7 +1,7 @@
 import { signInWithEmailAndPassword, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
-import { mostrarBloqueoSuscripcion, obtenerBloqueoSuscripcion } from "./suscripcion-acceso.js?v=20260825-1";
+import { mostrarAvisoRenovacion, mostrarBloqueoSuscripcion, obtenerEstadoSuscripcion } from "./suscripcion-acceso.js?v=20260901-1";
 
 const form = document.getElementById("loginForm");
 const btnLogin = document.getElementById("btnLogin");
@@ -130,13 +130,14 @@ form.addEventListener("submit", async (event) => {
       return;
     }
 
-    const bloqueoSuscripcion = await obtenerBloqueoSuscripcion(usuario.empresaId);
-    if (bloqueoSuscripcion) {
+    const estadoSuscripcion = await obtenerEstadoSuscripcion(usuario.empresaId);
+    if (estadoSuscripcion.estado === "VENCIDA") {
       await signOut(auth);
-      await mostrarBloqueoSuscripcion(bloqueoSuscripcion);
+      await mostrarBloqueoSuscripcion(estadoSuscripcion);
       mostrarToast("info", "La suscripción mensual está vencida. Contacta al 902 564 457.");
       return;
     }
+    await mostrarAvisoRenovacion(estadoSuscripcion);
 
     if (usuario.requiereCambioPassword === true) await solicitarCambioObligatorio(credencial.user);
 
@@ -164,4 +165,3 @@ form.addEventListener("submit", async (event) => {
     ocultarCarga();
   }
 });
-

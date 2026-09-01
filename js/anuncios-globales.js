@@ -1,6 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { normalizarFechaISO } from "./suscripcion-acceso.js?v=20260901-1";
 
 const WHATSAPP_PAGOS = "51902564457";
 
@@ -43,7 +44,7 @@ function fecha(v) { const [a,m,d]=String(v||"").slice(0,10).split("-"); return a
 function fechaLocal(valor){const a=valor.getFullYear(),m=String(valor.getMonth()+1).padStart(2,"0"),d=String(valor.getDate()).padStart(2,"0");return `${a}-${m}-${d}`;}
 function crearAvisoPago(empresa,hoy){
   const suscripcion=empresa?.suscripcion||{};
-  const fin=String(suscripcion.fechaFin||"").slice(0,10);
+  const fin=normalizarFechaISO(suscripcion.fechaFin);
   if(!fin||String(suscripcion.condicion||"").toUpperCase()==="GRATIS")return null;
   const dias=Math.round((new Date(`${fin}T00:00:00`)-new Date(`${hoy}T00:00:00`))/86400000);
   if(dias<0||dias>7)return null;
