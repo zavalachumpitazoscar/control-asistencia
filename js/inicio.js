@@ -40,7 +40,7 @@ import { iniciarManual, abrirManual } from "./manual.js?v=20260824-3";
 import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260825-2";
 import { iniciarAnunciosGlobales } from "./anuncios-globales.js?v=20260825-1";
 import { iniciarSeguimientoUsoSistema, cerrarSeguimientoUsoSistema } from "./seguimiento-uso-sistema.js?v=20260822-2";
-import { mostrarBloqueoSuscripcion, obtenerBloqueoSuscripcion } from "./suscripcion-acceso.js?v=20260825-1";
+import { mostrarBloqueoSuscripcion, obtenerEstadoSuscripcion, programarControlDiarioSuscripcion } from "./suscripcion-acceso.js?v=20260901-1";
 
 aplicarAparienciaGuardada();
 iniciarManual();
@@ -339,13 +339,17 @@ onAuthStateChanged(auth, async(usuario)=>{
         const perfilActual = await cargarPerfilUsuario(usuario);
         const empresaIdActual = sessionStorage.getItem("empresaId") || perfilActual?.empresaId;
         await configurarAccesoRelojes(empresaIdActual);
-        const bloqueoSuscripcion = await obtenerBloqueoSuscripcion(empresaIdActual);
-        if(bloqueoSuscripcion){
+        const estadoSuscripcion = await obtenerEstadoSuscripcion(empresaIdActual);
+        if(estadoSuscripcion.estado === "VENCIDA"){
             finalizarSincronizacion();
-            await mostrarBloqueoSuscripcion(bloqueoSuscripcion);
+            await mostrarBloqueoSuscripcion(estadoSuscripcion);
             await signOut(auth);
             return;
         }
+        programarControlDiarioSuscripcion(empresaIdActual, async (estadoVencido) => {
+            await mostrarBloqueoSuscripcion(estadoVencido);
+            await signOut(auth);
+        });
         actualizarSincronizacion("Sincronizando la información necesaria para comenzar…");
         await iniciarSeguimientoUsoSistema(usuario,sessionStorage.getItem("empresaId"));
         programarCierreAutomatico();
