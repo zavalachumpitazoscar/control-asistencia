@@ -1,7 +1,7 @@
 import { signInWithEmailAndPassword, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { auth, db } from "./firebase-config.js";
-import { mostrarAvisoRenovacion, mostrarBloqueoSuscripcion, obtenerEstadoSuscripcion } from "./suscripcion-acceso.js?v=20260901-1";
+import { mostrarAvisoRenovacion, mostrarBloqueoSuscripcion, obtenerEstadoSuscripcion } from "./suscripcion-acceso.js?v=20260901-2";
 
 const form = document.getElementById("loginForm");
 const btnLogin = document.getElementById("btnLogin");

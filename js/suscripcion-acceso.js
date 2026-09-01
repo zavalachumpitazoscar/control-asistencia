@@ -13,7 +13,9 @@ export async function obtenerEstadoSuscripcion(empresaId) {
   const condicion = String(suscripcion.condicion || "").toUpperCase();
   const fechaFin = normalizarFechaISO(suscripcion.fechaFin);
   const razonSocial = empresa.empresa?.razonSocial || empresa.razonSocial || "la empresa";
-  if (!fechaFin || condicion === "GRATIS") return { estado: "VIGENTE", empresaId, razonSocial, condicion, fechaFin: null };
+  // GRATIS solo es ilimitado cuando no tiene un periodo configurado.
+  // Si el superadministrador asignó fecha final, esa vigencia debe respetarse.
+  if (!fechaFin) return { estado: "VIGENTE", empresaId, razonSocial, condicion, fechaFin: null };
   const diasRestantes = diferenciaDias(fechaLocal(new Date()), fechaFin);
   const estado = diasRestantes < 0 ? "VENCIDA" : diasRestantes <= DIAS_AVISO_RENOVACION ? "POR_VENCER" : "VIGENTE";
   const accion = estado === "VENCIDA" ? "regularizar el pago mensual" : "coordinar la renovación mensual";

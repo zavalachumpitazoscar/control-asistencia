@@ -40,7 +40,7 @@ import { iniciarManual, abrirManual } from "./manual.js?v=20260824-3";
 import { iniciarCentroControl, programarCierreAutomatico } from "./centro-control.js?v=20260825-2";
 import { iniciarAnunciosGlobales } from "./anuncios-globales.js?v=20260825-1";
 import { iniciarSeguimientoUsoSistema, cerrarSeguimientoUsoSistema } from "./seguimiento-uso-sistema.js?v=20260822-2";
-import { mostrarBloqueoSuscripcion, obtenerEstadoSuscripcion, programarControlDiarioSuscripcion } from "./suscripcion-acceso.js?v=20260901-1";
+import { mostrarBloqueoSuscripcion, obtenerEstadoSuscripcion, programarControlDiarioSuscripcion } from "./suscripcion-acceso.js?v=20260901-2";
 
 aplicarAparienciaGuardada();
 iniciarManual();
