@@ -31,7 +31,7 @@ from
 
 import { iniciarCompañia } from "./compañia.js?v=20260825-1";
 import { iniciarEmpleados } from "./empleados.js?v=20260826-3";
-import { iniciarRelojes } from "./relojes.js?v=20260827-6";
+import { iniciarRelojes } from "./relojes.js?v=20260902-1";
 import { iniciarAsistencia } from "./asistencia.js?v=20260831-1";
 import { iniciarAuditoria, iniciarMonitorAuditoriaGlobal } from "./auditoria.js?v=20260825-2";
 import { iniciarDashboard } from "./dashboard.js?v=20260825-3";
