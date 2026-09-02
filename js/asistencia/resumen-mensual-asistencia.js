@@ -178,6 +178,7 @@ async function cargarResumenPeriodo(forzar = false) {
             sucursal: colaborador.organizacion?.sucursal || colaborador.sucursal || "",
             area: colaborador.organizacion?.area || colaborador.area || "",
             subarea: colaborador.organizacion?.subarea || colaborador.subarea || "",
+            cargo: colaborador.informacionAdicional?.cargoProfesion || colaborador.cargoProfesion || "",
           },
           fecha,
         );
@@ -215,6 +216,7 @@ function acumular(mapa, r, fecha) {
       sucursal: r.sucursal || r.organizacion?.sucursal || "",
       area: r.area || r.organizacion?.area || "",
       subarea: r.subarea || r.organizacion?.subarea || "",
+      cargo: r.cargo || "",
       diasProgramados: 0,
       asistencias: 0,
       tardanzas: 0,
@@ -457,6 +459,7 @@ function abrirDescargaReporte() {
   selector.innerHTML = filas
     .map((r) => `<option value="${html(r.colaboradorId)}">${html(r.nombre)} · ${html(r.documento || "Sin documento")}</option>`)
     .join("");
+  cargarConfiguracionColegioGuardada();
   actualizarTipoDescarga();
   mostrarModalReporte(modal);
 }
@@ -471,6 +474,7 @@ function configurarModalDescarga() {
   document.getElementById("btnCerrarDescargaReporteAsistencia")?.addEventListener("click", cerrar);
   document.getElementById("btnCancelarDescargaReporteAsistencia")?.addEventListener("click", cerrar);
   document.getElementById("tipoDescargaReporteAsistencia")?.addEventListener("change", actualizarTipoDescarga);
+  document.getElementById("camposReporteColegio")?.addEventListener("input", guardarConfiguracionColegio);
   document.getElementById("btnGenerarDescargaReporteAsistencia")?.addEventListener("click", generarDescargaReporte);
   document
     .getElementById("btnCerrarVistaPreviaReporteAsistencia")
@@ -489,6 +493,7 @@ function configurarModalDescarga() {
         reportePrevisualizado.tipo,
         reportePrevisualizado.filas,
         reportePrevisualizado.colaboradorId,
+        reportePrevisualizado.configuracionColegio,
       );
     });
   document
@@ -499,6 +504,7 @@ function configurarModalDescarga() {
         reportePrevisualizado.tipo,
         reportePrevisualizado.filas,
         reportePrevisualizado.colaboradorId,
+        reportePrevisualizado.configuracionColegio,
       );
     });
   modal?.addEventListener("click", (e) => {
@@ -531,6 +537,53 @@ function actualizarTipoDescarga() {
   const tipo = document.getElementById("tipoDescargaReporteAsistencia")?.value;
   const grupo = document.getElementById("grupoColaboradorDescargaReporte");
   if (grupo) grupo.hidden = tipo !== "SIMPLIFICADO_INDIVIDUAL";
+  const camposColegio = document.getElementById("camposReporteColegio");
+  if (camposColegio) camposColegio.hidden = tipo !== "COLEGIOS";
+}
+
+function obtenerConfiguracionColegio() {
+  const valor = (id, defecto = "") => document.getElementById(id)?.value?.trim() || defecto;
+  return {
+    titulo: valor("colegioTituloReporte", "REGISTRO Y CONTROL DE ASISTENCIA"),
+    anexo: valor("colegioAnexoReporte", "REPORTE DE ASISTENCIA DETALLADO"),
+    dre: valor("colegioDreReporte", "—"),
+    institucion: valor("colegioInstitucionReporte", obtenerDatosEmpresa().razonSocial),
+    nivel: valor("colegioNivelReporte", "—"),
+    turno: valor("colegioTurnoReporte", "—"),
+  };
+}
+
+function claveConfiguracionColegio() {
+  return `configuracion-reporte-colegio:${sessionStorage.getItem("empresaId") || "sin-empresa"}`;
+}
+
+function guardarConfiguracionColegio() {
+  try {
+    localStorage.setItem(claveConfiguracionColegio(), JSON.stringify(obtenerConfiguracionColegio()));
+  } catch (error) {
+    console.warn("No se pudo guardar la configuración del reporte escolar:", error);
+  }
+}
+
+function cargarConfiguracionColegioGuardada() {
+  try {
+    const guardada = JSON.parse(localStorage.getItem(claveConfiguracionColegio()) || "null");
+    if (!guardada) {
+      const institucion = document.getElementById("colegioInstitucionReporte");
+      if (institucion && !institucion.value) institucion.value = obtenerDatosEmpresa().razonSocial;
+      return;
+    }
+    const campos = {
+      colegioTituloReporte: "titulo", colegioAnexoReporte: "anexo", colegioDreReporte: "dre",
+      colegioInstitucionReporte: "institucion", colegioNivelReporte: "nivel", colegioTurnoReporte: "turno",
+    };
+    Object.entries(campos).forEach(([id, propiedad]) => {
+      const campo = document.getElementById(id);
+      if (campo && guardada[propiedad] && guardada[propiedad] !== "—") campo.value = guardada[propiedad];
+    });
+  } catch (error) {
+    console.warn("No se pudo recuperar la configuración del reporte escolar:", error);
+  }
 }
 
 function generarDescargaReporte() {
@@ -538,11 +591,13 @@ function generarDescargaReporte() {
   const colaboradorId = document.getElementById("colaboradorDescargaReporteAsistencia")?.value;
   const filas = obtenerFiltrados();
   if (!filas.length) return;
-  reportePrevisualizado = { tipo, filas, colaboradorId };
-  mostrarVistaPreviaReporte(tipo, filas, colaboradorId);
+  const configuracionColegio = tipo === "COLEGIOS" ? obtenerConfiguracionColegio() : null;
+  if (configuracionColegio) guardarConfiguracionColegio();
+  reportePrevisualizado = { tipo, filas, colaboradorId, configuracionColegio };
+  mostrarVistaPreviaReporte(tipo, filas, colaboradorId, configuracionColegio);
 }
 
-function mostrarVistaPreviaReporte(tipo, filas, colaboradorId) {
+function mostrarVistaPreviaReporte(tipo, filas, colaboradorId, configuracionColegio = null) {
   const configuracion = document.getElementById("modalDescargaReporteAsistencia");
   const modal = document.getElementById("modalVistaPreviaReporteAsistencia");
   const contenido = document.getElementById("contenidoVistaPreviaReporteAsistencia");
@@ -550,13 +605,13 @@ function mostrarVistaPreviaReporte(tipo, filas, colaboradorId) {
   if (!modal || !contenido) return;
 
   ocultarModalReporte(configuracion);
-  contenido.innerHTML = `<style>${estilosDocumentoReporte()}</style>${construirDocumentoReporte(tipo, filas, colaboradorId)}`;
+  contenido.innerHTML = `<style>${estilosDocumentoReporte()}</style>${construirDocumentoReporte(tipo, filas, colaboradorId, configuracionColegio)}`;
   if (titulo) titulo.textContent = nombreTipoReporte(tipo);
   mostrarModalReporte(modal);
   document.getElementById("btnCerrarVistaPreviaReporteAsistencia")?.focus();
 }
 
-function construirDocumentoReporte(tipo, filas, colaboradorId) {
+function construirDocumentoReporte(tipo, filas, colaboradorId, configuracionColegio = null) {
   if (tipo === "RESUMEN") return tablaPdfResumen(filas);
   if (tipo === "HORAS_TRABAJADAS") return tablaPdfHorasTrabajadas(filas);
   if (tipo === "SIMPLIFICADO_INDIVIDUAL") {
@@ -566,6 +621,7 @@ function construirDocumentoReporte(tipo, filas, colaboradorId) {
   if (tipo === "SIMPLIFICADO_TODOS") {
     return filas.map(seccionPdfSimplificada).join("");
   }
+  if (tipo === "COLEGIOS") return `<style>${estilosReporteColegio()}</style>${tablaPdfColegios(filas, configuracionColegio || obtenerConfiguracionColegio())}`;
   return mensajeSinDatos();
 }
 
@@ -575,6 +631,7 @@ function nombreTipoReporte(tipo) {
     HORAS_TRABAJADAS: "Reporte de horas trabajadas",
     SIMPLIFICADO_INDIVIDUAL: "Asistencia simplificada",
     SIMPLIFICADO_TODOS: "Asistencia simplificada por colaboradores",
+    COLEGIOS: "Reporte de asistencia para colegios",
   };
   return nombres[tipo] || "Reporte de asistencia";
 }
@@ -583,7 +640,7 @@ function mensajeSinDatos() {
   return '<div class="reporte-sin-datos">No existen datos para mostrar.</div>';
 }
 
-async function exportarExcel(tipo, filas, colaboradorId) {
+async function exportarExcel(tipo, filas, colaboradorId, configuracionColegio = null) {
   try {
     const moduloXlsx = await import(
       "https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/+esm"
@@ -599,6 +656,7 @@ async function exportarExcel(tipo, filas, colaboradorId) {
     }
     if (tipo === "SIMPLIFICADO_TODOS")
       filas.forEach((r) => agregarHojaSimplificada(XLSX, libro, r));
+    if (tipo === "COLEGIOS") agregarHojaColegios(XLSX, libro, filas, configuracionColegio || obtenerConfiguracionColegio());
     XLSX.writeFile(libro, `reporte-asistencia-${fechaDesde.value}-a-${fechaHasta.value}.xlsx`);
   } catch (error) {
     console.error("No se pudo generar Excel:", error);
@@ -842,6 +900,93 @@ function agregarHojaSimplificada(XLSX, libro, r) {
     filasGlosario,
   });
   anexarHojaUnica(XLSX, libro, hoja, nombreHoja(r.nombre));
+}
+
+function fechasReporteColegio() {
+  return obtenerFechas(fechaDesde.value, fechaHasta.value);
+}
+
+function letraDiaColegio(fecha) {
+  const [anio, mes, dia] = String(fecha).split("-").map(Number);
+  return ["D", "L", "M", "M", "J", "V", "S"][new Date(anio, mes - 1, dia).getDay()];
+}
+
+function codigoAsistenciaColegio(detalle) {
+  if (!detalle) return "";
+  const estado = String(detalle.estado || "").toUpperCase();
+  if (estado.includes("TARDANZA")) return "T";
+  if (estado === "AUSENTE") return "F";
+  if (estado.includes("PERMISO")) return "P";
+  if (estado.includes("FERIADO")) return "FE";
+  if (estado.includes("DESCANSO")) return "D";
+  if (estado.includes("INCOMPLET")) return "I";
+  if (estado === "SIN_HORARIO" || estado === "SIN_ESTADO") return "";
+  if (esAsistencia(estado)) return "A";
+  return etiquetaPlano(estado).slice(0, 2).toUpperCase();
+}
+
+function mesReporteColegio(fechas) {
+  if (!fechas.length) return "MES";
+  const [anio, mes] = fechas[0].split("-").map(Number);
+  const nombre = new Date(anio, mes - 1, 1).toLocaleDateString("es-PE", { month: "long", year: "numeric" });
+  return nombre.toUpperCase();
+}
+
+function tablaPdfColegios(filas, configuracion) {
+  const fechas = fechasReporteColegio();
+  const cabeceraDias = fechas.map((fecha) => `<th>${Number(fecha.slice(8))}</th>`).join("");
+  const cabeceraLetras = fechas.map((fecha) => `<th>${letraDiaColegio(fecha)}</th>`).join("");
+  const cuerpo = filas.map((r, indice) => {
+    const detalles = new Map((r.detalles || []).map((d) => [d.fecha, d]));
+    return `<tr><td>${indice + 1}</td><td>${html(r.documento || "")}</td><td class="texto-izquierda">${html(r.nombre)}</td><td>${html(r.cargo || "—")}</td><td>${r.diasProgramados}</td>${fechas.map((fecha) => `<td class="codigo-colegio">${html(codigoAsistenciaColegio(detalles.get(fecha)))}</td>`).join("")}</tr>`;
+  }).join("");
+  return `<section class="hoja reporte-colegio"><header><h1>${html(configuracion.titulo)}</h1><h2>${html(configuracion.anexo)}</h2></header><div class="datos-colegio"><div><b>DRE / UGEL</b><span>${html(configuracion.dre)}</span></div><div><b>Mes</b><span>${html(mesReporteColegio(fechas))}</span></div><div><b>Institución educativa</b><span>${html(configuracion.institucion)}</span></div><div><b>Turno</b><span>${html(configuracion.turno)}</span></div><div><b>Nivel / modalidad</b><span>${html(configuracion.nivel)}</span></div><div><b>Período</b><span>${html(formatearFecha(fechaDesde.value))} al ${html(formatearFecha(fechaHasta.value))}</span></div></div><div class="reporte-tabla-marco tabla-colegio"><table><thead><tr><th rowspan="3">N.°</th><th rowspan="3">DNI</th><th rowspan="3">Apellidos y nombres</th><th rowspan="3">Cargo</th><th rowspan="3">Jor.<br>Lab.</th><th colspan="${Math.max(1, fechas.length)}">${html(mesReporteColegio(fechas))}</th></tr><tr>${cabeceraDias}</tr><tr>${cabeceraLetras}</tr></thead><tbody>${cuerpo}</tbody></table></div><div class="leyenda-colegio"><b>Leyenda:</b> A = Asistencia · T = Tardanza · F = Falta · P = Permiso · FE = Feriado · D = Descanso · I = Incompleto</div></section>`;
+}
+
+function estilosReporteColegio() {
+  return `.reporte-colegio{min-width:1050px;padding:18px;background:#fff;color:#111;font-family:Arial,sans-serif}.reporte-colegio>header{text-align:center}.reporte-colegio>header h1{margin:0;font-size:12px}.reporte-colegio>header h2{margin:6px 0 10px;font-size:11px}.datos-colegio{display:grid;grid-template-columns:1fr 1fr;margin-bottom:8px;border:1px solid #777}.datos-colegio>div{display:grid;grid-template-columns:145px 1fr;min-height:25px;border-bottom:1px solid #aaa}.datos-colegio b,.datos-colegio span{padding:5px 7px;font-size:8px}.datos-colegio b{background:#eee;text-transform:uppercase}.tabla-colegio{border-radius:0;overflow:visible}.tabla-colegio table{font-size:7px}.tabla-colegio th,.tabla-colegio td{min-width:24px;padding:4px 2px;border-color:#777}.tabla-colegio th:nth-child(2){min-width:68px}.tabla-colegio th:nth-child(3){min-width:190px}.tabla-colegio th:nth-child(4){min-width:90px}.tabla-colegio thead th{background:#e7e6e6;color:#111}.codigo-colegio{font-weight:700}.leyenda-colegio{margin-top:8px;font-size:8px}@media print{.reporte-colegio{min-width:0;padding:0}.tabla-colegio table{font-size:6px}.tabla-colegio th,.tabla-colegio td{min-width:17px;padding:3px 1px}}`;
+}
+
+function agregarHojaColegios(XLSX, libro, registros, configuracion) {
+  const fechas = fechasReporteColegio();
+  const columnasFijas = 5;
+  const totalColumnas = columnasFijas + fechas.length;
+  const filas = [
+    [configuracion.titulo], [configuracion.anexo], [],
+    ["DRE / UGEL", configuracion.dre, "", "INSTITUCIÓN EDUCATIVA", configuracion.institucion],
+    ["NIVEL / MODALIDAD", configuracion.nivel, "", "TURNO", configuracion.turno],
+    [],
+    ["N.°", "DNI", "APELLIDOS Y NOMBRES", "CARGO", "JOR. LAB.", mesReporteColegio(fechas), ...Array(Math.max(0, fechas.length - 1)).fill("")],
+    ["", "", "", "", "", ...fechas.map((fecha) => Number(fecha.slice(8)))],
+    ["", "", "", "", "", ...fechas.map(letraDiaColegio)],
+  ];
+  registros.forEach((r, indice) => {
+    const detalles = new Map((r.detalles || []).map((d) => [d.fecha, d]));
+    filas.push([indice + 1, r.documento || "", r.nombre, r.cargo || "", r.diasProgramados, ...fechas.map((fecha) => codigoAsistenciaColegio(detalles.get(fecha)))]);
+  });
+  filas.push([], ["LEYENDA: A = Asistencia · T = Tardanza · F = Falta · P = Permiso · FE = Feriado · D = Descanso · I = Incompleto"]);
+  const hoja = XLSX.utils.aoa_to_sheet(filas);
+  hoja["!merges"] = [
+    rangoCombinado(0, 0, 0, totalColumnas - 1), rangoCombinado(1, 0, 1, totalColumnas - 1),
+    rangoCombinado(3, 1, 3, 2), rangoCombinado(3, 4, 3, totalColumnas - 1),
+    rangoCombinado(4, 1, 4, 2), rangoCombinado(4, 4, 4, totalColumnas - 1),
+    ...Array.from({ length: columnasFijas }, (_, c) => rangoCombinado(6, c, 8, c)),
+    rangoCombinado(6, 5, 6, totalColumnas - 1),
+    rangoCombinado(filas.length - 1, 0, filas.length - 1, totalColumnas - 1),
+  ];
+  const borde = bordesExcel("808080");
+  const aplicarRango = (f1, f2, c1, c2, estilo) => { for (let f = f1; f <= f2; f++) for (let c = c1; c <= c2; c++) { const ref = XLSX.utils.encode_cell({ r:f, c }); if (!hoja[ref]) hoja[ref] = { t:"s", v:"" }; hoja[ref].s = estilo; } };
+  aplicarRango(0, 1, 0, totalColumnas - 1, { font:{ bold:true, sz:11 }, alignment:{ horizontal:"center", vertical:"center", wrapText:true } });
+  aplicarRango(3, 4, 0, totalColumnas - 1, { font:{ sz:9 }, alignment:{ vertical:"center", wrapText:true }, border:borde });
+  aplicarRango(6, 8, 0, totalColumnas - 1, { fill:{ fgColor:{ rgb:"E7E6E6" } }, font:{ bold:true, sz:8 }, alignment:{ horizontal:"center", vertical:"center", wrapText:true }, border:borde });
+  aplicarRango(9, 8 + registros.length, 0, totalColumnas - 1, { font:{ sz:8 }, alignment:{ horizontal:"center", vertical:"center", wrapText:true }, border:borde });
+  for (let f = 9; f <= 8 + registros.length; f++) { const ref = XLSX.utils.encode_cell({r:f,c:2}); hoja[ref].s = { ...hoja[ref].s, alignment:{ horizontal:"left", vertical:"center", wrapText:true } }; }
+  aplicarRango(filas.length - 1, filas.length - 1, 0, totalColumnas - 1, { font:{ bold:true, sz:8 }, alignment:{ horizontal:"left", vertical:"center" } });
+  hoja["!cols"] = [{wch:5},{wch:12},{wch:34},{wch:18},{wch:9},...fechas.map(()=>({wch:4}))];
+  hoja["!rows"] = [{hpt:24},{hpt:22},{hpt:5},{hpt:22},{hpt:22},{hpt:5},{hpt:25},{hpt:18},{hpt:18}];
+  hoja["!pageSetup"] = { orientation:"landscape", fitToWidth:1, fitToHeight:0, paperSize:9 };
+  hoja["!margins"] = { left:0.2, right:0.2, top:0.35, bottom:0.35, header:0.1, footer:0.1 };
+  XLSX.utils.book_append_sheet(libro, hoja, "Asistencia colegio");
 }
 
 function calcularResumenPractico(r) {
@@ -1129,8 +1274,8 @@ function agregarHoja(XLSX, libro, nombre, datos) {
   XLSX.utils.book_append_sheet(libro, hoja, definitivo);
 }
 
-function exportarPdf(tipo, filas, colaboradorId) {
-  abrirImpresion(construirDocumentoReporte(tipo, filas, colaboradorId));
+function exportarPdf(tipo, filas, colaboradorId, configuracionColegio = null) {
+  abrirImpresion(construirDocumentoReporte(tipo, filas, colaboradorId, configuracionColegio));
 }
 
 function tablaPdfResumen(filas) {
