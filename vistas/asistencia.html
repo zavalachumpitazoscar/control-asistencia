@@ -670,8 +670,21 @@
             <option value="HORAS_TRABAJADAS">Reporte de horas trabajadas</option>
             <option value="SIMPLIFICADO_INDIVIDUAL">Asistencia simplificada — un colaborador</option>
             <option value="SIMPLIFICADO_TODOS">Asistencia simplificada — todos</option>
+            <option value="COLEGIOS">Reporte de asistencia para colegios</option>
           </select>
         </label>
+        <fieldset id="camposReporteColegio" class="campos-reporte-colegio" hidden>
+          <legend>Datos del formato escolar</legend>
+          <p>Completa o modifica los datos que aparecerán en la parte superior del reporte.</p>
+          <div>
+            <label><span>Título principal</span><input id="colegioTituloReporte" maxlength="180" value="NORMAS PARA EL REGISTRO Y CONTROL DE ASISTENCIA Y SU APLICACIÓN EN LA PLANILLA ÚNICA DE PAGOS"></label>
+            <label><span>Anexo / formato</span><input id="colegioAnexoReporte" maxlength="100" value="ANEXO 03 · FORMATO 01: REPORTE DE ASISTENCIA DETALLADO"></label>
+            <label><span>DRE / UGEL</span><input id="colegioDreReporte" maxlength="100" placeholder="Ej.: UGEL 08 Cañete"></label>
+            <label><span>Institución educativa</span><input id="colegioInstitucionReporte" maxlength="140" placeholder="Ej.: I.E. N.° 2010 Albert Einstein"></label>
+            <label><span>Nivel / modalidad</span><input id="colegioNivelReporte" maxlength="100" placeholder="Ej.: Primaria"></label>
+            <label><span>Turno</span><input id="colegioTurnoReporte" maxlength="100" placeholder="Ej.: Mañana y tarde"></label>
+          </div>
+        </fieldset>
         <label id="grupoColaboradorDescargaReporte" hidden>
           <span>Colaborador</span>
           <select id="colaboradorDescargaReporteAsistencia"></select>
