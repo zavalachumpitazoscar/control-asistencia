@@ -4079,6 +4079,10 @@ JORNADA JUSTIFICADA POR PERMISO
 .campos-reporte-colegio:not([hidden]) {
   display: block;
 }
+#camposReporteColegio[hidden],
+#grupoColaboradorDescargaReporte[hidden] {
+  display: none !important;
+}
 .campos-reporte-colegio>p{margin:0 0 10px;color:#64748b;font-size:10px}.campos-reporte-colegio>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.campos-reporte-colegio label{display:flex;flex-direction:column;gap:5px}.campos-reporte-colegio label:first-child,.campos-reporte-colegio label:nth-child(2){grid-column:1/-1}.campos-reporte-colegio input{width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#0f172a;font:inherit}.campos-reporte-colegio input:focus{border-color:#2563eb;outline:2px solid #dbeafe}@media(max-width:650px){.campos-reporte-colegio>div{grid-template-columns:1fr}.campos-reporte-colegio label:first-child,.campos-reporte-colegio label:nth-child(2){grid-column:auto}}
 .descarga-reporte-cuerpo legend {
   grid-column: 1 / -1;
