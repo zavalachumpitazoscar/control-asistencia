@@ -15,6 +15,7 @@ const SECUENCIA=["ENTRADA","INICIO_ALMUERZO","FIN_ALMUERZO","SALIDA"];
 
 // Portal general de administración y registro seguro de empresas.
 Object.assign(exports, require("./superadmin"));
+Object.assign(exports, require("./whatsapp"));
 
 exports.invitarColaboradorMovil=callableAdmin(async({data,admin})=>{
   const colaboradorId=texto(data.colaboradorId);const ref=db.doc(`colaboradores/${colaboradorId}`),snap=await ref.get();
